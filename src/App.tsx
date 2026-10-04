@@ -11,7 +11,7 @@ import { AskHost } from './components/confirm';
 import { EditorView } from './editor/EditorView';
 import { useWorkspace } from './state/workspace';
 import { findByShortcut, runCommand } from './commands/registry';
-import { viewComponents } from './shell/views';
+import { viewComponents, globalComponents } from './shell/views';
 import { useLang, t } from './i18n';
 
 export default function App() {
@@ -65,6 +65,9 @@ export default function App() {
         {view === 'versions' && (Versions ? <Versions /> : null)}
       </div>
       <StatusBar />
+      {globalComponents.map((C, i) => (
+        <C key={i} />
+      ))}
       <DialogHost />
       <ContextMenuHost />
       <AskHost />

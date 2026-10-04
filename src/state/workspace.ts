@@ -36,6 +36,7 @@ export type DialogId =
   | 'merge'
   | 'remote'
   | 'addResource'
+  | 'cite'
   | 'goToLine'
   | 'findReplace'
   | 'export'

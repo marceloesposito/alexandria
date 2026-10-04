@@ -5,6 +5,8 @@ import { Plugin, PluginKey } from '@tiptap/pm/state';
 import type { EditorView } from '@tiptap/pm/view';
 
 export const CITE_MIME = 'application/x-alexandria-cite';
+export const FIGURE_MIME = 'application/x-alexandria-figure';
+export const LINK_MIME = 'application/x-alexandria-link';
 
 export interface CiteDragData {
   key: string;
@@ -45,6 +47,27 @@ export const DropHandler = Extension.create({
             const ev = e as DragEvent;
             const dt = ev.dataTransfer;
             if (!dt) return false;
+            // immagine delle risorse: diventa una figura
+            const fig = dt.getData(FIGURE_MIME);
+            if (fig) {
+              const pos = dropPos(view, ev);
+              if (pos === null) return true;
+              const { src, caption } = JSON.parse(fig) as { src: string; caption: string };
+              const $p = view.state.doc.resolve(pos);
+              const at = $p.depth > 0 ? $p.after(1) : pos;
+              view.dispatch(view.state.tr.insert(at, view.state.schema.nodes.figure.create({ src, caption })).scrollIntoView());
+              return true;
+            }
+            // pagina web non citata come fonte: diventa un collegamento
+            const link = dt.getData(LINK_MIME);
+            if (link) {
+              const pos = dropPos(view, ev);
+              if (pos === null) return true;
+              const { href, text } = JSON.parse(link) as { href: string; text: string };
+              const mark = view.state.schema.marks.link.create({ href });
+              view.dispatch(view.state.tr.insert(pos, view.state.schema.text(text, [mark])).scrollIntoView());
+              return true;
+            }
             const raw = dt.getData(CITE_MIME);
             if (raw) {
               const pos = dropPos(view, ev);
