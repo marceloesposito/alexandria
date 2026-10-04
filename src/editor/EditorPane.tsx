@@ -1,0 +1,181 @@
+// Colonna centrale: la pagina con l'editor a blocchi, i numeri di riga e la vista sorgente.
+import { useEffect, useRef, type ReactNode } from 'react';
+import { useEditor, EditorContent } from '@tiptap/react';
+import DragHandle from '@tiptap/extension-drag-handle-react';
+import { GripVertical } from 'lucide-react';
+import { TextSelection } from '@tiptap/pm/state';
+import { buildExtensions } from './extensions';
+import { setEditor, getEditor } from '../state/editorRef';
+import { useWorkspace } from '../state/workspace';
+import { useDoc, loadDocument, scheduleSave, flushSave, updateSelectionCounts, checkExternalChange } from './session';
+import { measureLines, setLines } from './lines';
+import { LineGutter } from './LineGutter';
+import { SourceView } from './SourceView';
+import { notifyCommandState } from '../commands/registry';
+import { useDocSettings, pageMetrics } from '../layout/docSettings';
+
+interface Props {
+  /** sovrapposizioni allineate alla pagina (evidenziazione righe dei commenti, connettori) */
+  overlay?: ReactNode;
+  pageRef?: React.RefObject<HTMLDivElement | null>;
+}
+
+export function EditorPane({ overlay, pageRef: externalPageRef }: Props) {
+  const vaultRoot = useWorkspace((s) => s.vaultRoot);
+  const activeDoc = useWorkspace((s) => s.activeDoc);
+  const reloadToken = useWorkspace((s) => s.reloadToken);
+  const prefs = useWorkspace((s) => s.app.prefs);
+  const sourceMode = useDoc((s) => s.sourceMode);
+  const layout = useDocSettings((s) => s.settings.layout);
+  const localPageRef = useRef<HTMLDivElement>(null);
+  const pageRef = externalPageRef ?? localPageRef;
+  const scrollRef = useRef<HTMLDivElement>(null);
+  const measureRaf = useRef(0);
+
+  const scheduleMeasure = () => {
+    cancelAnimationFrame(measureRaf.current);
+    measureRaf.current = requestAnimationFrame(() => {
+      const page = pageRef.current;
+      const pm = page?.querySelector('.ProseMirror') as HTMLElement | null;
+      if (page && pm) setLines(measureLines(pm, page));
+    });
+  };
+
+  const editor = useEditor({
+    extensions: buildExtensions(),
+    editorProps: {
+      attributes: { class: 'doc-body', spellcheck: String(prefs.spellcheck) },
+    },
+    onUpdate: ({ editor }) => {
+      scheduleSave(editor);
+      scheduleMeasure();
+      notifyCommandState();
+    },
+    onSelectionUpdate: ({ editor }) => {
+      updateSelectionCounts(editor);
+      notifyCommandState();
+    },
+  });
+
+  // riferimento globale all'editor (con StrictMode la distruzione del primo arriva dopo la creazione del secondo)
+  useEffect(() => {
+    if (!editor) return;
+    setEditor(editor);
+    return () => {
+      if (getEditor() === editor || getEditor() === null) setEditor(null);
+    };
+  }, [editor]);
+
+  // carica il documento attivo (e ricarica dopo checkout, merge, ripristino)
+  useEffect(() => {
+    if (!editor || !vaultRoot || !activeDoc) return;
+    let cancelled = false;
+    void (async () => {
+      await loadDocument(editor, vaultRoot, activeDoc);
+      if (cancelled) return;
+      const cur = useWorkspace.getState().app.cursors[`${vaultRoot}|${activeDoc}`];
+      if (cur) {
+        const pos = Math.min(cur.pos, editor.state.doc.content.size);
+        try {
+          editor.view.dispatch(editor.state.tr.setSelection(TextSelection.near(editor.state.doc.resolve(pos))));
+        } catch {
+          /* posizione non piu' valida */
+        }
+        requestAnimationFrame(() => {
+          if (scrollRef.current) scrollRef.current.scrollTop = cur.scroll;
+        });
+      }
+      editor.commands.focus();
+      scheduleMeasure();
+    })();
+    return () => {
+      cancelled = true;
+    };
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [editor, vaultRoot, activeDoc, reloadToken]);
+
+  // ricorda posizione del cursore e scorrimento
+  useEffect(() => {
+    if (!editor || !activeDoc) return;
+    let timer: ReturnType<typeof setTimeout>;
+    const save = () => {
+      clearTimeout(timer);
+      timer = setTimeout(() => {
+        useWorkspace.getState().setCursor(activeDoc, editor.state.selection.from, scrollRef.current?.scrollTop ?? 0);
+      }, 800);
+    };
+    editor.on('selectionUpdate', save);
+    const sc = scrollRef.current;
+    sc?.addEventListener('scroll', save);
+    return () => {
+      clearTimeout(timer);
+      editor.off('selectionUpdate', save);
+      sc?.removeEventListener('scroll', save);
+    };
+  }, [editor, activeDoc]);
+
+  // misura le righe quando cambiano dimensioni, zoom o font caricati
+  useEffect(() => {
+    const page = pageRef.current;
+    if (!page) return;
+    const ro = new ResizeObserver(() => scheduleMeasure());
+    ro.observe(page);
+    void document.fonts?.ready.then(() => scheduleMeasure());
+    return () => ro.disconnect();
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [editor, sourceMode]);
+
+  useEffect(() => {
+    scheduleMeasure();
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [prefs.zoom, prefs.lineNumbers, layout]);
+
+  // file modificati fuori dall'app
+  useEffect(() => {
+    const h = () => void checkExternalChange();
+    window.addEventListener('focus', h);
+    return () => window.removeEventListener('focus', h);
+  }, []);
+
+  // salva prima di chiudere la finestra
+  useEffect(() => {
+    const h = () => void flushSave(editor);
+    window.addEventListener('beforeunload', h);
+    return () => window.removeEventListener('beforeunload', h);
+  }, [editor]);
+
+  useEffect(() => {
+    editor?.view.dom.setAttribute('spellcheck', String(prefs.spellcheck));
+  }, [editor, prefs.spellcheck]);
+
+  const m = pageMetrics(layout);
+  const style = {
+    '--page-width': `${m.textWidthMm}mm`,
+    '--page-pad-x': `${m.padXmm}mm`,
+    '--page-font-size': `${layout.fontSizePt}pt`,
+    '--page-leading': String(layout.leading),
+    '--page-font': layout.font === 'sans' ? 'var(--font-ui)' : 'var(--font-text)',
+    zoom: prefs.zoom,
+  } as React.CSSProperties;
+
+  return (
+    <div className={`editor-scroll ${prefs.focusMode ? 'is-focus' : ''}`} ref={scrollRef}>
+      {sourceMode ? (
+        <div className="page page--source" style={style}>
+          <SourceView />
+        </div>
+      ) : (
+        <div className="page" ref={pageRef} style={style} data-columns={layout.columns}>
+          {prefs.lineNumbers && <LineGutter />}
+          {overlay}
+          {editor && (
+            <DragHandle editor={editor} className="drag-handle">
+              <GripVertical size={14} />
+            </DragHandle>
+          )}
+          <EditorContent editor={editor} />
+        </div>
+      )}
+    </div>
+  );
+}
