@@ -1,5 +1,5 @@
 // Colonna centrale: la pagina con l'editor a blocchi, i numeri di riga e la vista sorgente.
-import { useEffect, useRef, type ReactNode } from 'react';
+import { useEffect, useRef, useState, type ReactNode } from 'react';
 import { useEditor, EditorContent } from '@tiptap/react';
 import DragHandle from '@tiptap/extension-drag-handle-react';
 import { GripVertical } from 'lucide-react';
@@ -31,6 +31,7 @@ export function EditorPane({ overlay, pageRef: externalPageRef }: Props) {
   const pageRef = externalPageRef ?? localPageRef;
   const scrollRef = useRef<HTMLDivElement>(null);
   const measureRaf = useRef(0);
+  const [fit, setFit] = useState(1);
 
   const scheduleMeasure = () => {
     cancelAnimationFrame(measureRaf.current);
@@ -128,7 +129,22 @@ export function EditorPane({ overlay, pageRef: externalPageRef }: Props) {
   useEffect(() => {
     scheduleMeasure();
     // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [prefs.zoom, prefs.lineNumbers, layout]);
+  }, [prefs.zoom, prefs.lineNumbers, layout, fit]);
+
+  // la pagina si riduce per stare nella colonna quando lo spazio non basta
+  useEffect(() => {
+    const sc = scrollRef.current;
+    if (!sc) return;
+    const ro = new ResizeObserver(() => {
+      const mm = 96 / 25.4;
+      const pm = pageMetrics(layout);
+      const pageW = (pm.textWidthMm + 2 * pm.padXmm) * mm;
+      const avail = sc.clientWidth - 48;
+      setFit(Math.min(1, Math.max(0.5, avail / (pageW * prefs.zoom))));
+    });
+    ro.observe(sc);
+    return () => ro.disconnect();
+  }, [layout, prefs.zoom]);
 
   // file modificati fuori dall'app
   useEffect(() => {
@@ -155,7 +171,7 @@ export function EditorPane({ overlay, pageRef: externalPageRef }: Props) {
     '--page-font-size': `${layout.fontSizePt}pt`,
     '--page-leading': String(layout.leading),
     '--page-font': layout.font === 'sans' ? 'var(--font-ui)' : 'var(--font-text)',
-    zoom: prefs.zoom,
+    zoom: prefs.zoom * fit,
   } as React.CSSProperties;
 
   return (

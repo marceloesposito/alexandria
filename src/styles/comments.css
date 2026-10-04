@@ -1,0 +1,335 @@
+/* Colonna dei commenti, bolle, connettori. */
+.comments-host {
+  display: flex;
+  flex-direction: column;
+  height: 100%;
+  min-height: 0;
+}
+
+.comments {
+  display: flex;
+  flex-direction: column;
+  height: 100%;
+  min-height: 0;
+}
+
+.comments__head {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  padding: 8px 10px 4px;
+  color: var(--muted);
+  font-size: 11px;
+  letter-spacing: 0.06em;
+  text-transform: uppercase;
+}
+
+.comments__title {
+  flex: 1;
+}
+
+.comments__search {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  padding: 0 10px 8px;
+  color: var(--muted);
+  border-bottom: 1px solid var(--line);
+}
+
+.comments__search .input {
+  padding: 3px 6px;
+  font-size: var(--fs-ui-small);
+}
+
+.comments__viewport {
+  position: relative;
+  flex: 1;
+  min-height: 0;
+  overflow: hidden;
+}
+
+/* il puntatore diventa un fumetto */
+.comments__track {
+  position: absolute;
+  left: 0;
+  right: 0;
+  top: 0;
+  cursor: url("data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' width='24' height='24' viewBox='0 0 24 24'><path d='M4 4h16a1 1 0 0 1 1 1v10a1 1 0 0 1-1 1H10l-5 4v-4H4a1 1 0 0 1-1-1V5a1 1 0 0 1 1-1z' fill='%23fffdf8' stroke='%238a4f2a' stroke-width='1.6' stroke-linejoin='round'/><path d='M7.5 9h9M7.5 12h6' stroke='%238a4f2a' stroke-width='1.4' stroke-linecap='round'/></svg>") 4 20, copy;
+}
+
+.comments__guide {
+  position: absolute;
+  left: 0;
+  right: 0;
+  border-top: 1px dashed color-mix(in srgb, var(--accent) 45%, transparent);
+  pointer-events: none;
+}
+
+.line-hover {
+  position: absolute;
+  left: calc(var(--page-pad-x) - 3mm);
+  right: calc(var(--page-pad-x) - 3mm);
+  background: var(--line-hover);
+  border-radius: 3px;
+  pointer-events: none;
+  z-index: 0;
+}
+
+.line-hover.is-draft {
+  background: color-mix(in srgb, var(--accent) 16%, transparent);
+}
+
+/* ---------------------------------------------------------------- bolle */
+.bubble {
+  position: absolute;
+  left: 0;
+  width: calc(100% - 32px);
+  margin-left: 26px;
+  background: var(--paper);
+  border: 1px solid var(--line);
+  border-radius: 10px;
+  padding: 7px 10px 8px;
+  box-shadow: var(--shadow);
+  cursor: default;
+  font-size: var(--fs-ui-small);
+  line-height: 1.4;
+  transition: top 0.15s ease, box-shadow 0.15s;
+}
+
+/* coda del fumetto verso il testo */
+.bubble::before {
+  content: '';
+  position: absolute;
+  left: -6px;
+  top: 12px;
+  width: 10px;
+  height: 10px;
+  background: var(--paper);
+  border-left: 1px solid var(--line);
+  border-bottom: 1px solid var(--line);
+  transform: rotate(45deg);
+}
+
+.bubble.is-static {
+  position: relative;
+  margin: 0 0 8px 26px;
+}
+
+.bubble.is-linked {
+  cursor: grab;
+}
+
+.bubble.is-dragging {
+  transition: none;
+  cursor: grabbing;
+  box-shadow: var(--shadow-strong);
+  z-index: 5;
+}
+
+.bubble.is-active {
+  border-color: var(--accent);
+  box-shadow: 0 0 0 1px var(--accent), var(--shadow);
+  z-index: 4;
+}
+
+.bubble.is-resolved {
+  opacity: 0.6;
+}
+
+.bubble--draft {
+  border-color: var(--accent);
+  z-index: 6;
+}
+
+.bubble__close {
+  position: absolute;
+  top: 3px;
+  right: 3px;
+  border: 0;
+  background: none;
+  color: var(--muted);
+  border-radius: 50%;
+  padding: 3px;
+  display: flex;
+  opacity: 0;
+  transition: opacity 0.12s;
+}
+
+.bubble__close:hover {
+  background: var(--chrome-2);
+  color: var(--ink);
+}
+
+/* pallino per il collegamento */
+.bubble__dot {
+  position: absolute;
+  left: -18px;
+  top: 11px;
+  width: 11px;
+  height: 11px;
+  border-radius: 50%;
+  background: var(--accent);
+  border: 2px solid var(--paper);
+  box-shadow: 0 0 0 1px var(--accent);
+  cursor: crosshair;
+  opacity: 0;
+  transition: opacity 0.12s, transform 0.12s;
+}
+
+.bubble:hover .bubble__close,
+.bubble:hover .bubble__dot,
+.bubble.is-active .bubble__dot {
+  opacity: 1;
+}
+
+.bubble__dot:hover {
+  transform: scale(1.25);
+}
+
+.bubble__meta {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  padding-right: 16px;
+  color: var(--muted);
+  font-size: 10.5px;
+}
+
+.bubble__author {
+  color: var(--ink-2);
+  font-weight: 600;
+}
+
+.bubble__resolved {
+  color: var(--ok);
+}
+
+.bubble__quote {
+  margin: 3px 0 2px;
+  color: var(--accent);
+  font-family: var(--font-text);
+  font-style: italic;
+  display: flex;
+  gap: 4px;
+  align-items: baseline;
+}
+
+.bubble__quote.is-orphan {
+  color: var(--warn);
+  font-family: var(--font-ui);
+  font-style: normal;
+}
+
+.bubble__body {
+  white-space: pre-wrap;
+  word-break: break-word;
+  color: var(--ink);
+  font-size: var(--fs-ui);
+  margin-top: 2px;
+}
+
+.bubble__input {
+  width: 100%;
+  border: 0;
+  outline: none;
+  resize: none;
+  background: none;
+  font-size: var(--fs-ui);
+  line-height: 1.4;
+}
+
+.bubble__hint {
+  color: var(--muted);
+  font-size: 10.5px;
+}
+
+.bubble__reply {
+  border-top: 1px solid var(--line);
+  margin-top: 6px;
+  padding-top: 5px;
+}
+
+.bubble__actions {
+  display: flex;
+  align-items: center;
+  gap: 4px;
+  margin-top: 6px;
+}
+
+.bubble__reply-input {
+  flex: 1;
+  border: 1px solid var(--line);
+  border-radius: var(--radius-small);
+  padding: 3px 6px;
+  font-size: var(--fs-ui-small);
+  background: var(--paper);
+}
+
+.comments__orphans {
+  border-top: 1px solid var(--line);
+  max-height: 40%;
+  overflow-y: auto;
+  padding: 6px 8px 8px 0;
+}
+
+.comments__orphans-head {
+  display: flex;
+  align-items: center;
+  gap: 4px;
+  border: 0;
+  background: none;
+  color: var(--warn);
+  font-size: var(--fs-ui-small);
+  padding: 2px 10px;
+}
+
+.comments__orphans-list .hint {
+  padding: 0 10px 6px;
+  margin: 0;
+}
+
+/* ---------------------------------------------------------------- testo collegato e connettori */
+.comment-anchor {
+  background: color-mix(in srgb, var(--accent) 13%, transparent);
+  border-bottom: 2px solid color-mix(in srgb, var(--accent) 50%, transparent);
+}
+
+.comment-anchor.is-active {
+  background: color-mix(in srgb, var(--accent) 26%, transparent);
+}
+
+.connectors {
+  position: fixed;
+  inset: 0;
+  width: 100vw;
+  height: 100vh;
+  pointer-events: none;
+  z-index: 30;
+}
+
+.connector {
+  fill: none;
+  stroke: color-mix(in srgb, var(--accent) 40%, transparent);
+  stroke-width: 1.2;
+}
+
+.connector.is-active {
+  stroke: var(--accent);
+  stroke-width: 1.8;
+}
+
+.connector.is-linking {
+  stroke: var(--accent);
+  stroke-width: 2;
+  stroke-dasharray: 5 4;
+}
+
+.connector-end {
+  fill: var(--accent);
+}
+
+body.is-linking,
+body.is-linking * {
+  cursor: crosshair !important;
+}

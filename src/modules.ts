@@ -2,6 +2,7 @@
 import { registerAppCommands } from './commands/appCommands';
 import { registerEditorCommands } from './commands/editorCommands';
 import './shell/RibbonWidgets';
+import { registerComments } from './comments';
 
 let done = false;
 
@@ -10,4 +11,5 @@ export function registerAll() {
   done = true;
   registerAppCommands();
   registerEditorCommands();
+  registerComments();
 }
