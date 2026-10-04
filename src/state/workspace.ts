@@ -32,6 +32,7 @@ export type DialogId =
   | 'help'
   | 'commit'
   | 'newBranch'
+  | 'switchBranch'
   | 'merge'
   | 'remote'
   | 'addResource'

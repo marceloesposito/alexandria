@@ -139,6 +139,26 @@ pub fn git_init(repo: String) -> CmdResult<()> {
     Ok(())
 }
 
+/// Nome dell'autore dei commit del vault (configurazione locale del repository).
+#[tauri::command]
+pub fn git_set_author(repo: String, name: String) -> CmdResult<()> {
+    let r = open(&repo)?;
+    let cfg = r.config().map_err(err)?;
+    let mut local = match cfg.open_level(git2::ConfigLevel::Local) {
+        Ok(c) => c,
+        Err(_) => return Ok(()),
+    };
+    if name.trim().is_empty() {
+        let _ = local.remove("user.name");
+    } else {
+        local.set_str("user.name", name.trim()).map_err(err)?;
+        if cfg.get_string("user.email").is_err() {
+            local.set_str("user.email", "author@alexandria.local").map_err(err)?;
+        }
+    }
+    Ok(())
+}
+
 #[tauri::command]
 pub fn git_status(repo: String) -> CmdResult<GitStatus> {
     let r = open(&repo)?;

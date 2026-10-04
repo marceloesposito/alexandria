@@ -1,4 +1,4 @@
-// Estrae le chiavi i18n usate nel codice: t('...'), tn('...'), label: '...', hint: '...'.
+// Estrae le chiavi i18n usate nel codice: t('...'), tn('...') (plurali .one/.other), label: '...', hint: '...'.
 import { readFileSync, readdirSync, statSync } from 'node:fs';
 import { join } from 'node:path';
 
@@ -13,10 +13,15 @@ export function walk(dir, out = []) {
 
 export function usedKeys(root = 'src') {
   const keys = new Set();
-  const re = [/\bt\(\s*'([a-zA-Z][\w.-]*)'/g, /\btn\(\s*'([a-zA-Z][\w.-]*)'/g, /\blabel:\s*'([a-z][\w-]*\.[\w.-]+)'/g, /\bhint:\s*'([a-z][\w-]*\.[\w.-]+)'/g];
+  const simple = [/\bt\(\s*'([a-zA-Z][\w.-]*)'/g, /\blabel:\s*'([a-z][\w-]*\.[\w.-]+)'/g, /\bhint:\s*'([a-z][\w-]*\.[\w.-]+)'/g];
+  const plural = /\btn\(\s*'([a-zA-Z][\w.-]*)'/g;
   for (const f of walk(root)) {
     const s = readFileSync(f, 'utf8');
-    for (const r of re) for (const m of s.matchAll(r)) keys.add(m[1]);
+    for (const r of simple) for (const m of s.matchAll(r)) keys.add(m[1]);
+    for (const m of s.matchAll(plural)) {
+      keys.add(m[1] + '.one');
+      keys.add(m[1] + '.other');
+    }
   }
   return keys;
 }

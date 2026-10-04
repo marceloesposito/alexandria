@@ -117,6 +117,7 @@ export interface Platform {
   // git
   gitInit(repo: string): Promise<void>;
   gitStatus(repo: string): Promise<GitStatus>;
+  gitSetAuthor(repo: string, name: string): Promise<void>;
   gitCommit(repo: string, message: string, opts?: { amendCheckpoints?: boolean }): Promise<string | null>;
   gitLog(repo: string): Promise<GitLog>;
   gitChanges(repo: string, sha: string): Promise<FileChange[]>;
