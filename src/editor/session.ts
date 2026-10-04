@@ -42,6 +42,13 @@ let countTimer: ReturnType<typeof setTimeout> | null = null;
 let pending: { root: string; rel: string; md: string } | null = null;
 let lastSaved = new Map<string, string>();
 const afterSaveHooks = new Set<(rel: string) => void>();
+const loadedHooks = new Set<(editor: Editor, root: string, rel: string) => void | Promise<void>>();
+
+/** Chiamato dopo il caricamento di un documento nell'editor (commenti, impostazioni...). */
+export function onDocLoaded(h: (editor: Editor, root: string, rel: string) => void | Promise<void>): () => void {
+  loadedHooks.add(h);
+  return () => loadedHooks.delete(h);
+}
 
 export function onAfterSave(h: (rel: string) => void): () => void {
   afterSaveHooks.add(h);
@@ -68,6 +75,7 @@ export async function loadDocument(editor: Editor, root: string, rel: string): P
   editor.view.updateState(state);
   useDoc.setState({ rel, counts: countDoc(doc), selection: null, realPages: null, sourceText: md });
   useWorkspace.getState().setSaveState('saved');
+  for (const h of loadedHooks) await h(editor, root, rel);
   notifyCommandState();
 }
 
