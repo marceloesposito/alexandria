@@ -1,0 +1,141 @@
+import { describe, it, expect } from 'vitest';
+import { parseMarkdown } from './parse';
+import { serializeMarkdown } from './serialize';
+import { parseCitation, formatCitation, makeCiteKey } from './citeSyntax';
+import type { PMNode } from './types';
+
+function roundTrip(md: string) {
+  const doc = parseMarkdown(md);
+  const out = serializeMarkdown(doc);
+  return { doc, out };
+}
+
+// Markdown gia' nella forma canonica: deve uscire identico.
+const CANONICAL = [
+  '# Titolo\n',
+  'Testo **grassetto**, *corsivo*, ~~barrato~~, `codice` e [link](https://example.org "T").\n',
+  '## Sotto <!-- align:center -->\n',
+  'Paragrafo centrato <!-- align:center -->\n',
+  '- uno\n- due\n  - annidato\n- tre\n',
+  '3. tre\n4. quattro\n',
+  '- [ ] da fare\n- [x] fatto\n',
+  '> Citazione\n>\n> secondo paragrafo\n',
+  '```js\nconst a = 1;\n```\n',
+  '---\n',
+  '$$\nE = mc^2\n$$\n',
+  'Formula $a^2 + b^2$ in linea.\n',
+  'Come detto [@rossi2020, p. 12; -@bianchi2019, cap. 3].\n',
+  'Vedi [[Capitolo 2|il secondo]] e [[Note]].\n',
+  'Una nota[^1] e un\'altra[^2].\n\n[^1]: Prima nota.\n[^2]: Seconda con *enfasi*.\n',
+  '![Didascalia](img/a.png "titolo"){placement=top width=60%}\n',
+  '<!-- pagebreak -->\n',
+  '<!-- section master="body" columns="2" -->\n',
+  '<!-- toc -->\n',
+  '| A | B |\n| :---: | ---: |\n| 1 | 2 |\n',
+  'Testo <u>sottolineato</u>, <mark>evidenziato</mark>, H<sub>2</sub>O e x<sup>2</sup>.\n',
+  '<!-- bibliography:start -->\n\n## Bibliografia\n\nRossi, M. (2020). *Titolo*.\n\n<!-- bibliography:end -->\n',
+  'Costa \\$5 e \\*non\\* enfasi, \\[parentesi\\].\n',
+  '\\# non titolo\n',
+  'Riga\\\ncon a capo.\n',
+  '***grassetto corsivo*** e **grassetto *misto***.\n',
+  '<https://example.org>\n',
+];
+
+describe('markdown round trip', () => {
+  for (const md of CANONICAL) {
+    it(JSON.stringify(md.slice(0, 40)), () => {
+      expect(roundTrip(md).out).toBe(md);
+    });
+  }
+
+  it('documento -> md -> documento e\' stabile', () => {
+    const md = CANONICAL.join('\n');
+    const a = parseMarkdown(md);
+    const b = parseMarkdown(serializeMarkdown(a));
+    expect(b).toEqual(a);
+  });
+});
+
+describe('parse', () => {
+  it('riconosce le citazioni', () => {
+    const { doc } = roundTrip('Vedi [@rossi2020, p. 12].');
+    const p = doc.content![0];
+    expect(p.content![1]).toEqual({ type: 'citation', attrs: { items: [{ key: 'rossi2020', locator: 'p. 12' }] } });
+  });
+
+  it('il codice non contiene citazioni', () => {
+    const { doc } = roundTrip('`[@rossi2020]`');
+    expect(doc.content![0].content![0].type).toBe('text');
+  });
+
+  it('immagine nel testo spezza il paragrafo', () => {
+    const doc = parseMarkdown('prima ![x](a.png) dopo');
+    expect(doc.content!.map((n) => n.type)).toEqual(['paragraph', 'figure', 'paragraph']);
+  });
+
+  it('note con contenuto', () => {
+    const doc = parseMarkdown('Testo[^a].\n\n[^a]: La *nota*.');
+    const fn = doc.content![0].content!.find((n) => n.type === 'footnote') as PMNode;
+    expect(fn.attrs!.text).toBe('La *nota*.');
+  });
+
+  it('allineamento del titolo', () => {
+    const doc = parseMarkdown('# Titolo <!-- align:right -->');
+    expect(doc.content![0].attrs).toEqual({ level: 1, textAlign: 'right' });
+    expect(doc.content![0].content).toEqual([{ type: 'text', text: 'Titolo' }]);
+  });
+
+  it('documento vuoto', () => {
+    expect(parseMarkdown('')).toEqual({ type: 'doc', content: [{ type: 'paragraph' }] });
+    expect(serializeMarkdown({ type: 'doc', content: [{ type: 'paragraph' }] })).toBe('');
+  });
+});
+
+describe('serialize', () => {
+  it('gli spazi escono dall\'enfasi', () => {
+    const doc: PMNode = {
+      type: 'doc',
+      content: [
+        {
+          type: 'paragraph',
+          content: [
+            { type: 'text', text: 'a' },
+            { type: 'text', text: ' b ', marks: [{ type: 'bold' }] },
+            { type: 'text', text: 'c' },
+          ],
+        },
+      ],
+    };
+    expect(serializeMarkdown(doc)).toBe('a **b** c\n');
+  });
+
+  it('codice con backtick', () => {
+    const doc: PMNode = {
+      type: 'doc',
+      content: [{ type: 'paragraph', content: [{ type: 'text', text: 'a`b', marks: [{ type: 'code' }] }] }],
+    };
+    const md = serializeMarkdown(doc);
+    expect(md).toBe('``a`b``\n');
+    expect(parseMarkdown(md)).toEqual(doc);
+  });
+});
+
+describe('citazioni', () => {
+  it('analizza prefisso, locator e suffisso', () => {
+    expect(parseCitation('vedi @a, pp. 3-4 e oltre; -@b')).toEqual([
+      { key: 'a', prefix: 'vedi', locator: 'pp. 3-4', suffix: 'e oltre' },
+      { key: 'b', suppressAuthor: true },
+    ]);
+    expect(parseCitation('nessuna chiave')).toBeNull();
+  });
+
+  it('formatta in sintassi Pandoc', () => {
+    expect(formatCitation([{ key: 'a', locator: 'p. 2' }, { key: 'b', suppressAuthor: true }])).toBe('[@a, p. 2; -@b]');
+  });
+
+  it('chiavi uniche', () => {
+    const taken = new Set(['rossi2020']);
+    expect(makeCiteKey('Rossì', 2020, taken)).toBe('rossi2020a');
+    expect(makeCiteKey('', undefined, new Set())).toBe('anon');
+  });
+});

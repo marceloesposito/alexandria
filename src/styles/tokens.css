@@ -1,0 +1,112 @@
+/* Token di stile: carta e inchiostro. Mai colori scritti a mano fuori da qui. */
+:root {
+  color-scheme: light;
+  --font-ui: 'Inter', system-ui, sans-serif;
+  --font-text: 'Libertinus Serif', 'Georgia', serif;
+  --font-mono: 'JetBrains Mono', ui-monospace, monospace;
+
+  --fs-ui: 13px;
+  --fs-ui-small: 11.5px;
+  --fs-ui-large: 15px;
+  --fs-title: 20px;
+
+  --desk: #ece8df;
+  --chrome: #f6f3ec;
+  --chrome-2: #efebe2;
+  --paper: #fffdf8;
+  --ink: #1f1c17;
+  --ink-2: #4a453c;
+  --muted: #7a7366;
+  --line: #ddd6c8;
+  --line-strong: #c4bba9;
+  --accent: #8a4f2a;
+  --accent-soft: color-mix(in srgb, var(--accent) 12%, var(--paper));
+  --accent-ink: #fffdf8;
+  --select: color-mix(in srgb, #3a6ea5 22%, transparent);
+  --line-hover: color-mix(in srgb, var(--accent) 9%, transparent);
+  --mark: #f3dc8a;
+  --ok: #3f7d4e;
+  --warn: #a8741a;
+  --bad: #a83a2c;
+  --info: #3a6ea5;
+  --add-bg: color-mix(in srgb, var(--ok) 16%, var(--paper));
+  --del-bg: color-mix(in srgb, var(--bad) 14%, var(--paper));
+  --shadow: 0 1px 2px rgb(40 30 10 / 0.08), 0 4px 16px rgb(40 30 10 / 0.08);
+  --shadow-strong: 0 8px 40px rgb(40 30 10 / 0.22);
+  --radius: 6px;
+  --radius-small: 4px;
+
+  /* Serie per layer, grafi e branch (sempre con etichetta accanto) */
+  --series-1: #8a4f2a;
+  --series-2: #3a6ea5;
+  --series-3: #3f7d4e;
+  --series-4: #8e4a8a;
+  --series-5: #a8741a;
+  --series-6: #2f8a87;
+  --series-7: #a83a2c;
+  --series-8: #5b5f6b;
+}
+
+:root[data-theme='dark'] {
+  color-scheme: dark;
+  --desk: #151412;
+  --chrome: #1d1c19;
+  --chrome-2: #242320;
+  --paper: #22201c;
+  --ink: #e9e4d8;
+  --ink-2: #c9c2b3;
+  --muted: #958d7d;
+  --line: #36332d;
+  --line-strong: #4a463e;
+  --accent: #d39563;
+  --accent-ink: #1d1c19;
+  --select: color-mix(in srgb, #6f9fd3 30%, transparent);
+  --mark: #6b5a1d;
+  --ok: #7cb68a;
+  --warn: #d7a64e;
+  --bad: #e07a6b;
+  --info: #7fa9d8;
+  --shadow: 0 1px 2px rgb(0 0 0 / 0.3), 0 4px 16px rgb(0 0 0 / 0.3);
+  --shadow-strong: 0 8px 40px rgb(0 0 0 / 0.5);
+  --series-1: #d39563;
+  --series-2: #7fa9d8;
+  --series-3: #7cb68a;
+  --series-4: #c58ac1;
+  --series-5: #d7a64e;
+  --series-6: #6cc2be;
+  --series-7: #e07a6b;
+  --series-8: #a3a7b3;
+}
+
+@media (prefers-color-scheme: dark) {
+  :root[data-theme='system'] {
+    color-scheme: dark;
+    --desk: #151412;
+    --chrome: #1d1c19;
+    --chrome-2: #242320;
+    --paper: #22201c;
+    --ink: #e9e4d8;
+    --ink-2: #c9c2b3;
+    --muted: #958d7d;
+    --line: #36332d;
+    --line-strong: #4a463e;
+    --accent: #d39563;
+    --accent-ink: #1d1c19;
+    --select: color-mix(in srgb, #6f9fd3 30%, transparent);
+    --mark: #6b5a1d;
+    --ok: #7cb68a;
+    --warn: #d7a64e;
+    --bad: #e07a6b;
+    --info: #7fa9d8;
+    --shadow: 0 1px 2px rgb(0 0 0 / 0.3), 0 4px 16px rgb(0 0 0 / 0.3);
+    --shadow-strong: 0 8px 40px rgb(0 0 0 / 0.5);
+    --series-1: #d39563;
+    --series-2: #7fa9d8;
+    --series-3: #7cb68a;
+    --series-4: #c58ac1;
+    --series-5: #d7a64e;
+    --series-6: #6cc2be;
+    --series-7: #e07a6b;
+    --series-8: #a3a7b3;
+  }
+}
