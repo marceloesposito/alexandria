@@ -20,6 +20,7 @@ interface MemCommit {
   message: string;
   time: number;
   tree: Map<string, FileData>;
+  author?: string;
 }
 
 interface MemRepo {
@@ -28,7 +29,9 @@ interface MemRepo {
   head: string; // nome del branch
   merging: { theirs: string } | null;
   remote: string | null;
+  author?: string;
 }
+
 
 const PERSIST_KEY = 'alexandria.memfs.v1';
 const IGNORED = ['/.git/', '/.alexandria-cache/'];
@@ -256,7 +259,7 @@ export function createMemoryPlatform(opts: { persist?: boolean } = {}): Platform
       return { status: 'conflicts', conflicts, theirsSha };
     }
     const sha = fakeSha();
-    r.commits.set(sha, { sha, parents: [ours, theirsSha], message: 'Merge', time: Date.now() / 1000, tree: result });
+    r.commits.set(sha, { sha, parents: [ours, theirsSha], message: 'Merge', time: Date.now() / 1000, tree: result, author: r.author });
     r.branches.set(r.head, sha);
     return { status: 'merged', conflicts: [], theirsSha };
   }
@@ -360,6 +363,9 @@ export function createMemoryPlatform(opts: { persist?: boolean } = {}): Platform
       repos.set(norm(repo), { commits: new Map(), branches: new Map(), head: 'main', merging: null, remote: null });
       ensureDir(repo + '/.git');
     },
+    async gitSetAuthor(repo, name) {
+      repoOf(repo).author = name.trim() || undefined;
+    },
     async gitStatus(repo) {
       const r = repoOf(repo);
       const changes = diffTrees(commitTree(r, headSha(r)), workTree(repo));
@@ -382,7 +388,7 @@ export function createMemoryPlatform(opts: { persist?: boolean } = {}): Platform
       const sha = fakeSha();
       const parents = parentSha ? [parentSha] : [];
       if (r.merging) parents.push(r.merging.theirs);
-      r.commits.set(sha, { sha, parents, message, time: Date.now() / 1000, tree: new Map(tree) });
+      r.commits.set(sha, { sha, parents, message, time: Date.now() / 1000, tree: new Map(tree), author: r.author });
       r.branches.set(r.head, sha);
       r.merging = null;
       return sha;
@@ -400,7 +406,7 @@ export function createMemoryPlatform(opts: { persist?: boolean } = {}): Platform
           sha: c.sha,
           parents: c.parents,
           message: c.message,
-          author: 'Autore',
+          author: c.author || 'Alexandria',
           time: Math.floor(c.time),
           refs: refs.get(c.sha) ?? [],
         }));

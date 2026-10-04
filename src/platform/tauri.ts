@@ -52,6 +52,7 @@ export const tauriPlatform: Platform = {
 
   gitInit: (repo) => invoke('git_init', { repo }),
   gitStatus: (repo) => invoke('git_status', { repo }),
+  gitSetAuthor: (repo, name) => invoke('git_set_author', { repo, name }),
   gitCommit: (repo, message, opts) =>
     invoke('git_commit', { repo, message, amendCheckpoints: opts?.amendCheckpoints ?? false }),
   gitLog: (repo) => invoke('git_log', { repo }),

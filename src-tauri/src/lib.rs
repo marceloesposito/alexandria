@@ -26,6 +26,7 @@ pub fn run() {
             fsops::documents_dir,
             git::git_init,
             git::git_status,
+            git::git_set_author,
             git::git_commit,
             git::git_log,
             git::git_changes,

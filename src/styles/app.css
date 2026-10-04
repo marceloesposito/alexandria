@@ -397,7 +397,8 @@ kbd {
   background: none;
   border-radius: var(--radius-small);
   padding: 4px 4px 3px;
-  width: 58px;
+  min-width: 54px;
+  max-width: 86px;
   color: var(--ink);
 }
 
