@@ -514,8 +514,8 @@ export function createMemoryPlatform(opts: { persist?: boolean } = {}): Platform
       return out.sort((a, b) => b.score - a.score).slice(0, limit);
     },
 
-    async fetchUrl(url) {
-      const res = await fetch(url);
+    async fetchUrl(url, accept) {
+      const res = await fetch(url, accept ? { headers: { Accept: accept } } : undefined);
       return {
         status: res.status,
         url: res.url,

@@ -16,7 +16,7 @@ pub struct FetchResult {
 }
 
 #[tauri::command]
-pub async fn net_fetch(url: String) -> CmdResult<FetchResult> {
+pub async fn net_fetch(url: String, accept: Option<String>) -> CmdResult<FetchResult> {
     if !(url.starts_with("http://") || url.starts_with("https://")) {
         return Err("Sono ammessi solo indirizzi http(s)".into());
     }
@@ -26,7 +26,12 @@ pub async fn net_fetch(url: String) -> CmdResult<FetchResult> {
         .timeout(std::time::Duration::from_secs(30))
         .build()
         .map_err(err)?;
-    let res = client.get(&url).send().await.map_err(err)?;
+    let mut req = client.get(&url);
+    // negoziazione del contenuto (per esempio CSL-JSON da doi.org)
+    if let Some(a) = accept {
+        req = req.header(reqwest::header::ACCEPT, a);
+    }
+    let res = req.send().await.map_err(err)?;
     let status = res.status().as_u16();
     let final_url = res.url().to_string();
     let content_type = res

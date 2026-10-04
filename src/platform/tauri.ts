@@ -74,8 +74,8 @@ export const tauriPlatform: Platform = {
   indexRemove: (db, ids) => invoke('index_remove', { db, ids }),
   indexSearch: (db, query, limit) => invoke('index_search', { db, query, limit: limit ?? 50 }),
 
-  fetchUrl: async (url): Promise<FetchResult> => {
-    const r = await invoke<RawFetch>('net_fetch', { url });
+  fetchUrl: async (url, accept): Promise<FetchResult> => {
+    const r = await invoke<RawFetch>('net_fetch', { url, accept: accept ?? null });
     return { status: r.status, url: r.url, contentType: r.contentType, body: base64ToBytes(r.bodyB64) };
   },
 

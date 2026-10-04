@@ -4,6 +4,9 @@ import { registerEditorCommands } from './commands/editorCommands';
 import './shell/RibbonWidgets';
 import { registerComments } from './comments';
 import { registerVersions } from './versions';
+import { registerResources } from './resources';
+import { registerDialog } from './shell/DialogHost';
+import { DocSettingsDialog } from './layout/DocSettingsDialog';
 
 let done = false;
 
@@ -14,6 +17,8 @@ export function registerAll() {
   registerEditorCommands();
   registerComments();
   registerVersions();
+  registerResources();
+  registerDialog('docSettings', DocSettingsDialog);
 }
 
 // accesso agli store per le prove nel browser (solo sviluppo)

@@ -140,7 +140,7 @@ export interface Platform {
   indexSearch(db: string, query: string, limit?: number): Promise<SearchHit[]>;
 
   // rete (solo su azione esplicita dell'utente)
-  fetchUrl(url: string): Promise<FetchResult>;
+  fetchUrl(url: string, accept?: string): Promise<FetchResult>;
 
   // impaginazione
   typst(source: string, files: TypstFile[], format: 'pdf' | 'svg'): Promise<TypstOutput>;

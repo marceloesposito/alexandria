@@ -27,3 +27,5 @@ dist-ssr
 coverage
 test-results
 /tmp
+public/tesseract
+public/tessdata
