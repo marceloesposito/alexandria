@@ -341,8 +341,9 @@ export function createMemoryPlatform(opts: { persist?: boolean } = {}): Platform
     async documentsDir() {
       return '/documents';
     },
-    async pickDirectory() {
-      return window.prompt('Cartella', '/documents/Vault') ?? null;
+    async pickDirectory(title) {
+      const { promptDialog } = await import('../components/confirm');
+      return promptDialog(title ?? 'Cartella', '/documents/Vault');
     },
     async pickFiles() {
       return [];

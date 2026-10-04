@@ -1,0 +1,523 @@
+/* Pagina e testo dell'editor. La misura della colonna di testo e' fissa (impostazioni del documento). */
+.editor-view {
+  display: flex;
+  height: 100%;
+  min-height: 0;
+}
+
+.editor-center {
+  flex: 1;
+  min-width: 0;
+  position: relative;
+  display: flex;
+  flex-direction: column;
+}
+
+.editor-scroll {
+  flex: 1;
+  overflow: auto;
+  padding: 28px 24px 120px;
+  scroll-behavior: auto;
+  scrollbar-width: thin;
+}
+
+.page {
+  position: relative;
+  width: calc(var(--page-width) + 2 * var(--page-pad-x));
+  margin: 0 auto;
+  padding: 22mm var(--page-pad-x) 30mm;
+  min-height: calc(100% - 20px);
+  background: var(--paper);
+  box-shadow: var(--shadow);
+  border-radius: 2px;
+}
+
+.page--source {
+  padding: 10mm 6mm 20mm;
+}
+
+/* ---------------------------------------------------------------- testo */
+.doc-body {
+  outline: none;
+  font-family: var(--page-font);
+  font-size: var(--page-font-size);
+  line-height: var(--page-leading);
+  color: var(--ink);
+  font-kerning: normal;
+  font-variant-ligatures: common-ligatures;
+  hyphens: manual;
+  counter-reset: footnote;
+  caret-color: var(--accent);
+  min-height: 60vh;
+}
+
+.doc-body > * + * {
+  margin-top: 0.6em;
+}
+
+.doc-body p {
+  margin: 0;
+}
+
+.doc-body h1,
+.doc-body h2,
+.doc-body h3,
+.doc-body h4,
+.doc-body h5,
+.doc-body h6 {
+  font-weight: 600;
+  line-height: 1.25;
+  margin: 1.2em 0 0.4em;
+}
+
+.doc-body h1 {
+  font-size: 1.75em;
+}
+.doc-body h2 {
+  font-size: 1.35em;
+}
+.doc-body h3 {
+  font-size: 1.15em;
+}
+.doc-body h4,
+.doc-body h5,
+.doc-body h6 {
+  font-size: 1em;
+  font-style: italic;
+}
+
+.doc-body > :first-child {
+  margin-top: 0;
+}
+
+.doc-body blockquote {
+  margin: 0.6em 0;
+  padding: 0 0 0 1.2em;
+  border-left: 2px solid var(--line-strong);
+  color: var(--ink-2);
+}
+
+.doc-body ul,
+.doc-body ol {
+  padding-left: 1.6em;
+  margin: 0.4em 0;
+}
+
+.doc-body li > p {
+  margin: 0;
+}
+
+.doc-body ul[data-type='taskList'] {
+  list-style: none;
+  padding-left: 0.2em;
+}
+
+.doc-body ul[data-type='taskList'] li {
+  display: flex;
+  gap: 0.5em;
+  align-items: flex-start;
+}
+
+.doc-body ul[data-type='taskList'] li > label {
+  margin-top: 0.15em;
+}
+
+.doc-body ul[data-type='taskList'] li > div {
+  flex: 1;
+}
+
+.doc-body pre {
+  font-family: var(--font-mono);
+  font-size: 0.82em;
+  line-height: 1.5;
+  background: var(--chrome);
+  border-radius: var(--radius-small);
+  padding: 0.8em 1em;
+  overflow-x: auto;
+}
+
+.doc-body code {
+  font-family: var(--font-mono);
+  font-size: 0.85em;
+  background: var(--chrome);
+  border-radius: 3px;
+  padding: 0.05em 0.3em;
+}
+
+.doc-body pre code {
+  background: none;
+  padding: 0;
+}
+
+.doc-body hr {
+  border: 0;
+  border-top: 1px solid var(--line-strong);
+  margin: 1.4em 25%;
+}
+
+.doc-body a {
+  color: var(--info);
+  text-decoration: underline;
+  text-underline-offset: 2px;
+}
+
+.doc-body mark {
+  background: var(--mark);
+  color: inherit;
+  padding: 0 0.05em;
+}
+
+.doc-body table {
+  border-collapse: collapse;
+  width: 100%;
+  margin: 0.6em 0;
+  font-size: 0.92em;
+  table-layout: fixed;
+}
+
+.doc-body th,
+.doc-body td {
+  border: 1px solid var(--line-strong);
+  padding: 0.3em 0.5em;
+  vertical-align: top;
+}
+
+.doc-body th {
+  background: var(--chrome);
+  font-weight: 600;
+  text-align: left;
+}
+
+.doc-body .selectedCell {
+  background: var(--select);
+}
+
+.doc-body p.is-empty::before,
+.doc-body h1.is-empty::before,
+.doc-body h2.is-empty::before,
+.doc-body h3.is-empty::before {
+  content: attr(data-placeholder);
+  color: var(--muted);
+  opacity: 0.6;
+  pointer-events: none;
+  float: left;
+  height: 0;
+}
+
+.doc-body ::selection {
+  background: var(--select);
+}
+
+.doc-body .ProseMirror-selectednode,
+.is-selected {
+  outline: 2px solid color-mix(in srgb, var(--accent) 45%, transparent);
+  outline-offset: 2px;
+  border-radius: 2px;
+}
+
+.search-hit {
+  background: color-mix(in srgb, var(--warn) 30%, transparent);
+  border-radius: 2px;
+}
+
+.search-hit.is-current {
+  background: color-mix(in srgb, var(--warn) 65%, transparent);
+}
+
+.page-break {
+  border-top: 1px dashed var(--line-strong);
+  margin: 1.4em 0;
+  position: relative;
+  height: 0;
+}
+
+.page-break::after {
+  content: '⤓';
+  position: absolute;
+  right: -1.6em;
+  top: -0.7em;
+  font-size: 0.8em;
+  color: var(--muted);
+}
+
+/* ---------------------------------------------------------------- nodi speciali */
+.nv-math-block {
+  text-align: center;
+  margin: 0.8em 0;
+  cursor: pointer;
+}
+
+.nv-math-inline {
+  cursor: pointer;
+}
+
+.nv-footnote {
+  font-size: 0.7em;
+  line-height: 0;
+}
+
+.nv-footnote__ref {
+  cursor: pointer;
+  color: var(--accent);
+  padding: 0 1px;
+}
+
+.nv-footnote__ref::after {
+  counter-increment: footnote;
+  content: counter(footnote);
+}
+
+.nv-citation {
+  color: var(--accent);
+  cursor: pointer;
+  border-bottom: 1px dotted color-mix(in srgb, var(--accent) 50%, transparent);
+}
+
+.nv-citation__note::after {
+  counter-increment: footnote;
+  content: counter(footnote);
+  font-size: 0.7em;
+}
+
+.nv-wikilink {
+  color: var(--info);
+  cursor: pointer;
+  border-bottom: 1px solid color-mix(in srgb, var(--info) 40%, transparent);
+}
+
+.nv-wikilink.is-missing {
+  color: var(--muted);
+  border-bottom-style: dashed;
+}
+
+.nv-figure {
+  margin: 1em 0;
+  text-align: center;
+  position: relative;
+}
+
+.nv-figure img {
+  max-width: 100%;
+  border-radius: 2px;
+  display: block;
+  margin: 0 auto;
+}
+
+.nv-figure__caption {
+  display: block;
+  width: 100%;
+  border: 0;
+  background: none;
+  text-align: center;
+  font-family: var(--page-font);
+  font-style: italic;
+  font-size: 0.85em;
+  color: var(--ink-2);
+  margin-top: 0.4em;
+  outline: none;
+}
+
+.nv-figure__tools {
+  position: absolute;
+  top: 6px;
+  right: 6px;
+  display: flex;
+  gap: 4px;
+  font-family: var(--font-ui);
+}
+
+.nv-break {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  margin: 1.2em 0;
+  font-family: var(--font-ui);
+  font-size: var(--fs-ui-small);
+  color: var(--muted);
+  border-top: 1px dashed var(--line-strong);
+  padding-top: 4px;
+}
+
+.nv-toc {
+  border: 1px solid var(--line);
+  border-radius: var(--radius-small);
+  padding: 0.6em 1em;
+  margin: 1em 0;
+  font-size: 0.92em;
+}
+
+.nv-toc__title {
+  font-weight: 600;
+  margin-bottom: 0.3em;
+}
+
+.nv-toc__item.level-2 {
+  padding-left: 1em;
+}
+.nv-toc__item.level-3 {
+  padding-left: 2em;
+}
+.nv-toc__item.level-4,
+.nv-toc__item.level-5,
+.nv-toc__item.level-6 {
+  padding-left: 3em;
+}
+
+.nv-bibliography {
+  border-left: 3px solid var(--line);
+  padding-left: 0.8em;
+  margin: 1em 0;
+}
+
+.nv-bibliography__bar {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  font-family: var(--font-ui);
+  font-size: var(--fs-ui-small);
+  color: var(--muted);
+  margin-bottom: 0.4em;
+}
+
+.nv-bibliography__content p {
+  padding-left: 2em;
+  text-indent: -2em;
+}
+
+/* ---------------------------------------------------------------- numeri di riga */
+.line-gutter {
+  position: absolute;
+  left: 0;
+  top: 0;
+  bottom: 0;
+  width: calc(var(--page-pad-x) - 5mm);
+  pointer-events: none;
+  user-select: none;
+}
+
+.line-gutter__n {
+  position: absolute;
+  right: 0;
+  display: flex;
+  align-items: center;
+  font-family: var(--font-ui);
+  font-size: 10px;
+  color: var(--muted);
+  opacity: 0.75;
+  font-variant-numeric: tabular-nums;
+}
+
+.line-flash {
+  position: absolute;
+  left: 0;
+  right: 0;
+  background: color-mix(in srgb, var(--accent) 18%, transparent);
+  pointer-events: none;
+  animation: fade 1.6s ease-out forwards;
+}
+
+@keyframes fade {
+  to {
+    opacity: 0;
+  }
+}
+
+/* ---------------------------------------------------------------- maniglia dei blocchi */
+.drag-handle {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 18px;
+  height: 22px;
+  border-radius: 4px;
+  color: var(--muted);
+  cursor: grab;
+  background: var(--paper);
+}
+
+.drag-handle:hover {
+  background: var(--chrome-2);
+  color: var(--ink);
+}
+
+/* ---------------------------------------------------------------- menu / */
+.slash-host {
+  position: fixed;
+  z-index: 160;
+}
+
+.slash-menu {
+  width: 250px;
+  max-height: 320px;
+  overflow-y: auto;
+  background: var(--paper);
+  border: 1px solid var(--line);
+  border-radius: var(--radius);
+  box-shadow: var(--shadow-strong);
+  padding: 4px;
+  font-family: var(--font-ui);
+  font-size: var(--fs-ui);
+}
+
+.slash-menu.empty {
+  padding: 10px;
+  color: var(--muted);
+}
+
+.slash-menu__item {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  width: 100%;
+  border: 0;
+  background: none;
+  text-align: left;
+  padding: 6px 8px;
+  border-radius: var(--radius-small);
+}
+
+.slash-menu__item.is-active {
+  background: var(--accent-soft);
+  color: var(--accent);
+}
+
+/* ---------------------------------------------------------------- vista sorgente */
+.source-view {
+  font-size: 13px;
+}
+
+.source-view .cm-editor {
+  background: transparent;
+  color: var(--ink);
+}
+
+.source-view .cm-content {
+  font-family: var(--font-mono);
+  caret-color: var(--accent);
+}
+
+.source-view .cm-gutters {
+  background: transparent;
+  border-right: 1px solid var(--line);
+  color: var(--muted);
+}
+
+.source-view .cm-activeLine,
+.source-view .cm-activeLineGutter {
+  background: var(--line-hover);
+}
+
+.source-view .cm-focused {
+  outline: none;
+}
+
+/* ---------------------------------------------------------------- modalita' focus */
+.editor-scroll.is-focus .doc-body > * {
+  opacity: 0.35;
+  transition: opacity 0.2s;
+}
+
+.editor-scroll.is-focus .doc-body > .has-focus,
+.editor-scroll.is-focus .doc-body > *:focus-within {
+  opacity: 1;
+}
