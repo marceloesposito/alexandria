@@ -52,7 +52,7 @@ export const DEFAULT_PREFS: Prefs = {
   authorName: '',
   leftWidth: 280,
   rightWidth: 300,
-  previewWidth: 520,
+  previewWidth: 440,
 };
 
 export interface DocCursor {

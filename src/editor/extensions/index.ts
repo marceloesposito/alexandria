@@ -25,6 +25,7 @@ import { SlashCommands } from '../slash';
 import { DropHandler } from './drop';
 import { SearchHighlight } from '../search';
 import { CommentAnchors } from '../../comments/plugin';
+import { MarkdownShortcuts } from './inputRules';
 
 /** Tabella con l'allineamento delle colonne del Markdown (GFM). */
 const AlignedTable = Table.extend({
@@ -72,5 +73,6 @@ export function buildExtensions() {
     DropHandler,
     SearchHighlight,
     CommentAnchors,
+    MarkdownShortcuts,
   ];
 }

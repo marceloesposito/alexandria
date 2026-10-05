@@ -140,13 +140,22 @@ fn slash(p: std::path::PathBuf) -> String {
 
 #[tauri::command]
 pub fn app_data_dir(app: tauri::AppHandle) -> CmdResult<String> {
-    let dir = app.path().app_config_dir().map_err(err)?;
+    // prove automatiche: tutto in una cartella a parte, mai nei dati veri dell'utente
+    let dir = match std::env::var("ALEXANDRIA_DATA_DIR") {
+        Ok(d) => Path::new(&d).join("appdata"),
+        Err(_) => app.path().app_config_dir().map_err(err)?,
+    };
     fs::create_dir_all(&dir).map_err(err)?;
     Ok(slash(dir))
 }
 
 #[tauri::command]
 pub fn documents_dir(app: tauri::AppHandle) -> CmdResult<String> {
+    if let Ok(d) = std::env::var("ALEXANDRIA_DATA_DIR") {
+        let p = Path::new(&d).join("documents");
+        fs::create_dir_all(&p).map_err(err)?;
+        return Ok(slash(p));
+    }
     app.path()
         .document_dir()
         .or_else(|_| app.path().home_dir())

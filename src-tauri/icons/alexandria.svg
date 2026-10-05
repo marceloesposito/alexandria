@@ -1,0 +1,17 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1024 1024">
+  <rect x="64" y="64" width="896" height="896" rx="200" fill="#f6f1e6"/>
+  <rect x="64" y="64" width="896" height="896" rx="200" fill="none" stroke="#8a4f2a" stroke-width="24"/>
+  <!-- frontone -->
+  <path d="M200 380 L512 210 L824 380 Z" fill="#8a4f2a"/>
+  <rect x="200" y="390" width="624" height="34" fill="#8a4f2a"/>
+  <!-- colonne -->
+  <g fill="#8a4f2a">
+    <rect x="250" y="450" width="64" height="300" rx="10"/>
+    <rect x="390" y="450" width="64" height="300" rx="10"/>
+    <rect x="570" y="450" width="64" height="300" rx="10"/>
+    <rect x="710" y="450" width="64" height="300" rx="10"/>
+  </g>
+  <rect x="180" y="770" width="664" height="40" rx="8" fill="#8a4f2a"/>
+  <!-- pagina aperta al centro del frontone -->
+  <path d="M440 330 Q512 300 584 330 L584 350 Q512 322 440 350 Z" fill="#f6f1e6"/>
+</svg>

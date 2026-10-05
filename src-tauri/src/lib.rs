@@ -9,6 +9,21 @@ mod typeset;
 #[cfg_attr(mobile, tauri::mobile_entry_point)]
 pub fn run() {
     tauri::Builder::default()
+        .setup(|app| {
+            use tauri::Manager;
+            if let Some(w) = app.get_webview_window("main") {
+                // prove automatiche: finestra fuori schermo e senza focus (non disturba chi lavora)
+                if std::env::var("ALEXANDRIA_TEST_OFFSCREEN").is_ok() {
+                    let _ = w.set_position(tauri::PhysicalPosition::new(-6000, -6000));
+                    let _ = w.show();
+                } else {
+                    let _ = w.center();
+                    let _ = w.show();
+                    let _ = w.set_focus();
+                }
+            }
+            Ok(())
+        })
         .plugin(tauri_plugin_opener::init())
         .plugin(tauri_plugin_dialog::init())
         .invoke_handler(tauri::generate_handler![
