@@ -1151,3 +1151,51 @@ table.kv td:last-child {
   color: var(--muted);
   font-size: var(--fs-ui-small);
 }
+
+/* ---------------------------------------------------------------- scrittura minimale */
+.app.app--zen {
+  grid-template-rows: 1fr;
+}
+
+.app--zen .editor-scroll.is-borderless {
+  padding-top: 8vh;
+}
+
+.app--zen .counts-badge {
+  opacity: 0.25;
+}
+
+.app--zen .counts-badge:hover,
+.app--zen .counts-badge.is-open {
+  opacity: 1;
+}
+
+.app--zen .drag-handle {
+  opacity: 0.4;
+}
+
+.zen-hint {
+  position: fixed;
+  top: 14px;
+  left: 50%;
+  translate: -50% 0;
+  z-index: 40;
+  padding: 4px 12px;
+  border-radius: 999px;
+  background: var(--chrome);
+  border: 1px solid var(--line);
+  color: var(--muted);
+  font-size: var(--fs-ui-small);
+  pointer-events: none;
+  animation: zen-hint 3.5s ease forwards;
+}
+
+@keyframes zen-hint {
+  0%,
+  70% {
+    opacity: 1;
+  }
+  100% {
+    opacity: 0;
+  }
+}

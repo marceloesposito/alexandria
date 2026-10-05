@@ -8,6 +8,7 @@ import { Splitter } from '../components/Splitter';
 import { leftPanelSections, rightPanel, centerOverlay, previewPanel } from './slots';
 import { OutlinePanel } from './OutlinePanel';
 import { CountsBadge } from '../shell/CountsBadge';
+import { useZen } from '../state/zen';
 import { Library, ListTree } from 'lucide-react';
 import { t, useLang } from '../i18n';
 
@@ -16,14 +17,16 @@ export function EditorView() {
   const prefs = useWorkspace((s) => s.app.prefs);
   const dialog = useWorkspace((s) => s.dialog);
   const pageRef = useRef<HTMLDivElement>(null);
+  const zen = useZen((s) => s.on);
+  const bare = prefs.focusMode || zen;
   const Right = rightPanel.get();
   const Overlay = centerOverlay.get();
   const Preview = previewPanel.get();
   const set = useWorkspace.getState().setPrefs;
 
   return (
-    <div className={`editor-view ${prefs.focusMode ? 'is-focus' : ''}`}>
-      {prefs.showLeft && !prefs.focusMode && (
+    <div className={`editor-view ${prefs.focusMode ? 'is-focus' : ''} ${zen ? 'is-zen' : ''}`}>
+      {prefs.showLeft && !bare && (
         <>
           <aside className="side side--left" style={{ width: prefs.leftWidth }}>
             <div className="side-tabs" role="tablist">
@@ -58,7 +61,7 @@ export function EditorView() {
         <EditorPane pageRef={pageRef} overlay={Overlay ? <Overlay pageRef={pageRef} /> : null} />
         <CountsBadge />
       </main>
-      {prefs.showPreview && Preview && (
+      {prefs.showPreview && !zen && Preview && (
         <>
           <Splitter onDrag={(dx) => set({ previewWidth: Math.max(320, Math.min(1000, useWorkspace.getState().app.prefs.previewWidth - dx)) })} />
           <aside className="side side--preview" style={{ width: prefs.previewWidth }}>
@@ -66,7 +69,7 @@ export function EditorView() {
           </aside>
         </>
       )}
-      {prefs.showRight && !prefs.focusMode && Right && (
+      {prefs.showRight && !bare && Right && (
         <>
           <Splitter onDrag={(dx) => set({ rightWidth: Math.max(220, Math.min(520, useWorkspace.getState().app.prefs.rightWidth - dx)) })} />
           <aside className="side side--right" style={{ width: prefs.rightWidth }}>

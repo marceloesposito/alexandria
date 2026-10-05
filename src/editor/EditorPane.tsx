@@ -15,6 +15,7 @@ import { SourceView } from './SourceView';
 import { notifyCommandState } from '../commands/registry';
 import { useDocSettings, pageMetrics } from '../layout/docSettings';
 import { HorizontalRuler, VerticalRuler, RULER_SPACE_PX } from './Rulers';
+import { useZen } from '../state/zen';
 
 interface Props {
   /** sovrapposizioni allineate alla pagina (evidenziazione righe dei commenti, connettori) */
@@ -34,7 +35,10 @@ export function EditorPane({ overlay, pageRef: externalPageRef }: Props) {
   const scrollRef = useRef<HTMLDivElement>(null);
   const measureRaf = useRef(0);
   const [fit, setFit] = useState(1);
-  const borderless = prefs.editorLayout === 'borderless';
+  const zen = useZen((s) => s.on);
+  // la scrittura minimale e' sempre senza bordi, senza righelli e senza numeri di riga
+  const borderless = zen || prefs.editorLayout === 'borderless';
+  const lineNumbers = prefs.lineNumbers && !zen;
   const rulers = !borderless && prefs.rulers && !sourceMode;
 
   const scheduleMeasure = () => {
@@ -133,7 +137,7 @@ export function EditorPane({ overlay, pageRef: externalPageRef }: Props) {
   useEffect(() => {
     scheduleMeasure();
     // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [prefs.zoom, prefs.lineNumbers, layout, fit, borderless]);
+  }, [prefs.zoom, lineNumbers, layout, fit, borderless]);
 
   // la pagina si riduce per stare nella colonna quando lo spazio non basta
   useEffect(() => {
@@ -193,7 +197,7 @@ export function EditorPane({ overlay, pageRef: externalPageRef }: Props) {
       ) : (
         <div className={`page ${borderless ? 'page--borderless' : ''}`} ref={pageRef} style={style} data-columns={layout.columns}>
           {rulers && <VerticalRuler pageRef={pageRef} textHeightMm={m.textHeightMm} />}
-          {prefs.lineNumbers && <LineGutter />}
+          {lineNumbers && <LineGutter />}
           {overlay}
           {editor && (
             <DragHandle editor={editor} className="drag-handle">
