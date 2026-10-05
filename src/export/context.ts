@@ -1,6 +1,7 @@
 // Contesto comune agli esportatori: impostazioni, citazioni gia' formattate, immagini e formule.
 import type { DocSettings } from '../layout/model';
 import type { CitationItem, PMNode } from '../doc/types';
+import type { ExportComment } from './comments';
 
 export interface CiteOut {
   /** testo nel corpo (stili autore-data e numerici) oppure testo della nota (stili a note) */
@@ -31,6 +32,8 @@ export interface ExportContext {
   math(latex: string, display: boolean): MathAsset | null;
   /** header con tipo e proprietà, se l'autore l'ha incluso nell'export */
   header?: ExportHeader;
+  /** Marginalia da portare come commenti di Word (solo export .docx della pergamena aperta) */
+  comments?: ExportComment[];
 }
 
 export interface ExportHeader {

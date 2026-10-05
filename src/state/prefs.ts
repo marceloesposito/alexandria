@@ -45,6 +45,8 @@ export interface Prefs {
   previewWidth: number;
   /** larghezza dei riquadri accanto all'editor */
   paneWidth: number;
+  /** revisioni tracciate nell'export: testo pulito o evidenziate */
+  exportRevisions: 'clean' | 'marked';
 }
 
 export const DEFAULT_PREFS: Prefs = {
@@ -77,6 +79,7 @@ export const DEFAULT_PREFS: Prefs = {
   rightWidth: 300,
   previewWidth: 440,
   paneWidth: 460,
+  exportRevisions: 'clean',
 };
 
 export interface DocCursor {

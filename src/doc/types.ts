@@ -23,10 +23,15 @@ export type MarkType =
   | 'highlight'
   | 'subscript'
   | 'superscript'
-  | 'code';
+  | 'code'
+  /** revisioni tracciate: testo proposto / testo da togliere (attrs: author, date) */
+  | 'insertion'
+  | 'deletion';
 
 /** Ordine di annidamento in Markdown: il primo e' il piu' esterno. */
 export const MARK_ORDER: MarkType[] = [
+  'insertion',
+  'deletion',
   'link',
   'bold',
   'italic',

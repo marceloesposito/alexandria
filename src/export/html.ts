@@ -19,6 +19,8 @@ const TAGS: Partial<Record<string, string>> = {
   subscript: 'sub',
   superscript: 'sup',
   code: 'code',
+  insertion: 'ins',
+  deletion: 'del',
 };
 
 function safeHref(u: string): string {

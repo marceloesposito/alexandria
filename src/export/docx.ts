@@ -1,6 +1,11 @@
 // Documento -> DOCX (Word) con la libreria docx: stili, note, immagini, tabelle, elenchi,
 // formato pagina e margini dalle impostazioni, intestazione e numeri di pagina.
 import {
+  CommentRangeStart,
+  CommentRangeEnd,
+  CommentReference,
+  InsertedTextRun,
+  DeletedTextRun,
   Document,
   Packer,
   Paragraph,
@@ -112,6 +117,7 @@ export async function toDocx(doc: PMNode, ctx: ExportContext): Promise<Uint8Arra
     }
   }
 
+  let changeId = 0;
   const run = (text: string, s: RunStyle): TextRun => {
     const o: IRunOptions = {
       text,
@@ -129,7 +135,20 @@ export async function toDocx(doc: PMNode, ctx: ExportContext): Promise<Uint8Arra
 
   const inline = (nodes: PMNode[] = []): ParagraphChild[] => {
     const out: ParagraphChild[] = [];
+    // commenti dei Marginalia: inizio e fine dell'intervallo, poi il richiamo
+    const open = new Set<number>();
+    const commentIds = (n: PMNode) => (n.marks ?? []).filter((m) => (m.type as string) === 'comment').map((m) => Number(m.attrs?.id));
+    const closeComments = (keep: number[]) => {
+      for (const id of [...open]) {
+        if (keep.includes(id)) continue;
+        out.push(new CommentRangeEnd(id), new TextRun({ children: [new CommentReference(id)] }));
+        open.delete(id);
+      }
+    };
     for (const n of nodes) {
+      const ids = commentIds(n);
+      closeComments(ids);
+      for (const id of ids) if (!open.has(id)) (out.push(new CommentRangeStart(id)), open.add(id));
       const marks = new Set((n.marks ?? []).map((m) => m.type));
       const s: RunStyle = {
         bold: marks.has('bold'),
@@ -144,9 +163,14 @@ export async function toDocx(doc: PMNode, ctx: ExportContext): Promise<Uint8Arra
       const link = n.marks?.find((m) => m.type === 'link');
       let child: ParagraphChild | null = null;
       switch (n.type) {
-        case 'text':
-          child = run(n.text ?? '', s);
+        case 'text': {
+          const tr = n.marks?.find((m) => m.type === 'insertion' || m.type === 'deletion');
+          if (tr) {
+            const o = { text: n.text ?? '', id: ++changeId, author: String(tr.attrs?.author ?? ctx.settings.author ?? 'Alexandria'), date: `${String(tr.attrs?.date ?? new Date().toISOString().slice(0, 10))}T00:00:00Z`, bold: s.bold, italics: s.italics };
+            child = tr.type === 'insertion' ? new InsertedTextRun(o) : new DeletedTextRun(o);
+          } else child = run(n.text ?? '', s);
           break;
+        }
         case 'hardBreak':
           child = new TextRun({ break: 1 });
           break;
@@ -181,6 +205,7 @@ export async function toDocx(doc: PMNode, ctx: ExportContext): Promise<Uint8Arra
       }
       out.push(link ? new ExternalHyperlink({ link: String(link.attrs?.href ?? ''), children: [child as TextRun] }) : child);
     }
+    closeComments([]);
     return out;
   };
 
@@ -314,6 +339,21 @@ export async function toDocx(doc: PMNode, ctx: ExportContext): Promise<Uint8Arra
     children: [new TextRun({ children: [PageNumber.CURRENT], size: 18 })],
   });
   const d = new Document({
+    ...(ctx.comments?.length
+      ? {
+          comments: {
+            children: ctx.comments.map((c) => ({
+              id: c.id,
+              author: c.author || 'Alexandria',
+              date: new Date(c.date || Date.now()),
+              children: [
+                new Paragraph({ children: [new TextRun(c.text)] }),
+                ...c.replies.map((r) => new Paragraph({ children: [new TextRun({ text: `${r.author}: `, bold: true }), new TextRun(r.text)] })),
+              ],
+            })),
+          },
+        }
+      : {}),
     creator: ctx.settings.author || 'Alexandria',
     title: ctx.title,
     features: { updateFields: true },

@@ -279,10 +279,14 @@ function inlines(nodes: M.PhrasingContent[], ctx: Ctx, marks: PMMark[] = []): PM
       case 'html': {
         const v = n.value.trim();
         const tag = /^<(\/?)(u|mark|sub|sup)>$/i.exec(v);
+        const track = /^<(\/?)(ins|del)(\s[^>]*)?>$/i.exec(v);
         const align = /^<!--\s*align:(left|center|right|justify)\s*-->$/.exec(v);
         if (tag) {
           const type = HTML_MARKS[tag[2].toLowerCase()];
           active = tag[1] ? active.filter((m) => m.type !== type) : addMark(active, { type });
+        } else if (track) {
+          const type: MarkType = track[2].toLowerCase() === 'ins' ? 'insertion' : 'deletion';
+          active = track[1] ? active.filter((m) => m.type !== type) : addMark(active, { type, attrs: { author: htmlAttr(track[3], 'data-author'), date: htmlAttr(track[3], 'data-date') } });
         } else if (/^<br\s*\/?>$/i.test(v)) {
           out.push({ type: 'hardBreak' });
         } else if (align) {
@@ -301,6 +305,12 @@ function inlines(nodes: M.PhrasingContent[], ctx: Ctx, marks: PMMark[] = []): PM
     }
   }
   return mergeText(out);
+}
+
+/** Valore di un attributo in un tag HTML (con le entità di base). */
+function htmlAttr(attrs: string | undefined, name: string): string | null {
+  const m = attrs && new RegExp(`${name}="([^"]*)"`).exec(attrs);
+  return m ? m[1].replace(/&quot;/g, '"').replace(/&lt;/g, '<').replace(/&amp;/g, '&') : null;
 }
 
 function addMark(marks: PMMark[], m: PMMark): PMMark[] {

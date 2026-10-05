@@ -1176,3 +1176,97 @@
   border-color: var(--accent);
   color: var(--accent);
 }
+
+/* revisioni tracciate */
+.ProseMirror ins.track-ins,
+.readonly-doc ins.track-ins {
+  color: var(--ok);
+  text-decoration: underline;
+  text-decoration-color: var(--ok);
+  background: color-mix(in srgb, var(--ok) 10%, transparent);
+}
+
+.ProseMirror del.track-del,
+.readonly-doc del.track-del {
+  color: var(--bad);
+  text-decoration: line-through;
+  text-decoration-color: var(--bad);
+  background: color-mix(in srgb, var(--bad) 8%, transparent);
+}
+
+/* Marginalia da revisione: provenienza, stato, versioni collegate */
+.bubble__tags,
+.bubble__commits {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 4px;
+  margin: 4px 0;
+}
+
+.bubble__origin,
+.bubble__status {
+  padding: 0 6px;
+  border: 1px solid var(--line);
+  border-left-width: 3px;
+  border-radius: var(--radius-small);
+  font-size: var(--fs-ui-small);
+  color: var(--ink-2);
+}
+
+.bubble__status.is-accepted {
+  border-color: var(--ok);
+  color: var(--ok);
+}
+
+.bubble__status.is-rejected {
+  border-color: var(--bad);
+  color: var(--bad);
+}
+
+.bubble__commit {
+  display: inline-flex;
+  align-items: center;
+  border: 1px solid var(--line);
+  border-radius: 999px;
+  font-size: var(--fs-ui-small);
+}
+
+.bubble__commit-open {
+  display: inline-flex;
+  align-items: center;
+  gap: 3px;
+  padding: 0 4px 0 8px;
+  border: 0;
+  background: none;
+  color: var(--accent);
+  cursor: pointer;
+}
+
+.commit-pick {
+  margin: 8px 0 0;
+  padding: 0;
+  list-style: none;
+  max-height: 320px;
+  overflow-y: auto;
+}
+
+.commit-pick li {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  padding: 6px 8px;
+  border-radius: var(--radius-small);
+  cursor: pointer;
+}
+
+.commit-pick li:hover {
+  background: var(--chrome-2);
+}
+
+.commit-pick__msg {
+  flex: 1;
+  min-width: 0;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}

@@ -27,6 +27,7 @@ import { DropHandler } from './drop';
 import { SearchHighlight } from '../search';
 import { CommentAnchors } from '../../comments/plugin';
 import { MarkdownShortcuts } from './inputRules';
+import { Insertion, Deletion, TrackChanges } from './track';
 
 /** Tabella con l'allineamento delle colonne del Markdown (GFM). */
 const AlignedTable = Table.extend({
@@ -76,12 +77,15 @@ export function buildExtensions() {
     SearchHighlight,
     CommentAnchors,
     MarkdownShortcuts,
+    Insertion,
+    Deletion,
+    TrackChanges,
   ];
 }
 
 /** Estensioni per un editor in sola lettura (lettura del Codex, riquadri accanto): senza i plugin
  * legati all'editor principale (rilascio file, ricerca, commenti, comandi /). */
 export function buildReadOnlyExtensions() {
-  const skip = new Set(['alexandriaDrop', 'alexandriaSearch', 'commentAnchors', 'markdownShortcuts', 'slashCommands', 'placeholder']);
+  const skip = new Set(['alexandriaDrop', 'alexandriaSearch', 'commentAnchors', 'markdownShortcuts', 'slashCommands', 'placeholder', 'trackChanges']);
   return buildExtensions().filter((e) => !skip.has(e.name));
 }
