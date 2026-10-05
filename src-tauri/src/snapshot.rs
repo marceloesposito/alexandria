@@ -2,7 +2,7 @@
 // cookie persistenti e senza accesso ai comandi dell'app (le capability valgono solo per "main").
 // A pagina caricata se ne scatta una foto (WKWebView su macOS, WebView2 su Windows) e la si chiude.
 // Usata solo su azione esplicita dell'utente (import di un link).
-use crate::fsops::{err, CmdResult};
+use crate::fsops::CmdResult;
 use base64::Engine;
 use std::sync::atomic::{AtomicU32, Ordering};
 use std::time::Duration;
@@ -14,16 +14,28 @@ static NEXT: AtomicU32 = AtomicU32::new(1);
 const WIDTH: f64 = 1280.0;
 const HEIGHT: f64 = 800.0;
 
-/// Restituisce la foto della pagina in PNG (base64), oppure None se la pagina non si carica in tempo.
+/// Restituisce la foto della pagina in PNG (base64), oppure None se non e' stato possibile scattarla.
 #[tauri::command]
 pub async fn net_snapshot(app: tauri::AppHandle, url: String) -> CmdResult<Option<String>> {
     if !(url.starts_with("http://") || url.starts_with("https://")) {
         return Err("Sono ammessi solo indirizzi http(s)".into());
     }
-    let parsed: tauri::Url = url.parse().map_err(err)?;
+    match take(&app, &url).await {
+        Ok(png) => Ok(Some(base64::engine::general_purpose::STANDARD.encode(png))),
+        Err(e) => {
+            eprintln!("snapshot {url}: {e}");
+            Ok(None)
+        }
+    }
+}
+
+/// Apre la pagina in una finestra di servizio, aspetta che sia disegnata e la fotografa.
+/// Ogni passo che fallisce lo dice nell'errore (per l'autotest e per i log).
+pub async fn take(app: &tauri::AppHandle, url: &str) -> Result<Vec<u8>, String> {
+    let parsed: tauri::Url = url.parse().map_err(|e| format!("indirizzo non valido: {e}"))?;
     let label = format!("snapshot-{}", NEXT.fetch_add(1, Ordering::Relaxed));
     let (loaded_tx, mut loaded) = unbounded_channel::<()>();
-    let win = WebviewWindowBuilder::new(&app, &label, WebviewUrl::External(parsed))
+    let win = WebviewWindowBuilder::new(app, &label, WebviewUrl::External(parsed))
         .title("Alexandria snapshot")
         .inner_size(WIDTH, HEIGHT)
         .position(-32000.0, -32000.0)
@@ -38,26 +50,32 @@ pub async fn net_snapshot(app: tauri::AppHandle, url: String) -> CmdResult<Optio
             }
         })
         .build()
-        .map_err(err)?;
+        .map_err(|e| format!("finestra di servizio: {e}"))?;
 
     let result = async {
-        tokio::time::timeout(Duration::from_secs(20), loaded.recv()).await.ok()??;
+        tokio::time::timeout(Duration::from_secs(20), loaded.recv())
+            .await
+            .map_err(|_| "la pagina non ha finito di caricarsi entro 20 s".to_string())?
+            .ok_or("canale di caricamento chiuso")?;
         // immagini, font e script che arrivano dopo l'evento di caricamento
         tokio::time::sleep(Duration::from_millis(1500)).await;
-        let (tx, mut rx) = unbounded_channel::<Option<Vec<u8>>>();
-        win.with_webview(move |wv| capture(wv, tx)).ok()?;
-        tokio::time::timeout(Duration::from_secs(10), rx.recv()).await.ok()?.flatten()
+        let (tx, mut rx) = unbounded_channel::<Result<Vec<u8>, String>>();
+        win.with_webview(move |wv| capture(wv, tx)).map_err(|e| format!("webview non raggiungibile: {e}"))?;
+        tokio::time::timeout(Duration::from_secs(10), rx.recv())
+            .await
+            .map_err(|_| "la foto non e' arrivata entro 10 s".to_string())?
+            .ok_or("canale della foto chiuso")?
     }
     .await;
 
     if let Some(w) = app.get_webview_window(&label) {
         let _ = w.destroy();
     }
-    Ok(result.map(|png| base64::engine::general_purpose::STANDARD.encode(png)))
+    result
 }
 
 #[cfg(target_os = "macos")]
-fn capture(wv: tauri::webview::PlatformWebview, tx: UnboundedSender<Option<Vec<u8>>>) {
+fn capture(wv: tauri::webview::PlatformWebview, tx: UnboundedSender<Result<Vec<u8>, String>>) {
     use block2::RcBlock;
     use objc2::MainThreadMarker;
     use objc2_app_kit::{NSBitmapImageFileType, NSBitmapImageRep, NSImage};
@@ -65,13 +83,18 @@ fn capture(wv: tauri::webview::PlatformWebview, tx: UnboundedSender<Option<Vec<u
     use objc2_web_kit::{WKSnapshotConfiguration, WKWebView};
 
     let Some(mtm) = MainThreadMarker::new() else {
-        let _ = tx.send(None);
+        let _ = tx.send(Err("non sul thread principale".into()));
         return;
     };
     // SAFETY: su macOS inner() e' il WKWebView della finestra, vivo finche' la finestra esiste
     let webview: &WKWebView = unsafe { &*(wv.inner() as *const WKWebView) };
     let config = unsafe { WKSnapshotConfiguration::new(mtm) };
-    let block = RcBlock::new(move |image: *mut NSImage, _e: *mut NSError| {
+    let block = RcBlock::new(move |image: *mut NSImage, e: *mut NSError| {
+        if image.is_null() {
+            let why = unsafe { e.as_ref() }.map(|e| e.localizedDescription().to_string()).unwrap_or_else(|| "immagine vuota".into());
+            let _ = tx.send(Err(format!("WKWebView: {why}")));
+            return;
+        }
         let png = (|| {
             // SAFETY: l'immagine, se presente, e' valida per la durata del blocco
             let image = unsafe { image.as_ref() }?;
@@ -80,13 +103,13 @@ fn capture(wv: tauri::webview::PlatformWebview, tx: UnboundedSender<Option<Vec<u
             let data = unsafe { rep.representationUsingType_properties(NSBitmapImageFileType::PNG, &NSDictionary::new()) }?;
             Some(data.to_vec())
         })();
-        let _ = tx.send(png);
+        let _ = tx.send(png.ok_or_else(|| "conversione in PNG non riuscita".to_string()));
     });
     unsafe { webview.takeSnapshotWithConfiguration_completionHandler(Some(&config), &block) };
 }
 
 #[cfg(windows)]
-fn capture(wv: tauri::webview::PlatformWebview, tx: UnboundedSender<Option<Vec<u8>>>) {
+fn capture(wv: tauri::webview::PlatformWebview, tx: UnboundedSender<Result<Vec<u8>, String>>) {
     use webview2_com::CapturePreviewCompletedHandler;
     use webview2_com::Microsoft::Web::WebView2::Win32::COREWEBVIEW2_CAPTURE_PREVIEW_IMAGE_FORMAT_PNG;
     use windows::Win32::UI::Shell::SHCreateMemStream;
@@ -97,13 +120,13 @@ fn capture(wv: tauri::webview::PlatformWebview, tx: UnboundedSender<Option<Vec<u
         let reader = stream.clone();
         let done = tx.clone();
         let handler = CapturePreviewCompletedHandler::create(Box::new(move |res| {
-            let _ = done.send(res.ok().and_then(|_| read_stream(&reader)));
+            let _ = done.send(res.map_err(|e| format!("WebView2: {e}")).and_then(|_| read_stream(&reader).ok_or_else(|| "lettura dello stream non riuscita".to_string())));
             Ok(())
         }));
         unsafe { core.CapturePreview(COREWEBVIEW2_CAPTURE_PREVIEW_IMAGE_FORMAT_PNG, &stream, &handler) }.ok()
     };
     if run().is_none() {
-        let _ = tx.send(None);
+        let _ = tx.send(Err("WebView2: CapturePreview non avviato".into()));
     }
 }
 
@@ -123,6 +146,6 @@ fn read_stream(s: &windows::Win32::System::Com::IStream) -> Option<Vec<u8>> {
 }
 
 #[cfg(not(any(target_os = "macos", windows)))]
-fn capture(_wv: tauri::webview::PlatformWebview, tx: UnboundedSender<Option<Vec<u8>>>) {
-    let _ = tx.send(None);
+fn capture(_wv: tauri::webview::PlatformWebview, tx: UnboundedSender<Result<Vec<u8>, String>>) {
+    let _ = tx.send(Err("non disponibile su questo sistema".into()));
 }

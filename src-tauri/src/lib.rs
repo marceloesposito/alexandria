@@ -9,6 +9,19 @@ mod portable;
 mod snapshot;
 mod typeset;
 
+/// Autotest dell'import con foto (ALEXANDRIA_EMBED_TEST="<url>|<rapporto.json>"): lo esegue il frontend.
+#[tauri::command]
+fn selftest_spec() -> Option<String> {
+    std::env::var("ALEXANDRIA_EMBED_TEST").ok()
+}
+
+#[tauri::command]
+fn selftest_exit(app: tauri::AppHandle) {
+    if std::env::var("ALEXANDRIA_EMBED_TEST").is_ok() {
+        app.exit(0);
+    }
+}
+
 #[cfg_attr(mobile, tauri::mobile_entry_point)]
 pub fn run() {
     // portable su Windows: anche la cache di WebView2 resta sulla chiavetta, non sul PC ospite
@@ -29,6 +42,22 @@ pub fn run() {
                     let _ = w.show();
                     let _ = w.set_focus();
                 }
+            }
+            // autotest della foto dei link: ALEXANDRIA_SNAPSHOT_TEST="<url>|<file.png>" fotografa ed esce
+            if let Ok(spec) = std::env::var("ALEXANDRIA_SNAPSHOT_TEST") {
+                let handle = app.handle().clone();
+                tauri::async_runtime::spawn(async move {
+                    let (url, out) = spec.split_once('|').unwrap_or((spec.as_str(), "snapshot-test.png"));
+                    let t0 = std::time::Instant::now();
+                    match snapshot::take(&handle, url).await {
+                        Ok(png) => {
+                            let _ = std::fs::write(out, &png);
+                            eprintln!("SNAPSHOT OK {} byte in {:?} -> {out}", png.len(), t0.elapsed());
+                        }
+                        Err(e) => eprintln!("SNAPSHOT ERRORE dopo {:?}: {e}", t0.elapsed()),
+                    }
+                    handle.exit(0);
+                });
             }
             Ok(())
         })
@@ -72,6 +101,8 @@ pub fn run() {
             snapshot::net_snapshot,
             portable::portable_root,
             clipboard::clipboard_read,
+            selftest_spec,
+            selftest_exit,
             typeset::typst_compile,
         ])
         .run(tauri::generate_context!())

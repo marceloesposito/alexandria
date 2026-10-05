@@ -1,3 +1,5 @@
+// prima di tutto: funzioni che WKWebView non ha (iterazione dei ReadableStream, usata da pdf.js)
+import './lib/streamPolyfill';
 import React from 'react';
 import ReactDOM from 'react-dom/client';
 import '@fontsource/libertinus-serif/400.css';
@@ -19,6 +21,8 @@ import { registerAll } from './modules';
 import App from './App';
 
 registerAll();
+// autotest dell'app nativa: non fa nulla senza la variabile ALEXANDRIA_EMBED_TEST
+void import('./selftest').then((m) => m.runSelfTest());
 
 ReactDOM.createRoot(document.getElementById('root') as HTMLElement).render(
   <React.StrictMode>

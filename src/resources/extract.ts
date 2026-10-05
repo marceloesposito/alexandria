@@ -1,14 +1,15 @@
 // Estrazione di testo, metadati e miniatura da ogni formato supportato.
 // Tutto avviene in locale; nessuna libreria scarica nulla da internet.
-import * as pdfjs from 'pdfjs-dist';
-import pdfWorkerUrl from 'pdfjs-dist/build/pdf.worker.min.mjs?url';
+// build legacy: la build moderna usa funzioni (es. iterazione dei ReadableStream) che WKWebView non ha
+import * as pdfjs from 'pdfjs-dist/legacy/build/pdf.mjs';
 import JSZip from 'jszip';
 import type { CslItem, ResourceKind } from './model';
 import { rtfToText } from './rtf';
 import { parsePage, parseName, parseDate, blocksToText, type Block } from './html';
 import { findDoi, findIsbn } from './detect';
 
-pdfjs.GlobalWorkerOptions.workerSrc = pdfWorkerUrl;
+// worker nostro: carica il polyfill dei ReadableStream prima di pdf.js (serve a WKWebView)
+pdfjs.GlobalWorkerOptions.workerPort = new Worker(new URL('./pdf.worker.ts', import.meta.url), { type: 'module' });
 
 export interface Extracted {
   title?: string;

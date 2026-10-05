@@ -84,6 +84,15 @@ Aggiornato: 5 ottobre 2026 (M10).
   (compila anche il sorgente prodotto dal test del convertitore del frontend).
 - Interfaccia: Chrome headless via CDP (`scripts/cdp.mjs`) sul server di sviluppo.
   App desktop: `ALEXANDRIA_TEST_OFFSCREEN=1` apre la finestra fuori schermo e senza focus.
+- Autotest dell'app nativa (WKWebView/WebView2, dove il browser di prova non arriva), con
+  `ALEXANDRIA_DATA_DIR` su una cartella di prova:
+  - `ALEXANDRIA_SNAPSHOT_TEST="<url>|<out.png>"`: solo la foto della pagina (Rust);
+  - `ALEXANDRIA_EMBED_TEST="<url>|<rapporto.json>"`: import del link, foto salvata, scheda nel testo,
+    immagine caricata; con `pdf:<percorso>` al posto dell'URL prova l'import di un PDF.
+- WKWebView non sa iterare i `ReadableStream` (`for await`), che pdf.js usa nella pagina e nel worker:
+  `src/lib/streamPolyfill.ts` li completa, caricato per primo e dal worker `src/resources/pdf.worker.ts`.
+- Asset protocol: `requireLiteralLeadingDot: false`, altrimenti le immagini in cartelle nascoste
+  (es. Compendium dentro una cartella che inizia con un punto) non si vedono.
 
 ## Prossimi passi possibili
 
