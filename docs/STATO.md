@@ -1,6 +1,6 @@
 # Stato dei lavori
 
-Aggiornato: 5 ottobre 2026.
+Aggiornato: 5 ottobre 2026 (M10).
 
 | Milestone | Stato | PR |
 | --- | --- | --- |
@@ -11,6 +11,7 @@ Aggiornato: 5 ottobre 2026.
 | M6–M7 Risorse, Library, whiteboard, grafo, layer, pin, citazioni CSL, bibliografia | fatto | #4 |
 | M8 Export (PDF Typst, DOCX, HTML, MD, TXT, LaTeX), anteprima, Layout, indice | fatto | #5 |
 | M9 Rifiniture: icona, digitazione e incolla in Markdown, prova dell'app vera, installer | fatto | #6 |
+| M10 Vista senza bordi, righelli, scrittura minimale, contatore flottante, embed con screenshot, snippet, build universale | in revisione | #7 |
 
 ## Decisioni prese durante il lavoro
 
@@ -23,11 +24,28 @@ Aggiornato: 5 ottobre 2026.
 - **xmldom**: la versione aggiornata e' forzata solo per MathJax (mammoth richiede la 0.8).
 - **Pagine web**: archiviate come blocchi di solo testo (`page.json`), mai come HTML.
 
+- **Aspetto dell'editor** (Visualizza): Pagina, con righelli in cm e inizi di pagina stimati, oppure
+  Senza bordi (stile Notion/Obsidian). La **scrittura minimale** (Cmd/Ctrl+Maiusc+D, Esc per uscire)
+  nasconde tutto tranne il testo e mette la finestra a schermo intero; non si salva nello stato.
+- **Conteggi**: etichetta flottante in basso a destra al posto della barra di stato.
+- **Embed**: `[Titolo](url){embed resource=id image="..."}`. All'import di un link l'app fotografa la
+  pagina con una webview fuori schermo, senza focus, senza cookie e senza capability (WKWebView su
+  macOS, WebView2 su Windows); la foto e' ridotta a WebP o JPEG. Se non riesce resta og:image.
+  Negli export l'embed diventa un link.
+- **Snippet di codice**: nuovo tipo di risorsa (file `snippet.<ext>`), creato da Aggiungi risorse,
+  modificabile nel visualizzatore, inseribile nel testo dal menu / o trascinandolo.
+- **Rimozione delle risorse**: ribbon, menu Risorse, clic destro, Canc nella tabella, visualizzatore.
+- **OpenSSL** compilato dentro l'app (`vendored-openssl` di git2): niente dipendenza da Homebrew.
+- **Nomi tematici** (vault, documento -> Scroll, gestore risorse -> Bookshelf...): proposta in attesa
+  di conferma del committente; si cambiano solo le stringhe di `src/i18n/`.
+
 ## Installer
 
 - `npm run tauri build`: installer NSIS 27,5 MB e MSI 34 MB (Windows), molto sotto i 200 MB.
 - Il workflow `release.yml` costruisce Windows e macOS (universale) a ogni tag `v*` e li
   allega a una release in bozza.
+- macOS in locale: `npm run tauri build -- --target universal-apple-darwin --bundles app,dmg`
+  (serve `rustup target add x86_64-apple-darwin`).
 
 ## Prove
 
