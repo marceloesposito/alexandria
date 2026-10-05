@@ -28,6 +28,8 @@ export interface Prefs {
   spellcheck: boolean;
   libraryPath: string | null;
   layerSuggestions: 'off' | 'suggest';
+  /** ordinamento dell'albero della Bookshelf */
+  resourceSort: 'title' | 'added' | 'author' | 'year' | 'kind';
   authorName: string;
   leftWidth: number;
   rightWidth: number;
@@ -54,6 +56,7 @@ export const DEFAULT_PREFS: Prefs = {
   spellcheck: true,
   libraryPath: null,
   layerSuggestions: 'suggest',
+  resourceSort: 'title',
   authorName: '',
   leftWidth: 280,
   rightWidth: 300,

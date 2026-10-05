@@ -1463,3 +1463,71 @@
   line-height: 1.55;
   tab-size: 2;
 }
+
+/* ---------------------------------------------------------------- albero della Bookshelf */
+.tree-tools {
+  display: flex;
+  gap: 6px;
+  margin: 4px 0 6px;
+}
+
+.tree-tools__search,
+.tree-tools__sort {
+  display: flex;
+  align-items: center;
+  gap: 4px;
+  color: var(--muted);
+}
+
+.tree-tools__search {
+  flex: 1;
+  min-width: 0;
+}
+
+.tree-tools__search .input {
+  flex: 1;
+  min-width: 0;
+}
+
+.tree-tools__sort .select {
+  max-width: 108px;
+}
+
+.res-row {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  padding: 3px 6px;
+  border-radius: var(--radius-small);
+  cursor: default;
+  color: var(--ink-2);
+}
+
+.res-row:hover {
+  background: var(--chrome-2);
+}
+
+.res-row.is-selected {
+  background: var(--accent-soft);
+  color: var(--accent);
+}
+
+.res-row .kind-icon {
+  flex-shrink: 0;
+  color: var(--muted);
+}
+
+.res-row__title {
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.layer-row--loose {
+  margin-top: 4px;
+}
+
+.tree-tools .input {
+  padding: 2px 6px;
+  font-size: var(--fs-ui-small);
+}

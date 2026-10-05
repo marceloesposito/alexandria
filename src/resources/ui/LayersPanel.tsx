@@ -15,6 +15,9 @@ import {
   Check,
   X,
   Layers as LayersIcon,
+  Search,
+  ArrowDownUp,
+  Inbox,
 } from 'lucide-react';
 import { useResources } from '../store';
 import { membersOf, LAYER_COLORS, type Layer, type FilterRule } from '../model';
@@ -24,6 +27,10 @@ import { useWorkspace } from '../../state/workspace';
 import { openContextMenu } from '../../components/ContextMenu';
 import { promptDialog, confirmDialog } from '../../components/confirm';
 import { FilterEditor } from './FilterEditor';
+import { KindIcon, subtitle } from './common';
+import { removeWithConfirm } from './remove';
+import { matchesQuery, sortResources, directMembers, ungrouped, layerHasMatch, RESOURCE_SORTS, type ResourceSort } from '../tree';
+import type { Resource } from '../model';
 
 const MIME = 'application/x-alexandria-resources';
 
@@ -38,7 +45,44 @@ export function LayersPanel() {
   const [open, setOpen] = useState<Set<string>>(new Set());
   const [editing, setEditing] = useState<Layer | null>(null);
   const [creatingFilter, setCreatingFilter] = useState(false);
+  const [query, setQuery] = useState('');
+  const [looseOpen, setLooseOpen] = useState(true);
+  const selected = useResources((s) => s.selected);
+  const sortBy = useWorkspace((s) => s.app.prefs.resourceSort);
   const st = useResources.getState();
+  const searching = query.trim().length > 0;
+  const shown = (list: Resource[]) => sortResources(list.filter((r) => matchesQuery(r, query)), sortBy);
+
+  // una risorsa dell'albero: clic seleziona, doppio clic apre, trascinabile nei gruppi e sulla lavagna
+  const item = (r: Resource, depth: number, inGroup?: Layer) => (
+    <div
+      key={`${inGroup?.id ?? 'root'}-${r.id}`}
+      className={`res-row ${selected.includes(r.id) ? 'is-selected' : ''}`}
+      style={{ paddingLeft: 22 + depth * 16 }}
+      draggable
+      onDragStart={(e) => e.dataTransfer.setData(MIME, JSON.stringify(selected.includes(r.id) ? selected : [r.id]))}
+      onClick={(e) => {
+        if (e.metaKey || e.ctrlKey) st.select(selected.includes(r.id) ? selected.filter((x) => x !== r.id) : [...selected, r.id]);
+        else st.select([r.id]);
+        st.openInspector(r.id);
+      }}
+      onDoubleClick={() => st.openViewer(r.id)}
+      onContextMenu={(e) => {
+        const ids = selected.includes(r.id) ? selected : [r.id];
+        if (!selected.includes(r.id)) st.select([r.id]);
+        openContextMenu(e, [
+          { label: t('embed.open'), onClick: () => st.openViewer(r.id) },
+          ...(inGroup && inGroup.kind === 'group' ? [{ label: t('layers.removeFromGroup', { name: inGroup.name }), onClick: () => void st.assignLayer(ids, inGroup.id, false) }] : []),
+          { sep: true, label: '' },
+          { label: t('cmd.res.remove'), danger: true, onClick: () => void removeWithConfirm(ids) },
+        ]);
+      }}
+      title={`${r.title}\n${subtitle(r)}`}
+    >
+      <KindIcon kind={r.kind} size={13} />
+      <span className="res-row__title">{r.title}</span>
+    </div>
+  );
 
   // testo delle risorse per i filtri sul contenuto e per i suggerimenti
   useEffect(() => {
@@ -63,8 +107,10 @@ export function LayersPanel() {
   };
 
   const row = (l: Layer, depth: number): React.ReactNode => {
+    if (searching && !layerHasMatch(l, layers, resources, query, texts)) return null;
     const kids = children(l.id);
-    const isOpen = open.has(l.id);
+    const members = shown(directMembers(l, resources, texts));
+    const isOpen = searching || open.has(l.id);
     const count = membersOf(l, layers, resources, texts).length;
     return (
       <div key={l.id}>
@@ -126,7 +172,7 @@ export function LayersPanel() {
               else n.add(l.id);
               setOpen(n);
             }}
-            style={{ visibility: kids.length ? 'visible' : 'hidden' }}
+            style={{ visibility: kids.length || members.length ? 'visible' : 'hidden' }}
           >
             {isOpen ? <ChevronDown size={12} /> : <ChevronRight size={12} />}
           </button>
@@ -166,6 +212,7 @@ export function LayersPanel() {
           </button>
         </div>
         {isOpen && kids.map((k) => row(k, depth + 1))}
+        {isOpen && members.map((r) => item(r, depth + 1, l))}
       </div>
     );
   };
@@ -196,8 +243,41 @@ export function LayersPanel() {
         <LayersIcon size={13} /> <span className="layer-row__name">{t('layers.all')}</span>
         <span className="layer-row__count">{resources.length}</span>
       </div>
+      <div className="tree-tools">
+        <label className="tree-tools__search">
+          <Search size={12} />
+          <input className="input" value={query} placeholder={t('tree.filter')} onChange={(e) => setQuery(e.target.value)} aria-label={t('tree.filter')} />
+        </label>
+        <label className="tree-tools__sort" title={t('tree.sort')}>
+          <ArrowDownUp size={12} />
+          <select className="select small" value={sortBy} aria-label={t('tree.sort')} onChange={(e) => useWorkspace.getState().setPrefs({ resourceSort: e.target.value as ResourceSort })}>
+            {RESOURCE_SORTS.map((k) => (
+              <option key={k} value={k}>
+                {t(`tree.sort.${k}`)}
+              </option>
+            ))}
+          </select>
+        </label>
+      </div>
       {children(null).map((l) => row(l, 0))}
-      {!layers.length && <p className="hint layers__empty">{t('layers.empty')}</p>}
+      {(() => {
+        const loose = shown(ungrouped(resources, layers));
+        if (!loose.length) return null;
+        const isOpen = searching || looseOpen;
+        return (
+          <>
+            <div className="layer-row layer-row--loose" onClick={() => setLooseOpen(!looseOpen)}>
+              <span className="icon-btn tiny">{isOpen ? <ChevronDown size={12} /> : <ChevronRight size={12} />}</span>
+              <Inbox size={13} className="layer-row__kind" />
+              <span className="layer-row__name">{layers.some((l) => l.kind === 'group') ? t('tree.ungrouped') : t('tree.all')}</span>
+              <span className="layer-row__count">{loose.length}</span>
+            </div>
+            {isOpen && loose.map((r) => item(r, 0))}
+          </>
+        );
+      })()}
+      {searching && !resources.some((r) => matchesQuery(r, query)) && <p className="hint layers__empty">{t('tree.noMatch')}</p>}
+      {!layers.length && !resources.length && <p className="hint layers__empty">{t('layers.empty')}</p>}
 
       {suggestions.length > 0 && (
         <section className="layers__suggest">
