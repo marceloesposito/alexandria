@@ -270,10 +270,13 @@
   --xy-edge-stroke-default: var(--accent);
   --xy-edge-stroke-width-default: 1.6;
   --xy-minimap-background-color-default: var(--paper);
+  --xy-minimap-mask-background-color-default: color-mix(in srgb, var(--desk) 65%, transparent);
+  --xy-minimap-node-background-color-default: var(--line-strong);
   --xy-controls-button-background-color-default: var(--paper);
   --xy-controls-button-color-default: var(--ink);
   --xy-controls-button-border-color-default: var(--line);
-  --xy-selection-background-color-default: var(--accent-soft);
+  /* trasparente: le schede sotto il rettangolo di selezione restano visibili */
+  --xy-selection-background-color-default: color-mix(in srgb, var(--accent) 10%, transparent);
   --xy-selection-border-default: 1px dashed var(--accent);
 }
 
