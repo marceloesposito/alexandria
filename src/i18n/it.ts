@@ -1289,4 +1289,8 @@ export const it: Record<string, string> = {
   'header.continueHint': "Collega una pergamena che segue questa: insieme formano un Codex",
   'header.continueTitle': "Cosa segue «{name}»?",
   'header.continueAction': "Collega in coda",
+  'cmd.file.journalToday': "Voce di diario di oggi",
+  'cmd.file.newJournal': "Nuovo Compendium: Diario",
+  'start.journal': "Inizia un diario",
+  'start.journalHint': "Una voce al giorno, con data, umore e luogo, da leggere di seguito come un libro",
 };

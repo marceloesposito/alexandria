@@ -1,5 +1,6 @@
 // Comandi dell'app: file, vista, preferenze, aiuto.
 import {
+  NotebookPen,
   PanelTop,
   Shapes,
   Search,
@@ -91,6 +92,8 @@ export function registerAppCommands() {
     { id: 'file.openVault', label: 'cmd.file.openVault', icon: FolderOpen, shortcut: 'Mod+Alt+O', category: 'file', run: () => chooseVault(false) },
     { id: 'nav.quickSwitcher', label: 'cmd.nav.quickSwitcher', icon: Search, shortcut: 'Mod+O', category: 'view', run: () => ws().openDialog('quickSwitcher') },
     { id: 'nav.commandPalette', label: 'cmd.nav.commandPalette', icon: Command, shortcut: 'Mod+Shift+Space', category: 'view', run: () => ws().openDialog('quickSwitcher', { query: '>' }) },
+    { id: 'file.journalToday', label: 'cmd.file.journalToday', icon: NotebookPen, shortcut: 'Mod+Alt+J', category: 'file', run: async () => void (await import('../vault/journal')).openTodayEntry() },
+    { id: 'file.newJournal', label: 'cmd.file.newJournal', icon: NotebookPen, category: 'file', run: async () => void (await flushSave(getEditor()), ws().createFromTemplate('journal')) },
     { id: 'file.newVault', label: 'cmd.file.newVault', icon: FolderPlus, category: 'file', run: () => chooseVault(true) },
     {
       id: 'file.renameDoc',

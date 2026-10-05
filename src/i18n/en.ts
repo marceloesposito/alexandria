@@ -1289,4 +1289,8 @@ export const en: Record<string, string> = {
   'header.continueHint': "Link a scroll that follows this one: together they form a Codex",
   'header.continueTitle': "What follows “{name}”?",
   'header.continueAction': "Link after",
+  'cmd.file.journalToday': "Today's journal entry",
+  'cmd.file.newJournal': "New Compendium: Journal",
+  'start.journal': "Start a journal",
+  'start.journalHint': "One entry a day, with date, mood and place, to read in sequence like a book",
 };
