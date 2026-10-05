@@ -25,6 +25,7 @@ import {
   Paperclip,
   SquareCode,
   Trash2,
+  Landmark,
 } from 'lucide-react';
 import { registerCommands, notifyCommandState } from '../commands/registry';
 import { viewComponents, globalComponents } from '../shell/views';
@@ -112,6 +113,30 @@ export function registerResources() {
     { id: 'res.insert', label: 'slash.resource', icon: Paperclip, category: 'insert', views: ['editor'], run: () => ws().openDialog('insertResource') },
     { id: 'res.insertSnippet', label: 'slash.snippet', icon: SquareCode, category: 'insert', views: ['editor'], run: () => ws().openDialog('insertResource', { kind: 'snippet' }) },
     { id: 'res.newSnippet', label: 'cmd.res.newSnippet', icon: SquareCode, category: 'resources', run: () => ws().openDialog('addResource', { tab: 'snippet' }) },
+    {
+      id: 'view.resources',
+      label: 'cmd.view.resources',
+      icon: Library,
+      shortcut: 'Mod+1',
+      category: 'view',
+      isActive: () => ws().app.view === 'resources' && st().scope === 'vault',
+      run: () => {
+        ws().setView('resources');
+        st().setScope('vault');
+      },
+    },
+    {
+      id: 'view.library',
+      label: 'cmd.view.library',
+      icon: Landmark,
+      shortcut: 'Mod+4',
+      category: 'view',
+      isActive: () => ws().app.view === 'resources' && st().scope === 'library',
+      run: () => {
+        ws().setView('resources');
+        st().setScope('library');
+      },
+    },
     { id: 'res.remove', label: 'cmd.res.remove', icon: Trash2, category: 'resources', views: ['resources'], isEnabled: () => removalTargets().length > 0, run: () => removeWithConfirm() },
     { id: 'res.add', label: 'cmd.res.add', icon: Plus, shortcut: 'Mod+Shift+A', category: 'resources', run: () => ws().openDialog('addResource') },
     {

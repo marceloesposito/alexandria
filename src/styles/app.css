@@ -1199,3 +1199,19 @@ table.kv td:last-child {
     opacity: 0;
   }
 }
+
+/* la Library sta fuori dal vault: un piccolo stacco dalle altre tab */
+.navbar__tab--apart {
+  margin-left: 10px;
+  position: relative;
+}
+
+.navbar__tab--apart::before {
+  content: '';
+  position: absolute;
+  left: -7px;
+  top: 5px;
+  bottom: 5px;
+  width: 1px;
+  background: var(--line-strong);
+}

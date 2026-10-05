@@ -36,8 +36,14 @@ Aggiornato: 5 ottobre 2026 (M10).
   modificabile nel visualizzatore, inseribile nel testo dal menu / o trascinandolo.
 - **Rimozione delle risorse**: ribbon, menu Risorse, clic destro, Canc nella tabella, visualizzatore.
 - **OpenSSL** compilato dentro l'app (`vendored-openssl` di git2): niente dipendenza da Homebrew.
-- **Nomi tematici** (vault, documento -> Scroll, gestore risorse -> Bookshelf...): proposta in attesa
-  di conferma del committente; si cambiano solo le stringhe di `src/i18n/`.
+- **Nomi tematici** (scelti dal committente, solo nelle stringhe di `src/i18n/`, uguali in IT ed EN):
+  documento -> Scroll, gestore risorse -> Bookshelf, schermata Editor -> Scriptorium, Versioni ->
+  History, commenti a margine -> Marginalia, whiteboard -> Tabula, pin -> Bookmarks, layer -> Strata.
+  Restano Library e Bibliografia; il nome del vault e' ancora da decidere. Identificatori, cartelle
+  (`documents/`, `resources/`) e file su disco non cambiano.
+- **Navbar**: Bookshelf · Scriptorium · History | Library (Cmd/Ctrl+1..4). La Library e' una tab a
+  parte (stessa schermata della Bookshelf sulla raccolta comune); il selettore Vault/Library e' sparito.
+- **Bookshelf**: l'albero degli Strata mostra le risorse sotto gruppi e filtri, con filtro e ordinamento.
 
 ## Installer
 

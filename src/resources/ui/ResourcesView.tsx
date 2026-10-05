@@ -1,7 +1,7 @@
 // Schermata Gestore risorse: layer a sinistra, vista (whiteboard, grafo, layer) al centro,
 // ispettore a destra. Vuota, mostra solo il grande "+".
 import { useEffect, useState } from 'react';
-import { Plus, Search, LayoutDashboard, Network, Layers, Library, FolderOpen, X } from 'lucide-react';
+import { Plus, Search, LayoutDashboard, Network, Layers, FolderOpen, X } from 'lucide-react';
 import { useResources, type ResView } from '../store';
 import { useWorkspace } from '../../state/workspace';
 import { LayersPanel } from './LayersPanel';
@@ -97,14 +97,6 @@ export function ResourcesView() {
       }}
     >
       <aside className="resources__side">
-        <div className="resources__scope" role="tablist">
-          <button role="tab" aria-selected={scope === 'vault'} className={`seg ${scope === 'vault' ? 'is-active' : ''}`} onClick={() => st.setScope('vault')}>
-            {t('res.scope.vault')}
-          </button>
-          <button role="tab" aria-selected={scope === 'library'} className={`seg ${scope === 'library' ? 'is-active' : ''}`} onClick={() => st.setScope('library')}>
-            <Library size={13} /> {t('res.scope.library')}
-          </button>
-        </div>
         {scope === 'library' && (
           <div className="resources__libpath hint" title={library?.root}>
             <FolderOpen size={12} /> {library?.root}
