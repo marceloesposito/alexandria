@@ -147,7 +147,18 @@ function table(n: PMNode, st: State): string {
 // ---------------------------------------------------------------- in linea
 
 function markKey(m: PMMark): string {
+  if (m.type === 'insertion' || m.type === 'deletion') return `${m.type}:${m.attrs?.author ?? ''}:${m.attrs?.date ?? ''}`;
   return m.type === 'link' ? `link:${m.attrs?.href}:${m.attrs?.title ?? ''}` : m.type;
+}
+
+const attr = (s: unknown) => String(s ?? '').replace(/&/g, '&amp;').replace(/"/g, '&quot;').replace(/</g, '&lt;');
+
+/** Revisione tracciata in HTML: <ins data-author="..." data-date="...">...</ins> (anche gli spazi restano dentro). */
+function trackTag(m: PMMark, inner: string): string {
+  const tag = m.type === 'insertion' ? 'ins' : 'del';
+  const a = m.attrs?.author ? ` data-author="${attr(m.attrs.author)}"` : '';
+  const d = m.attrs?.date ? ` data-date="${attr(m.attrs.date)}"` : '';
+  return `<${tag}${a}${d}>${inner}</${tag}>`;
 }
 
 function topMark(n: PMNode, excluded: Set<string>): PMMark | null {
@@ -191,6 +202,7 @@ export function inline(nodes: PMNode[], st: State, excluded: Set<string> = new S
 }
 
 function wrap(m: PMMark, inner: string): string {
+  if (m.type === 'insertion' || m.type === 'deletion') return trackTag(m, inner);
   // gli spazi ai bordi escono dai delimitatori, altrimenti CommonMark non chiude l'enfasi
   const lead = /^\s*/.exec(inner)![0];
   const trail = /\s*$/.exec(inner.slice(lead.length))![0];
@@ -216,6 +228,8 @@ const DELIMS: Record<MarkType, [string, string]> = {
   subscript: ['<sub>', '</sub>'],
   superscript: ['<sup>', '</sup>'],
   code: ['`', '`'],
+  insertion: ['<ins>', '</ins>'],
+  deletion: ['<del>', '</del>'],
 };
 
 function codeSpan(code: string): string {

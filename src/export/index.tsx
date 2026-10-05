@@ -30,6 +30,7 @@ function ExportDialog() {
   const [format, setFormat] = useState<ExportFormat>('pdf');
   const [busy, setBusy] = useState(false);
   const lineNumbers = useDocSettings((s) => s.settings.layout.lineNumbersInPdf);
+  const revisions = useWorkspace((s) => s.app.prefs.exportRevisions);
   return (
     <Modal
       title={t('export.title')}
@@ -67,6 +68,12 @@ function ExportDialog() {
         <label className="check" style={{ marginTop: 12 }}>
           <input type="checkbox" checked={lineNumbers} onChange={(e) => useDocSettings.getState().updateLayout({ lineNumbersInPdf: e.target.checked })} />
           {t('docset.lineNumbersPdf')}
+        </label>
+      )}
+      {(format === 'pdf' || format === 'docx' || format === 'html') && (
+        <label className="check" style={{ marginTop: 8 }}>
+          <input type="checkbox" checked={revisions === 'marked'} onChange={(e) => useWorkspace.getState().setPrefs({ exportRevisions: e.target.checked ? 'marked' : 'clean' })} />
+          {format === 'docx' ? t('export.revisionsDocx') : t('export.revisions')}
         </label>
       )}
       {format === 'pdf' && platform.kind !== 'tauri' && <p className="hint">{t('preview.desktopOnly')}</p>}

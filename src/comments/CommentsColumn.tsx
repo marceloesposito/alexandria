@@ -1,6 +1,8 @@
 // Colonna dei commenti, allineata alla pagina e sincronizzata con il suo scorrimento.
 import { useEffect, useLayoutEffect, useMemo, useRef, useState } from 'react';
-import { X, Search, Eye, EyeOff, Link2, Unlink, Trash2, CheckCircle2, RotateCcw, ChevronDown, ChevronRight, MessageSquare } from 'lucide-react';
+import { X, Search, Eye, EyeOff, Link2, Unlink, Trash2, CheckCircle2, RotateCcw, ChevronDown, ChevronRight, MessageSquare, GitCommitHorizontal } from 'lucide-react';
+import { Modal } from '../components/Modal';
+import { useVersions } from '../versions/store';
 import { useComments, saveNow } from './store';
 import { useCommentUi } from './ui';
 import { layoutBubbles, matchesQuery, makeAnchor, type Comment } from './model';
@@ -231,6 +233,7 @@ function Bubble({ c, y, active }: { c: Comment; y: number | null; active: boolea
   const [body, setBody] = useState(c.body);
   const [reply, setReply] = useState('');
   const [drag, setDrag] = useState<{ x: number; y: number } | null>(null);
+  const [pickCommit, setPickCommit] = useState(false);
   const ref = useRef<HTMLDivElement>(null);
   const linked = c.anchor?.kind === 'text';
 
@@ -303,6 +306,9 @@ function Bubble({ c, y, active }: { c: Comment; y: number | null; active: boolea
       c.resolved
         ? { label: t('comments.reopen'), onClick: () => st.setResolved(c.id, false) }
         : { label: t('comments.resolve'), onClick: () => st.setResolved(c.id, true) },
+      ...(c.status !== 'accepted' ? [{ label: t('comments.accept'), onClick: () => st.setStatus(c.id, 'accepted') }] : []),
+      ...(c.status !== 'rejected' ? [{ label: t('comments.reject'), onClick: () => st.setStatus(c.id, 'rejected') }] : []),
+      { label: t('comments.linkCommit'), onClick: () => setPickCommit(true) },
       ...(c.anchor ? [{ label: t('comments.unlink'), onClick: () => st.unlink(c.id) }] : []),
       ...(c.offsetY !== null && c.anchor ? [{ label: t('comments.realign'), onClick: () => st.setOffset(c.id, null, null) }] : []),
       { sep: true, label: '' },
@@ -351,6 +357,17 @@ function Bubble({ c, y, active }: { c: Comment; y: number | null; active: boolea
         <span className="bubble__time">{timeAgo(c.created)}</span>
         {c.resolved && <CheckCircle2 size={11} className="bubble__resolved" />}
       </div>
+      {(c.origin?.kind === 'reviewer' || c.origin?.kind === 'word' || c.status === 'accepted' || c.status === 'rejected') && (
+        <div className="bubble__tags">
+          {c.origin && c.origin.kind !== 'author' && (
+            <span className="bubble__origin" style={{ borderColor: reviewerColor(c.origin.name ?? c.author) }}>
+              {c.origin.kind === 'word' ? 'Word' : t('comments.reviewer')} · {c.origin.name ?? c.author}
+            </span>
+          )}
+          {c.status === 'accepted' && <span className="bubble__status is-accepted">{t('comments.status.accepted')}</span>}
+          {c.status === 'rejected' && <span className="bubble__status is-rejected">{t('comments.status.rejected')}</span>}
+        </div>
+      )}
       {c.anchor && c.anchor.kind === 'text' && (
         <div className="bubble__quote" title={t('comments.quoteHint')}>
           <Link2 size={10} /> «{c.anchor.quote.length > 60 ? c.anchor.quote.slice(0, 60) + '…' : c.anchor.quote}»
@@ -386,6 +403,14 @@ function Bubble({ c, y, active }: { c: Comment; y: number | null; active: boolea
           {c.body}
         </div>
       )}
+      {c.commits.length > 0 && (
+        <div className="bubble__commits">
+          {c.commits.map((sha) => (
+            <CommitChip key={sha} sha={sha} onRemove={() => st.unlinkCommit(c.id, sha)} />
+          ))}
+        </div>
+      )}
+      {pickCommit && <CommitPicker onPick={(sha) => st.linkCommit(c.id, sha)} onClose={() => setPickCommit(false)} />}
       {c.replies.map((r) => (
         <div key={r.id} className="bubble__reply">
           <div className="bubble__meta">
@@ -423,3 +448,62 @@ function Bubble({ c, y, active }: { c: Comment; y: number | null; active: boolea
 
 // salvataggio dei commenti prima di chiudere
 window.addEventListener('beforeunload', () => void saveNow());
+
+/** Colore stabile per revisore (dal nome), fra i colori delle serie. */
+function reviewerColor(name: string): string {
+  let h = 0;
+  for (const ch of name) h = (h * 31 + ch.charCodeAt(0)) >>> 0;
+  return `var(--series-${(h % 8) + 1})`;
+}
+
+/** Versione del Palimpsestus collegata: clic = la apre nel Palimpsestus. */
+function CommitChip({ sha, onRemove }: { sha: string; onRemove: () => void }) {
+  const c = useVersions((s) => s.log?.commits.find((x) => x.sha === sha));
+  return (
+    <span className="bubble__commit">
+      <button
+        className="bubble__commit-open"
+        title={t('comments.openCommit')}
+        onClick={(e) => {
+          e.stopPropagation();
+          useVersions.getState().select(sha);
+          useWorkspace.getState().setView('versions');
+        }}
+      >
+        <GitCommitHorizontal size={11} /> {c ? c.message.split('\n')[0].slice(0, 40) : sha.slice(0, 7)}
+      </button>
+      <button className="icon-btn tiny" title={t('common.delete')} onClick={(e) => (e.stopPropagation(), onRemove())}>
+        <X size={10} />
+      </button>
+    </span>
+  );
+}
+
+function CommitPicker({ onPick, onClose }: { onPick: (sha: string) => void; onClose: () => void }) {
+  const log = useVersions((s) => s.log);
+  useEffect(() => {
+    void useVersions.getState().refresh();
+  }, []);
+  const commits = (log?.commits ?? []).slice(0, 25);
+  return (
+    <Modal title={t('comments.linkCommit')} onClose={onClose} size="small">
+      <p className="hint">{t('comments.linkCommitHint')}</p>
+      <ul className="commit-pick">
+        {!commits.length && <li className="hint">{t('vc.noHistory')}</li>}
+        {commits.map((c) => (
+          <li
+            key={c.sha}
+            onClick={() => {
+              onPick(c.sha);
+              onClose();
+            }}
+          >
+            <GitCommitHorizontal size={12} />
+            <span className="commit-pick__msg">{c.message.split('\n')[0]}</span>
+            <span className="hint">{new Date(c.time * 1000).toLocaleString()}</span>
+          </li>
+        ))}
+      </ul>
+    </Modal>
+  );
+}

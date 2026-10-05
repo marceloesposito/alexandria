@@ -9,6 +9,8 @@ import {
   reanchor,
   newCommentId,
   normalizeCommentsFile,
+  statusFields,
+  type CommentStatus,
 } from './model';
 import { commentsKey, flatText, setAnchorsListener, type LiveAnchor } from './plugin';
 import { readJson, writeJson } from '../vault/vault';
@@ -37,6 +39,11 @@ interface CommentsState {
   update(id: string, body: string): void;
   reply(id: string, body: string): void;
   setResolved(id: string, resolved: boolean): void;
+  setStatus(id: string, status: CommentStatus): void;
+  linkCommit(id: string, sha: string): void;
+  unlinkCommit(id: string, sha: string): void;
+  /** commenti arrivati da fuori (Word, copia per revisione) */
+  addMany(list: Comment[]): void;
   remove(id: string): void;
   link(id: string, from: number, to: number, kind: Anchor['kind']): void;
   unlink(id: string): void;
@@ -121,7 +128,8 @@ export const useComments = create<CommentsState>((set, get) => {
         anchor: d.anchor,
         offsetX: null,
         offsetY: d.anchor ? null : d.y,
-        resolved: false,
+        ...statusFields('open'),
+        commits: [],
         replies: [],
       };
       set({ draft: null, active: c.id });
@@ -140,7 +148,19 @@ export const useComments = create<CommentsState>((set, get) => {
       );
     },
     setResolved(id, resolved) {
-      mutate((cs) => cs.map((c) => (c.id === id ? { ...c, resolved } : c)), true);
+      mutate((cs) => cs.map((c) => (c.id === id ? { ...c, ...statusFields(resolved ? 'resolved' : 'open') } : c)), true);
+    },
+    setStatus(id, status) {
+      mutate((cs) => cs.map((c) => (c.id === id ? { ...c, ...statusFields(status) } : c)), true);
+    },
+    linkCommit(id, sha) {
+      mutate((cs) => cs.map((c) => (c.id === id && !c.commits.includes(sha) ? { ...c, commits: [...c.commits, sha] } : c)), true);
+    },
+    addMany(list) {
+      if (list.length) mutate((cs) => [...cs, ...list], true);
+    },
+    unlinkCommit(id, sha) {
+      mutate((cs) => cs.map((c) => (c.id === id ? { ...c, commits: c.commits.filter((x) => x !== sha) } : c)), true);
     },
     remove(id) {
       mutate((cs) => cs.filter((c) => c.id !== id), true);

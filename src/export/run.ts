@@ -18,6 +18,8 @@ import { toPlainText } from './plain';
 import { toHtml } from './html';
 import { toLatex } from './latex';
 import { toUtf8 } from '../lib/bytes';
+import { useComments } from '../comments/store';
+import { injectCommentMarks, type ExportComment } from './comments';
 import { getLang, t } from '../i18n';
 import { useTypes } from '../types/store';
 import type { DocSettings } from '../layout/model';
@@ -54,15 +56,49 @@ export function exportHeader(settings: DocSettings): ExportContext['header'] {
 }
 
 /** Prepara la pergamena aperta nell'editor. */
-export async function prepare(): Promise<Prepared | null> {
+export async function prepare(opts: { wordComments?: boolean } = {}): Promise<Prepared | null> {
   const ws = useWorkspace.getState();
   const editor = getEditor();
   if (!ws.vaultRoot || !ws.activeDoc || !editor) return null;
   await flushSave(editor);
-  const doc = embedsToLinks(parseMarkdown(currentMarkdown(editor)));
+  // i segni dei commenti vanno messi sul documento com'è nell'editor (prima di embed e revisioni)
+  const comments = opts.wordComments ? marginaliaForWord() : [];
+  const parsed = parseMarkdown(currentMarkdown(editor));
+  const doc = embedsToLinks(comments.length ? injectCommentMarks(parsed, comments) : parsed);
   const settings = useDocSettings.getState().settings;
   const title = settings.title || ws.docs.find((d) => d.rel === ws.activeDoc)?.title || t('doc.untitled');
-  return prepareDoc(doc, settings, title, ws.vaultRoot, ws.activeDoc, keysInDoc(editor));
+  const p = await prepareDoc(doc, settings, title, ws.vaultRoot, ws.activeDoc, keysInDoc(editor));
+  if (comments.length) p.ctx.comments = comments;
+  return p;
+}
+
+/** Commenti aperti e ancorati della pergamena aperta, con le risposte. */
+function marginaliaForWord(): ExportComment[] {
+  return useComments
+    .getState()
+    .comments.filter((c) => c.anchor && c.anchor.to > c.anchor.from && c.status === 'open')
+    .map((c, i) => ({
+      id: i + 1,
+      from: c.anchor!.from,
+      to: c.anchor!.to,
+      author: c.author,
+      date: c.created,
+      text: c.body,
+      replies: c.replies.map((r) => ({ author: r.author, date: r.created, text: r.body })),
+    }));
+}
+
+/** Testo pulito: le cancellazioni proposte spariscono, le aggiunte diventano testo normale. */
+export function cleanRevisions(n: PMNode): PMNode {
+  if (!n.content) return n;
+  const content = n.content
+    .filter((c) => !(c.type === 'text' && c.marks?.some((m) => m.type === 'deletion')))
+    .map((c) => {
+      const marks = c.marks?.filter((m) => m.type !== 'insertion');
+      const x = cleanRevisions(c);
+      return c.marks ? (marks!.length ? { ...x, marks } : (({ marks: _m, ...rest }) => rest)(x)) : x;
+    });
+  return { ...n, content };
 }
 
 /** Citazioni in ordine di comparsa in un documento (anche nelle note). */
@@ -80,6 +116,8 @@ export function keysOfDoc(doc: PMNode): string[] {
 /** Prepara un documento qualsiasi (una pergamena o un Codex già unito). */
 export async function prepareDoc(doc: PMNode, settings: DocSettings, title: string, vaultRoot: string, baseRel: string, citeOrder: string[]): Promise<Prepared> {
   const ws = { vaultRoot, activeDoc: baseRel };
+  // revisioni tracciate: per l'export si accettano (testo pulito) se l'autore non chiede di vederle
+  if (useWorkspace.getState().app.prefs.exportRevisions !== 'marked') doc = cleanRevisions(doc);
 
   // immagini
   const assets = collectAssets(doc, parseMarkdown);
@@ -172,7 +210,8 @@ export const EXTENSIONS: Record<ExportFormat, string> = { pdf: 'pdf', docx: 'doc
 /** Esporta nel formato scelto; chiede dove salvare. Restituisce il percorso o null. */
 export async function exportTo(format: ExportFormat, target?: string, prepared?: Prepared): Promise<string | null> {
   const ws = useWorkspace.getState();
-  const p = prepared ?? (await prepare());
+  // nel .docx i Marginalia della pergamena aperta diventano commenti di Word
+  const p = prepared ?? (await prepare({ wordComments: format === 'docx' }));
   if (!p) return null;
   const name = `${p.ctx.title}.${EXTENSIONS[format]}`;
   const path = target ?? (await platform.saveDialog(name, [EXTENSIONS[format]]));

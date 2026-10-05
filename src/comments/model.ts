@@ -17,6 +17,15 @@ export interface Reply {
   created: string;
 }
 
+/** Stato del commento nella revisione: aperto, accettato (la richiesta è stata seguita), rifiutato, risolto. */
+export type CommentStatus = 'open' | 'accepted' | 'rejected' | 'resolved';
+
+/** Chi ha scritto il commento: l'autore, un revisore (copia per revisione) o Word (import). */
+export interface CommentOrigin {
+  kind: 'author' | 'reviewer' | 'word';
+  name?: string;
+}
+
 export interface Comment {
   id: string;
   author: string;
@@ -27,9 +36,16 @@ export interface Comment {
   /** posizione libera nella colonna dopo il collegamento (px rispetto alla pagina / alla colonna) */
   offsetY: number | null;
   offsetX: number | null;
+  /** vero se lo stato non è 'open' (tenuto per compatibilità) */
   resolved: boolean;
+  status: CommentStatus;
+  origin?: CommentOrigin;
+  /** versioni del Palimpsestus in cui la richiesta è stata seguita (sha dei commit) */
+  commits: string[];
   replies: Reply[];
 }
+
+const STATUSES: CommentStatus[] = ['open', 'accepted', 'rejected', 'resolved'];
 
 export interface CommentsFile {
   version: 1;
@@ -42,6 +58,11 @@ let n = 0;
 export function newCommentId(): string {
   n += 1;
   return `c${Date.now().toString(36)}${n.toString(36)}${Math.random().toString(36).slice(2, 6)}`;
+}
+
+/** Stato e campo "resolved" sempre coerenti. */
+export function statusFields(status: CommentStatus): { status: CommentStatus; resolved: boolean } {
+  return { status, resolved: status !== 'open' };
 }
 
 export function normalizeCommentsFile(raw: unknown): CommentsFile {
@@ -57,7 +78,9 @@ export function normalizeCommentsFile(raw: unknown): CommentsFile {
       anchor: c.anchor ?? null,
       offsetY: typeof c.offsetY === 'number' ? c.offsetY : null,
       offsetX: typeof c.offsetX === 'number' ? c.offsetX : null,
-      resolved: !!c.resolved,
+      ...statusFields(STATUSES.includes(c.status) ? c.status : c.resolved ? 'resolved' : 'open'),
+      ...(c.origin && ['author', 'reviewer', 'word'].includes(c.origin.kind) ? { origin: { kind: c.origin.kind, ...(c.origin.name ? { name: String(c.origin.name) } : {}) } } : {}),
+      commits: Array.isArray(c.commits) ? c.commits.filter((x: unknown): x is string => typeof x === 'string') : [],
       replies: Array.isArray(c.replies) ? c.replies : [],
     }));
   return { version: 1, comments };

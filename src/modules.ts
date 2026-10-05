@@ -9,6 +9,7 @@ import { registerExport } from './export';
 import { registerTemplates } from './layout/templatesModule';
 import { registerDialog } from './shell/DialogHost';
 import { DocSettingsDialog } from './layout/DocSettingsDialog';
+import { registerRevision } from './revision';
 
 let done = false;
 
@@ -18,6 +19,7 @@ export function registerAll() {
   registerAppCommands();
   registerEditorCommands();
   registerComments();
+  registerRevision();
   registerVersions();
   registerResources();
   registerExport();

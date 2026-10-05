@@ -69,6 +69,8 @@ export function inline(nodes: PMNode[], ctx: ExportContext, excluded: Set<string
     while (j < nodes.length && (nodes[j].marks ?? []).some((x) => markKey(x) === key)) j++;
     const inner = inline(nodes.slice(i, j), ctx, new Set([...excluded, m.type]));
     if (m.type === 'link') out += `#link(${str(String(m.attrs?.href ?? ''))})[${inner}]`;
+    else if (m.type === 'insertion') out += `#text(fill: rgb("#3f7d4e"))[#underline[${inner}]]`;
+    else if (m.type === 'deletion') out += `#text(fill: rgb("#a83a2c"))[#strike[${inner}]]`;
     else out += `#${WRAP[m.type] ?? 'box'}[${inner}]`;
     i = j;
   }
