@@ -65,6 +65,12 @@ Aggiornato: 5 ottobre 2026 (M10).
 - **Portable**: cartella `Alexandria-data` accanto all'app (`node scripts/portable.mjs --mac ... --win ...`).
 - **macOS**: pacchetto firmato ad-hoc. Senza Developer ID e notarizzazione Apple, su altri Mac al primo
   avvio serve Impostazioni di sistema > Privacy e sicurezza > Apri comunque.
+- **Workspace** (come Illustrator): Beginner (vicino alla modalita' focus: niente colonne, vista senza
+  bordi, una scheda "Essenziali" per ambiente; le altre schede restano nascoste), Studio (predefinito),
+  Pro (tutto visibile, icone piccole). Da Visualizza > Workspace o dal selettore in alto a destra;
+  "Salva workspace corrente" salva colonne, viste, barra e pannelli flottanti (`src/state/workspaces.ts`).
+- **Pannelli flottanti**: un gruppo trascinato fuori dalla barra diventa un pannello libero; altri gruppi
+  si aggiungono trascinandoli sopra; si richiudono nella barra (`src/commands/floatModel.ts`).
 - **History semplificata** (stile GitHub Desktop): a sinistra variante, "Salva una versione" e storia
   verticale (salvataggi automatici nascosti); al centro la pergamena come documento; passando su una
   versione il centro si divide nelle due versioni allineate (`src/versions/docDiff.ts`). Interfaccia in

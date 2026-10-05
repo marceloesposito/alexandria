@@ -1,6 +1,8 @@
 // Preferenze e stato dell'app (non del vault): salvate in <appData>/state.json.
 import type { Lang } from '../i18n';
 import type { RibbonConfig } from '../commands/ribbonModel';
+import type { FloatingPanel } from '../commands/floatModel';
+import type { WorkspaceLayout } from './workspaces';
 
 export type ThemePref = 'light' | 'dark' | 'system';
 export type View = 'resources' | 'editor' | 'versions';
@@ -83,6 +85,12 @@ export interface AppState {
   cursors: Record<string, DocCursor>; // chiave: vault|doc
   prefs: Prefs;
   ribbon: RibbonConfig | null; // null = predefinito
+  /** workspace attivo: 'beginner' | 'studio' | 'pro' o l'id di uno salvato */
+  workspace: string;
+  /** workspace salvati dall'utente */
+  workspaces: WorkspaceLayout[];
+  /** gruppi della barra staccati in pannelli flottanti */
+  floating: FloatingPanel[];
   view: View;
 }
 
@@ -96,6 +104,9 @@ export function defaultAppState(): AppState {
     cursors: {},
     prefs: { ...DEFAULT_PREFS },
     ribbon: null,
+    workspace: 'studio',
+    workspaces: [],
+    floating: [],
     view: 'editor',
   };
 }
@@ -114,6 +125,9 @@ export function normalizeAppState(raw: unknown): AppState {
     recentDocs: Array.isArray(r.recentDocs) ? r.recentDocs.slice(0, 20) : [],
     cursors: r.cursors && typeof r.cursors === 'object' ? r.cursors : {},
     view: r.view === 'resources' || r.view === 'versions' ? r.view : 'editor',
+    workspace: typeof r.workspace === 'string' ? r.workspace : 'studio',
+    workspaces: Array.isArray(r.workspaces) ? r.workspaces : [],
+    floating: Array.isArray(r.floating) ? r.floating : [],
   };
 }
 

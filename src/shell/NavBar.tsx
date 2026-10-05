@@ -3,6 +3,7 @@ import { Library, Landmark, PenLine, History, GitBranch, CircleCheck, CircleDot,
 import { useWorkspace } from '../state/workspace';
 import { runCommand, getCommand, displayShortcut } from '../commands/registry';
 import { useCommandTick } from './useCommands';
+import { WorkspaceSwitcher } from './WorkspaceMenu';
 import { t, useLang } from '../i18n';
 import { useVersions } from '../versions/store';
 
@@ -44,6 +45,7 @@ export function NavBar() {
         ))}
       </div>
       <div className="navbar__context">
+        <WorkspaceSwitcher />
         <span className="navbar__vault" title={useWorkspace.getState().vaultRoot ?? ''}>
           {vault?.name}
         </span>

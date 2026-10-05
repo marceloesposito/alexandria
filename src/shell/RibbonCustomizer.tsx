@@ -25,6 +25,7 @@ import {
 } from '../commands/ribbonModel';
 import { useRibbonConfig, labelOf } from './Ribbon';
 import { DEFAULT_RIBBON } from '../commands/defaults';
+import { floatingGroupIds } from '../commands/floatModel';
 import { useWorkspace } from '../state/workspace';
 import { t } from '../i18n';
 import type { View } from '../state/prefs';
@@ -51,6 +52,7 @@ export function RibbonCustomizer() {
   const [dropAt, setDropAt] = useState<{ group: string; index: number } | null>(null);
 
   const save = (next: RibbonConfig) => ws.setRibbon(next);
+  const floatIds = floatingGroupIds(useWorkspace((s) => s.app.floating));
   const tabs = cfg.tabs.filter((x) => x.view === view);
 
   const commands = useMemo(
@@ -271,10 +273,10 @@ export function RibbonCustomizer() {
                     </div>
                   </div>
                 ))}
-                {removedGroups(cfg, DEFAULT_RIBBON, tab.id).length > 0 && (
+                {removedGroups(cfg, DEFAULT_RIBBON, tab.id).filter((g) => !floatIds.has(g.id)).length > 0 && (
                   <div className="ribbon-custom__removed">
                     <span className="hint">{t('ribbon.custom.removedGroups')}:</span>
-                    {removedGroups(cfg, DEFAULT_RIBBON, tab.id).map((g) => (
+                    {removedGroups(cfg, DEFAULT_RIBBON, tab.id).filter((g) => !floatIds.has(g.id)).map((g) => (
                       <button key={g.id} className="btn small" onClick={() => save(restoreGroup(cfg, tab.id, g))} title={t('ribbon.custom.restore')}>
                         <Plus size={12} /> {labelOf(g.label, g.custom)}
                       </button>

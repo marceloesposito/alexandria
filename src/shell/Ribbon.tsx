@@ -7,6 +7,7 @@ import { ChevronUp, ChevronDown, GripHorizontal, Trash2 } from 'lucide-react';
 import { getCommand, runCommand, displayShortcut, commandIds, type Command } from '../commands/registry';
 import { DEFAULT_RIBBON } from '../commands/defaults';
 import { reconcile, tabsForView, placeGroup, removeGroup, setGroupCompact, type RibbonConfig, type RibbonGroup } from '../commands/ribbonModel';
+import { detachGroup } from '../commands/floatModel';
 import { useWorkspace } from '../state/workspace';
 import type { RibbonSize } from '../state/prefs';
 import { useCommandTick } from './useCommands';
@@ -15,7 +16,7 @@ import { openContextMenu } from '../components/ContextMenu';
 import { Popover } from '../components/Popover';
 import { RibbonWidget } from './RibbonWidgets';
 
-const GROUP_MIME = 'application/x-alexandria-ribbon-group';
+export const GROUP_MIME = 'application/x-alexandria-ribbon-group';
 
 export function useRibbonConfig(): RibbonConfig {
   const saved = useWorkspace((s) => s.app.ribbon);
@@ -27,7 +28,7 @@ export function labelOf(label: string, custom?: boolean): string {
   return custom ? label : t(label);
 }
 
-function CommandButton({ cmd, size, onRun }: { cmd: Command; size: RibbonSize; onRun?: () => void }) {
+export function CommandButton({ cmd, size, onRun }: { cmd: Command; size: RibbonSize; onRun?: () => void }) {
   if (cmd.widget) return <RibbonWidget id={cmd.widget} size={size} />;
   const enabled = cmd.isEnabled ? cmd.isEnabled() : true;
   const on = cmd.isActive?.() ?? false;
@@ -98,7 +99,9 @@ export function Ribbon() {
   const [dragging, setDragging] = useState<string | null>(null);
   const [dropIndex, setDropIndex] = useState<number | null>(null);
   const [overTrash, setOverTrash] = useState(false);
+  const [overFloat, setOverFloat] = useState(false);
   const bodyRef = useRef<HTMLDivElement>(null);
+  const rootRef = useRef<HTMLDivElement>(null);
   const ws = useWorkspace.getState();
 
   const onContext = (e: React.MouseEvent) => {
@@ -142,12 +145,13 @@ export function Ribbon() {
     setDragging(null);
     setDropIndex(null);
     setOverTrash(false);
+    setOverFloat(false);
   };
 
   const visibleGroups = active ? active.groups.filter((g) => g.items.some((id) => getCommand(id))) : [];
 
   return (
-    <div className={`ribbon ribbon--${size} ${collapsed ? 'is-collapsed' : ''} ${dragging ? 'is-dragging' : ''}`} onContextMenu={onContext}>
+    <div ref={rootRef} className={`ribbon ribbon--${size} ${collapsed ? 'is-collapsed' : ''} ${dragging ? 'is-dragging' : ''}`} onContextMenu={onContext}>
       <div className="ribbon__tabs" role="tablist">
         {tabs.map((tab) => (
           <button
@@ -225,6 +229,28 @@ export function Ribbon() {
               </div>
             );
           })}
+        </div>
+      )}
+      {dragging && (
+        <div
+          className={`float-drop ${overFloat ? 'is-over' : ''}`}
+          style={{ top: rootRef.current?.getBoundingClientRect().bottom ?? 0 }}
+          onDragOver={(e) => {
+            if (!e.dataTransfer.types.includes(GROUP_MIME)) return;
+            e.preventDefault();
+            e.dataTransfer.dropEffect = 'move';
+            if (!overFloat) setOverFloat(true);
+          }}
+          onDragLeave={() => setOverFloat(false)}
+          onDrop={(e) => {
+            e.preventDefault();
+            const app = ws.app;
+            const s = detachGroup(cfg, app.floating, dragging, Math.max(8, e.clientX - 60), Math.max(8, e.clientY - 20));
+            ws.setRibbonAndFloating(s.cfg, s.panels);
+            endDrag();
+          }}
+        >
+          <span>{t('float.dropHere')}</span>
         </div>
       )}
       {dragging && (

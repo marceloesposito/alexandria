@@ -7,6 +7,7 @@ import { Toasts } from './shell/Toasts';
 import { DialogHost } from './shell/DialogHost';
 import { Onboarding } from './shell/Onboarding';
 import { StartScreen } from './shell/StartScreen';
+import { FloatingPanels } from './shell/FloatingPanels';
 import { ContextMenuHost } from './components/ContextMenu';
 import { AskHost } from './components/confirm';
 import { EditorView } from './editor/EditorView';
@@ -103,6 +104,7 @@ export default function App() {
       ))}
       <DialogHost />
       <Onboarding />
+      {!zen && <FloatingPanels />}
       <ContextMenuHost />
       <AskHost />
       <Toasts />

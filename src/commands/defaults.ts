@@ -110,7 +110,7 @@ export type MenuEntry =
   | { cmd: string }
   | { sep: true }
   | { label: string; submenu: MenuEntry[] }
-  | { dynamic: 'recentVaults' | 'documents' };
+  | { dynamic: 'recentVaults' | 'documents' | 'workspaces' };
 
 export interface MenuDef {
   id: string;
@@ -225,6 +225,8 @@ export const MENUS: MenuDef[] = [
     id: 'view',
     label: 'menu.view',
     items: [
+      { label: 'menu.view.workspace', submenu: [{ dynamic: 'workspaces' }] },
+      sep,
       c('view.resources'),
       c('view.editor'),
       c('view.versions'),

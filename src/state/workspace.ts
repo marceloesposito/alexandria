@@ -16,6 +16,9 @@ import {
   pushRecent,
 } from './prefs';
 import type { RibbonConfig } from '../commands/ribbonModel';
+import type { FloatingPanel } from '../commands/floatModel';
+import { DEFAULT_RIBBON } from '../commands/defaults';
+import { BUILT_IN, builtInWorkspace, applyWorkspace, captureWorkspace, type BuiltInWorkspace } from './workspaces';
 import {
   type VaultConfig,
   type DocInfo,
@@ -81,6 +84,13 @@ interface WorkspaceState {
   setView(v: View): void;
   setPrefs(p: Partial<Prefs>): void;
   setRibbon(r: RibbonConfig | null): void;
+  /** barra e pannelli flottanti insieme (staccare o riagganciare un gruppo) */
+  setRibbonAndFloating(r: RibbonConfig | null, floating: FloatingPanel[]): void;
+  /** applica un workspace: Beginner, Studio, Pro o uno salvato */
+  applyWorkspaceLayout(id: string): void;
+  /** salva la disposizione attuale come workspace dell'utente */
+  saveWorkspaceLayout(name: string): string;
+  deleteWorkspaceLayout(id: string): void;
   openVault(root: string): Promise<void>;
   /** Apre un Compendium e il suo ultimo Scroll (o il primo, o uno nuovo). */
   enterVault(root: string): Promise<boolean>;
@@ -192,6 +202,40 @@ export const useWorkspace = create<WorkspaceState>((set, get) => ({
 
   setRibbon(r) {
     const app = { ...get().app, ribbon: r };
+    set({ app });
+    persist(app);
+  },
+
+  setRibbonAndFloating(r, floating) {
+    const app = { ...get().app, ribbon: r, floating };
+    set({ app });
+    persist(app);
+  },
+
+  applyWorkspaceLayout(id) {
+    const cur = get().app;
+    const w = (BUILT_IN as string[]).includes(id) ? builtInWorkspace(id as BuiltInWorkspace, DEFAULT_RIBBON) : cur.workspaces.find((x) => x.id === id);
+    if (!w) return;
+    const a = applyWorkspace(w);
+    const app = { ...cur, workspace: id, prefs: { ...cur.prefs, ...a.prefs }, ribbon: a.ribbon, floating: a.floating };
+    set({ app });
+    persist(app);
+  },
+
+  saveWorkspaceLayout(name) {
+    const cur = get().app;
+    const existing = cur.workspaces.find((w) => w.name === name);
+    const id = existing?.id ?? `ws-${Date.now().toString(36)}`;
+    const w = captureWorkspace(id, name, cur.prefs, cur.ribbon, cur.floating);
+    const app = { ...cur, workspace: id, workspaces: existing ? cur.workspaces.map((x) => (x.id === id ? w : x)) : [...cur.workspaces, w] };
+    set({ app });
+    persist(app);
+    return id;
+  },
+
+  deleteWorkspaceLayout(id) {
+    const cur = get().app;
+    const app = { ...cur, workspaces: cur.workspaces.filter((w) => w.id !== id), workspace: cur.workspace === id ? 'studio' : cur.workspace };
     set({ app });
     persist(app);
   },
