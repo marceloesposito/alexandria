@@ -78,3 +78,10 @@ export function buildExtensions() {
     MarkdownShortcuts,
   ];
 }
+
+/** Estensioni per un editor in sola lettura (lettura del Codex, riquadri accanto): senza i plugin
+ * legati all'editor principale (rilascio file, ricerca, commenti, comandi /). */
+export function buildReadOnlyExtensions() {
+  const skip = new Set(['alexandriaDrop', 'alexandriaSearch', 'commentAnchors', 'markdownShortcuts', 'slashCommands', 'placeholder']);
+  return buildExtensions().filter((e) => !skip.has(e.name));
+}

@@ -13,6 +13,11 @@ import { borderlessFooter } from './slots';
 import { useDoc } from './session';
 import { Library, ListTree } from 'lucide-react';
 import { t, useLang } from '../i18n';
+import { CodexPanel } from '../codex/CodexPanel';
+import { SidePane } from './SidePane';
+import { useSidePane } from './paneStore';
+import { CodexReader } from '../codex/CodexReader';
+import { useCodexStore } from '../codex/store';
 
 export function EditorView() {
   useLang();
@@ -28,6 +33,8 @@ export function EditorView() {
   const Overlay = centerOverlay.get();
   const Preview = previewPanel.get();
   const set = useWorkspace.getState().setPrefs;
+  const reading = useCodexStore((s) => s.reading);
+  const paneTabs = useSidePane((s) => s.tabs.length);
 
   return (
     <div className={`editor-view ${prefs.focusMode ? 'is-focus' : ''} ${zen ? 'is-zen' : ''}`}>
@@ -52,6 +59,7 @@ export function EditorView() {
             ) : (
               <>
                 <DocumentsTree />
+                <CodexPanel />
                 {leftPanelSections.all().map((S, i) => (
                   <S key={i} />
                 ))}
@@ -63,7 +71,10 @@ export function EditorView() {
       )}
       <main className={`editor-center ${Footer ? 'has-footer' : ''}`}>
         {dialog === 'findReplace' && <FindReplace />}
-        <EditorPane pageRef={pageRef} overlay={Overlay ? <Overlay pageRef={pageRef} /> : null} />
+        {reading && <CodexReader root={reading} />}
+        <div className="editor-center__pane" hidden={!!reading}>
+          <EditorPane pageRef={pageRef} overlay={Overlay ? <Overlay pageRef={pageRef} /> : null} />
+        </div>
         {Footer && (
           <div className="doc-links-bar">
             <Footer />
@@ -71,6 +82,14 @@ export function EditorView() {
         )}
         <CountsBadge />
       </main>
+      {paneTabs > 0 && !zen && (
+        <>
+          <Splitter onDrag={(dx) => set({ paneWidth: Math.max(280, Math.min(1000, useWorkspace.getState().app.prefs.paneWidth - dx)) })} />
+          <div className="side side--pane" style={{ width: prefs.paneWidth }}>
+            <SidePane />
+          </div>
+        </>
+      )}
       {prefs.showPreview && !zen && Preview && (
         <>
           <Splitter onDrag={(dx) => set({ previewWidth: Math.max(320, Math.min(1000, useWorkspace.getState().app.prefs.previewWidth - dx)) })} />

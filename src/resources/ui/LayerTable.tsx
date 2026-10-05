@@ -10,6 +10,7 @@ import { RESOURCES_MIME } from './LayersPanel';
 import { openContextMenu } from '../../components/ContextMenu';
 import { removeWithConfirm } from './remove';
 import { useWorkspace } from '../../state/workspace';
+import { useSidePane } from '../../editor/paneStore';
 import { useTypes } from '../../types/store';
 import { typesFor, typeById, sortValue, type ObjectType, type PropDef } from '../../types/model';
 import { TypeIcon, propText } from '../../types/ui';
@@ -232,6 +233,13 @@ export function LayerTable({ results }: { results: Set<string> | null }) {
                     if (!selected.includes(r.id)) st.select([r.id]);
                     openContextMenu(e, [
                       { label: t('embed.open'), onClick: () => st.openViewer(r.id) },
+                      {
+                        label: t('pane.openAside'),
+                        onClick: () => {
+                          useWorkspace.getState().setView('editor');
+                          useSidePane.getState().open({ kind: 'resource', id: r.id });
+                        },
+                      },
                       { label: t('cmd.res.remove'), danger: true, onClick: () => void removeWithConfirm(ids) },
                     ]);
                   }}

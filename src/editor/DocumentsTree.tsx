@@ -10,6 +10,7 @@ import { confirmDialog } from '../components/confirm';
 import { useDoc } from './session';
 import { HoverCard, useHoverCard } from '../components/HoverCard';
 import { DocPreview } from '../shell/DocPreview';
+import { useSidePane } from './paneStore';
 
 const MIME = 'application/x-alexandria-doc';
 
@@ -29,6 +30,7 @@ export function DocumentsTree() {
   const menu = (e: React.MouseEvent, rel: string, title: string) => {
     const ws = useWorkspace.getState();
     openContextMenu(e, [
+      { label: t('pane.openAside'), onClick: () => useSidePane.getState().open({ kind: 'doc', rel }) },
       { label: t('cmd.file.renameDoc'), onClick: () => ws.openDialog('renameDoc', rel) },
       {
         label: t('cmd.file.duplicateDoc'),

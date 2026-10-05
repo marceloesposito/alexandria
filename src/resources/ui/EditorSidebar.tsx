@@ -12,6 +12,8 @@ import { relativeFromDoc } from '../../vault/resolve';
 import { displayAuthorYear, type Resource, type Layer } from '../model';
 import { t, useLang } from '../../i18n';
 import { ensureCiteKey } from '../citeKeys';
+import { useSidePane } from '../../editor/paneStore';
+import { openContextMenu } from '../../components/ContextMenu';
 
 function setDragData(e: React.DragEvent, r: Resource, locator?: string, pinId?: string) {
   const docRel = useWorkspace.getState().activeDoc;
@@ -35,6 +37,12 @@ function ResItem({ r }: { r: Resource }) {
       draggable
       onDragStart={(e) => setDragData(e, r)}
       onDoubleClick={() => useResources.getState().openViewer(r.id)}
+      onContextMenu={(e) =>
+        openContextMenu(e, [
+          { label: t('embed.open'), onClick: () => useResources.getState().openViewer(r.id) },
+          { label: t('pane.openAside'), onClick: () => useSidePane.getState().open({ kind: 'resource', id: r.id }) },
+        ])
+      }
       title={`${r.title}\n${displayAuthorYear(r)}${r.citeKey ? `\n@${r.citeKey}` : ''}`}
     >
       <KindIcon kind={r.kind} size={13} />
