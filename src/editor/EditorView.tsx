@@ -6,8 +6,12 @@ import { useWorkspace } from '../state/workspace';
 import { FindReplace } from '../shell/dialogs/FindReplace';
 import { Splitter } from '../components/Splitter';
 import { leftPanelSections, rightPanel, centerOverlay, previewPanel } from './slots';
+import { OutlinePanel } from './OutlinePanel';
+import { Library, ListTree } from 'lucide-react';
+import { t, useLang } from '../i18n';
 
 export function EditorView() {
+  useLang();
   const prefs = useWorkspace((s) => s.app.prefs);
   const dialog = useWorkspace((s) => s.dialog);
   const pageRef = useRef<HTMLDivElement>(null);
@@ -21,10 +25,29 @@ export function EditorView() {
       {prefs.showLeft && !prefs.focusMode && (
         <>
           <aside className="side side--left" style={{ width: prefs.leftWidth }}>
-            <DocumentsTree />
-            {leftPanelSections.all().map((S, i) => (
-              <S key={i} />
-            ))}
+            <div className="side-tabs" role="tablist">
+              {(['resources', 'outline'] as const).map((tab) => (
+                <button
+                  key={tab}
+                  role="tab"
+                  aria-selected={prefs.leftTab === tab}
+                  className={`seg ${prefs.leftTab === tab ? 'is-active' : ''}`}
+                  onClick={() => set({ leftTab: tab })}
+                >
+                  {tab === 'resources' ? <Library size={13} /> : <ListTree size={13} />} {t(`side.tab.${tab}`)}
+                </button>
+              ))}
+            </div>
+            {prefs.leftTab === 'outline' ? (
+              <OutlinePanel />
+            ) : (
+              <>
+                <DocumentsTree />
+                {leftPanelSections.all().map((S, i) => (
+                  <S key={i} />
+                ))}
+              </>
+            )}
           </aside>
           <Splitter onDrag={(dx) => set({ leftWidth: Math.max(200, Math.min(520, useWorkspace.getState().app.prefs.leftWidth + dx)) })} />
         </>

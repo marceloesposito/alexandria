@@ -354,6 +354,10 @@ export function createMemoryPlatform(opts: { persist?: boolean } = {}): Platform
     async saveDialog(defaultName) {
       return '/documents/' + defaultName;
     },
+    async openPath(path) {
+      const u = platform.fileUrl(path);
+      if (u) window.open(u, '_blank', 'noreferrer');
+    },
     async openExternal(url) {
       window.open(url, '_blank', 'noreferrer');
     },

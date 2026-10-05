@@ -70,7 +70,7 @@ export const DEFAULT_RIBBON: RibbonConfig = {
       view: 'editor',
       label: 'ribbon.tab.view',
       groups: [
-        { id: 'ed-view-panels', label: 'ribbon.group.panels', items: ['view.toggleLeft', 'view.toggleRight', 'view.preview', 'view.source'] },
+        { id: 'ed-view-panels', label: 'ribbon.group.panels', items: ['view.toggleLeft', 'view.outline', 'view.toggleRight', 'view.preview', 'view.source'] },
         { id: 'ed-view-mode', label: 'ribbon.group.mode', items: ['view.focus', 'view.fullscreen', 'view.zoomOut', 'view.zoomIn'] },
         { id: 'ed-view-theme', label: 'ribbon.group.theme', items: ['view.themeLight', 'view.themeDark', 'view.themeSystem', 'view.customizeRibbon'] },
       ],
@@ -225,6 +225,7 @@ export const MENUS: MenuDef[] = [
       c('view.versions'),
       sep,
       c('view.toggleLeft'),
+      c('view.outline'),
       c('view.toggleRight'),
       c('view.preview'),
       c('view.source'),

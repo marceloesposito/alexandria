@@ -14,6 +14,8 @@ export interface Prefs {
   showLeft: boolean;
   showRight: boolean;
   showPreview: boolean;
+  /** colonna sinistra dell'editor: risorse o indice del documento */
+  leftTab: 'resources' | 'outline';
   focusMode: boolean;
   zoom: number; // 0.6 .. 2
   ribbonSize: RibbonSize;
@@ -37,6 +39,7 @@ export const DEFAULT_PREFS: Prefs = {
   showLeft: true,
   showRight: true,
   showPreview: false,
+  leftTab: 'resources',
   focusMode: false,
   zoom: 1,
   ribbonSize: 'large',

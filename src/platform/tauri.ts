@@ -1,7 +1,7 @@
 // Implementazione Tauri: ogni metodo e' un comando Rust (src-tauri/src/*.rs).
 import { invoke, convertFileSrc } from '@tauri-apps/api/core';
 import { open, save } from '@tauri-apps/plugin-dialog';
-import { openUrl } from '@tauri-apps/plugin-opener';
+import { openUrl, openPath } from '@tauri-apps/plugin-opener';
 import type { Platform, FetchResult, TypstOutput } from './types';
 import { bytesToBase64, base64ToBytes } from '../lib/bytes';
 
@@ -49,6 +49,7 @@ export const tauriPlatform: Platform = {
     return r ? r.replace(/\\/g, '/') : null;
   },
   openExternal: (url) => openUrl(url),
+  openPath: (path) => openPath(path),
 
   gitInit: (repo) => invoke('git_init', { repo }),
   gitStatus: (repo) => invoke('git_status', { repo }),
