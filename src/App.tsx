@@ -1,9 +1,8 @@
-// Guscio dell'app: menu, navbar, ribbon, vista corrente, barra di stato, dialoghi.
+// Guscio dell'app: menu, navbar, ribbon, vista corrente, dialoghi.
 import { useEffect } from 'react';
 import { MenuBar } from './shell/MenuBar';
 import { NavBar } from './shell/NavBar';
 import { Ribbon } from './shell/Ribbon';
-import { StatusBar } from './shell/StatusBar';
 import { Toasts } from './shell/Toasts';
 import { DialogHost } from './shell/DialogHost';
 import { ContextMenuHost } from './components/ContextMenu';
@@ -64,7 +63,6 @@ export default function App() {
         {view === 'resources' && (Resources ? <Resources /> : null)}
         {view === 'versions' && (Versions ? <Versions /> : null)}
       </div>
-      <StatusBar />
       {globalComponents.map((C, i) => (
         <C key={i} />
       ))}

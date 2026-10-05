@@ -79,7 +79,7 @@ kbd {
 /* ---------------------------------------------------------------- struttura */
 .app {
   display: grid;
-  grid-template-rows: auto auto auto 1fr auto;
+  grid-template-rows: auto auto auto 1fr;
   grid-template-columns: minmax(0, 1fr);
   height: 100vh;
 }
@@ -690,29 +690,77 @@ input[type='range'] {
   opacity: 1;
 }
 
-/* ---------------------------------------------------------------- barra di stato */
-.statusbar {
+/* ---------------------------------------------------------------- conteggi (etichetta flottante) */
+.counts-badge {
+  position: absolute;
+  right: 18px;
+  bottom: 14px;
+  z-index: 30;
   display: flex;
-  align-items: center;
-  gap: 16px;
-  height: 24px;
-  padding: 0 12px;
-  background: var(--chrome);
-  border-top: 1px solid var(--line);
+  flex-direction: column;
+  align-items: stretch;
+  max-width: calc(100% - 36px);
+  background: color-mix(in srgb, var(--chrome) 92%, transparent);
+  backdrop-filter: blur(6px);
+  border: 1px solid var(--line);
+  border-radius: 999px;
+  box-shadow: var(--shadow);
   color: var(--muted);
   font-size: var(--fs-ui-small);
   white-space: nowrap;
-  overflow: hidden;
+  opacity: 0.88;
+  transition: opacity 0.15s;
 }
 
-.statusbar__zoom {
+.counts-badge:hover,
+.counts-badge.is-open {
+  opacity: 1;
+}
+
+.counts-badge.is-open {
+  border-radius: 12px;
+}
+
+.counts-badge__bar {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  height: 26px;
+  padding: 0 6px 0 12px;
+}
+
+.counts-badge__list {
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+  padding: 10px 12px 4px;
+  border-bottom: 1px solid var(--line);
+  color: var(--ink);
+}
+
+.counts-badge__dot {
+  opacity: 0.6;
+}
+
+.counts-badge__zoom,
+.counts-badge__toggle {
   border: 0;
   background: none;
   color: var(--muted);
   font-size: var(--fs-ui-small);
+  padding: 2px 4px;
+  border-radius: 999px;
+  display: inline-flex;
+  align-items: center;
 }
 
-.statusbar__mode {
+.counts-badge__zoom:hover,
+.counts-badge__toggle:hover {
+  background: var(--chrome-2);
+  color: var(--ink);
+}
+
+.counts-badge__mode {
   color: var(--accent);
 }
 

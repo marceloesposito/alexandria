@@ -17,6 +17,9 @@ export interface Prefs {
   /** colonna sinistra dell'editor: risorse o indice del documento */
   leftTab: 'resources' | 'outline';
   focusMode: boolean;
+  /** editor come pagina (con margini e righelli) o senza bordi, a tutta colonna */
+  editorLayout: 'page' | 'borderless';
+  rulers: boolean;
   zoom: number; // 0.6 .. 2
   ribbonSize: RibbonSize;
   ribbonCollapsed: boolean;
@@ -41,6 +44,8 @@ export const DEFAULT_PREFS: Prefs = {
   showPreview: false,
   leftTab: 'resources',
   focusMode: false,
+  editorLayout: 'page',
+  rulers: true,
   zoom: 1,
   ribbonSize: 'large',
   ribbonCollapsed: false,

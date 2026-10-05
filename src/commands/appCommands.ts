@@ -29,6 +29,9 @@ import {
   PenLine,
   History,
   Eye,
+  FileText,
+  ScrollText,
+  Ruler,
 } from 'lucide-react';
 import { registerCommands } from './registry';
 import { useWorkspace, ws } from '../state/workspace';
@@ -150,6 +153,9 @@ export function registerAppCommands() {
       run: () => toggleSource(getEditor()),
     },
     { id: 'view.preview', label: 'cmd.view.preview', icon: Eye, shortcut: 'Mod+Shift+P', category: 'view', views: ['editor'], isActive: () => prefs().showPreview, run: () => ws().setPrefs({ showPreview: !prefs().showPreview }) },
+    { id: 'view.layoutPage', label: 'cmd.view.layoutPage', icon: FileText, category: 'view', views: ['editor'], isActive: () => prefs().editorLayout === 'page', run: () => ws().setPrefs({ editorLayout: 'page' }) },
+    { id: 'view.layoutBorderless', label: 'cmd.view.layoutBorderless', icon: ScrollText, category: 'view', views: ['editor'], isActive: () => prefs().editorLayout === 'borderless', run: () => ws().setPrefs({ editorLayout: 'borderless' }) },
+    { id: 'view.rulers', label: 'cmd.view.rulers', icon: Ruler, category: 'view', views: ['editor'], isActive: () => prefs().rulers, isEnabled: () => prefs().editorLayout === 'page', run: () => ws().setPrefs({ rulers: !prefs().rulers }) },
     { id: 'view.focus', label: 'cmd.view.focus', icon: Focus, shortcut: 'Mod+Shift+F', category: 'view', views: ['editor'], isActive: () => prefs().focusMode, run: () => ws().setPrefs({ focusMode: !prefs().focusMode }) },
     { id: 'view.zoomIn', label: 'cmd.view.zoomIn', icon: ZoomIn, shortcut: 'Mod+=', category: 'view', run: () => ws().setPrefs({ zoom: Math.min(2, Math.round((prefs().zoom + 0.1) * 10) / 10) }) },
     { id: 'view.zoomOut', label: 'cmd.view.zoomOut', icon: ZoomOut, shortcut: 'Mod+-', category: 'view', run: () => ws().setPrefs({ zoom: Math.max(0.6, Math.round((prefs().zoom - 0.1) * 10) / 10) }) },

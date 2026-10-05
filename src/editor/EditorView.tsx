@@ -7,6 +7,7 @@ import { FindReplace } from '../shell/dialogs/FindReplace';
 import { Splitter } from '../components/Splitter';
 import { leftPanelSections, rightPanel, centerOverlay, previewPanel } from './slots';
 import { OutlinePanel } from './OutlinePanel';
+import { CountsBadge } from '../shell/CountsBadge';
 import { Library, ListTree } from 'lucide-react';
 import { t, useLang } from '../i18n';
 
@@ -55,6 +56,7 @@ export function EditorView() {
       <main className="editor-center">
         {dialog === 'findReplace' && <FindReplace />}
         <EditorPane pageRef={pageRef} overlay={Overlay ? <Overlay pageRef={pageRef} /> : null} />
+        <CountsBadge />
       </main>
       {prefs.showPreview && Preview && (
         <>
