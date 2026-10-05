@@ -19,6 +19,9 @@ import { toHtml } from './html';
 import { toLatex } from './latex';
 import { toUtf8 } from '../lib/bytes';
 import { getLang, t } from '../i18n';
+import { useTypes } from '../types/store';
+import type { DocSettings } from '../layout/model';
+import { headerRows, typeById } from '../types/model';
 
 export type ExportFormat = 'pdf' | 'docx' | 'html' | 'md' | 'txt' | 'tex';
 
@@ -30,6 +33,21 @@ export interface Prepared {
   ctx: ExportContext;
   images: ImageAsset[];
   math: MathAsset[];
+}
+
+/** Righe dell'header da mettere in testa all'export, se l'autore l'ha chiesto. */
+export function exportHeader(settings: DocSettings): ExportContext['header'] {
+  const h = settings.header;
+  if (!h.export) return undefined;
+  const rows = headerRows(
+    settings.object,
+    typeById(useTypes.getState().types, settings.object.type),
+    h,
+    { author: settings.author, date: settings.date },
+    { type: t('types.type'), author: t('header.author'), date: t('header.date') },
+    getLang(),
+  );
+  return rows.length ? { rows, layout: h.layout, align: h.align } : undefined;
 }
 
 export async function prepare(): Promise<Prepared | null> {
@@ -94,6 +112,7 @@ export async function prepare(): Promise<Prepared | null> {
         : { text: `(${items.map((x) => x.key + (x.locator ? ', ' + x.locator : '')).join('; ')})`, note: false },
     image: (src) => images.get(src) ?? null,
     math: (latex, display) => math.get(mathKey(latex, display)) ?? null,
+    header: exportHeader(settings),
   };
   return { doc, ctx, images: [...images.values()], math: [...math.values()] };
 }

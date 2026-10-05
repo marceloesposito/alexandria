@@ -1739,3 +1739,33 @@
 .resources__empty.is-overlay > .resources__empty {
   height: 100%;
 }
+
+/* tabella degli Strata: barra con raggruppamento e colonne */
+.layer-table__bar {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  padding: 6px 8px;
+  border-bottom: 1px solid var(--line);
+}
+
+.layer-table__group {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  color: var(--muted);
+  font-size: var(--fs-ui-small);
+}
+
+.layer-table__grouprow td {
+  padding-top: 12px;
+  font-weight: 600;
+  color: var(--ink-2);
+  background: var(--chrome);
+}
+
+.filter__prop {
+  display: inline-flex;
+  gap: 6px;
+  flex: 1;
+}

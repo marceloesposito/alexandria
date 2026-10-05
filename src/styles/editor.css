@@ -768,3 +768,94 @@
   background: var(--accent-soft);
   color: var(--accent);
 }
+
+/* ---------------------------------------------------------------- header della pergamena */
+.doc-header {
+  margin: 0 0 1.4em;
+  padding-bottom: 0.8em;
+  border-bottom: 1px solid var(--line);
+  font-family: var(--font-ui);
+  font-size: var(--fs-ui);
+  color: var(--ink-2);
+}
+
+.doc-header.is-empty {
+  opacity: 0.45;
+  border-bottom-style: dashed;
+  transition: opacity 0.15s ease;
+}
+
+.doc-header.is-empty:hover,
+.doc-header.is-empty:focus-within {
+  opacity: 1;
+}
+
+.doc-header__type {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+}
+
+.doc-header__type-select {
+  border-color: transparent;
+  background: none;
+  font-weight: 600;
+}
+
+.doc-header__type-select:hover {
+  border-color: var(--line);
+}
+
+.doc-header__props {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 6px 16px;
+  margin-top: 6px;
+}
+
+.doc-header--table .doc-header__props {
+  display: grid;
+  grid-template-columns: max-content minmax(0, 1fr);
+  gap: 4px 14px;
+}
+
+.doc-header--table .doc-header__prop {
+  display: contents;
+}
+
+.doc-header--block .doc-header__props {
+  flex-direction: column;
+}
+
+.doc-header.is-center .doc-header__type,
+.doc-header.is-center .doc-header__props {
+  justify-content: center;
+}
+
+.doc-header__prop {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+}
+
+.doc-header--block .doc-header__prop {
+  flex-direction: column;
+  align-items: flex-start;
+  gap: 2px;
+}
+
+.doc-header__label {
+  color: var(--muted);
+  font-size: var(--fs-ui-small);
+}
+
+.doc-header .input,
+.doc-header .select {
+  font-size: var(--fs-ui);
+}
+
+.input--compact {
+  padding: 2px 6px;
+  min-width: 9em;
+  width: auto;
+}

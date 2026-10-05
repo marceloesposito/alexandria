@@ -32,6 +32,9 @@ export interface Prefs {
   layerSuggestions: 'off' | 'suggest';
   /** ordinamento dell'albero della Bookshelf */
   resourceSort: 'title' | 'added' | 'author' | 'year' | 'kind';
+  /** colonne e raggruppamento della tabella degli Strata */
+  tableColumns: string[];
+  tableGroup: string;
   /** introduzione vista (o saltata) */
   onboardingDone: boolean;
   /** all'avvio: schermata iniziale o ultimo Compendium */
@@ -63,6 +66,8 @@ export const DEFAULT_PREFS: Prefs = {
   libraryPath: null,
   layerSuggestions: 'suggest',
   resourceSort: 'title',
+  tableColumns: ['kind', 'author', 'year', 'otype', 'layers', 'tags', 'source'],
+  tableGroup: '',
   onboardingDone: false,
   startup: 'home',
   authorName: '',

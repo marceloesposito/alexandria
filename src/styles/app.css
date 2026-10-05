@@ -2429,6 +2429,102 @@ table.kv td:last-child {
   font-size: var(--fs-ui-small);
 }
 
+/* ---------------------------------------------------------------- tipi e proprietà */
+.header-settings {
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+  min-width: 240px;
+}
+
+.seg-row {
+  display: flex;
+  gap: 2px;
+}
+
+.types-dlg {
+  display: grid;
+  grid-template-columns: 220px minmax(0, 1fr);
+  gap: 16px;
+  min-height: 360px;
+}
+
+.types-dlg__list {
+  margin: 0;
+  padding: 0;
+  list-style: none;
+  border-right: 1px solid var(--line);
+  padding-right: 8px;
+}
+
+.types-dlg__list li {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  padding: 6px 8px;
+  border-radius: var(--radius-small);
+  cursor: pointer;
+}
+
+.types-dlg__list li:hover {
+  background: var(--chrome-2);
+}
+
+.types-dlg__list li.is-active {
+  background: var(--accent-soft);
+}
+
+.types-dlg__add {
+  color: var(--accent);
+}
+
+.types-dlg__edit {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+}
+
+.types-dlg__icons {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 4px;
+}
+
+.types-dlg__icons .icon-btn.is-active {
+  background: var(--accent-soft);
+}
+
+.types-dlg__sep {
+  width: 1px;
+  height: 18px;
+  margin: 0 6px;
+  background: var(--line);
+}
+
+.types-dlg__color {
+  width: 18px;
+  height: 18px;
+  border: 2px solid transparent;
+  border-radius: 50%;
+  cursor: pointer;
+}
+
+.types-dlg__color.is-active {
+  border-color: var(--ink);
+}
+
+.types-dlg__props {
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+}
+
+.types-dlg__prop {
+  display: grid;
+  grid-template-columns: minmax(0, 1.4fr) minmax(0, 1fr) minmax(0, 1.4fr) auto;
+  gap: 6px;
+  align-items: center;
 /* ---------------------------------------------------------------- account e repository remota */
 .forge__section {
   display: flex;

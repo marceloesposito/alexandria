@@ -284,7 +284,29 @@ export async function toDocx(doc: PMNode, ctx: ExportContext): Promise<Uint8Arra
     return out;
   };
 
-  const children = blocks(doc.content);
+  // header con tipo e proprietà, se incluso nell'export
+  function headerParagraphs(): Paragraph[] {
+    const h = ctx.header;
+    if (!h || !h.rows.length) return [];
+    const alignment = h.align === 'center' ? AlignmentType.CENTER : AlignmentType.LEFT;
+    if (h.layout === 'line')
+      return [
+        new Paragraph({
+          alignment,
+          spacing: { after: 320 },
+          children: h.rows.flatMap((r, i) => [...(i ? [new TextRun('    ')] : []), new TextRun({ text: `${r.label}: `, bold: true }), new TextRun(r.value)]),
+        }),
+      ];
+    return h.rows.map(
+      (r, i) =>
+        new Paragraph({
+          alignment,
+          spacing: { after: i === h.rows.length - 1 ? 320 : 60 },
+          children: h.layout === 'block' ? [new TextRun({ text: r.label, size: fontSize - 4 }), new TextRun({ text: r.value, break: 1 })] : [new TextRun({ text: `${r.label}\t`, bold: true }), new TextRun(r.value)],
+        }),
+    );
+  }
+  const children = [...headerParagraphs(), ...blocks(doc.content)];
   const m = L.masters.body;
   const headerText = m.header.replace('{title}', ctx.title).replace('{author}', ctx.settings.author).replace('{date}', ctx.settings.date).replace(/\{\w+\}/g, '');
   const pageNumberPara = new Paragraph({

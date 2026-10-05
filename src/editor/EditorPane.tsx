@@ -16,6 +16,7 @@ import { notifyCommandState } from '../commands/registry';
 import { useDocSettings, pageMetrics } from '../layout/docSettings';
 import { HorizontalRuler, VerticalRuler, RULER_SPACE_PX } from './Rulers';
 import { useZen } from '../state/zen';
+import { DocHeader } from './DocHeader';
 
 interface Props {
   /** sovrapposizioni allineate alla pagina (evidenziazione righe dei commenti, connettori) */
@@ -204,6 +205,7 @@ export function EditorPane({ overlay, pageRef: externalPageRef }: Props) {
               <GripVertical size={14} />
             </DragHandle>
           )}
+          <DocHeader borderless={borderless} />
           <EditorContent editor={editor} />
         </div>
       )}

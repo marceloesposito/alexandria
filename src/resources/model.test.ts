@@ -92,3 +92,20 @@ describe('locator', () => {
     expect(timeLocator(3725)).toBe('1:02:05');
   });
 });
+
+describe('filtri su tipo e proprietà', () => {
+  const anna = { ...res({ id: 'p1' }), object: { type: 'character', props: { role: 'Protagonista', traits: ['tenace', 'ironica'], age: '34' } } };
+  const luca = { ...res({ id: 'p2' }), object: { type: 'character', props: { role: 'Antagonista', age: '61' } } };
+  const casa = { ...res({ id: 'p3' }), object: { type: 'place', props: {} } };
+  it('tipo di oggetto', () => {
+    const rule = { match: 'all' as const, conditions: [{ field: 'otype' as const, op: 'is' as const, value: 'character' }] };
+    expect([anna, luca, casa, halb].filter((r) => matchRule(r, rule)).map((r) => r.id)).toEqual(['p1', 'p2']);
+  });
+  it('proprietà: uguale, contiene, numeri', () => {
+    const m = (op: 'is' | 'contains' | 'gte' | 'not', key: string, value: string) => [anna, luca, casa].filter((r) => matchRule(r, { match: 'all', conditions: [{ field: 'prop', op, key, value }] })).map((r) => r.id);
+    expect(m('is', 'role', 'protagonista')).toEqual(['p1']);
+    expect(m('contains', 'traits', 'iron')).toEqual(['p1']);
+    expect(m('gte', 'age', '40')).toEqual(['p2']);
+    expect(m('not', 'role', 'antagonista')).toEqual(['p1', 'p3']);
+  });
+});

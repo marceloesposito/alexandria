@@ -11,6 +11,8 @@ import { platform } from '../../platform';
 import { lookupDoi, lookupIsbn, addFromLibrary, sendToLibrary } from '../importer';
 import { parseName } from '../html';
 import { useWorkspace } from '../../state/workspace';
+import { TypeSelect, PropField, TypeIcon, useType } from '../../types/ui';
+import { emptyObject } from '../../types/model';
 
 const CSL_TYPES = ['book', 'article', 'chapter', 'article-journal', 'article-magazine', 'article-newspaper', 'paper-conference', 'thesis', 'report', 'webpage', 'post-weblog', 'motion_picture', 'graphic', 'document', 'entry-encyclopedia', 'manuscript', 'interview', 'legislation'];
 
@@ -72,6 +74,7 @@ export function Inspector({ id }: { id: string }) {
 
       <MetaEditor r={r} />
       <TagsField r={r} />
+      <ObjectSection r={r} />
 
       {!inLibrary && layers.some((l) => l.kind === 'group') && (
         <section className="inspector__section">
@@ -291,6 +294,27 @@ function TagsField({ r }: { r: Resource }) {
           }}
         />
       </div>
+    </section>
+  );
+}
+
+/** Tipo di oggetto e proprietà della risorsa (Personaggio, Luogo, Intervista...). */
+function ObjectSection({ r }: { r: Resource }) {
+  const obj = r.object ?? emptyObject();
+  const type = useType(obj.type);
+  const st = useResources.getState();
+  return (
+    <section className="inspector__section">
+      <h4>
+        {type && <TypeIcon icon={type.icon} color={type.color} />} {t('types.type')}
+      </h4>
+      <TypeSelect target="resource" value={obj.type} onChange={(id) => void st.update(r.id, { object: { ...obj, type: id } })} />
+      {type?.properties.map((d) => (
+        <label key={d.key} className="form__stack">
+          <span className="field-label">{d.label}</span>
+          <PropField def={d} value={obj.props[d.key]} onChange={(v) => void st.update(r.id, { object: { ...obj, props: { ...obj.props, [d.key]: v } } })} />
+        </label>
+      ))}
     </section>
   );
 }
