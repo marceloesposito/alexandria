@@ -1034,4 +1034,10 @@ export const en: Record<string, string> = {
   'cmd.tpl.newFrom': "New from template…",
   'cmd.tpl.saveAs': "Save as template…",
   'ribbon.group.templates': "Templates",
+  'embed.auto': "The link became a card",
+  'embed.keepLink': "Keep as link",
+  'start.portable': "Portable: data stays in the Alexandria-data folder",
+  'paste.added': "“{name}” added to the Bookshelf",
+  'paste.open': "Open",
+  'paste.note': "Note from clipboard",
 };

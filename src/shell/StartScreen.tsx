@@ -1,8 +1,8 @@
 // Schermata iniziale (stile VS Code / Adobe Home): si sceglie quale Compendium aprire o se crearne
 // uno nuovo. A sinistra le azioni e "riprendi l'ultimo", a destra i Compendium recenti.
 import { useEffect, useMemo, useState } from 'react';
-import { FolderOpen, FolderPlus, Landmark, ArrowRight, Search, X, CircleAlert, Feather, Settings } from 'lucide-react';
-import { useWorkspace } from '../state/workspace';
+import { FolderOpen, FolderPlus, Landmark, ArrowRight, Search, X, CircleAlert, Feather, Settings, Usb } from 'lucide-react';
+import { useWorkspace, getPortableRoot } from '../state/workspace';
 import { runCommand } from '../commands/registry';
 import { platform, baseName } from '../platform';
 import { t, useLang } from '../i18n';
@@ -52,6 +52,11 @@ export function StartScreen() {
             <div className="start__tagline">{t('start.tagline')}</div>
           </div>
         </div>
+        {getPortableRoot() && (
+          <div className="start__portable" title={getPortableRoot() ?? ''}>
+            <Usb size={13} /> {t('start.portable')}
+          </div>
+        )}
 
         {resume && (
           <button className="start__resume" onClick={() => void open(resume)} disabled={busy} autoFocus>

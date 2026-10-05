@@ -143,7 +143,11 @@ pub fn app_data_dir(app: tauri::AppHandle) -> CmdResult<String> {
     // prove automatiche: tutto in una cartella a parte, mai nei dati veri dell'utente
     let dir = match std::env::var("ALEXANDRIA_DATA_DIR") {
         Ok(d) => Path::new(&d).join("appdata"),
-        Err(_) => app.path().app_config_dir().map_err(err)?,
+        // portable: lo stato dell'app viaggia sulla chiavetta
+        Err(_) => match crate::portable::data_root() {
+            Some(p) => p.join("appdata"),
+            None => app.path().app_config_dir().map_err(err)?,
+        },
     };
     fs::create_dir_all(&dir).map_err(err)?;
     Ok(slash(dir))
@@ -155,6 +159,9 @@ pub fn documents_dir(app: tauri::AppHandle) -> CmdResult<String> {
         let p = Path::new(&d).join("documents");
         fs::create_dir_all(&p).map_err(err)?;
         return Ok(slash(p));
+    }
+    if let Some(p) = crate::portable::data_root() {
+        return Ok(slash(p.to_path_buf()));
     }
     app.path()
         .document_dir()

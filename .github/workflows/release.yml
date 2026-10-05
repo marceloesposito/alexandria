@@ -41,3 +41,25 @@ jobs:
           releaseName: Alexandria ${{ github.ref_type == 'tag' && github.ref_name || 'v__VERSION__' }}
           releaseDraft: true
           args: ${{ matrix.args }}
+      # versione portable (chiavetta USB): l'app con la cartella Alexandria-data accanto
+      - name: portable (macOS)
+        if: matrix.os == 'macos-latest'
+        run: |
+          node scripts/portable.mjs --mac src-tauri/target/universal-apple-darwin/release/bundle/macos/Alexandria.app --out dist-portable/Alexandria-portable
+          cd dist-portable && ditto -c -k --sequesterRsrc --keepParent Alexandria-portable Alexandria-portable-macos.zip
+      - name: portable (Windows)
+        if: matrix.os == 'windows-latest'
+        shell: pwsh
+        run: |
+          node scripts/portable.mjs --win src-tauri/target/release/alexandria.exe --out dist-portable/Alexandria-portable
+          Compress-Archive -Path dist-portable/Alexandria-portable -DestinationPath dist-portable/Alexandria-portable-windows.zip
+      - uses: actions/upload-artifact@v4
+        with:
+          name: portable-${{ matrix.os }}
+          path: dist-portable/*.zip
+      - name: allega alla release
+        if: github.ref_type == 'tag'
+        shell: bash
+        env:
+          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        run: gh release upload "${{ github.ref_name }}" dist-portable/*.zip --clobber

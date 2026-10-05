@@ -43,12 +43,13 @@ import { CitePicker } from '../citations/CitePicker';
 import { useCitations, insertBibliography, BUNDLED_STYLES, listCustomStyles, type StyleInfo } from '../citations/store';
 import { useDocSettings } from '../layout/docSettings';
 import { getEditor } from '../state/editorRef';
-import { setEditorFilesHandler, setEditorLinksHandler } from '../editor/extensions/drop';
+import { setEditorFilesHandler, setEditorLinksHandler, setEditorPasteLinkHandler } from '../editor/extensions/drop';
 import { embedView } from '../editor/slots';
-import { importAndInsert } from './insertActions';
+import { importAndInsert, upgradeLinkToEmbed, downgradeEmbedToLink } from './insertActions';
 import { relativeFromDoc } from '../vault/resolve';
 import { classifyTransfer, readTransfer } from './insert';
 import { InsertResourceDialog } from './ui/InsertResourceDialog';
+import { onGlobalPaste, onGlobalKeydown } from './pasteToBookshelf';
 import { EmbedView } from './ui/EmbedView';
 import { removeWithConfirm, removalTargets } from './ui/remove';
 import { platform } from '../platform';
@@ -101,6 +102,13 @@ export function registerResources() {
   registerWidget('citeStyle', StyleWidget);
   setEditorFilesHandler(dropFilesIntoEditor);
   setEditorLinksHandler(dropLinksIntoEditor);
+  window.addEventListener('paste', onGlobalPaste);
+  window.addEventListener('keydown', onGlobalKeydown);
+  setEditorPasteLinkHandler((url) => {
+    void upgradeLinkToEmbed(url).then((id) => {
+      if (id) ws().toast(t('embed.auto'), 'info', { label: t('embed.keepLink'), run: () => downgradeEmbedToLink(id, url) });
+    });
+  });
   registerDialog('insertResource', InsertResourceDialog);
   embedView.set(EmbedView);
   // i pulsanti del ribbon seguono vista, ambito e selezione del gestore risorse

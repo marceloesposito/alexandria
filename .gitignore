@@ -29,3 +29,4 @@ test-results
 /tmp
 public/tesseract
 public/tessdata
+dist-portable/

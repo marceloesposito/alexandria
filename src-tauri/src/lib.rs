@@ -3,12 +3,19 @@
 mod fsops;
 mod git;
 mod index;
+mod clipboard;
 mod net;
+mod portable;
 mod snapshot;
 mod typeset;
 
 #[cfg_attr(mobile, tauri::mobile_entry_point)]
 pub fn run() {
+    // portable su Windows: anche la cache di WebView2 resta sulla chiavetta, non sul PC ospite
+    #[cfg(windows)]
+    if let Some(p) = portable::data_root() {
+        std::env::set_var("WEBVIEW2_USER_DATA_FOLDER", p.join("webview"));
+    }
     tauri::Builder::default()
         .setup(|app| {
             use tauri::Manager;
@@ -63,6 +70,8 @@ pub fn run() {
             index::index_search,
             net::net_fetch,
             snapshot::net_snapshot,
+            portable::portable_root,
+            clipboard::clipboard_read,
             typeset::typst_compile,
         ])
         .run(tauri::generate_context!())

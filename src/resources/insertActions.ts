@@ -52,6 +52,47 @@ export async function importAndInsert(c: Classified, files: File[], pos?: number
   }
 }
 
+/** Paragrafo fatto solo del link `url` (quello appena incollato). */
+function findLinkParagraph(url: string): { from: number; to: number } | null {
+  const e = getEditor();
+  let found: { from: number; to: number } | null = null;
+  e?.state.doc.descendants((node, pos) => {
+    if (found || node.type.name !== 'paragraph' || node.childCount !== 1) return !found;
+    const t = node.firstChild!;
+    if (t.isText && t.text === url && t.marks.some((m) => m.type.name === 'link' && m.attrs.href === url)) found = { from: pos, to: pos + node.nodeSize };
+    return false;
+  });
+  return found;
+}
+
+/** Il link incollato diventa una scheda embed (import della pagina e foto). */
+export async function upgradeLinkToEmbed(url: string): Promise<string | null> {
+  await importUrls([url], 'vault');
+  const r = byUrls([url])[0];
+  const e = getEditor();
+  const docRel = ws().activeDoc;
+  const at = findLinkParagraph(url);
+  if (!r || !e || !docRel || !at) return null;
+  const json = nodeFor(r, docRel);
+  e.view.dispatch(e.state.tr.replaceWith(at.from, at.to, e.schema.nodes[json.type].create(json.attrs)));
+  return r.id;
+}
+
+/** Ripensamento: la scheda torna a essere un semplice link. */
+export function downgradeEmbedToLink(resourceId: string, url: string) {
+  const e = getEditor();
+  if (!e) return;
+  let at: { from: number; to: number; title: string } | null = null;
+  e.state.doc.descendants((node, pos) => {
+    if (!at && node.type.name === 'embed' && node.attrs.resource === resourceId) at = { from: pos, to: pos + node.nodeSize, title: url };
+    return !at;
+  });
+  if (!at) return;
+  const { from, to } = at;
+  const p = e.schema.nodes.paragraph.create(null, e.schema.text(url, [e.schema.marks.link.create({ href: url })]));
+  e.view.dispatch(e.state.tr.replaceWith(from, to, p));
+}
+
 /** File scelti dal dialogo di sistema (app desktop). */
 export async function importPathsAndInsert(paths: string[], pos?: number) {
   insertResources(await importPaths(paths, 'vault'), pos);

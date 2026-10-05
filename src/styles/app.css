@@ -2085,3 +2085,15 @@ table.kv td:last-child {
   display: flex;
   gap: 6px;
 }
+
+.start__portable {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  margin-top: -10px;
+  padding: 5px 10px;
+  border-radius: 999px;
+  background: var(--accent-soft);
+  color: var(--accent);
+  font-size: var(--fs-ui-small);
+}

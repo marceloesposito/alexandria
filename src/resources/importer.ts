@@ -62,6 +62,11 @@ export async function importBibliography(text: string, target: 'vault' | 'librar
     toast(t('import.bibError', { error: String(e) }), 'error');
     return [];
   }
+  return importCslItems(items, target);
+}
+
+/** Voci bibliografiche (CSL-JSON) come risorse "fonte" con una chiave di citazione. */
+export async function importCslItems(items: CslItem[], target: 'vault' | 'library' = 'vault'): Promise<Resource[]> {
   const out: Resource[] = [];
   const taken = takenKeys();
   const st = useResources.getState();

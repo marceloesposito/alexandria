@@ -1034,4 +1034,10 @@ export const it: Record<string, string> = {
   'cmd.tpl.newFrom': "Nuova da template…",
   'cmd.tpl.saveAs': "Salva come template…",
   'ribbon.group.templates': "Template",
+  'embed.auto': "Il link è diventato una scheda",
+  'embed.keepLink': "Lascia come link",
+  'start.portable': "Portable: i dati restano nella cartella Alexandria-data",
+  'paste.added': "«{name}» aggiunto alla Bookshelf",
+  'paste.open': "Apri",
+  'paste.note': "Nota dagli appunti",
 };

@@ -77,9 +77,13 @@ pub struct Resolved {
 fn open(repo: &str) -> CmdResult<Repository> {
     let r = Repository::open(repo).map_err(err)?;
     // il testo resta byte per byte com'e' scritto: niente conversione degli a capo
+    // niente bit di esecuzione: su una chiavetta exFAT non esistono e git vedrebbe file "modificati"
     if let Ok(mut cfg) = r.config() {
         if cfg.get_bool("core.autocrlf").unwrap_or(false) {
             let _ = cfg.set_bool("core.autocrlf", false);
+        }
+        if cfg.get_bool("core.filemode").unwrap_or(true) {
+            let _ = cfg.set_bool("core.filemode", false);
         }
     }
     Ok(r)
@@ -132,6 +136,7 @@ pub fn git_init(repo: String) -> CmdResult<()> {
     let r = Repository::init_opts(&repo, &opts).map_err(err)?;
     let mut cfg = r.config().map_err(err)?;
     cfg.set_bool("core.autocrlf", false).map_err(err)?;
+    cfg.set_bool("core.filemode", false).map_err(err)?;
     let gi = Path::new(&repo).join(".gitignore");
     if !gi.exists() {
         write_atomic(&gi.to_string_lossy(), b".alexandria-cache/\n*.alexandria-tmp\n.DS_Store\nThumbs.db\n")?;

@@ -21,6 +21,14 @@ let filesHandler: FilesHandler | null = null;
 type LinksHandler = (dt: DataTransfer, pos: number) => boolean;
 let linksHandler: LinksHandler | null = null;
 
+type PasteLinkHandler = (url: string) => void;
+let pasteLinkHandler: PasteLinkHandler | null = null;
+
+/** L'app registra qui i link incollati da soli su una riga vuota (diventano schede embed). */
+export function setEditorPasteLinkHandler(h: PasteLinkHandler | null) {
+  pasteLinkHandler = h;
+}
+
 /** L'app registra qui i link trascinati da altre finestre (diventano schede embed). */
 export function setEditorLinksHandler(h: LinksHandler | null) {
   linksHandler = h;
@@ -51,6 +59,19 @@ export const DropHandler = Extension.create({
               }
               return false;
             },
+          },
+          // un link incollato da solo su una riga vuota: subito come link, poi diventa una scheda
+          handlePaste(view, e) {
+            const dt = e.clipboardData;
+            if (!dt || dt.files.length || !pasteLinkHandler) return false;
+            const url = dt.getData('text/plain').trim();
+            if (!/^https?:\/\/\S+$/.test(url)) return false;
+            const { $from, empty } = view.state.selection;
+            if (!empty || $from.depth !== 1 || $from.parent.type.name !== 'paragraph' || $from.parent.content.size !== 0) return false;
+            const mark = view.state.schema.marks.link.create({ href: url });
+            view.dispatch(view.state.tr.replaceSelectionWith(view.state.schema.text(url, [mark]), false));
+            pasteLinkHandler(url);
+            return true;
           },
           handleDrop(view, e) {
             const ev = e as DragEvent;

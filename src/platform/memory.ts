@@ -338,6 +338,12 @@ export function createMemoryPlatform(opts: { persist?: boolean } = {}): Platform
       return URL.createObjectURL(new Blob([d as BlobPart]));
     },
 
+    async readClipboard() {
+      return null;
+    },
+    async portableRoot() {
+      return null;
+    },
     async appDataDir() {
       return '/appdata';
     },

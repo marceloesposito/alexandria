@@ -29,6 +29,7 @@ import {
   writeJson,
 } from '../vault/vault';
 import { abs, docSettingsFile } from '../vault/paths';
+import { mapPaths, toStored, fromStored } from './portablePaths';
 
 export type DialogId =
   | 'templates'
@@ -109,12 +110,21 @@ let statePath: string | null = null;
 let saveTimer: ReturnType<typeof setTimeout> | null = null;
 let toastId = 0;
 
+let portableRoot: string | null = null;
+
+/** Cartella dati della chiavetta, se l'app e' portable. */
+export function getPortableRoot(): string | null {
+  return portableRoot;
+}
+
 function persist(app: AppState) {
   if (!statePath) return;
   if (saveTimer) clearTimeout(saveTimer);
   const path = statePath;
   saveTimer = setTimeout(() => {
-    platform.writeText(path, JSON.stringify(app, null, 2)).catch(() => {
+    // in modalita' portable i percorsi della chiavetta si salvano relativi
+    const stored = portableRoot ? mapPaths(app, (p) => toStored(p, portableRoot)) : app;
+    platform.writeText(path, JSON.stringify(stored, null, 2)).catch(() => {
       /* uno stato non salvato vale per la sessione in corso */
     });
   }, 250);
@@ -142,7 +152,8 @@ export const useWorkspace = create<WorkspaceState>((set, get) => ({
     statePath = joinPath(dir, 'state.json');
     let app = defaultAppState();
     try {
-      if (await platform.exists(statePath)) app = normalizeAppState(JSON.parse(await platform.readText(statePath)));
+      portableRoot = await platform.portableRoot();
+      if (await platform.exists(statePath)) app = mapPaths(normalizeAppState(JSON.parse(await platform.readText(statePath))), (p) => fromStored(p, portableRoot));
     } catch {
       app = defaultAppState();
     }
