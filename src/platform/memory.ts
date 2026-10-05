@@ -493,6 +493,12 @@ export function createMemoryPlatform(opts: { persist?: boolean } = {}): Platform
     async gitPull() {
       throw new Error('Remoto non disponibile nella versione browser');
     },
+    async startupFile() {
+      return null;
+    },
+    async onOpenFile() {
+      return () => undefined;
+    },
     async forgeAccount() {
       return null;
     },

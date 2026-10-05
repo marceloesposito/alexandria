@@ -11,6 +11,7 @@ import { useTypes } from '../types/store';
 import { TypeIcon, TypeSelect, PropField } from '../types/ui';
 import { type HeaderSettings, type PropValue, typeById } from '../types/model';
 import { Popover } from '../components/Popover';
+import { useTrack } from './extensions/track';
 import { useWorkspace } from '../state/workspace';
 import { t, useLang } from '../i18n';
 
@@ -26,6 +27,7 @@ export function DocHeader({ borderless }: { borderless: boolean }) {
   const active = useWorkspace((s) => s.activeDoc);
   const h = settings.header;
   if (borderless ? !h.borderless : !h.paged) return null;
+  if (useTrack.getState().locked) return null;
   const obj = settings.object;
   const type = typeById(types, obj.type);
   const update = useDocSettings.getState().update;

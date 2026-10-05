@@ -114,10 +114,10 @@ export function keysOfDoc(doc: PMNode): string[] {
 }
 
 /** Prepara un documento qualsiasi (una pergamena o un Codex già unito). */
-export async function prepareDoc(doc: PMNode, settings: DocSettings, title: string, vaultRoot: string, baseRel: string, citeOrder: string[]): Promise<Prepared> {
+export async function prepareDoc(doc: PMNode, settings: DocSettings, title: string, vaultRoot: string, baseRel: string, citeOrder: string[], opts: { revisions?: 'clean' | 'marked' } = {}): Promise<Prepared> {
   const ws = { vaultRoot, activeDoc: baseRel };
   // revisioni tracciate: per l'export si accettano (testo pulito) se l'autore non chiede di vederle
-  if (useWorkspace.getState().app.prefs.exportRevisions !== 'marked') doc = cleanRevisions(doc);
+  if ((opts.revisions ?? useWorkspace.getState().app.prefs.exportRevisions) !== 'marked') doc = cleanRevisions(doc);
 
   // immagini
   const assets = collectAssets(doc, parseMarkdown);

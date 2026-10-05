@@ -17,6 +17,9 @@ import { useZen } from './state/zen';
 import { findByShortcut, runCommand } from './commands/registry';
 import { viewComponents, globalComponents } from './shell/views';
 import { useLang, t } from './i18n';
+import { useReview, openRecensioFile } from './recensio/session';
+import { ReviewBar } from './recensio/ui';
+import { platform } from './platform';
 
 export default function App() {
   useLang();
@@ -29,6 +32,20 @@ export default function App() {
     void useWorkspace.getState().init();
   }, []);
 
+  // doppio clic su un .recensio: si apre dopo l'avvio (e, su macOS, anche ad app aperta)
+  const reviewing = useReview((s) => !!s.session);
+  useEffect(() => {
+    if (!ready) return;
+    const check = () =>
+      void platform.startupFile().then((p) => {
+        if (p) void openRecensioFile(p);
+      });
+    check();
+    let off: (() => void) | undefined;
+    void platform.onOpenFile(check).then((f) => (off = f));
+    return () => off?.();
+  }, [ready]);
+
   // scorciatoie globali (quelle di formattazione le gestisce l'editor)
   useEffect(() => {
     const onKey = (e: KeyboardEvent) => {
@@ -38,6 +55,8 @@ export default function App() {
       const inField = !!target && /^(INPUT|TEXTAREA|SELECT)$/.test(target.tagName);
       const cmd = findByShortcut(e, inEditor);
       if (!cmd) return;
+      // copia per revisione: niente comandi che cambiano il Compendium
+      if (useReview.getState().session && (/^(file|vc|res|insert|doc|cite|layout)\./.test(cmd.id) || ['view.versions', 'view.library'].includes(cmd.id))) return;
       // nei campi di testo solo le scorciatoie con modificatori
       if (inField && !(e.ctrlKey || e.metaKey) && !/^F\d+$/.test(e.key)) return;
       if (inField && ['edit.undo', 'edit.redo', 'edit.selectAll', 'edit.cut', 'edit.copy', 'edit.paste'].includes(cmd.id)) return;
@@ -88,7 +107,8 @@ export default function App() {
 
   return (
     <div className={`app ${zen ? 'app--zen' : ''}`}>
-      {!zen && (
+      {!zen && reviewing && <ReviewBar />}
+      {!zen && !reviewing && (
         <>
           <MenuBar />
           <NavBar />

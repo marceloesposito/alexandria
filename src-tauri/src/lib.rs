@@ -10,6 +10,20 @@ mod portable;
 mod snapshot;
 mod typeset;
 
+/// File .recensio da aprire (passato all'avvio o, su macOS, dal Finder): lo legge una volta il frontend.
+static OPEN_FILE: std::sync::Mutex<Option<String>> = std::sync::Mutex::new(None);
+
+fn remember_open(path: String) {
+    if let Ok(mut f) = OPEN_FILE.lock() {
+        *f = Some(path);
+    }
+}
+
+#[tauri::command]
+fn startup_file() -> Option<String> {
+    OPEN_FILE.lock().ok()?.take()
+}
+
 /// Autotest dell'import con foto (ALEXANDRIA_EMBED_TEST="<url>|<rapporto.json>"): lo esegue il frontend.
 #[tauri::command]
 fn selftest_spec() -> Option<String> {
@@ -29,6 +43,10 @@ pub fn run() {
     #[cfg(windows)]
     if let Some(p) = portable::data_root() {
         std::env::set_var("WEBVIEW2_USER_DATA_FOLDER", p.join("webview"));
+    }
+    // doppio clic su un .recensio (Windows/Linux: il percorso arriva come argomento)
+    if let Some(a) = std::env::args().skip(1).find(|a| a.to_lowercase().ends_with(".recensio")) {
+        remember_open(a);
     }
     tauri::Builder::default()
         .setup(|app| {
@@ -113,9 +131,23 @@ pub fn run() {
             portable::portable_root,
             clipboard::clipboard_read,
             selftest_spec,
+            startup_file,
             selftest_exit,
             typeset::typst_compile,
         ])
-        .run(tauri::generate_context!())
-        .expect("errore all'avvio di Alexandria");
+        .build(tauri::generate_context!())
+        .expect("errore all'avvio di Alexandria")
+        .run(|_app, _event| {
+            // macOS: i file aperti dal Finder arrivano come evento
+            #[cfg(target_os = "macos")]
+            if let tauri::RunEvent::Opened { urls } = &_event {
+                use tauri::Emitter;
+                for u in urls {
+                    if let Ok(p) = u.to_file_path() {
+                        remember_open(p.to_string_lossy().into_owned());
+                        let _ = _app.emit("open-file", ());
+                    }
+                }
+            }
+        });
 }

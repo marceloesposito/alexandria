@@ -129,6 +129,10 @@ export interface Platform {
   documentsDir(): Promise<string>;
   pickDirectory(title?: string): Promise<string | null>;
   pickFiles(title?: string): Promise<string[]>;
+  /** file da aprire all'avvio (doppio clic su un .recensio), una volta sola */
+  startupFile(): Promise<string | null>;
+  /** file aperti mentre l'app gira (macOS) */
+  onOpenFile(cb: () => void): Promise<() => void>;
   saveDialog(defaultName: string, extensions: string[]): Promise<string | null>;
   openExternal(url: string): Promise<void>;
   /** apre un file locale con l'app predefinita del sistema */

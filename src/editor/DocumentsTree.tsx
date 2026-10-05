@@ -10,6 +10,7 @@ import { confirmDialog } from '../components/confirm';
 import { useDoc } from './session';
 import { HoverCard, useHoverCard } from '../components/HoverCard';
 import { DocPreview } from '../shell/DocPreview';
+import { useTrack } from './extensions/track';
 import { useSidePane } from './paneStore';
 
 const MIME = 'application/x-alexandria-doc';
@@ -20,6 +21,7 @@ export function DocumentsTree() {
   const counts = useDoc((s) => s.counts);
   const [dropBefore, setDropBefore] = useState<string | null>(null);
   const hover = useHoverCard();
+  const reviewing = useTrack((s) => s.locked);
 
   const open = async (rel: string) => {
     if (rel === active) return;
@@ -55,9 +57,11 @@ export function DocumentsTree() {
     <section className="side-section">
       <header className="side-section__head">
         <span>{t('side.documents')}</span>
-        <button className="icon-btn" title={t('cmd.file.newDoc')} onClick={() => void useWorkspace.getState().newDoc()}>
-          <Plus size={14} />
-        </button>
+        {!reviewing && (
+          <button className="icon-btn" title={t('cmd.file.newDoc')} onClick={() => void useWorkspace.getState().newDoc()}>
+            <Plus size={14} />
+          </button>
+        )}
       </header>
       {hover.anchor?.dataset.rel && (
         <HoverCard anchor={hover.anchor} cardProps={hover.cardProps} placement="right">
@@ -94,7 +98,7 @@ export function DocumentsTree() {
               hover.close();
               void open(d.rel);
             }}
-            onContextMenu={(e) => menu(e, d.rel, d.title)}
+            onContextMenu={(e) => !reviewing && menu(e, d.rel, d.title)}
             data-rel={d.rel}
             {...(d.rel === active ? {} : hover.triggerProps)}
           >

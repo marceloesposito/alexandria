@@ -74,6 +74,8 @@ export const tauriPlatform: Platform = {
   gitSetRemote: (repo, url, token) => invoke('git_set_remote', { repo, url, token }),
   gitRemote: (repo) => invoke('git_remote', { repo }),
   gitPush: (repo) => invoke('git_push', { repo }),
+  startupFile: () => invoke('startup_file'),
+  onOpenFile: async (cb) => (await import('@tauri-apps/api/event')).listen('open-file', () => cb()),
   forgeAccount: (host) => invoke('forge_account', { host }),
   forgeLogout: (host) => invoke('forge_logout', { host }),
   forgeSetToken: (kind, host, token) => invoke('forge_set_token', { kind, host, token }),

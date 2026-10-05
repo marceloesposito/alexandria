@@ -84,7 +84,8 @@ export async function createBranch(name: string, fromSha: string | null, switchT
   const clean = name.trim().replace(/\s+/g, '-').replace(/[^\p{L}\p{N}._/-]/gu, '');
   if (!r || !clean) return false;
   await protectWork(t('vc.cp.beforeBranch', { name: clean }));
-  const ok = await guard(() => platform.gitCreateBranch(r, clean, fromSha ?? undefined));
+  // i comandi senza risultato restituiscono null: true segna la riuscita
+  const ok = await guard(async () => (await platform.gitCreateBranch(r, clean, fromSha ?? undefined), true));
   if (ok === null) return false;
   if (switchTo) await switchBranch(clean);
   else await useVersions.getState().refresh();
@@ -96,7 +97,7 @@ export async function switchBranch(name: string): Promise<boolean> {
   const r = root();
   if (!r) return false;
   await protectWork(t('vc.cp.beforeSwitch', { name }));
-  const ok = await guard(() => platform.gitCheckout(r, name));
+  const ok = await guard(async () => (await platform.gitCheckout(r, name), true));
   if (ok === null) return false;
   await afterChange();
   toast(t('vc.switched', { name }), 'ok');
@@ -144,7 +145,7 @@ export async function restoreVersion(sha: string, label: string): Promise<boolea
   const r = root();
   if (!r) return false;
   await protectWork(t('vc.cp.beforeRestore'));
-  const ok = await guard(() => platform.gitRestore(r, sha));
+  const ok = await guard(async () => (await platform.gitRestore(r, sha), true));
   if (ok === null) return false;
   await platform.gitCommit(r, t('vc.restoredMsg', { label }));
   await afterChange();

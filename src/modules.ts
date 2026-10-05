@@ -10,6 +10,8 @@ import { registerTemplates } from './layout/templatesModule';
 import { registerDialog } from './shell/DialogHost';
 import { DocSettingsDialog } from './layout/DocSettingsDialog';
 import { registerRevision } from './revision';
+import { RecensioDialog } from './recensio/ui';
+import { ReviewDialog } from './review/ReviewDialog';
 
 let done = false;
 
@@ -25,6 +27,8 @@ export function registerAll() {
   registerExport();
   registerTemplates();
   registerDialog('docSettings', DocSettingsDialog);
+  registerDialog('recensio', RecensioDialog);
+  registerDialog('review', ReviewDialog);
 }
 
 // accesso agli store per le prove nel browser (solo sviluppo)

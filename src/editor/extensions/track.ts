@@ -7,9 +7,20 @@ import type { Mark as PMMark, Node as PMNode } from '@tiptap/pm/model';
 import { create } from 'zustand';
 
 /** Modalità Suggerisci e nome con cui si firmano le revisioni. */
-export const useTrack = create<{ suggest: boolean; author: string; set(p: Partial<{ suggest: boolean; author: string }>): void }>((set) => ({
+interface TrackState {
+  suggest: boolean;
+  author: string;
+  /** testo bloccato: si cambia solo con revisioni tracciate (copia per revisione) */
+  locked: boolean;
+  /** nome del revisore quando l'app è aperta su una copia per revisione */
+  reviewer: string | null;
+}
+
+export const useTrack = create<TrackState & { set(p: Partial<TrackState>): void }>((set) => ({
   suggest: false,
   author: '',
+  locked: false,
+  reviewer: null,
   set: (p) => set(p),
 }));
 
@@ -79,6 +90,11 @@ export const TrackChanges = Extension.create({
     return [
       new Plugin({
         key,
+        // copia per revisione: il testo cambia solo con revisioni tracciate (e con annulla/ripeti)
+        filterTransaction(tr) {
+          if (!useTrack.getState().locked || !tr.docChanged) return true;
+          return !!tr.getMeta('track') || !!tr.getMeta('history$');
+        },
         props: {
           handleTextInput(view, from, to, text) {
             if (!useTrack.getState().suggest || !view.editable) return false;
@@ -88,7 +104,7 @@ export const TrackChanges = Extension.create({
             const at = tr.mapping.map(to);
             const end = insertSuggested(tr, state, at, text);
             tr.setSelection(TextSelection.create(tr.doc, end));
-            view.dispatch(tr.scrollIntoView());
+            view.dispatch(tr.setMeta('track', true).scrollIntoView());
             return true;
           },
           handleKeyDown(view, e) {
@@ -110,7 +126,7 @@ export const TrackChanges = Extension.create({
             markDeleted(tr, state, a, b);
             const caret = empty ? (back ? tr.mapping.map(a, -1) : tr.mapping.map(b)) : tr.mapping.map(b);
             tr.setSelection(TextSelection.create(tr.doc, caret));
-            view.dispatch(tr.scrollIntoView());
+            view.dispatch(tr.setMeta('track', true).scrollIntoView());
             e.preventDefault();
             return true;
           },
@@ -124,7 +140,7 @@ export const TrackChanges = Extension.create({
             if (from < to) markDeleted(tr, state, from, to);
             const end = insertSuggested(tr, state, tr.mapping.map(to), text.replace(/\r?\n+/g, ' '));
             tr.setSelection(TextSelection.create(tr.doc, end));
-            view.dispatch(tr.scrollIntoView());
+            view.dispatch(tr.setMeta('track', true).scrollIntoView());
             return true;
           },
         },
