@@ -1,18 +1,52 @@
-// Introduzione breve al primo avvio (si riapre da Aiuto): una pagina per sezione dell'app,
-// con l'icona e il colore della sua tab nella navbar.
+// Introduzione al primo avvio (si riapre da Aiuto): una pagina per ambiente dell'app, con l'icona e
+// il colore della sua tab nella navbar e le funzioni principali spiegate in una riga ciascuna.
 import { useEffect, useState } from 'react';
-import { Feather, Library, PenLine, History, Landmark } from 'lucide-react';
+import {
+  Feather,
+  Library,
+  PenLine,
+  History,
+  Landmark,
+  Landmark as Compendium,
+  LayoutTemplate,
+  ScrollText,
+  FileStack,
+  ClipboardPaste,
+  Network,
+  Bookmark,
+  SlashSquare,
+  MessageSquare,
+  Maximize,
+  Save,
+  GitBranch,
+  Columns2,
+  Cloud,
+  Share2,
+  SlidersHorizontal,
+  Palette,
+  Keyboard,
+  type LucideIcon,
+} from 'lucide-react';
 import { useWorkspace } from '../state/workspace';
 import { useZen } from '../state/zen';
 import { t, useLang } from '../i18n';
 
-const STEPS = [
-  { key: 'welcome', icon: Feather, color: 'var(--accent)' },
-  { key: 'bookshelf', icon: Library, color: 'var(--series-1)' },
-  { key: 'scriptorium', icon: PenLine, color: 'var(--series-2)' },
-  { key: 'history', icon: History, color: 'var(--series-3)' },
-  { key: 'library', icon: Landmark, color: 'var(--series-4)' },
-] as const;
+interface Step {
+  key: string;
+  icon: LucideIcon;
+  color: string;
+  features: LucideIcon[];
+}
+
+const STEPS: Step[] = [
+  { key: 'welcome', icon: Feather, color: 'var(--accent)', features: [] },
+  { key: 'compendium', icon: Compendium, color: 'var(--accent)', features: [ScrollText, LayoutTemplate, FileStack] },
+  { key: 'bookshelf', icon: Library, color: 'var(--series-1)', features: [ClipboardPaste, Network, Bookmark] },
+  { key: 'scriptorium', icon: PenLine, color: 'var(--series-2)', features: [SlashSquare, MessageSquare, Maximize] },
+  { key: 'history', icon: History, color: 'var(--series-3)', features: [Save, Columns2, GitBranch, Cloud] },
+  { key: 'library', icon: Landmark, color: 'var(--series-4)', features: [Share2, FileStack] },
+  { key: 'customize', icon: SlidersHorizontal, color: 'var(--accent)', features: [SlidersHorizontal, Palette, Keyboard] },
+];
 
 export function Onboarding() {
   useLang();
@@ -44,12 +78,28 @@ export function Onboarding() {
         <div className="onboarding__icon">
           <step.icon size={34} strokeWidth={1.5} />
         </div>
+        <div className="onboarding__kicker">{t('onboarding.progress', { n: i + 1, total: STEPS.length })}</div>
         <h2 id="onboarding-title">{t(`onboarding.${step.key}.title`)}</h2>
         <p>{t(`onboarding.${step.key}.text`)}</p>
+        {step.features.length > 0 && (
+          <ul className="onboarding__features">
+            {step.features.map((Icon, k) => (
+              <li key={k}>
+                <span className="onboarding__feature-icon">
+                  <Icon size={16} />
+                </span>
+                <span>
+                  <strong>{t(`onboarding.${step.key}.f${k + 1}.title`)}</strong>
+                  <span>{t(`onboarding.${step.key}.f${k + 1}.text`)}</span>
+                </span>
+              </li>
+            ))}
+          </ul>
+        )}
         <p className="onboarding__tip">{t(`onboarding.${step.key}.tip`)}</p>
         <div className="onboarding__dots" aria-hidden>
           {STEPS.map((s, k) => (
-            <button key={s.key} className={k === i ? 'is-active' : ''} onClick={() => setI(k)} tabIndex={-1} />
+            <button key={s.key} className={k === i ? 'is-active' : ''} onClick={() => setI(k)} tabIndex={-1} title={t(`onboarding.${s.key}.title`)} />
           ))}
         </div>
         <div className="onboarding__actions">

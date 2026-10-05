@@ -65,7 +65,11 @@ Aggiornato: 5 ottobre 2026 (M10).
 - **Portable**: cartella `Alexandria-data` accanto all'app (`node scripts/portable.mjs --mac ... --win ...`).
 - **macOS**: pacchetto firmato ad-hoc. Senza Developer ID e notarizzazione Apple, su altri Mac al primo
   avvio serve Impostazioni di sistema > Privacy e sicurezza > Apri comunque.
-- **Introduzione** al primo avvio (cinque pagine), riapribile da Aiuto.
+- **History semplificata** (stile GitHub Desktop): a sinistra variante, "Salva una versione" e storia
+  verticale (salvataggi automatici nascosti); al centro la pergamena come documento; passando su una
+  versione il centro si divide nelle due versioni allineate (`src/versions/docDiff.ts`). Interfaccia in
+  parole semplici: versione (commit), variante (branch), unisci (merge), pubblica/scarica (push/pull).
+- **Introduzione** al primo avvio (sette pagine con le funzioni di ogni ambiente), riapribile da Aiuto.
 - **Bookshelf**: l'albero degli Strata mostra le risorse sotto gruppi e filtri, con filtro e ordinamento.
 
 ## Installer
@@ -96,6 +100,13 @@ Aggiornato: 5 ottobre 2026 (M10).
   `src/lib/streamPolyfill.ts` li completa, caricato per primo e dal worker `src/resources/pdf.worker.ts`.
 - Asset protocol: `requireLiteralLeadingDot: false`, altrimenti le immagini in cartelle nascoste
   (es. Compendium dentro una cartella che inizia con un punto) non si vedono.
+
+## In valutazione (A/B test del committente)
+
+- **Split dello Scriptorium** (piu' pergamene aperte affiancate): non implementato. Rischi da valutare
+  per Marginalia: oggi c'e' un solo editor attivo (`getEditor()`), le bolle si ancorano alle posizioni
+  di quell'editor e la colonna dei commenti segue una sola pagina; con due editor servirebbero colonne
+  (o colori) per pergamena, ancore per editor e salvataggio/checkpoint per ciascuna.
 
 ## Prossimi passi possibili
 

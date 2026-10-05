@@ -386,3 +386,461 @@
 .pick-list__item.is-active {
   color: var(--accent);
 }
+
+/* ---------------------------------------------------------------- History semplificata */
+.hist {
+  display: grid;
+  grid-template-columns: 320px 1fr;
+  height: 100%;
+  min-height: 0;
+}
+
+.hist__side {
+  display: flex;
+  flex-direction: column;
+  min-height: 0;
+  border-right: 1px solid var(--line);
+  background: var(--chrome);
+}
+
+.hist__branch {
+  display: flex;
+  align-items: center;
+  gap: 4px;
+  padding: 10px 10px 8px;
+  border-bottom: 1px solid var(--line);
+}
+
+.hist__branch-btn {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  flex: 1;
+  min-width: 0;
+  padding: 6px 10px;
+  border: 1px solid var(--line);
+  border-radius: var(--radius);
+  background: var(--paper);
+  color: var(--ink);
+  text-align: left;
+}
+
+.hist__branch-btn:hover {
+  border-color: var(--line-strong);
+}
+
+.hist__branch-text {
+  display: flex;
+  flex-direction: column;
+  flex: 1;
+  min-width: 0;
+  line-height: 1.2;
+}
+
+.hist__branch-text small {
+  font-size: 10.5px;
+  color: var(--muted);
+}
+
+.hist__branch-text strong {
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.hist__section-head {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  margin-bottom: 8px;
+  font-size: 11px;
+  font-weight: 600;
+  text-transform: uppercase;
+  letter-spacing: 0.05em;
+  color: var(--muted);
+}
+
+.hist__help {
+  display: inline-flex;
+  cursor: help;
+}
+
+.hist__commit {
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+  padding: 12px 10px;
+  border-bottom: 1px solid var(--line);
+}
+
+.hist__clean {
+  margin: 0;
+}
+
+.hist__changes {
+  list-style: none;
+  margin: 0 0 4px;
+  padding: 0;
+  max-height: 160px;
+  overflow: auto;
+}
+
+.hist__changes button {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  width: 100%;
+  padding: 3px 6px;
+  border: 0;
+  border-radius: var(--radius-small);
+  background: none;
+  color: var(--ink);
+  text-align: left;
+}
+
+.hist__changes button:hover {
+  background: var(--chrome-2);
+}
+
+.hist__change-name {
+  flex: 1;
+  min-width: 0;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.hist__change-stat {
+  font-size: var(--fs-ui-small);
+  color: var(--muted);
+  font-variant-numeric: tabular-nums;
+}
+
+.hist__others {
+  padding: 2px 6px;
+  font-size: var(--fs-ui-small);
+}
+
+.hist__save {
+  justify-content: center;
+}
+
+.hist__list-wrap {
+  flex: 1;
+  min-height: 0;
+  display: flex;
+  flex-direction: column;
+  padding: 12px 10px 0;
+}
+
+.hist__toggle {
+  display: inline-flex;
+  align-items: center;
+  gap: 4px;
+  padding: 1px 6px;
+  border: 1px solid var(--line);
+  border-radius: 999px;
+  background: none;
+  color: var(--muted);
+  font-size: 10.5px;
+  font-weight: 500;
+  text-transform: none;
+  letter-spacing: 0;
+}
+
+.hist__list {
+  list-style: none;
+  margin: 0;
+  padding: 0 0 12px;
+  overflow: auto;
+  min-height: 0;
+}
+
+.hist__item {
+  position: relative;
+  display: flex;
+  gap: 12px;
+  padding: 7px 8px 7px 6px;
+  border-radius: var(--radius-small);
+  cursor: pointer;
+}
+
+.hist__item:hover,
+.hist__item.is-hover {
+  background: var(--chrome-2);
+}
+
+.hist__item.is-selected {
+  background: var(--accent-soft);
+}
+
+.hist__dot {
+  position: relative;
+  z-index: 1;
+  flex-shrink: 0;
+  width: 11px;
+  height: 11px;
+  margin-top: 3px;
+  border: 2px solid var(--series-3);
+  border-radius: 50%;
+  background: var(--paper);
+}
+
+.hist__item.is-head .hist__dot {
+  background: var(--series-3);
+}
+
+.hist__item.is-auto .hist__dot {
+  width: 9px;
+  height: 9px;
+  margin-left: 1px;
+  border-color: var(--line-strong);
+}
+
+.hist__line {
+  position: absolute;
+  left: 11px;
+  top: 18px;
+  bottom: -10px;
+  width: 2px;
+  background: var(--line);
+}
+
+.hist__item-text {
+  display: flex;
+  flex-direction: column;
+  min-width: 0;
+}
+
+.hist__item-title {
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+  color: var(--ink);
+}
+
+.hist__item.is-auto .hist__item-title {
+  color: var(--muted);
+  font-style: italic;
+}
+
+.hist__item-meta {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 4px;
+  font-size: var(--fs-ui-small);
+  color: var(--muted);
+}
+
+.hist__ref {
+  padding: 0 6px;
+  border-radius: 999px;
+  background: color-mix(in srgb, var(--series-3) 14%, transparent);
+  color: var(--series-3);
+}
+
+.hist__main {
+  display: flex;
+  flex-direction: column;
+  min-width: 0;
+  min-height: 0;
+  background: var(--desk);
+}
+
+.hist__main-head {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  padding: 8px 16px;
+  border-bottom: 1px solid var(--line);
+  background: var(--chrome);
+}
+
+.hist__doc-pick {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  color: var(--muted);
+}
+
+.hist__doc-pick .select {
+  min-width: 220px;
+}
+
+.hist__counts {
+  display: flex;
+  gap: 8px;
+  font-size: var(--fs-ui-small);
+  color: var(--muted);
+}
+
+.hist__counts .is-mod {
+  color: var(--warn);
+}
+
+.hist__counts .is-add {
+  color: var(--ok);
+}
+
+.hist__counts .is-del {
+  color: var(--bad);
+}
+
+.hist__cols-head {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 16px;
+  padding: 10px 24px 6px;
+}
+
+.hist__cols-head.is-single {
+  grid-template-columns: auto 1fr;
+  align-items: end;
+}
+
+.hist__cols-head.is-single .hint {
+  text-align: right;
+}
+
+.hist__cols-head > div {
+  display: flex;
+  flex-direction: column;
+}
+
+.hist__cols-head small {
+  font-size: 10.5px;
+  color: var(--muted);
+}
+
+.hist__scroll {
+  flex: 1;
+  min-height: 0;
+  overflow: auto;
+  padding: 4px 24px 40px;
+}
+
+/* la pergamena come documento */
+.doc-view {
+  max-width: 760px;
+  margin: 0 auto;
+  padding: 28px 40px 40px;
+  background: var(--paper);
+  box-shadow: var(--shadow);
+  font-family: var(--font-text);
+  font-size: 15px;
+  line-height: 1.55;
+  color: var(--ink);
+}
+
+.doc-view h1 {
+  font-size: 24px;
+  margin: 0.6em 0 0.4em;
+}
+
+.doc-view h2 {
+  font-size: 19px;
+  margin: 0.8em 0 0.3em;
+}
+
+.doc-view h3 {
+  font-size: 16px;
+  margin: 0.8em 0 0.3em;
+}
+
+.doc-view p {
+  margin: 0 0 0.6em;
+}
+
+.doc-view blockquote {
+  margin: 0 0 0.6em;
+  padding-left: 14px;
+  border-left: 3px solid var(--line-strong);
+  color: var(--ink-2);
+}
+
+.doc-view pre {
+  margin: 0 0 0.6em;
+  padding: 8px 10px;
+  background: var(--chrome);
+  font-family: var(--font-mono);
+  font-size: 12.5px;
+  white-space: pre-wrap;
+}
+
+.doc-view__list {
+  white-space: pre-line;
+}
+
+.doc-view__figure {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  color: var(--muted);
+  font-style: italic;
+}
+
+.doc-view__empty {
+  text-align: center;
+  margin-top: 40px;
+}
+
+/* confronto affiancato */
+.cmp.doc-view {
+  max-width: none;
+  padding: 18px 0 30px;
+}
+
+.cmp__note {
+  margin: 0 24px 12px;
+  padding: 6px 10px;
+  border-radius: var(--radius-small);
+  background: var(--chrome);
+  font-family: var(--font-ui);
+  font-size: var(--fs-ui-small);
+  color: var(--muted);
+}
+
+.cmp__row {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+}
+
+.cmp__cell {
+  padding: 2px 24px;
+  border-left: 3px solid transparent;
+}
+
+.cmp__cell + .cmp__cell {
+  border-left: 1px solid var(--line);
+}
+
+.cmp__row.is-del .cmp__cell:first-child,
+.cmp__row.is-mod .cmp__cell:first-child {
+  background: var(--del-bg);
+  border-left-color: var(--bad);
+}
+
+.cmp__row.is-add .cmp__cell:last-child,
+.cmp__row.is-mod .cmp__cell:last-child {
+  background: var(--add-bg);
+  box-shadow: inset 3px 0 0 var(--ok);
+}
+
+.cmp__cell.is-gap {
+  background: repeating-linear-gradient(-45deg, transparent 0 6px, color-mix(in srgb, var(--line) 50%, transparent) 6px 7px);
+}
+
+.cmp__row.is-same .cmp__cell {
+  color: var(--ink-2);
+}
+
+.cmp del {
+  background: color-mix(in srgb, var(--bad) 22%, transparent);
+  text-decoration: line-through;
+}
+
+.cmp ins {
+  background: color-mix(in srgb, var(--ok) 25%, transparent);
+  text-decoration: none;
+}

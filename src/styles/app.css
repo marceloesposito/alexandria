@@ -2097,3 +2097,59 @@ table.kv td:last-child {
   color: var(--accent);
   font-size: var(--fs-ui-small);
 }
+
+.onboarding {
+  width: min(540px, calc(100vw - 32px));
+}
+
+.onboarding__kicker {
+  font-size: 10.5px;
+  text-transform: uppercase;
+  letter-spacing: 0.06em;
+  color: var(--muted);
+  margin-bottom: 2px;
+}
+
+.onboarding__features {
+  list-style: none;
+  margin: 4px 0 12px;
+  padding: 0;
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+  text-align: left;
+}
+
+.onboarding__features li {
+  display: flex;
+  gap: 12px;
+  align-items: flex-start;
+  padding: 8px 10px;
+  border-radius: 10px;
+  background: var(--chrome);
+}
+
+.onboarding__features li > span:last-child {
+  display: flex;
+  flex-direction: column;
+  font-size: var(--fs-ui-small);
+  line-height: 1.4;
+  color: var(--ink-2);
+}
+
+.onboarding__features strong {
+  font-size: var(--fs-ui);
+  color: var(--ink);
+}
+
+.onboarding__feature-icon {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 30px;
+  height: 30px;
+  flex-shrink: 0;
+  border-radius: 8px;
+  color: var(--section);
+  background: color-mix(in srgb, var(--section) 12%, var(--paper));
+}
