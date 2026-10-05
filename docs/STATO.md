@@ -74,7 +74,10 @@ Aggiornato: 5 ottobre 2026 (M10).
 - Il workflow `release.yml` costruisce Windows e macOS (universale) a ogni tag `v*` e li
   allega a una release in bozza.
 - macOS in locale: `npm run tauri build -- --target universal-apple-darwin --bundles app,dmg`
-  (serve `rustup target add x86_64-apple-darwin`).
+  (serve `rustup target add x86_64-apple-darwin`). Bastano i Command Line Tools, non serve Xcode.
+  Se fra gli SDK ce n'e' uno piu' nuovo del linker (es. un MacOSX27.0.sdk rimasto da una beta, con
+  architetture che `ld` non conosce: "unknown architecture" nei .tbd), indicare l'SDK giusto:
+  `SDKROOT=/Library/Developer/CommandLineTools/SDKs/MacOSX26.5.sdk npm run tauri build -- ...`
 
 ## Prove
 
