@@ -33,6 +33,10 @@ pub fn run() {
         .setup(|app| {
             use tauri::Manager;
             if let Some(w) = app.get_webview_window("main") {
+                // Windows: niente barra nativa, la barra dei menu dell'app fa da barra del titolo
+                // (bordi, ombra e ridimensionamento restano quelli del sistema)
+                #[cfg(windows)]
+                let _ = w.set_decorations(false);
                 // prove automatiche: finestra fuori schermo e senza focus (non disturba chi lavora)
                 if std::env::var("ALEXANDRIA_TEST_OFFSCREEN").is_ok() {
                     let _ = w.set_position(tauri::PhysicalPosition::new(-6000, -6000));

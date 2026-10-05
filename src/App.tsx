@@ -2,6 +2,7 @@
 import { useEffect } from 'react';
 import { MenuBar } from './shell/MenuBar';
 import { NavBar } from './shell/NavBar';
+import { FloatingTitleBar } from './shell/WindowControls';
 import { Ribbon } from './shell/Ribbon';
 import { Toasts } from './shell/Toasts';
 import { DialogHost } from './shell/DialogHost';
@@ -72,6 +73,7 @@ export default function App() {
   if (!vaultRoot) {
     return (
       <div className="app app--start">
+        <FloatingTitleBar />
         <StartScreen />
         <DialogHost />
         <Onboarding />

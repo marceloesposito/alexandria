@@ -1165,4 +1165,8 @@ export const it: Record<string, string> = {
   'float.close': "Chiudi il pannello (i gruppi tornano nella barra)",
   'float.dock': "Rimetti nella barra",
   'float.dropHere': "Rilascia qui per un pannello flottante",
+  'win.minimize': "Riduci a icona",
+  'win.maximize': "Ingrandisci",
+  'win.restore': "Ripristina",
+  'win.close': "Chiudi",
 };
