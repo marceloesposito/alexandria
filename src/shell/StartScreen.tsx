@@ -1,7 +1,7 @@
 // Schermata iniziale (stile VS Code / Adobe Home): si sceglie quale Compendium aprire o se crearne
 // uno nuovo. A sinistra le azioni e "riprendi l'ultimo", a destra i Compendium recenti.
 import { useEffect, useMemo, useState } from 'react';
-import { FolderOpen, FolderPlus, Landmark, ArrowRight, Search, X, CircleAlert, Feather, Settings, Usb } from 'lucide-react';
+import { FolderOpen, FolderPlus, Landmark, ArrowRight, Search, X, CircleAlert, Feather, Settings, Usb, NotebookPen } from 'lucide-react';
 import { useWorkspace, getPortableRoot } from '../state/workspace';
 import { runCommand } from '../commands/registry';
 import { platform, baseName } from '../platform';
@@ -82,6 +82,13 @@ export function StartScreen() {
             <span>
               <strong>{t('cmd.file.newVault')}</strong>
               <small>{t('start.newHint')}</small>
+            </span>
+          </button>
+          <button className="start__action" onClick={async () => (setBusy(true), await ws.createFromTemplate('journal'), setBusy(false))} disabled={busy}>
+            <NotebookPen size={18} />
+            <span>
+              <strong>{t('start.journal')}</strong>
+              <small>{t('start.journalHint')}</small>
             </span>
           </button>
           <button className="start__action" onClick={() => void runCommand('file.openVault')} disabled={busy}>

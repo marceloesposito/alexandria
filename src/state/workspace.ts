@@ -100,6 +100,8 @@ interface WorkspaceState {
   closeVault(): void;
   /** Crea (o riapre) il Compendium predefinito in Documenti/Alexandria. */
   createDefaultVault(): Promise<boolean>;
+  /** nuovo Compendium da un modello (per ora: 'journal') */
+  createFromTemplate(id: 'journal'): Promise<boolean>;
   forgetRecent(root: string): void;
   refreshDocs(): Promise<void>;
   openDoc(rel: string): void;
@@ -283,6 +285,23 @@ export const useWorkspace = create<WorkspaceState>((set, get) => ({
   async createDefaultVault() {
     const docs = await platform.documentsDir();
     return get().enterVault(await ensureDir(joinPath(docs, 'Alexandria', t('vault.defaultName'))));
+  },
+
+  async createFromTemplate(id) {
+    const { journalTemplate, applyCompendiumTemplate } = await import('../vault/compendiumTemplates');
+    const lang = get().app.prefs.lang;
+    const tpl = id === 'journal' ? journalTemplate(lang) : null;
+    if (!tpl) return false;
+    const base = joinPath(await platform.documentsDir(), 'Alexandria');
+    await ensureDir(base);
+    // cartella nuova: Diario, Diario 2, ...
+    let root = joinPath(base, tpl.folderName);
+    for (let n = 2; await platform.exists(root); n++) root = joinPath(base, `${tpl.folderName} ${n}`);
+    await ensureDir(root);
+    const rels = await applyCompendiumTemplate(root, tpl, lang);
+    const ok = await get().enterVault(root);
+    if (ok && rels[0]) get().openDoc(rels[rels.length - 1]);
+    return ok;
   },
 
   forgetRecent(root) {
