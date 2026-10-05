@@ -32,6 +32,8 @@ export interface Prefs {
   resourceSort: 'title' | 'added' | 'author' | 'year' | 'kind';
   /** introduzione vista (o saltata) */
   onboardingDone: boolean;
+  /** all'avvio: schermata iniziale o ultimo Compendium */
+  startup: 'home' | 'last';
   authorName: string;
   leftWidth: number;
   rightWidth: number;
@@ -60,6 +62,7 @@ export const DEFAULT_PREFS: Prefs = {
   layerSuggestions: 'suggest',
   resourceSort: 'title',
   onboardingDone: false,
+  startup: 'home',
   authorName: '',
   leftWidth: 280,
   rightWidth: 300,

@@ -50,10 +50,7 @@ function Entries({ items, onDone }: { items: MenuEntry[]; onDone: () => void }) 
               onClick={async () => {
                 onDone();
                 await flushSave(getEditor());
-                await useWorkspace.getState().openVault(r);
-                const st = useWorkspace.getState();
-                if (st.docs.length) st.openDoc(st.docs[0].rel);
-                else await st.newDoc();
+                await useWorkspace.getState().enterVault(r);
               }}
             >
               <span className="menu-item__check" />

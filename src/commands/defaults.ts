@@ -128,6 +128,7 @@ export const MENUS: MenuDef[] = [
       c('file.newDoc'),
       { label: 'menu.file.documents', submenu: [{ dynamic: 'documents' }] },
       sep,
+      c('file.home'),
       c('file.openVault'),
       c('file.newVault'),
       { label: 'menu.file.recentVaults', submenu: [{ dynamic: 'recentVaults' }] },

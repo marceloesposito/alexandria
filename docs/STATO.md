@@ -48,6 +48,9 @@ Aggiornato: 5 ottobre 2026 (M10).
   pannello); nella personalizzazione gli strumenti sono tessere con l'etichetta sotto l'icona e i gruppi
   tolti si possono rimettere.
 - **Navbar** in stile Affinity: icone grandi colorate per sezione, etichetta sotto.
+- **Schermata iniziale** (stile VS Code / Adobe Home): all'avvio si sceglie il Compendium (riprendi
+  l'ultimo, recenti, nuovo, apri; al primo avvio "crea il tuo primo Compendium"). Si torna da File >
+  Schermata iniziale. Preferenze > All'avvio: schermata iniziale (predefinito) o ultimo Compendium.
 - **Introduzione** al primo avvio (cinque pagine), riapribile da Aiuto.
 - **Bookshelf**: l'albero degli Strata mostra le risorse sotto gruppi e filtri, con filtro e ordinamento.
 

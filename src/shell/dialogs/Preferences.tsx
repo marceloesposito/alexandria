@@ -58,6 +58,13 @@ export function PreferencesDialog() {
               </div>
             </div>
             <label className="form__row">
+              <span>{t('prefs.startup')}</span>
+              <select className="select" value={prefs.startup} onChange={(e) => set({ startup: e.target.value as Prefs['startup'] })}>
+                <option value="home">{t('prefs.startup.home')}</option>
+                <option value="last">{t('prefs.startup.last')}</option>
+              </select>
+            </label>
+            <label className="form__row">
               <span>{t('prefs.author')}</span>
               <input className="input" value={prefs.authorName} placeholder={t('prefs.authorHint')} onChange={(e) => set({ authorName: e.target.value })} />
             </label>

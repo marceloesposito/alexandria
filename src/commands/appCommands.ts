@@ -33,6 +33,7 @@ import {
   ScrollText,
   Ruler,
   Feather,
+  House,
 } from 'lucide-react';
 import { registerCommands, notifyCommandState } from './registry';
 import { useZen } from '../state/zen';
@@ -54,10 +55,7 @@ async function chooseVault(create: boolean) {
     // una cartella qualsiasi diventa un vault: i .md esistenti in documents/ vengono letti
     ws().toast(t('vault.converted'), 'info');
   }
-  await ws().openVault(dir);
-  const st = ws();
-  if (st.docs.length) st.openDoc(st.docs[0].rel);
-  else await st.newDoc();
+  await ws().enterVault(dir);
 }
 
 export function registerAppCommands() {
@@ -73,6 +71,16 @@ export function registerAppCommands() {
         await flushSave(getEditor());
         await ws().newDoc();
         ws().setView('editor');
+      },
+    },
+    {
+      id: 'file.home',
+      label: 'cmd.file.home',
+      icon: House,
+      category: 'file',
+      run: async () => {
+        await flushSave(getEditor());
+        ws().closeVault();
       },
     },
     { id: 'file.openVault', label: 'cmd.file.openVault', icon: FolderOpen, shortcut: 'Mod+O', category: 'file', run: () => chooseVault(false) },

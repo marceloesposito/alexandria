@@ -6,6 +6,7 @@ import { Ribbon } from './shell/Ribbon';
 import { Toasts } from './shell/Toasts';
 import { DialogHost } from './shell/DialogHost';
 import { Onboarding } from './shell/Onboarding';
+import { StartScreen } from './shell/StartScreen';
 import { ContextMenuHost } from './components/ContextMenu';
 import { AskHost } from './components/confirm';
 import { EditorView } from './editor/EditorView';
@@ -20,6 +21,7 @@ export default function App() {
   const ready = useWorkspace((s) => s.ready);
   const view = useWorkspace((s) => s.app.view);
   const zen = useZen((s) => s.on);
+  const vaultRoot = useWorkspace((s) => s.vaultRoot);
 
   useEffect(() => {
     void useWorkspace.getState().init();
@@ -61,6 +63,19 @@ export default function App() {
       <div className="splash">
         <div className="splash__name">Alexandria</div>
         <div className="hint">{t('app.loading')}</div>
+      </div>
+    );
+  }
+
+  // nessun Compendium aperto: schermata iniziale
+  if (!vaultRoot) {
+    return (
+      <div className="app app--start">
+        <StartScreen />
+        <DialogHost />
+        <Onboarding />
+        <AskHost />
+        <Toasts />
       </div>
     );
   }

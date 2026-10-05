@@ -1,6 +1,11 @@
 // Stato centrale dell'app: preferenze, vault aperto, documento attivo, finestre di dialogo.
 import { create } from 'zustand';
 import { platform, joinPath } from '../platform';
+
+async function ensureDir(p: string): Promise<string> {
+  if (!(await platform.exists(p))) await platform.mkdir(p);
+  return p;
+}
 import { setLang, t } from '../i18n';
 import {
   type AppState,
@@ -73,6 +78,13 @@ interface WorkspaceState {
   setPrefs(p: Partial<Prefs>): void;
   setRibbon(r: RibbonConfig | null): void;
   openVault(root: string): Promise<void>;
+  /** Apre un Compendium e il suo ultimo Scroll (o il primo, o uno nuovo). */
+  enterVault(root: string): Promise<boolean>;
+  /** Chiude il Compendium e torna alla schermata iniziale. */
+  closeVault(): void;
+  /** Crea (o riapre) il Compendium predefinito in Documenti/Alexandria. */
+  createDefaultVault(): Promise<boolean>;
+  forgetRecent(root: string): void;
   refreshDocs(): Promise<void>;
   openDoc(rel: string): void;
   newDoc(title?: string, folder?: string): Promise<string | null>;
@@ -138,19 +150,8 @@ export const useWorkspace = create<WorkspaceState>((set, get) => ({
     applyTheme(app.prefs.theme);
     set({ app });
 
-    // Avvio: ultimo vault e ultimo documento; al primo avvio un vault nuovo con un documento vuoto
-    let root = app.lastVault;
-    if (root && !(await platform.exists(root))) root = null;
-    if (!root) {
-      const docs = await platform.documentsDir();
-      root = joinPath(docs, 'Alexandria', t('vault.defaultName'));
-    }
-    await get().openVault(root);
-    const st = get();
-    const last = st.app.lastDoc && st.docs.find((d) => d.rel === st.app.lastDoc);
-    if (last) st.openDoc(last.rel);
-    else if (st.docs.length) st.openDoc(st.docs[0].rel);
-    else await st.newDoc();
+    // Avvio: la schermata iniziale sceglie il Compendium; chi lo preferisce riapre subito l'ultimo
+    if (app.prefs.startup === 'last' && app.lastVault && (await platform.exists(app.lastVault))) await get().enterVault(app.lastVault);
     set({ ready: true });
   },
 
@@ -188,6 +189,39 @@ export const useWorkspace = create<WorkspaceState>((set, get) => ({
     } catch (e) {
       get().toast(t('vault.openError', { error: String(e) }), 'error');
     }
+  },
+
+  async enterVault(root) {
+    if (!(await platform.exists(root))) {
+      get().toast(t('start.missing'), 'error');
+      return false;
+    }
+    const wasLast = get().app.lastVault === root;
+    await get().openVault(root);
+    const st = get();
+    if (st.vaultRoot !== root) return false;
+    // l'ultimo Scroll vale solo se apparteneva a questo Compendium
+    const last = wasLast && st.app.lastDoc ? st.docs.find((d) => d.rel === st.app.lastDoc) : undefined;
+    if (last) st.openDoc(last.rel);
+    else if (st.docs.length) st.openDoc(st.docs[0].rel);
+    else await st.newDoc();
+    if (get().app.view !== 'editor') get().setView('editor');
+    return true;
+  },
+
+  closeVault() {
+    set({ vaultRoot: null, vault: null, docs: [], activeDoc: null, dialog: null, dialogArg: null });
+  },
+
+  async createDefaultVault() {
+    const docs = await platform.documentsDir();
+    return get().enterVault(await ensureDir(joinPath(docs, 'Alexandria', t('vault.defaultName'))));
+  },
+
+  forgetRecent(root) {
+    const app = { ...get().app, recentVaults: get().app.recentVaults.filter((r) => r !== root), lastVault: get().app.lastVault === root ? null : get().app.lastVault };
+    set({ app });
+    persist(app);
   },
 
   async refreshDocs() {
