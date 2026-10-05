@@ -200,4 +200,30 @@ Un paragrafo di prova con una nota#footnote[La nota.].
         let doc = compile("#image(\"img/a.svg\", width: 2cm)".into(), vec![("img/a.svg".into(), svg.to_vec())]);
         assert!(doc.is_ok(), "{:?}", doc.err());
     }
+
+    /// Il sorgente prodotto dall'esportatore del frontend (src/export/typst.test.ts) deve compilare.
+    #[test]
+    fn compiles_frontend_fixture() {
+        let path = std::path::Path::new(env!("CARGO_MANIFEST_DIR")).join("tests/fixtures/sample.typ");
+        let src = std::fs::read_to_string(&path).expect("fixture generata da npm test");
+        let svg = br#"<svg xmlns="http://www.w3.org/2000/svg" width="20" height="10"><rect width="20" height="10"/></svg>"#;
+        // ogni immagine citata riceve un SVG di prova
+        let mut files = Vec::new();
+        for part in src.split("image(\"").skip(1) {
+            if let Some(end) = part.find('"') {
+                files.push((part[..end].to_string(), svg.to_vec()));
+            }
+        }
+        let doc = compile(src, files);
+        assert!(doc.is_ok(), "{:?}", doc.err());
+        let doc = doc.unwrap();
+        assert!(doc.pages().len() >= 3);
+        // per guardarlo: ALEXANDRIA_DUMP_PDF=percorso cargo test
+        if let Ok(out) = std::env::var("ALEXANDRIA_DUMP_PDF") {
+            std::fs::write(&out, typst_pdf::pdf(&doc, &typst_pdf::PdfOptions::default()).unwrap()).unwrap();
+            for (i, p) in doc.pages().iter().enumerate() {
+                std::fs::write(format!("{}.{}.svg", out, i + 1), typst_svg::svg(p, &typst_svg::SvgOptions::default())).unwrap();
+            }
+        }
+    }
 }

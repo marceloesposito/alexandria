@@ -113,6 +113,8 @@ export interface Platform {
   pickFiles(title?: string): Promise<string[]>;
   saveDialog(defaultName: string, extensions: string[]): Promise<string | null>;
   openExternal(url: string): Promise<void>;
+  /** apre un file locale con l'app predefinita del sistema */
+  openPath(path: string): Promise<void>;
 
   // git
   gitInit(repo: string): Promise<void>;

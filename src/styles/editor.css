@@ -521,3 +521,127 @@
 .editor-scroll.is-focus .doc-body > *:focus-within {
   opacity: 1;
 }
+
+/* ---------------------------------------------------------------- colonna sinistra: risorse / indice */
+.side-tabs {
+  display: flex;
+  padding: 8px 8px 4px;
+}
+
+.side-tabs .seg {
+  flex: 1;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 5px;
+  font-size: var(--fs-ui-small);
+}
+
+.outline__item {
+  cursor: pointer;
+  gap: 6px;
+}
+
+.outline__item.level-2 {
+  padding-left: 18px;
+}
+
+.outline__item.level-3 {
+  padding-left: 30px;
+}
+
+.outline__item.level-1 .tree__label {
+  font-weight: 600;
+}
+
+.outline__level {
+  font-size: 9.5px;
+  color: var(--muted);
+  min-width: 18px;
+}
+
+/* ---------------------------------------------------------------- anteprima di stampa */
+.preview {
+  display: flex;
+  flex-direction: column;
+  height: 100%;
+  min-height: 0;
+}
+
+.preview__bar {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  padding: 6px 10px;
+  background: var(--chrome);
+  border-bottom: 1px solid var(--line);
+}
+
+.preview__pages {
+  flex: 1;
+  overflow: auto;
+  padding: 16px;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 14px;
+}
+
+.preview__page {
+  margin: 0;
+  background: white;
+  box-shadow: var(--shadow);
+}
+
+.preview__page img {
+  width: 100%;
+  display: block;
+}
+
+.preview__page figcaption {
+  text-align: center;
+  font-size: 10.5px;
+  color: var(--muted);
+  background: var(--desk);
+  padding-top: 3px;
+}
+
+.preview__errors {
+  width: 100%;
+  background: color-mix(in srgb, var(--bad) 12%, var(--paper));
+  color: var(--bad);
+  border-radius: var(--radius-small);
+  padding: 8px 10px;
+  font-family: var(--font-mono);
+  font-size: var(--fs-ui-small);
+  white-space: pre-wrap;
+}
+
+.preview__note {
+  text-align: center;
+}
+
+/* ---------------------------------------------------------------- esporta */
+.export-formats {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: 8px;
+}
+
+.export-format {
+  display: flex;
+  flex-direction: column;
+  align-items: flex-start;
+  gap: 4px;
+  text-align: left;
+  border: 1px solid var(--line);
+  border-radius: var(--radius);
+  background: var(--paper);
+  padding: 10px 12px;
+}
+
+.export-format.is-active {
+  border-color: var(--accent);
+  background: var(--accent-soft);
+  color: var(--accent);
+}
