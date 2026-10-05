@@ -252,7 +252,7 @@ function templateText(tpl: string, ctx: ExportContext, numbering: string): strin
 
 function pageSetup(ctx: ExportContext, master: MasterId, columns: number, section: number, resetCounter: boolean): string {
   const L = ctx.settings.layout;
-  const m = L.masters[master];
+  const m = L.masters[master] ?? L.masters.body;
   const numbering = NUMBERING[m.numbering] ?? '1';
   const num = `#counter(page).display(${str(numbering)})`;
   const facing = L.facingPages;

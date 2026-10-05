@@ -2,11 +2,15 @@
 // Salvate in .alexandria/doc-settings/<doc>.json e usate da editor, anteprima ed export.
 
 export type Paper = 'a4' | 'a5' | 'letter' | 'b5' | 'custom';
-export type MasterId = 'title' | 'body' | 'appendix';
+/** master page: 'title', 'body', 'appendix' predefinite, piu' quelle create dall'utente */
+export type MasterId = string;
+export const BUILTIN_MASTERS = ['title', 'body', 'appendix'] as const;
 export type PageNumberPos = 'none' | 'bottom-center' | 'bottom-outer' | 'top-outer' | 'top-center';
 export type ParaStyleId = 'body' | 'h1' | 'h2' | 'h3' | 'quote' | 'caption' | 'footnote';
 
 export interface MasterPage {
+  /** nome scelto dall'utente (le predefinite usano la traduzione) */
+  name?: string;
   header: string; // testo con variabili {title} {author} {chapter} {page} {pages} {date}
   footer: string;
   pageNumbers: PageNumberPos;
@@ -140,11 +144,39 @@ export function normalizeDocSettings(raw: unknown, lang: 'it' | 'en' = 'it'): Do
   if (!raw || typeof raw !== 'object') return d;
   const r = raw as Partial<DocSettings>;
   const l = (r.layout ?? {}) as Partial<LayoutSettings>;
-  const masters = { ...d.layout.masters };
-  for (const k of Object.keys(masters) as MasterId[]) masters[k] = { ...masters[k], ...(l.masters?.[k] ?? {}) };
+  // le predefinite completano quelle salvate; le master create dall'utente restano
+  const masters: Record<MasterId, MasterPage> = { ...d.layout.masters };
+  for (const [k, m] of Object.entries(l.masters ?? {})) masters[k] = { ...(masters[k] ?? masters.body), ...m };
   const styles = { ...d.layout.styles };
   for (const k of Object.keys(styles) as ParaStyleId[]) styles[k] = { ...styles[k], ...(l.styles?.[k] ?? {}) };
   return { ...d, ...r, version: 1, layout: { ...d.layout, ...l, masters, styles } };
+}
+
+/** Nuova master page copiata da un'altra (di solito il corpo); restituisce anche il suo id. */
+export function addMaster(l: LayoutSettings, name: string, from: MasterId = 'body'): { layout: LayoutSettings; id: MasterId } {
+  const base = l.masters[from] ?? l.masters.body;
+  let n = 1;
+  while (l.masters[`m${n}`]) n++;
+  const id = `m${n}`;
+  return { layout: { ...l, masters: { ...l.masters, [id]: { ...base, name } } }, id };
+}
+
+export function renameMaster(l: LayoutSettings, id: MasterId, name: string): LayoutSettings {
+  if (!l.masters[id]) return l;
+  return { ...l, masters: { ...l.masters, [id]: { ...l.masters[id], name } } };
+}
+
+/** Il corpo non si elimina: e' la master di ripiego per le sezioni rimaste senza. */
+export function removeMaster(l: LayoutSettings, id: MasterId): LayoutSettings {
+  if (id === 'body' || !l.masters[id]) return l;
+  const masters = { ...l.masters };
+  delete masters[id];
+  return { ...l, masters };
+}
+
+/** Master usata davvero: quella chiesta, o il corpo se non esiste piu'. */
+export function resolveMaster(l: LayoutSettings, id: MasterId | undefined): MasterPage {
+  return (id && l.masters[id]) || l.masters.body;
 }
 
 export function withPaper(l: LayoutSettings, paper: Paper): LayoutSettings {

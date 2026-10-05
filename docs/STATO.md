@@ -37,7 +37,7 @@ Aggiornato: 5 ottobre 2026 (M10).
 - **Rimozione delle risorse**: ribbon, menu Risorse, clic destro, Canc nella tabella, visualizzatore.
 - **OpenSSL** compilato dentro l'app (`vendored-openssl` di git2): niente dipendenza da Homebrew.
 - **Nomi tematici** (scelti dal committente, solo nelle stringhe di `src/i18n/`, uguali in IT ed EN):
-  documento -> Scroll, gestore risorse -> Bookshelf, schermata Editor -> Scriptorium, Versioni ->
+  documento -> Scroll (in italiano Pergamena), gestore risorse -> Bookshelf, schermata Editor -> Scriptorium, Versioni ->
   History, commenti a margine -> Marginalia, whiteboard -> Tabula, pin -> Bookmarks, layer -> Strata.
   Restano Library e Bibliografia; vault -> Compendium (la cartella creata al primo avvio si chiama "Il mio Compendium"; quelle esistenti non cambiano nome). Identificatori, cartelle
   (`documents/`, `resources/`) e file su disco non cambiano.
@@ -51,6 +51,11 @@ Aggiornato: 5 ottobre 2026 (M10).
 - **Schermata iniziale** (stile VS Code / Adobe Home): all'avvio si sceglie il Compendium (riprendi
   l'ultimo, recenti, nuovo, apri; al primo avvio "crea il tuo primo Compendium"). Si torna da File >
   Schermata iniziale. Preferenze > All'avvio: schermata iniziale (predefinito) o ultimo Compendium.
+- **Template e master page** (Scriptorium > Layout > Template, File > Nuova da template...):
+  template predefiniti (Vuota, Articolo, Tesi, Saggio, Paper a due colonne) e dell'utente in
+  `<appData>/templates/*.json`, comuni a tutti i Compendium; un template e' testo di partenza +
+  impostazioni. Le master page non sono piu' tre fisse: si creano, rinominano, duplicano ed eliminano
+  (il corpo resta; una sezione con una master eliminata usa il corpo). "Nuova pergamena" resta vuota.
 - **Introduzione** al primo avvio (cinque pagine), riapribile da Aiuto.
 - **Bookshelf**: l'albero degli Strata mostra le risorse sotto gruppi e filtri, con filtro e ordinamento.
 

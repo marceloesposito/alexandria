@@ -4,6 +4,7 @@ import { FileUp } from 'lucide-react';
 import { Modal } from '../components/Modal';
 import { useWorkspace } from '../state/workspace';
 import { useDocSettings } from './docSettings';
+import { masterLabel } from './TemplatesView';
 import { PAPERS, withPaper, type LayoutSettings, type MasterId, type ParaStyleId, type ParaStyle, type MasterPage, type Paper } from './model';
 import { BUNDLED_STYLES, listCustomStyles, type StyleInfo } from '../citations/store';
 import { runCommand } from '../commands/registry';
@@ -272,7 +273,7 @@ export function DocSettingsDialog() {
               {(Object.keys(L.masters) as MasterId[]).map((id) => (
                 <li key={id}>
                   <button className={`pick-list__item ${masterId === id ? 'is-active' : ''}`} onClick={() => setMasterId(id)}>
-                    {t(`layout.master.${id}`)}
+                    {masterLabel(id, L.masters[id])}
                   </button>
                 </li>
               ))}

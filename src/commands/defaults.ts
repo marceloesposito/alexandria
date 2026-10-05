@@ -61,7 +61,8 @@ export const DEFAULT_RIBBON: RibbonConfig = {
       label: 'ribbon.tab.layout',
       groups: [
         { id: 'ed-lay-page', label: 'ribbon.group.page', items: ['layout.paper', 'layout.margins', 'layout.columns'] },
-        { id: 'ed-lay-type', label: 'ribbon.group.typography', items: ['layout.styles', 'layout.masters', 'layout.lineNumbersPdf'] },
+        { id: 'ed-lay-tpl', label: 'ribbon.group.templates', items: ['tpl.manage', 'tpl.newFrom', 'tpl.saveAs', 'layout.masters'] },
+        { id: 'ed-lay-type', label: 'ribbon.group.typography', items: ['layout.styles', 'layout.lineNumbersPdf'] },
         { id: 'ed-lay-out', label: 'ribbon.group.output', items: ['view.preview', 'file.export', 'file.exportPdf'] },
       ],
     },
@@ -126,6 +127,7 @@ export const MENUS: MenuDef[] = [
     label: 'menu.file',
     items: [
       c('file.newDoc'),
+      c('tpl.newFrom'),
       { label: 'menu.file.documents', submenu: [{ dynamic: 'documents' }] },
       sep,
       c('file.home'),

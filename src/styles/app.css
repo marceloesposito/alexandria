@@ -1832,3 +1832,256 @@ table.kv td:last-child {
     min-height: 100vh;
   }
 }
+
+/* ---------------------------------------------------------------- template e master page */
+.tpl-view {
+  max-width: 1180px;
+}
+
+.tpl-view__tabs {
+  margin-left: 18px;
+}
+
+.tpl-view__body {
+  flex: 1;
+  min-height: 0;
+  overflow: hidden;
+  display: flex;
+}
+
+.tpl {
+  display: grid;
+  grid-template-columns: 1fr 300px;
+  width: 100%;
+  min-height: 0;
+}
+
+.tpl__grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(150px, 1fr));
+  gap: 14px;
+  padding: 20px;
+  overflow: auto;
+  align-content: start;
+  background: var(--desk);
+}
+
+.tpl-card {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 6px;
+  padding: 14px 10px 10px;
+  border: 1px solid transparent;
+  border-radius: 10px;
+  background: none;
+  color: var(--ink);
+}
+
+.tpl-card:hover {
+  background: var(--chrome);
+}
+
+.tpl-card.is-active {
+  background: var(--paper);
+  border-color: var(--accent);
+  box-shadow: var(--shadow);
+}
+
+.tpl-card__name {
+  font-weight: 600;
+  text-align: center;
+}
+
+.tpl-card__kind {
+  font-size: 10.5px;
+  color: var(--muted);
+}
+
+.tpl-card--add {
+  justify-content: center;
+  min-height: 200px;
+  border: 1.5px dashed var(--line-strong);
+  color: var(--muted);
+}
+
+.tpl__detail {
+  display: flex;
+  flex-direction: column;
+  align-items: flex-start;
+  gap: 8px;
+  padding: 20px;
+  border-left: 1px solid var(--line);
+  overflow: auto;
+}
+
+.tpl__detail h3 {
+  margin: 8px 0 0;
+  font-family: var(--font-text);
+  font-size: 20px;
+}
+
+.tpl__facts {
+  display: grid;
+  grid-template-columns: auto 1fr;
+  gap: 4px 12px;
+  margin: 6px 0;
+  font-size: var(--fs-ui-small);
+}
+
+.tpl__facts dt {
+  color: var(--muted);
+}
+
+.tpl__facts dd {
+  margin: 0;
+}
+
+.tpl__actions {
+  display: flex;
+  flex-direction: column;
+  align-items: stretch;
+  gap: 6px;
+  width: 100%;
+  margin-top: 6px;
+}
+
+.tpl__empty {
+  margin: 40px auto;
+}
+
+/* anteprima della pagina */
+.page-preview {
+  position: relative;
+  background: var(--paper);
+  border: 1px solid var(--line);
+  border-radius: 2px;
+  box-shadow: var(--shadow);
+  flex-shrink: 0;
+  overflow: hidden;
+}
+
+.page-preview__text {
+  position: absolute;
+  column-fill: auto;
+}
+
+.page-preview__line {
+  display: block;
+  height: 2px;
+  margin-bottom: 4px;
+  border-radius: 1px;
+  background: var(--line);
+  break-inside: avoid;
+}
+
+.page-preview__header,
+.page-preview__footer {
+  position: absolute;
+  min-height: 2px;
+  font-size: 8px;
+  line-height: 1;
+  color: var(--muted);
+  text-align: center;
+  border-bottom: 1px solid var(--line);
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+.page-preview__footer {
+  border-bottom: 0;
+  border-top: 1px solid var(--line);
+}
+
+.page-preview__num {
+  position: absolute;
+  min-width: 4px;
+  min-height: 4px;
+  font-size: 8px;
+  line-height: 1;
+  color: var(--accent);
+}
+
+.page-preview__num:empty {
+  background: var(--accent);
+  border-radius: 1px;
+}
+
+.page-preview__num.at-bottom-center,
+.page-preview__num.at-top-center {
+  left: 50%;
+  translate: -50% 0;
+}
+
+.page-preview__num.at-bottom-outer,
+.page-preview__num.at-top-outer {
+  right: 8%;
+}
+
+/* master page */
+.tpl--masters {
+  grid-template-columns: 240px 1fr;
+}
+
+.tpl__masters {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+  padding: 16px;
+  border-right: 1px solid var(--line);
+  overflow: auto;
+}
+
+.tpl__masters ul {
+  list-style: none;
+  margin: 0;
+  padding: 0;
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+}
+
+.tpl__master {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  width: 100%;
+  padding: 6px 8px;
+  border: 1px solid transparent;
+  border-radius: var(--radius-small);
+  background: none;
+  color: var(--ink);
+  text-align: left;
+}
+
+.tpl__master:hover {
+  background: var(--chrome-2);
+}
+
+.tpl__master.is-active {
+  background: var(--accent-soft);
+  border-color: var(--accent);
+  color: var(--accent);
+}
+
+.tpl__master-edit {
+  display: grid;
+  grid-template-columns: 1fr auto;
+  gap: 24px;
+  padding: 20px 24px;
+  overflow: auto;
+  align-items: start;
+}
+
+.tpl__master-side {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 12px;
+}
+
+.tpl__master-actions {
+  display: flex;
+  gap: 6px;
+}

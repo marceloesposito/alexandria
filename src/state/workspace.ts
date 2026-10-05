@@ -26,9 +26,12 @@ import {
   deleteDocument,
   duplicateDocument,
   saveVaultConfig,
+  writeJson,
 } from '../vault/vault';
+import { abs, docSettingsFile } from '../vault/paths';
 
 export type DialogId =
+  | 'templates'
   | 'insertResource'
   | 'ribbonCustomize'
   | 'preferences'
@@ -87,7 +90,8 @@ interface WorkspaceState {
   forgetRecent(root: string): void;
   refreshDocs(): Promise<void>;
   openDoc(rel: string): void;
-  newDoc(title?: string, folder?: string): Promise<string | null>;
+  /** nuova pergamena, vuota o con testo e impostazioni iniziali (template) */
+  newDoc(title?: string, folder?: string, init?: { markdown: string; settings: unknown }): Promise<string | null>;
   renameDoc(rel: string, title: string): Promise<void>;
   deleteDoc(rel: string): Promise<void>;
   duplicateDoc(rel: string): Promise<void>;
@@ -244,10 +248,11 @@ export const useWorkspace = create<WorkspaceState>((set, get) => ({
     persist(app);
   },
 
-  async newDoc(title, folder = '') {
+  async newDoc(title, folder = '', init) {
     const { vaultRoot, docs } = get();
     if (!vaultRoot) return null;
-    const rel = await createDocument(vaultRoot, docs, title ?? t('doc.untitled'), folder);
+    const rel = await createDocument(vaultRoot, docs, title ?? t('doc.untitled'), folder, init?.markdown ?? '');
+    if (init) await writeJson(abs(vaultRoot, docSettingsFile(rel)), init.settings);
     await get().refreshDocs();
     get().openDoc(rel);
     return rel;
