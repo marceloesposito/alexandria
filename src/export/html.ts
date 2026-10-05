@@ -25,6 +25,21 @@ function safeHref(u: string): string {
   return /^(https?:|mailto:|#)/i.test(u) ? u : '#';
 }
 
+/** Header con tipo e proprietà, se incluso nell'export. */
+function headerHtml(ctx: ExportContext): string {
+  const h = ctx.header;
+  if (!h || !h.rows.length) return '';
+  const style = `margin: 0 0 1.6em; text-align: ${h.align}; font-size: .92em;`;
+  if (h.layout === 'table')
+    return `<table class="doc-header" style="${style} border: 0;">${h.rows.map((r) => `<tr><th style="border: 0; text-align: left; padding: 1px 1em 1px 0;">${escapeHtml(r.label)}</th><td style="border: 0; padding: 1px 0;">${escapeHtml(r.value)}</td></tr>`).join('')}</table>
+`;
+  if (h.layout === 'block')
+    return `<div class="doc-header" style="${style}">${h.rows.map((r) => `<p><small>${escapeHtml(r.label)}</small><br>${escapeHtml(r.value)}</p>`).join('')}</div>
+`;
+  return `<p class="doc-header" style="${style}">${h.rows.map((r) => `<strong>${escapeHtml(r.label)}:</strong> ${escapeHtml(r.value)}`).join(' &emsp; ')}</p>
+`;
+}
+
 export function toHtml(doc: PMNode, ctx: ExportContext): string {
   const notes: string[] = [];
   const L = ctx.settings.layout;
@@ -175,7 +190,7 @@ mark { background: #f3dc8a; } .tasks { list-style: none; padding-left: .2em; }
 </style>
 </head>
 <body>
-${body}
+${headerHtml(ctx)}${body}
 ${fn}
 </body>
 </html>

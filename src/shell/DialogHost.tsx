@@ -4,6 +4,7 @@ import { useWorkspace, type DialogId } from '../state/workspace';
 import { RibbonCustomizer } from './RibbonCustomizer';
 import { PreferencesDialog } from './dialogs/Preferences';
 import { QuickSwitcher } from './QuickSwitcher';
+import { TypesDialog } from '../types/TypesDialog';
 import { RenameDocDialog, GoToLineDialog, AboutDialog, ShortcutsDialog, MarkdownGuideDialog, HelpDialog } from './dialogs/SimpleDialogs';
 
 const registry = new Map<Exclude<DialogId, null>, ComponentType>([
@@ -16,6 +17,7 @@ const registry = new Map<Exclude<DialogId, null>, ComponentType>([
   ['markdownGuide', MarkdownGuideDialog],
   ['help', HelpDialog],
   ['quickSwitcher', QuickSwitcher],
+  ['types', TypesDialog],
 ]);
 
 export function registerDialog(id: Exclude<DialogId, null>, c: ComponentType) {

@@ -57,6 +57,7 @@ export type DialogId =
   | 'renameDoc'
   | 'markdownGuide'
   | 'quickSwitcher'
+  | 'types'
   | null;
 
 export interface Toast {

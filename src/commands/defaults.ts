@@ -72,7 +72,7 @@ export const DEFAULT_RIBBON: RibbonConfig = {
       label: 'ribbon.tab.view',
       groups: [
         { id: 'ed-view-panels', label: 'ribbon.group.panels', items: ['view.toggleLeft', 'view.outline', 'view.toggleRight', 'view.preview', 'view.source'] },
-        { id: 'ed-view-mode', label: 'ribbon.group.mode', items: ['view.layoutPage', 'view.layoutBorderless', 'view.rulers', 'view.focus', 'view.zen', 'view.fullscreen', 'view.zoomOut', 'view.zoomIn'] },
+        { id: 'ed-view-mode', label: 'ribbon.group.mode', items: ['view.layoutPage', 'view.layoutBorderless', 'view.docHeader', 'view.rulers', 'view.focus', 'view.zen', 'view.fullscreen', 'view.zoomOut', 'view.zoomIn'] },
         { id: 'ed-view-theme', label: 'ribbon.group.theme', items: ['view.themeLight', 'view.themeDark', 'view.themeSystem', 'view.customizeRibbon'] },
       ],
     },
@@ -240,7 +240,7 @@ export const MENUS: MenuDef[] = [
       c('view.lineNumbers'),
       c('view.focus'),
       c('view.zen'),
-      { label: 'menu.view.editorLayout', submenu: [c('view.layoutPage'), c('view.layoutBorderless'), sep, c('view.rulers')] },
+      { label: 'menu.view.editorLayout', submenu: [c('view.layoutPage'), c('view.layoutBorderless'), sep, c('view.rulers'), c('view.docHeader')] },
       sep,
       c('view.zoomIn'),
       c('view.zoomOut'),
@@ -281,6 +281,6 @@ export const MENUS: MenuDef[] = [
       c('cite.manage'),
     ],
   },
-  { id: 'prefs', label: 'menu.preferences', items: [c('app.preferences'), c('file.docSettings'), c('view.customizeRibbon')] },
+  { id: 'prefs', label: 'menu.preferences', items: [c('app.preferences'), c('file.docSettings'), c('doc.types'), c('view.customizeRibbon')] },
   { id: 'help', label: 'menu.help', items: [c('help.onboarding'), c('help.guide'), c('help.shortcuts'), c('help.markdown'), sep, c('help.about')] },
 ];

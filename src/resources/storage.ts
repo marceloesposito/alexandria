@@ -1,5 +1,6 @@
 // Dove vivono le risorse: resources/<id>/ nel vault (versionate) oppure items/<id>/ nella Library
 // (globale, fuori dal version control). Il testo estratto sta in una cache ricostruibile.
+import { normalizeObject } from '../types/model';
 import { platform, joinPath } from '../platform';
 import { readJson, writeJson } from '../vault/vault';
 import { RES_DIR, CACHE_DIR, LAYERS_FILE, LINKS_FILE, WHITEBOARD_FILE, INDEX_DB } from '../vault/paths';
@@ -55,6 +56,7 @@ export function normalizeResource(r: Resource): Resource {
     layers: Array.isArray(r.layers) ? r.layers : [],
     meta: r.meta ?? {},
     pins: Array.isArray(r.pins) ? r.pins : [],
+    ...(r.object ? { object: normalizeObject(r.object) } : {}),
   };
 }
 

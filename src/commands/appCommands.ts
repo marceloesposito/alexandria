@@ -1,5 +1,7 @@
 // Comandi dell'app: file, vista, preferenze, aiuto.
 import {
+  PanelTop,
+  Shapes,
   Search,
   Command,
   FilePlus,
@@ -37,6 +39,7 @@ import {
   Feather,
   House,
 } from 'lucide-react';
+import { useDocSettings } from '../layout/docSettings';
 import { registerCommands, notifyCommandState } from './registry';
 import { useZen } from '../state/zen';
 import { useWorkspace, ws } from '../state/workspace';
@@ -168,6 +171,23 @@ export function registerAppCommands() {
     },
     { id: 'view.preview', label: 'cmd.view.preview', icon: Eye, shortcut: 'Mod+Shift+P', category: 'view', views: ['editor'], isActive: () => prefs().showPreview, run: () => ws().setPrefs({ showPreview: !prefs().showPreview }) },
     { id: 'view.layoutPage', label: 'cmd.view.layoutPage', icon: FileText, category: 'view', views: ['editor'], isActive: () => prefs().editorLayout === 'page', run: () => ws().setPrefs({ editorLayout: 'page' }) },
+    {
+      id: 'view.docHeader',
+      label: 'cmd.view.docHeader',
+      icon: PanelTop,
+      category: 'view',
+      views: ['editor'],
+      isActive: () => {
+        const h = useDocSettings.getState().settings.header;
+        return prefs().editorLayout === 'borderless' ? h.borderless : h.paged;
+      },
+      run: () => {
+        const st = useDocSettings.getState();
+        const h = st.settings.header;
+        st.update({ header: prefs().editorLayout === 'borderless' ? { ...h, borderless: !h.borderless } : { ...h, paged: !h.paged } });
+      },
+    },
+    { id: 'doc.types', label: 'cmd.doc.types', icon: Shapes, category: 'view', run: () => ws().openDialog('types') },
     { id: 'view.layoutBorderless', label: 'cmd.view.layoutBorderless', icon: ScrollText, category: 'view', views: ['editor'], isActive: () => prefs().editorLayout === 'borderless', run: () => ws().setPrefs({ editorLayout: 'borderless' }) },
     { id: 'view.rulers', label: 'cmd.view.rulers', icon: Ruler, category: 'view', views: ['editor'], isActive: () => prefs().rulers, isEnabled: () => prefs().editorLayout === 'page', run: () => ws().setPrefs({ rulers: !prefs().rulers }) },
     { id: 'help.onboarding', label: 'cmd.help.onboarding', icon: Feather, category: 'help', run: () => ws().setPrefs({ onboardingDone: false }) },

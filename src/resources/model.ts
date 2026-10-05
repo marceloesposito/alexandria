@@ -1,5 +1,6 @@
 // Risorse del vault (fonti, ispirazioni, materiali): modello, layer e filtri stile AutoCAD.
 // Funzioni pure: la vista (whiteboard, grafo, albero) chiede qui cosa e' visibile.
+import { type ObjectData, matchProp } from '../types/model';
 
 export type ResourceKind =
   | 'pdf'
@@ -95,17 +96,21 @@ export interface Resource {
     archived?: boolean;
   };
   pins: Pin[];
+  /** tipo di oggetto e proprietà (Personaggio, Luogo, Intervista...) */
+  object?: ObjectData;
 }
 
 // ---------------------------------------------------------------- layer
 
-export type FilterField = 'tag' | 'kind' | 'year' | 'author' | 'title' | 'source' | 'domain' | 'text' | 'pinned';
+export type FilterField = 'tag' | 'kind' | 'year' | 'author' | 'title' | 'source' | 'domain' | 'text' | 'pinned' | 'otype' | 'prop';
 export type FilterOp = 'is' | 'not' | 'contains' | 'gte' | 'lte';
 
 export interface Condition {
   field: FilterField;
   op: FilterOp;
   value: string;
+  /** chiave della proprietà, per field 'prop' */
+  key?: string;
 }
 
 export interface FilterRule {
@@ -204,6 +209,12 @@ export function matchCondition(r: Resource, c: Condition, text?: string): boolea
     case 'text':
       result = !!text && fold(text).includes(v);
       break;
+    case 'otype':
+      result = (r.object?.type ?? '') === c.value;
+      break;
+    case 'prop':
+      // la regola si valuta da sola (con not compreso)
+      return !!c.key && matchProp(undefined, r.object?.props[c.key], c.op, c.value);
     default:
       result = false;
   }

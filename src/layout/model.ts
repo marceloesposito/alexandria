@@ -1,5 +1,6 @@
 // Impostazioni del documento: stile di citazione e impaginazione (stile InDesign semplificato).
 // Salvate in .alexandria/doc-settings/<doc>.json e usate da editor, anteprima ed export.
+import { type ObjectData, type HeaderSettings, emptyObject, defaultHeader, normalizeObject, normalizeHeader } from '../types/model';
 
 export type Paper = 'a4' | 'a5' | 'letter' | 'b5' | 'custom';
 /** master page: 'title', 'body', 'appendix' predefinite, piu' quelle create dall'utente */
@@ -65,6 +66,10 @@ export interface DocSettings {
   citationLocale: string; // 'it-IT' | 'en-US' ...
   bibliographyTitle: string;
   layout: LayoutSettings;
+  /** tipo e proprietà della pergamena (il testo .md non cambia) */
+  object: ObjectData;
+  /** header con tipo e proprietà: dove compare e come */
+  header: HeaderSettings;
 }
 
 export const PAPERS: Record<Exclude<Paper, 'custom'>, [number, number]> = {
@@ -135,6 +140,8 @@ export function defaultDocSettings(lang: 'it' | 'en' = 'it'): DocSettings {
     citationLocale: lang === 'it' ? 'it-IT' : 'en-US',
     bibliographyTitle: lang === 'it' ? 'Bibliografia' : 'References',
     layout: defaultLayout(),
+    object: emptyObject(),
+    header: defaultHeader(),
   };
 }
 
@@ -149,7 +156,7 @@ export function normalizeDocSettings(raw: unknown, lang: 'it' | 'en' = 'it'): Do
   for (const [k, m] of Object.entries(l.masters ?? {})) masters[k] = { ...(masters[k] ?? masters.body), ...m };
   const styles = { ...d.layout.styles };
   for (const k of Object.keys(styles) as ParaStyleId[]) styles[k] = { ...styles[k], ...(l.styles?.[k] ?? {}) };
-  return { ...d, ...r, version: 1, layout: { ...d.layout, ...l, masters, styles } };
+  return { ...d, ...r, version: 1, layout: { ...d.layout, ...l, masters, styles }, object: normalizeObject(r.object), header: normalizeHeader(r.header) };
 }
 
 /** Nuova master page copiata da un'altra (di solito il corpo); restituisce anche il suo id. */

@@ -29,6 +29,14 @@ export interface ExportContext {
   cite(items: CitationItem[]): CiteOut;
   image(src: string): ImageAsset | null;
   math(latex: string, display: boolean): MathAsset | null;
+  /** header con tipo e proprietà, se l'autore l'ha incluso nell'export */
+  header?: ExportHeader;
+}
+
+export interface ExportHeader {
+  rows: { label: string; value: string }[];
+  layout: 'line' | 'table' | 'block';
+  align: 'left' | 'center';
 }
 
 /** Immagini e formule usate dal documento (note comprese), da preparare prima dell'export. */

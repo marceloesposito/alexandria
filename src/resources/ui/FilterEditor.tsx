@@ -1,5 +1,7 @@
 // Editor dei filtri di proprieta' (come i filtri dei layer di AutoCAD): condizioni su tag, tipo,
 // anno, autore, titolo, sito, testo, fonte; tutte o almeno una.
+import { useTypes } from '../../types/store';
+import { typesFor, type ObjectType, type PropDef } from '../../types/model';
 import { useMemo, useState } from 'react';
 import { Plus, X } from 'lucide-react';
 import { Modal } from '../../components/Modal';
@@ -7,7 +9,7 @@ import { type Condition, type FilterRule, type Layer, type FilterField, type Fil
 import { useResources } from '../store';
 import { t } from '../../i18n';
 
-const FIELDS: FilterField[] = ['tag', 'kind', 'year', 'author', 'title', 'domain', 'text', 'source', 'pinned'];
+const FIELDS: FilterField[] = ['tag', 'kind', 'year', 'author', 'title', 'domain', 'text', 'source', 'pinned', 'otype', 'prop'];
 const OPS: Record<FilterField, FilterOp[]> = {
   tag: ['is', 'contains', 'not'],
   kind: ['is', 'not'],
@@ -18,16 +20,26 @@ const OPS: Record<FilterField, FilterOp[]> = {
   text: ['contains', 'not'],
   source: ['is'],
   pinned: ['is'],
+  otype: ['is', 'not'],
+  prop: ['is', 'contains', 'not', 'gte', 'lte'],
 };
 const KINDS = ['pdf', 'text', 'markdown', 'rtf', 'docx', 'odt', 'epub', 'html', 'image', 'web', 'youtube', 'video', 'audio', 'reference', 'snippet', 'other'];
+
+/** Proprietà delle risorse (una per chiave, dal primo tipo che la definisce). */
+function resourceProps(types: ObjectType[]): PropDef[] {
+  const out = new Map<string, PropDef>();
+  for (const ty of typesFor(types, 'resource')) for (const d of ty.properties) if (!out.has(d.key)) out.set(d.key, d);
+  return [...out.values()];
+}
 
 export function FilterEditor({ initial, onClose, onSave }: { initial?: Layer; onClose: () => void; onSave: (name: string, rule: FilterRule) => void }) {
   const [name, setName] = useState(initial?.name ?? t('filter.defaultName'));
   const [match, setMatch] = useState<FilterRule['match']>(initial?.rule?.match ?? 'all');
+  const types = useTypes((s) => s.types);
   const [conds, setConds] = useState<Condition[]>(initial?.rule?.conditions ?? [{ field: 'tag', op: 'is', value: '' }]);
   const resources = useResources((s) => (s.scope === 'vault' ? s.resources : s.libraryItems));
   const texts = useResources((s) => s.texts);
-  const rule: FilterRule = { match, conditions: conds.filter((c) => c.value.trim() || c.field === 'source' || c.field === 'pinned') };
+  const rule: FilterRule = { match, conditions: conds.filter((c) => c.value.trim() || c.field === 'source' || c.field === 'pinned' || (c.field === 'prop' && !!c.key)) };
   const count = useMemo(() => resources.filter((r) => matchRule(r, rule, texts.get(r.id))).length, [resources, texts, rule]); // eslint-disable-line react-hooks/exhaustive-deps
 
   const set = (i: number, patch: Partial<Condition>) => setConds(conds.map((c, j) => (j === i ? { ...c, ...patch } : c)));
@@ -91,6 +103,27 @@ export function FilterEditor({ initial, onClose, onSave }: { initial?: Layer; on
                 <option value="true">{t('filter.yes')}</option>
                 <option value="false">{t('filter.no')}</option>
               </select>
+            ) : c.field === 'otype' ? (
+              <select className="select" value={c.value} onChange={(e) => set(i, { value: e.target.value })}>
+                <option value="" />
+                {typesFor(types, 'resource').map((ty) => (
+                  <option key={ty.id} value={ty.id}>
+                    {ty.name}
+                  </option>
+                ))}
+              </select>
+            ) : c.field === 'prop' ? (
+              <span className="filter__prop">
+                <select className="select" value={c.key ?? ''} onChange={(e) => set(i, { key: e.target.value })} aria-label={t('filter.prop')}>
+                  <option value="" />
+                  {resourceProps(types).map((d) => (
+                    <option key={d.key} value={d.key}>
+                      {d.label}
+                    </option>
+                  ))}
+                </select>
+                <input className="input" value={c.value} onChange={(e) => set(i, { value: e.target.value })} />
+              </span>
             ) : c.field === 'pinned' ? (
               <span className="hint">{t('filter.hasPins')}</span>
             ) : (

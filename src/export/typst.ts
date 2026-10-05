@@ -326,6 +326,23 @@ export function preamble(ctx: ExportContext, hasLeadingSection: boolean): string
   return lines.filter(Boolean).join('\n');
 }
 
+/** Header con tipo e proprietà in testa al documento (solo se l'autore l'ha incluso nell'export). */
+export function headerBlock(ctx: ExportContext): string {
+  const h = ctx.header;
+  if (!h || !h.rows.length) return '';
+  const al = h.align === 'center' ? 'center' : 'left';
+  let inner: string;
+  if (h.layout === 'table') {
+    const cells = h.rows.map((r) => `[#strong(${str(r.label)})], [${lit(r.value)}]`).join(', ');
+    inner = `#table(columns: 2, stroke: none, inset: (x: 0pt, y: 2pt), column-gutter: 1.2em, align: left, ${cells})`;
+  } else if (h.layout === 'block') {
+    inner = h.rows.map((r) => `#block(below: 0.6em)[#text(size: 0.8em, fill: luma(90))[${lit(r.label)}] \\ ${lit(r.value)}]`).join('\n');
+  } else {
+    inner = `#text(size: 0.9em)[${h.rows.map((r) => `#strong(${str(r.label + ':')}) ${lit(r.value)}`).join(' #h(1.2em) ')}]`;
+  }
+  return `#block(width: 100%, below: 1.6em)[#align(${al})[${inner}]]\n\n`;
+}
+
 export function toTypst(doc: PMNode, ctx: ExportContext): string {
   const content = doc.content ?? [];
   const leading = content[0]?.type === 'sectionBreak';
@@ -333,5 +350,5 @@ export function toTypst(doc: PMNode, ctx: ExportContext): string {
   // il primo cambio di mastro non va a pagina nuova se apre il documento
   if (leading) st.master = (content[0].attrs?.master as MasterId) ?? 'body';
   const body = blocks(content, ctx, st);
-  return `${preamble(ctx, leading)}\n\n${body}\n`;
+  return `${preamble(ctx, leading)}\n\n${headerBlock(ctx)}${body}\n`;
 }

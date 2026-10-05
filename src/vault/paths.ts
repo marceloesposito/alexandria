@@ -10,6 +10,7 @@ export const VAULT_FILE = `${META_DIR}/vault.json`;
 export const LAYERS_FILE = `${META_DIR}/layers.json`;
 export const LINKS_FILE = `${META_DIR}/links.json`;
 export const WHITEBOARD_FILE = `${META_DIR}/whiteboard.json`;
+export const TYPES_FILE = `${META_DIR}/types.json`;
 export const INDEX_DB = `${CACHE_DIR}/index.sqlite`;
 
 /** Chiave stabile del documento per i file accanto: documents/a/b.md -> a~b */
