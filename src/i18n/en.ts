@@ -1165,4 +1165,8 @@ export const en: Record<string, string> = {
   'float.close': "Close the panel (groups go back to the toolbar)",
   'float.dock': "Put back in the toolbar",
   'float.dropHere': "Drop here for a floating panel",
+  'win.minimize': "Minimize",
+  'win.maximize': "Maximize",
+  'win.restore': "Restore",
+  'win.close': "Close",
 };

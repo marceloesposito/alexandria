@@ -10,6 +10,7 @@ import { workspaceItems } from './WorkspaceMenu';
 import { baseName } from '../platform';
 import { flushSave } from '../editor/session';
 import { getEditor } from '../state/editorRef';
+import { WindowControls, customTitleBar } from './WindowControls';
 
 function Entries({ items, onDone }: { items: MenuEntry[]; onDone: () => void }) {
   useCommandTick();
@@ -141,8 +142,9 @@ export function MenuBar() {
   }, [open]);
 
   return (
-    <div className="menubar" ref={ref} role="menubar">
-      <span className="menubar__brand" aria-hidden>
+    // su Windows la barra dei menu fa anche da barra del titolo: si trascina dalle parti vuote
+    <div className={`menubar ${customTitleBar ? 'menubar--titlebar' : ''}`} ref={ref} role="menubar" data-tauri-drag-region>
+      <span className="menubar__brand" aria-hidden data-tauri-drag-region>
         Alexandria
       </span>
       {MENUS.map((m) => (
@@ -167,6 +169,8 @@ export function MenuBar() {
           )}
         </div>
       ))}
+      <span className="grow" data-tauri-drag-region />
+      <WindowControls />
     </div>
   );
 }
