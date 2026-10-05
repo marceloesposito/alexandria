@@ -39,7 +39,7 @@ Aggiornato: 5 ottobre 2026 (M10).
 - **Nomi tematici** (scelti dal committente, solo nelle stringhe di `src/i18n/`, uguali in IT ed EN):
   documento -> Scroll, gestore risorse -> Bookshelf, schermata Editor -> Scriptorium, Versioni ->
   History, commenti a margine -> Marginalia, whiteboard -> Tabula, pin -> Bookmarks, layer -> Strata.
-  Restano Library e Bibliografia; il nome del vault e' ancora da decidere. Identificatori, cartelle
+  Restano Library e Bibliografia; vault -> Compendium (la cartella creata al primo avvio si chiama "Il mio Compendium"; quelle esistenti non cambiano nome). Identificatori, cartelle
   (`documents/`, `resources/`) e file su disco non cambiano.
 - **Navbar**: Bookshelf · Scriptorium · History | Library (Cmd/Ctrl+1..4). La Library e' una tab a
   parte (stessa schermata della Bookshelf sulla raccolta comune); il selettore Vault/Library e' sparito.
