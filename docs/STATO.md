@@ -11,7 +11,7 @@ Aggiornato: 5 ottobre 2026 (M10).
 | M6–M7 Risorse, Library, whiteboard, grafo, layer, pin, citazioni CSL, bibliografia | fatto | #4 |
 | M8 Export (PDF Typst, DOCX, HTML, MD, TXT, LaTeX), anteprima, Layout, indice | fatto | #5 |
 | M9 Rifiniture: icona, digitazione e incolla in Markdown, prova dell'app vera, installer | fatto | #6 |
-| M10 Vista senza bordi, righelli, scrittura minimale, contatore flottante, embed con screenshot, snippet, build universale | in revisione | #7 |
+| M10 Vista senza bordi, righelli, scrittura minimale, contatore flottante, embed con screenshot, snippet, build universale | fatto | #7 |
 
 ## Decisioni prese durante il lavoro
 
@@ -119,3 +119,13 @@ Aggiornato: 5 ottobre 2026 (M10).
 - Firma degli installer e aggiornamenti automatici (oggi assenti per scelta: niente rete).
 - Corrispondenza esatta righe editor/PDF calcolando le righe con Typst in background.
 - Modelli di documento (tesi, articolo, saggio) come preset di impaginazione.
+
+## Verifica su Windows (5/10)
+
+Build di release `npm run tauri build` su Windows 11 (installer NSIS 27,6 MB), app avviata fuori
+schermo e senza focus con dati in una cartella di prova:
+- foto di un link con WebView2 (`ALEXANDRIA_SNAPSHOT_TEST`): riuscita in 1,8 s;
+- autotest dell'embed (`ALEXANDRIA_EMBED_TEST`): import di una pagina web, `screenshot.webp`
+  salvato, scheda nel testo con l'immagine caricata (1200 x 750);
+- import di un PDF: titolo e autore dai metadati, 2 pagine, miniatura, testo estratto;
+- schermata iniziale, creazione del primo Compendium, Scriptorium con righelli e contatore.
