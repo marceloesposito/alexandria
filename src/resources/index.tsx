@@ -24,6 +24,7 @@ import {
   FileUp,
   Paperclip,
   SquareCode,
+  Trash2,
 } from 'lucide-react';
 import { registerCommands, notifyCommandState } from '../commands/registry';
 import { viewComponents, globalComponents } from '../shell/views';
@@ -48,6 +49,7 @@ import { relativeFromDoc } from '../vault/resolve';
 import { classifyTransfer, readTransfer } from './insert';
 import { InsertResourceDialog } from './ui/InsertResourceDialog';
 import { EmbedView } from './ui/EmbedView';
+import { removeWithConfirm, removalTargets } from './ui/remove';
 import { platform } from '../platform';
 import { t, useLang } from '../i18n';
 import type { RibbonSize } from '../state/prefs';
@@ -102,7 +104,7 @@ export function registerResources() {
   embedView.set(EmbedView);
   // i pulsanti del ribbon seguono vista, ambito e selezione del gestore risorse
   useResources.subscribe((s, p) => {
-    if (s.view !== p.view || s.scope !== p.scope || s.selected !== p.selected) notifyCommandState();
+    if (s.view !== p.view || s.scope !== p.scope || s.selected !== p.selected || s.inspector !== p.inspector) notifyCommandState();
   });
 
   const st = () => useResources.getState();
@@ -110,6 +112,7 @@ export function registerResources() {
     { id: 'res.insert', label: 'slash.resource', icon: Paperclip, category: 'insert', views: ['editor'], run: () => ws().openDialog('insertResource') },
     { id: 'res.insertSnippet', label: 'slash.snippet', icon: SquareCode, category: 'insert', views: ['editor'], run: () => ws().openDialog('insertResource', { kind: 'snippet' }) },
     { id: 'res.newSnippet', label: 'cmd.res.newSnippet', icon: SquareCode, category: 'resources', run: () => ws().openDialog('addResource', { tab: 'snippet' }) },
+    { id: 'res.remove', label: 'cmd.res.remove', icon: Trash2, category: 'resources', views: ['resources'], isEnabled: () => removalTargets().length > 0, run: () => removeWithConfirm() },
     { id: 'res.add', label: 'cmd.res.add', icon: Plus, shortcut: 'Mod+Shift+A', category: 'resources', run: () => ws().openDialog('addResource') },
     {
       id: 'res.importBib',

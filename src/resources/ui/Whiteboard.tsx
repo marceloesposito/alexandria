@@ -25,6 +25,7 @@ import '@xyflow/react/dist/style.css';
 import { useResources } from '../store';
 import { isVisible, isLocked, colorOf, type Resource } from '../model';
 import { ResourceCard } from './common';
+import { removeWithConfirm } from './remove';
 import { t } from '../../i18n';
 import { openContextMenu } from '../../components/ContextMenu';
 import { promptDialog } from '../../components/confirm';
@@ -238,6 +239,14 @@ function Board() {
         onEdgeDoubleClick={async (_, e) => {
           const label = await promptDialog(t('wb.linkLabel'), String(e.label ?? ''));
           if (label !== null) useResources.getState().updateLink(e.id, label);
+        }}
+        onNodeContextMenu={(e, n) => {
+          if (n.type !== 'res') return;
+          e.preventDefault();
+          openContextMenu(e as React.MouseEvent, [
+            { label: t('embed.open'), onClick: () => useResources.getState().openViewer(n.id) },
+            { label: t('cmd.res.remove'), danger: true, onClick: () => void removeWithConfirm([n.id]) },
+          ]);
         }}
         onPaneContextMenu={(e) =>
           openContextMenu(e as React.MouseEvent, [

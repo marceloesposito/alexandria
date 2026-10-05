@@ -8,6 +8,7 @@ import { PdfViewer } from './PdfViewer';
 import { TextViewer, textToBlocks } from './TextViewer';
 import { ImageViewer, MediaViewer, YoutubeViewer } from './MediaViewers';
 import { SnippetViewer } from './SnippetViewer';
+import { removeWithConfirm } from '../ui/remove';
 import { thumbUrl, KindIcon, subtitle } from '../ui/common';
 import { platform } from '../../platform';
 import type { Block } from '../html';
@@ -95,6 +96,9 @@ export function ResourceViewer() {
               <ExternalLink size={14} /> {t('res.openBrowser')}
             </button>
           )}
+          <button className="icon-btn" onClick={() => void removeWithConfirm([r.id])} title={t('cmd.res.remove')}>
+            <Trash2 size={16} />
+          </button>
           <button className="icon-btn" onClick={() => st.openViewer(null)} title={t('common.close')}>
             <X size={18} />
           </button>

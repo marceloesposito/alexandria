@@ -84,7 +84,7 @@ export const DEFAULT_RIBBON: RibbonConfig = {
       groups: [
         { id: 'res-add', label: 'ribbon.group.add', items: ['res.add', 'res.newSnippet', 'res.importBib', 'res.library'] },
         { id: 'res-views', label: 'ribbon.group.views', items: ['res.view.whiteboard', 'res.view.graph', 'res.view.layers'] },
-        { id: 'res-org', label: 'ribbon.group.organize', items: ['res.newLayer', 'res.newFilter', 'res.tags', 'res.suggest'] },
+        { id: 'res-org', label: 'ribbon.group.organize', items: ['res.newLayer', 'res.newFilter', 'res.tags', 'res.suggest', 'res.remove'] },
         { id: 'res-tools', label: 'ribbon.group.whiteboard', items: ['wb.select', 'wb.pan', 'wb.note', 'wb.frame', 'wb.connect', 'wb.fit'] },
         { id: 'res-search', label: 'ribbon.group.find', items: ['res.search'] },
       ],
@@ -268,6 +268,8 @@ export const MENUS: MenuDef[] = [
       c('res.newFilter'),
       c('res.tags'),
       c('res.suggest'),
+      sep,
+      c('res.remove'),
       sep,
       c('res.library'),
       c('cite.manage'),

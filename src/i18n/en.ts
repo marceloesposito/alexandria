@@ -930,4 +930,6 @@ export const en: Record<string, string> = {
   'cmd.view.zen': "Minimal writing",
   'zen.exitHint': "Esc to leave minimal writing",
   'common.save': "Save",
+  'cmd.res.remove': "Remove resources",
+  'res.confirmDeleteMany': "Delete {n} resources?",
 };
