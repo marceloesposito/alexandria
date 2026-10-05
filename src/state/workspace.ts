@@ -58,6 +58,8 @@ export type DialogId =
   | 'markdownGuide'
   | 'quickSwitcher'
   | 'types'
+  | 'recensio'
+  | 'review'
   | null;
 
 export interface Toast {
@@ -93,9 +95,10 @@ interface WorkspaceState {
   /** salva la disposizione attuale come workspace dell'utente */
   saveWorkspaceLayout(name: string): string;
   deleteWorkspaceLayout(id: string): void;
-  openVault(root: string): Promise<void>;
+  /** transient: cartella di lavoro temporanea (copia per revisione), non entra fra i recenti */
+  openVault(root: string, transient?: boolean): Promise<void>;
   /** Apre un Compendium e il suo ultimo Scroll (o il primo, o uno nuovo). */
-  enterVault(root: string): Promise<boolean>;
+  enterVault(root: string, transient?: boolean): Promise<boolean>;
   /** Chiude il Compendium e torna alla schermata iniziale. */
   closeVault(): void;
   /** Crea (o riapre) il Compendium predefinito in Documenti/Alexandria. */
@@ -244,15 +247,17 @@ export const useWorkspace = create<WorkspaceState>((set, get) => ({
     persist(app);
   },
 
-  async openVault(root) {
+  async openVault(root, transient = false) {
     try {
       const cfg = await ensureVault(root);
       const docs = await listDocuments(root, cfg);
-      const app = {
-        ...get().app,
-        lastVault: root,
-        recentVaults: pushRecent(get().app.recentVaults, root, (a, b) => a === b, 12),
-      };
+      const app = transient
+        ? get().app
+        : {
+            ...get().app,
+            lastVault: root,
+            recentVaults: pushRecent(get().app.recentVaults, root, (a, b) => a === b, 12),
+          };
       set({ vaultRoot: root, vault: cfg, docs, activeDoc: null, app });
       persist(app);
     } catch (e) {
@@ -260,13 +265,13 @@ export const useWorkspace = create<WorkspaceState>((set, get) => ({
     }
   },
 
-  async enterVault(root) {
+  async enterVault(root, transient = false) {
     if (!(await platform.exists(root))) {
       get().toast(t('start.missing'), 'error');
       return false;
     }
     const wasLast = get().app.lastVault === root;
-    await get().openVault(root);
+    await get().openVault(root, transient);
     const st = get();
     if (st.vaultRoot !== root) return false;
     // l'ultimo Scroll vale solo se apparteneva a questo Compendium

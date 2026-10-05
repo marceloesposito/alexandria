@@ -1,6 +1,6 @@
 # Stato dei lavori
 
-Aggiornato: 5 ottobre 2026 (M10).
+Aggiornato: 7 ottobre 2026 (M11).
 
 | Milestone | Stato | PR |
 | --- | --- | --- |
@@ -12,6 +12,13 @@ Aggiornato: 5 ottobre 2026 (M10).
 | M8 Export (PDF Typst, DOCX, HTML, MD, TXT, LaTeX), anteprima, Layout, indice | fatto | #5 |
 | M9 Rifiniture: icona, digitazione e incolla in Markdown, prova dell'app vera, installer | fatto | #6 |
 | M10 Vista senza bordi, righelli, scrittura minimale, contatore flottante, embed con screenshot, snippet, build universale | fatto | #7 |
+| M11 Barra del titolo personalizzata (Windows), nomi Armarium/Palimpsestus/Bibliotheca, account sui server git | fatto | #8, #9, #11 |
+| M11 Quick switcher (Ctrl+O), tavolozza dei comandi, anteprime al passaggio del mouse | fatto | #10 |
+| M11 Tipi di oggetto con proprieta', header della pergamena (anche in pagina ed export), Strata come database | fatto | #12 |
+| M11 Codex (pergamene collegate lette ed esportate di seguito) e riquadri accanto all'editor | fatto | #14 |
+| M11 Modello di Compendium Diario e Voce di oggi | fatto | #15 |
+| M11 Revisioni tracciate (Suggerisci), Marginalia da revisione, andata e ritorno con Word | fatto | #16 |
+| M11 Copia per revisione (.recensio), modalita' revisore, import su branch, risposta ai revisori | fatto | #17 |
 
 ## Decisioni prese durante il lavoro
 
@@ -107,9 +114,30 @@ Aggiornato: 5 ottobre 2026 (M10).
 - Asset protocol: `requireLiteralLeadingDot: false`, altrimenti le immagini in cartelle nascoste
   (es. Compendium dentro una cartella che inizia con un punto) non si vedono.
 
+## M11 in breve (ottobre 2026)
+
+- **Nomi**: Bookshelf -> Armarium, History -> Palimpsestus, Library -> Bibliotheca, Librum -> Codex
+  (solo testi visibili; identificatori interni invariati).
+- **Codex**: nessun oggetto nuovo su disco oltre a `.alexandria/codices/<radice>.json` (nome,
+  separatore, titoli come capitoli): la catena sono i legami direzionali fra pergamene gia' in
+  `links.json`, letti in profondita' nell'ordine di creazione (`src/codex/model.ts`). Riordinare
+  riscrive i legami interni come catena semplice.
+- **Tipi e proprieta'**: `.alexandria/types.json`; per le pergamene stanno nel `DocSettings`
+  (`object`, `header`), il .md non cambia; per le risorse in `Resource.object`.
+- **Revisioni tracciate** nel Markdown come `<ins|del data-author data-date>` (HTML standard, leggibile
+  ovunque) invece di CriticMarkup: il parser gestiva gia' l'HTML in linea. In export: testo pulito
+  di default, revisioni visibili a richiesta, revisioni vere in Word.
+- **Copia per revisione** `.recensio` (zip): il revisore la apre in un Compendium temporaneo
+  (cartella dell'app) con testo bloccato: solo revisioni tracciate (filterTransaction) e Marginalia.
+  Al ritorno: branch `revisione-<nome>-<data>` dalla versione di partenza e unione guidata.
+- **Bug corretto**: `createBranch`, `switchBranch` e il ripristino leggevano come fallimento i
+  comandi git senza risultato (null), cosi' "Nuova variante" risultava fallita anche quando riusciva.
+
 ## In valutazione (A/B test del committente)
 
-- **Split dello Scriptorium** (piu' pergamene aperte affiancate): non implementato. Rischi da valutare
+- **Split dello Scriptorium**: risolto con i riquadri accanto (pergamene in sola lettura, Codex,
+  risorse); un secondo editor modificabile resta non implementato per i motivi qui sotto.
+- (storico) **Split dello Scriptorium** (piu' pergamene aperte affiancate): non implementato. Rischi da valutare
   per Marginalia: oggi c'e' un solo editor attivo (`getEditor()`), le bolle si ancorano alle posizioni
   di quell'editor e la colonna dei commenti segue una sola pagina; con due editor servirebbero colonne
   (o colori) per pergamena, ancore per editor e salvataggio/checkpoint per ciascuna.

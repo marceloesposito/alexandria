@@ -19,6 +19,7 @@ import { useWorkspace } from '../state/workspace';
 import { getEditor } from '../state/editorRef';
 import { onDocLoaded } from '../editor/session';
 import { t } from '../i18n';
+import { useTrack } from '../editor/extensions/track';
 
 export interface Draft {
   /** y della riga cliccata (rispetto alla pagina) */
@@ -122,7 +123,8 @@ export const useComments = create<CommentsState>((set, get) => {
       if (!body.trim() || !d) return null;
       const c: Comment = {
         id: newCommentId(),
-        author: author(),
+        author: useTrack.getState().reviewer ?? author(),
+        ...(useTrack.getState().reviewer ? { origin: { kind: 'reviewer' as const, name: useTrack.getState().reviewer! } } : {}),
         body: body.trim(),
         created: now(),
         anchor: d.anchor,
@@ -143,7 +145,7 @@ export const useComments = create<CommentsState>((set, get) => {
       if (!body.trim()) return;
       mutate((cs) =>
         cs.map((c) =>
-          c.id === id ? { ...c, replies: [...c.replies, { id: newCommentId(), author: author(), body: body.trim(), created: now() }] } : c,
+          c.id === id ? { ...c, replies: [...c.replies, { id: newCommentId(), author: useTrack.getState().reviewer ?? author(), body: body.trim(), created: now() }] } : c,
         ),
       );
     },

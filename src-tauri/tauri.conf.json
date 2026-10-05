@@ -47,6 +47,15 @@
     "active": true,
     "targets": ["nsis", "msi", "dmg", "app"],
     "category": "Productivity",
+    "fileAssociations": [
+      {
+        "ext": ["recensio"],
+        "name": "Recensio",
+        "description": "Copia per revisione di Alexandria",
+        "role": "Editor",
+        "mimeType": "application/x-alexandria-recensio"
+      }
+    ],
     "shortDescription": "Offline writing studio for papers and essays",
     "copyright": "© 2026 Marcelo Esposito — MIT",
     "icon": [

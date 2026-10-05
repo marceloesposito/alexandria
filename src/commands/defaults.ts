@@ -50,7 +50,7 @@ export const DEFAULT_RIBBON: RibbonConfig = {
       view: 'editor',
       label: 'ribbon.tab.review',
       groups: [
-        { id: 'ed-rev-track', label: 'ribbon.group.track', items: ['track.suggest', 'track.next', 'track.accept', 'track.reject', 'track.acceptAll', 'track.rejectAll', 'track.importWord'] },
+        { id: 'ed-rev-track', label: 'ribbon.group.track', items: ['track.suggest', 'track.next', 'track.accept', 'track.reject', 'track.acceptAll', 'track.rejectAll', 'track.importWord', 'review.rounds'] },
         { id: 'ed-rev-comments', label: 'ribbon.group.comments', items: ['comment.add', 'comment.search', 'comment.showResolved'] },
         { id: 'ed-rev-versions', label: 'ribbon.group.versions', items: ['vc.commit', 'vc.checkpoint', 'view.versions'] },
         { id: 'ed-rev-tools', label: 'ribbon.group.proofing', items: ['view.lineNumbers', 'tools.spellcheck', 'tools.counts'] },
@@ -152,6 +152,9 @@ export const MENUS: MenuDef[] = [
       c('file.print'),
       sep,
       c('file.docSettings'),
+      sep,
+      c('file.recensioCreate'),
+      c('file.recensioOpen'),
     ],
   },
   {
@@ -171,7 +174,7 @@ export const MENUS: MenuDef[] = [
       c('edit.replace'),
       c('edit.goToLine'),
       sep,
-      { label: 'menu.edit.track', submenu: [c('track.suggest'), c('track.next'), c('track.accept'), c('track.reject'), sep, c('track.acceptAll'), c('track.rejectAll'), sep, c('track.importWord')] },
+      { label: 'menu.edit.track', submenu: [c('track.suggest'), c('track.next'), c('track.accept'), c('track.reject'), sep, c('track.acceptAll'), c('track.rejectAll'), sep, c('track.importWord'), c('review.rounds')] },
     ],
   },
   {

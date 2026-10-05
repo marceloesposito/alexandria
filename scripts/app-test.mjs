@@ -8,7 +8,9 @@ const [exe, scriptPath, dataDir] = process.argv.slice(2);
 const PORT = 9555;
 const sleep = (ms) => new Promise((r) => setTimeout(r, ms));
 
-const proc = spawn(exe, [], {
+// argomenti in piu' per l'app (es. un .recensio da aprire): ALEXANDRIA_TEST_ARGS, separati da |
+const extra = process.env.ALEXANDRIA_TEST_ARGS ? process.env.ALEXANDRIA_TEST_ARGS.split('|') : [];
+const proc = spawn(exe, extra, {
   env: {
     ...process.env,
     ALEXANDRIA_TEST_OFFSCREEN: '1',

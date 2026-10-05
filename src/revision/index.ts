@@ -1,5 +1,5 @@
 // Modulo Revisione: modalità Suggerisci, accettare e rifiutare le revisioni tracciate.
-import { PenLine, Check, X, CheckCheck, XCircle, ArrowDownToLine, FileInput } from 'lucide-react';
+import { PenLine, Check, X, CheckCheck, XCircle, ArrowDownToLine, FileInput, ListChecks } from 'lucide-react';
 import { registerCommands } from '../commands/registry';
 import { getEditor } from '../state/editorRef';
 import { useWorkspace } from '../state/workspace';
@@ -31,11 +31,13 @@ export function registerRevision() {
   sync();
   useWorkspace.subscribe((s, p) => s.app.prefs.authorName !== p.app.prefs.authorName && sync());
 
+  const notReviewer = () => !useTrack.getState().locked;
   const hasChanges = () => {
     const e = getEditor();
     return !!e && listChanges(e.state.doc).length > 0;
   };
   registerCommands([
+    { id: 'review.rounds', label: 'cmd.review.rounds', hint: 'cmd.review.roundsHint', icon: ListChecks, category: 'edit', isEnabled: () => !useTrack.getState().locked, run: () => useWorkspace.getState().openDialog('review') },
     { id: 'track.importWord', label: 'cmd.track.importWord', hint: 'cmd.track.importWordHint', icon: FileInput, category: 'edit', views: ['editor'], run: async () => (await import('./word')).importWordReview() },
     {
       id: 'track.suggest',
@@ -46,14 +48,15 @@ export function registerRevision() {
       category: 'edit',
       views: ['editor'],
       isActive: () => useTrack.getState().suggest,
+      isEnabled: notReviewer,
       run: () => {
         const on = !useTrack.getState().suggest;
         useTrack.getState().set({ suggest: on });
         toast(on ? t('track.on') : t('track.off'));
       },
     },
-    { id: 'track.accept', label: 'cmd.track.accept', icon: Check, category: 'edit', views: ['editor'], run: () => resolveHere(true) },
-    { id: 'track.reject', label: 'cmd.track.reject', icon: X, category: 'edit', views: ['editor'], run: () => resolveHere(false) },
+    { id: 'track.accept', label: 'cmd.track.accept', icon: Check, category: 'edit', views: ['editor'], isEnabled: notReviewer, run: () => resolveHere(true) },
+    { id: 'track.reject', label: 'cmd.track.reject', icon: X, category: 'edit', views: ['editor'], isEnabled: notReviewer, run: () => resolveHere(false) },
     {
       id: 'track.next',
       label: 'cmd.track.next',
@@ -71,7 +74,7 @@ export function registerRevision() {
       icon: CheckCheck,
       category: 'edit',
       views: ['editor'],
-      isEnabled: hasChanges,
+      isEnabled: () => notReviewer() && hasChanges(),
       run: () => {
         const e = getEditor();
         if (e) toast(t('track.done', { n: resolveChanges(e, true) }));
@@ -83,7 +86,7 @@ export function registerRevision() {
       icon: XCircle,
       category: 'edit',
       views: ['editor'],
-      isEnabled: hasChanges,
+      isEnabled: () => notReviewer() && hasChanges(),
       run: () => {
         const e = getEditor();
         if (e) toast(t('track.done', { n: resolveChanges(e, false) }));

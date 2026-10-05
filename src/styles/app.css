@@ -2576,3 +2576,125 @@ table.kv td:last-child {
 .link-btn:hover {
   text-decoration: underline;
 }
+
+/* ---------------------------------------------------------------- modalità revisore */
+.review-bar {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  padding: 0 0 0 12px;
+  min-height: 44px;
+  background: var(--chrome);
+  border-bottom: 1px solid var(--line);
+  user-select: none;
+}
+
+.review-bar__icon {
+  color: var(--accent);
+}
+
+.review-bar__title {
+  display: flex;
+  flex-direction: column;
+  min-width: 0;
+  line-height: 1.2;
+}
+
+.review-bar__title strong {
+  font-family: var(--font-text);
+  font-size: var(--fs-ui-large);
+}
+
+.review-bar > .btn:last-of-type {
+  margin-right: 4px;
+}
+
+/* ---------------------------------------------------------------- risposta ai revisori */
+.review-dlg {
+  display: grid;
+  grid-template-columns: 220px minmax(0, 1fr);
+  gap: 16px;
+  min-height: 420px;
+}
+
+.review-dlg__rounds {
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+  padding-right: 10px;
+  border-right: 1px solid var(--line);
+}
+
+.review-dlg__round {
+  display: flex;
+  flex-direction: column;
+  padding: 6px 8px;
+  border-radius: var(--radius-small);
+  cursor: pointer;
+}
+
+.review-dlg__round:hover {
+  background: var(--chrome-2);
+}
+
+.review-dlg__round.is-active {
+  background: var(--accent-soft);
+}
+
+.review-dlg__main {
+  display: flex;
+  flex-direction: column;
+  min-width: 0;
+}
+
+.review-dlg__bar {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 6px;
+  padding-bottom: 8px;
+  border-bottom: 1px solid var(--line);
+}
+
+.review-items {
+  margin: 8px 0 0;
+  padding: 0;
+  list-style: none;
+  max-height: 56vh;
+  overflow-y: auto;
+}
+
+.review-item {
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+  padding: 10px;
+  margin-bottom: 8px;
+  border: 1px solid var(--line);
+  border-left: 3px solid var(--line-strong);
+  border-radius: var(--radius-small);
+}
+
+.review-item.is-done {
+  border-left-color: var(--ok);
+}
+
+.review-item.is-declined {
+  border-left-color: var(--bad);
+}
+
+.review-item__head,
+.review-item__commits {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 6px;
+}
+
+.review-item__reviewer {
+  max-width: 180px;
+}
+
+.review-item__text {
+  font-family: var(--font-text);
+  background: var(--chrome);
+}

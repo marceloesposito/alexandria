@@ -457,7 +457,7 @@ function reviewerColor(name: string): string {
 }
 
 /** Versione del Palimpsestus collegata: clic = la apre nel Palimpsestus. */
-function CommitChip({ sha, onRemove }: { sha: string; onRemove: () => void }) {
+export function CommitChip({ sha, onRemove }: { sha: string; onRemove: () => void }) {
   const c = useVersions((s) => s.log?.commits.find((x) => x.sha === sha));
   return (
     <span className="bubble__commit">
@@ -479,7 +479,7 @@ function CommitChip({ sha, onRemove }: { sha: string; onRemove: () => void }) {
   );
 }
 
-function CommitPicker({ onPick, onClose }: { onPick: (sha: string) => void; onClose: () => void }) {
+export function CommitPicker({ onPick, onClose }: { onPick: (sha: string) => void; onClose: () => void }) {
   const log = useVersions((s) => s.log);
   useEffect(() => {
     void useVersions.getState().refresh();
