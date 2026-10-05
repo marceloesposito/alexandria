@@ -493,6 +493,22 @@ export function createMemoryPlatform(opts: { persist?: boolean } = {}): Platform
     async gitPull() {
       throw new Error('Remoto non disponibile nella versione browser');
     },
+    async forgeAccount() {
+      return null;
+    },
+    async forgeLogout() {},
+    async forgeSetToken() {
+      throw new Error('Account non disponibili nella versione browser');
+    },
+    async forgeDeviceStart() {
+      throw new Error('Account non disponibili nella versione browser');
+    },
+    async forgeDevicePoll() {
+      return 'pending';
+    },
+    async forgeCreateRepo() {
+      throw new Error('Account non disponibili nella versione browser');
+    },
 
     async indexUpsert(db, docs) {
       const m = indexes.get(db) ?? new Map();

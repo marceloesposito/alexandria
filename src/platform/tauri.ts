@@ -74,6 +74,12 @@ export const tauriPlatform: Platform = {
   gitSetRemote: (repo, url, token) => invoke('git_set_remote', { repo, url, token }),
   gitRemote: (repo) => invoke('git_remote', { repo }),
   gitPush: (repo) => invoke('git_push', { repo }),
+  forgeAccount: (host) => invoke('forge_account', { host }),
+  forgeLogout: (host) => invoke('forge_logout', { host }),
+  forgeSetToken: (kind, host, token) => invoke('forge_set_token', { kind, host, token }),
+  forgeDeviceStart: (clientId) => invoke('forge_device_start', { clientId }),
+  forgeDevicePoll: (clientId, deviceCode) => invoke('forge_device_poll', { clientId, deviceCode }),
+  forgeCreateRepo: (host, name, priv, description) => invoke('forge_create_repo', { host, name, private: priv, description: description ?? null }),
   gitPull: (repo) => invoke('git_pull', { repo }),
 
   indexUpsert: (db, docs) => invoke('index_upsert', { db, docs }),

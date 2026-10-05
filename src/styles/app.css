@@ -2525,4 +2525,52 @@ table.kv td:last-child {
   grid-template-columns: minmax(0, 1.4fr) minmax(0, 1fr) minmax(0, 1.4fr) auto;
   gap: 6px;
   align-items: center;
+/* ---------------------------------------------------------------- account e repository remota */
+.forge__section {
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+  padding: 10px 0;
+  border-top: 1px solid var(--line);
+}
+
+.forge__section h4 {
+  margin: 0;
+  font-size: var(--fs-ui);
+  color: var(--ink-2);
+}
+
+.forge__row {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+
+.forge__row .input {
+  flex: 1;
+  min-width: 0;
+}
+
+.forge__code code {
+  padding: 2px 6px;
+  font-family: var(--font-mono);
+  font-size: var(--fs-ui-large);
+  background: var(--accent-soft);
+  border-radius: var(--radius-small);
+}
+
+.link-btn {
+  display: inline-flex;
+  align-items: center;
+  gap: 3px;
+  padding: 0;
+  border: 0;
+  background: none;
+  color: var(--accent);
+  cursor: pointer;
+  font: inherit;
+}
+
+.link-btn:hover {
+  text-decoration: underline;
 }

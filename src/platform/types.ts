@@ -18,6 +18,20 @@ export interface GitCommit {
   refs: string[]; // branch che puntano qui
 }
 
+export type ForgeKind = 'github' | 'gitlab' | 'gitea';
+export interface ForgeAccount {
+  kind: ForgeKind;
+  host: string;
+  login: string;
+}
+export interface DeviceCode {
+  device_code: string;
+  user_code: string;
+  verification_uri: string;
+  interval: number;
+  expires_in: number;
+}
+
 export interface GitLog {
   head: string | null; // sha
   branch: string | null; // branch corrente
@@ -139,6 +153,13 @@ export interface Platform {
   gitRemote(repo: string): Promise<string | null>;
   gitPush(repo: string): Promise<string>;
   gitPull(repo: string): Promise<MergeResult>;
+  /** account sul server git (token nel portachiavi, mai restituito) */
+  forgeAccount(host: string): Promise<ForgeAccount | null>;
+  forgeLogout(host: string): Promise<void>;
+  forgeSetToken(kind: ForgeKind, host: string, token: string): Promise<string>;
+  forgeDeviceStart(clientId: string): Promise<DeviceCode>;
+  forgeDevicePoll(clientId: string, deviceCode: string): Promise<string>;
+  forgeCreateRepo(host: string, name: string, priv: boolean, description?: string): Promise<string>;
 
   // indice full-text
   indexUpsert(db: string, docs: IndexDoc[]): Promise<void>;

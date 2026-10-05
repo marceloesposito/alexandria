@@ -7,7 +7,6 @@ import { useVersions } from './store';
 import { t } from '../i18n';
 import { commit, createBranch, switchBranch, startMerge, saveAll, workingChanges } from './actions';
 import { summarize, suggestCommitMessage, describeSummary, type ChangeSummary } from './diffSummary';
-import { platform } from '../platform';
 
 const close = () => useWorkspace.getState().closeDialog();
 
@@ -155,50 +154,6 @@ export function MergeDialog() {
         <p className="hint">{t('vc.merge.noOthers')}</p>
       )}
       <p className="hint">{t('vc.merge.hint')}</p>
-    </Modal>
-  );
-}
-
-export function RemoteDialog() {
-  const root = useWorkspace((s) => s.vaultRoot);
-  const [url, setUrl] = useState('');
-  const [token, setToken] = useState('');
-  useEffect(() => {
-    if (root) void platform.gitRemote(root).then((u) => setUrl(u ?? ''));
-  }, [root]);
-  const save = async () => {
-    if (!root) return;
-    try {
-      await platform.gitSetRemote(root, url.trim(), token ? token : null);
-      useWorkspace.getState().toast(t('vc.remote.saved'), 'ok');
-      close();
-    } catch (e) {
-      useWorkspace.getState().toast(String(e), 'error');
-    }
-  };
-  return (
-    <Modal
-      title={t('cmd.vc.remote')}
-      onClose={close}
-      footer={
-        <>
-          <button className="btn" onClick={close}>
-            {t('common.cancel')}
-          </button>
-          <button className="btn btn--primary" disabled={!url.trim()} onClick={save}>
-            {t('common.ok')}
-          </button>
-        </>
-      }
-    >
-      <p className="hint">{t('vc.remote.intro')}</p>
-      <label className="field-label">{t('vc.remote.url')}</label>
-      <input className="input" placeholder="https://github.com/utente/tesi.git" value={url} onChange={(e) => setUrl(e.target.value)} />
-      <label className="field-label" style={{ marginTop: 10 }}>
-        {t('vc.remote.token')}
-      </label>
-      <input className="input" type="password" autoComplete="off" value={token} onChange={(e) => setToken(e.target.value)} />
-      <p className="hint">{t('vc.remote.tokenHint')}</p>
     </Modal>
   );
 }

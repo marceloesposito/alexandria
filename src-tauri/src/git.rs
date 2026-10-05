@@ -483,6 +483,10 @@ fn callbacks(url: String) -> RemoteCallbacks<'static> {
             if let Some(t) = token_entry(&url).and_then(|e| e.get_password().ok()) {
                 return Cred::userpass_plaintext(username.unwrap_or("x-access-token"), &t);
             }
+            // altrimenti l'account collegato per quell'host (Accedi con GitHub / token personale)
+            if let Some((user, t)) = crate::forge::account_for_url(&url) {
+                return Cred::userpass_plaintext(&user, &t);
+            }
         }
         Cred::default()
     });
