@@ -16,10 +16,10 @@ export function NavBar() {
   useCommandTick();
   // la Library sta fuori dal vault: tab separata in fondo
   const tabs = [
-    { cmd: 'view.resources', icon: Library, label: t('nav.resources') },
-    { cmd: 'view.editor', icon: PenLine, label: t('nav.editor') },
-    { cmd: 'view.versions', icon: History, label: t('nav.versions') },
-    { cmd: 'view.library', icon: Landmark, label: t('nav.library'), apart: true },
+    { cmd: 'view.resources', icon: Library, label: t('nav.resources'), color: 'var(--series-1)' },
+    { cmd: 'view.editor', icon: PenLine, label: t('nav.editor'), color: 'var(--series-2)' },
+    { cmd: 'view.versions', icon: History, label: t('nav.versions'), color: 'var(--series-3)' },
+    { cmd: 'view.library', icon: Landmark, label: t('nav.library'), color: 'var(--series-4)', apart: true },
   ];
   const isActive = (cmd: string) => getCommand(cmd)?.isActive?.() ?? false;
 
@@ -35,10 +35,11 @@ export function NavBar() {
             aria-selected={isActive(tab.cmd)}
             className={`navbar__tab ${isActive(tab.cmd) ? 'is-active' : ''} ${tab.apart ? 'navbar__tab--apart' : ''}`}
             onClick={() => runCommand(tab.cmd)}
-            title={getCommand(tab.cmd)?.shortcut ? displayShortcut(getCommand(tab.cmd)!.shortcut!) : undefined}
+            title={getCommand(tab.cmd)?.shortcut ? `${tab.label} (${displayShortcut(getCommand(tab.cmd)!.shortcut!)})` : tab.label}
+            style={{ '--section': tab.color } as React.CSSProperties}
           >
-            <tab.icon size={15} />
-            <span>{tab.label}</span>
+            <tab.icon size={20} strokeWidth={1.7} className="navbar__tab-icon" />
+            <span className="navbar__tab-label">{tab.label}</span>
           </button>
         ))}
       </div>

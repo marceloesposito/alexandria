@@ -277,5 +277,5 @@ export const MENUS: MenuDef[] = [
     ],
   },
   { id: 'prefs', label: 'menu.preferences', items: [c('app.preferences'), c('file.docSettings'), c('view.customizeRibbon')] },
-  { id: 'help', label: 'menu.help', items: [c('help.guide'), c('help.shortcuts'), c('help.markdown'), sep, c('help.about')] },
+  { id: 'help', label: 'menu.help', items: [c('help.onboarding'), c('help.guide'), c('help.shortcuts'), c('help.markdown'), sep, c('help.about')] },
 ];

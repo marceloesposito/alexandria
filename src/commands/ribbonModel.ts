@@ -7,6 +7,8 @@ export interface RibbonGroup {
   label: string; // chiave i18n, oppure testo libero se custom
   custom?: boolean;
   items: string[]; // id dei comandi
+  /** sintetizzato: un solo pulsante che apre gli strumenti in un pannello */
+  compact?: boolean;
 }
 
 export interface RibbonTab {
@@ -101,6 +103,43 @@ export function moveGroup(cfg: RibbonConfig, groupId: string, delta: number): Ri
       return { ...t, groups };
     }),
   };
+}
+
+/** Gruppo esteso (tutti gli strumenti) o compatto (un pulsante che li apre in un pannello). */
+export function setGroupCompact(cfg: RibbonConfig, groupId: string, compact: boolean): RibbonConfig {
+  return mapGroup(cfg, groupId, (g) => ({ ...g, compact }));
+}
+
+/**
+ * Sposta un gruppo nella posizione `index` della sua scheda (trascinamento dalla maniglia).
+ * L'indice si riferisce alla lista prima dello spostamento, come le posizioni fra i gruppi a schermo.
+ */
+export function placeGroup(cfg: RibbonConfig, groupId: string, index: number): RibbonConfig {
+  return {
+    ...cfg,
+    tabs: cfg.tabs.map((t) => {
+      const i = t.groups.findIndex((g) => g.id === groupId);
+      if (i < 0) return t;
+      const groups = [...t.groups];
+      const [g] = groups.splice(i, 1);
+      const to = Math.max(0, Math.min(groups.length, index > i ? index - 1 : index));
+      groups.splice(to, 0, g);
+      return { ...t, groups };
+    }),
+  };
+}
+
+/** Gruppi predefiniti di una scheda che l'utente ha tolto (si possono rimettere). */
+export function removedGroups(cfg: RibbonConfig, defaults: RibbonConfig, tabId: string): RibbonGroup[] {
+  const cur = cfg.tabs.find((t) => t.id === tabId);
+  const def = defaults.tabs.find((t) => t.id === tabId);
+  if (!cur || !def) return [];
+  return def.groups.filter((g) => !cur.groups.some((x) => x.id === g.id));
+}
+
+/** Rimette un gruppo predefinito in fondo alla sua scheda. */
+export function restoreGroup(cfg: RibbonConfig, tabId: string, group: RibbonGroup): RibbonConfig {
+  return mapTab(cfg, tabId, (t) => (t.groups.some((g) => g.id === group.id) ? t : { ...t, groups: [...t.groups, { ...group }] }));
 }
 
 /** Inserisce un comando in un gruppo alla posizione data (lo toglie da dove era nello stesso gruppo). */

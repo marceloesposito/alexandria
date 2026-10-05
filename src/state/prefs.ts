@@ -30,6 +30,8 @@ export interface Prefs {
   layerSuggestions: 'off' | 'suggest';
   /** ordinamento dell'albero della Bookshelf */
   resourceSort: 'title' | 'added' | 'author' | 'year' | 'kind';
+  /** introduzione vista (o saltata) */
+  onboardingDone: boolean;
   authorName: string;
   leftWidth: number;
   rightWidth: number;
@@ -57,6 +59,7 @@ export const DEFAULT_PREFS: Prefs = {
   libraryPath: null,
   layerSuggestions: 'suggest',
   resourceSort: 'title',
+  onboardingDone: false,
   authorName: '',
   leftWidth: 280,
   rightWidth: 300,

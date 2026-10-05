@@ -5,6 +5,7 @@ import { NavBar } from './shell/NavBar';
 import { Ribbon } from './shell/Ribbon';
 import { Toasts } from './shell/Toasts';
 import { DialogHost } from './shell/DialogHost';
+import { Onboarding } from './shell/Onboarding';
 import { ContextMenuHost } from './components/ContextMenu';
 import { AskHost } from './components/confirm';
 import { EditorView } from './editor/EditorView';
@@ -86,6 +87,7 @@ export default function App() {
         <C key={i} />
       ))}
       <DialogHost />
+      <Onboarding />
       <ContextMenuHost />
       <AskHost />
       <Toasts />

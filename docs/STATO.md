@@ -43,6 +43,12 @@ Aggiornato: 5 ottobre 2026 (M10).
   (`documents/`, `resources/`) e file su disco non cambiano.
 - **Navbar**: Bookshelf · Scriptorium · History | Library (Cmd/Ctrl+1..4). La Library e' una tab a
   parte (stessa schermata della Bookshelf sulla raccolta comune); il selettore Vault/Library e' sparito.
+- **Barra degli strumenti**: ogni gruppo si trascina dalla maniglia in basso a destra (anche nel
+  cestino, con Annulla) e puo' essere esteso o compatto (un pulsante che apre gli strumenti in un
+  pannello); nella personalizzazione gli strumenti sono tessere con l'etichetta sotto l'icona e i gruppi
+  tolti si possono rimettere.
+- **Navbar** in stile Affinity: icone grandi colorate per sezione, etichetta sotto.
+- **Introduzione** al primo avvio (cinque pagine), riapribile da Aiuto.
 - **Bookshelf**: l'albero degli Strata mostra le risorse sotto gruppi e filtri, con filtro e ordinamento.
 
 ## Installer

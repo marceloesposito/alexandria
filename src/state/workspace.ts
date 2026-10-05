@@ -50,6 +50,8 @@ export interface Toast {
   id: number;
   kind: 'info' | 'ok' | 'error';
   text: string;
+  /** pulsante facoltativo (es. Annulla) */
+  action?: { label: string; run: () => void };
 }
 
 interface WorkspaceState {
@@ -81,7 +83,7 @@ interface WorkspaceState {
   setCursor(rel: string, pos: number, scroll: number): void;
   openDialog(d: DialogId, arg?: unknown): void;
   closeDialog(): void;
-  toast(text: string, kind?: Toast['kind']): void;
+  toast(text: string, kind?: Toast['kind'], action?: Toast['action']): void;
   dismissToast(id: number): void;
   setSaveState(s: WorkspaceState['saveState']): void;
   bumpReload(): void;
@@ -270,10 +272,10 @@ export const useWorkspace = create<WorkspaceState>((set, get) => ({
   closeDialog() {
     set({ dialog: null, dialogArg: null });
   },
-  toast(text, kind = 'info') {
+  toast(text, kind = 'info', action) {
     const id = ++toastId;
-    set({ toasts: [...get().toasts, { id, kind, text }] });
-    setTimeout(() => get().dismissToast(id), kind === 'error' ? 8000 : 3500);
+    set({ toasts: [...get().toasts, { id, kind, text, action }] });
+    setTimeout(() => get().dismissToast(id), kind === 'error' || action ? 8000 : 3500);
   },
   dismissToast(id) {
     set({ toasts: get().toasts.filter((x) => x.id !== id) });
