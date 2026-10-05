@@ -140,7 +140,7 @@ export function EditorPane({ overlay, pageRef: externalPageRef }: Props) {
       const pm = pageMetrics(layout);
       const pageW = (pm.textWidthMm + 2 * pm.padXmm) * mm;
       const avail = sc.clientWidth - 48;
-      setFit(Math.min(1, Math.max(0.5, avail / (pageW * prefs.zoom))));
+      setFit(Math.min(1, Math.max(0.35, avail / (pageW * prefs.zoom))));
     });
     ro.observe(sc);
     return () => ro.disconnect();

@@ -105,3 +105,15 @@ dir di Tauri, non nel vault. Primo avvio â†’ vault di default + documento n
   import bulk, pin â†’ citazione, export PDF).
 - `tauri build` su Windows: installer < 200 MB, app avviata senza rete.
 - Report finale all'utente in italiano: link del repo, PR, stato di ogni milestone, cosa resta.
+
+## Aggiunte durante lo sviluppo
+
+- **Colonna sinistra dell'editor con selettore Risorse | Indice** (richiesta del 5/10): l'indice
+  mostra i titoli H1, H2, H3 del documento, si aggiorna mentre si scrive e porta al titolo con un clic.
+- **Anteprima di stampa e scheda Layout** (richiesta del 4/10): vedi punto 7 dell'interfaccia.
+
+## Aggiunte durante lo sviluppo
+
+- **Colonna sinistra dell'editor con selettore Risorse | Indice** (richiesta del 5/10): l'indice
+  mostra i titoli H1, H2, H3 del documento, si aggiorna mentre si scrive e porta al titolo con un clic.
+- **Anteprima di stampa e scheda Layout** (richiesta del 4/10): vedi punto 7 dell'interfaccia.

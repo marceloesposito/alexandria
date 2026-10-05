@@ -23,6 +23,11 @@ Alexandria è un'app desktop leggera (Tauri) per Windows e macOS. Mette insieme:
 Tutto resta in una cartella locale (il *vault*), come in Obsidian. Nessun
 account, nessun server, nessuna telemetria.
 
+## Installazione
+
+Scarica l'installer dalla pagina Releases (Windows `.exe`/`.msi`, macOS `.dmg`), oppure
+compilalo con `npm run tauri build`. Pesa circa 30 MB.
+
 ## Sviluppo
 
 ```sh
