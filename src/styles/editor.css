@@ -36,6 +36,129 @@
   padding: 10mm 6mm 20mm;
 }
 
+/* ---------------------------------------------------------------- senza bordi (stile Notion) */
+.editor-scroll.is-borderless {
+  background: var(--paper);
+  padding-top: 0;
+}
+
+.page.page--borderless {
+  width: min(100%, 820px);
+  padding: 56px var(--page-pad-x) 40vh;
+  background: transparent;
+  box-shadow: none;
+  border-radius: 0;
+}
+
+/* ---------------------------------------------------------------- righelli della vista Pagina */
+.editor-scroll.has-rulers {
+  padding-top: 0;
+}
+
+.ruler-h-row {
+  position: sticky;
+  top: 0;
+  z-index: 25;
+  display: flex;
+  justify-content: center;
+  padding: 6px 0 8px;
+  background: var(--desk);
+}
+
+.ruler {
+  position: relative;
+  overflow: hidden;
+  background: var(--paper);
+  color: var(--muted);
+  font-family: var(--font-ui);
+  font-size: 8.5px;
+  user-select: none;
+}
+
+.ruler--h {
+  flex-shrink: 0;
+  height: 5mm;
+  border-bottom: 1px solid var(--line-strong);
+}
+
+.ruler--v {
+  position: absolute;
+  top: 0;
+  bottom: 0;
+  right: calc(100% + 3mm);
+  width: 5mm;
+  border-right: 1px solid var(--line-strong);
+}
+
+.ruler__margin {
+  position: absolute;
+  background: var(--chrome-2);
+}
+
+.ruler--h .ruler__margin {
+  top: 0;
+  bottom: 0;
+}
+
+.ruler--v .ruler__margin {
+  left: 0;
+  right: 0;
+}
+
+/* tacche: millimetri, mezzi centimetri, centimetri */
+.ruler--h .ruler__ticks {
+  position: absolute;
+  inset: 0;
+  background-image:
+    repeating-linear-gradient(to right, var(--line-strong) 0 1px, transparent 1px 10mm),
+    repeating-linear-gradient(to right, var(--line-strong) 0 1px, transparent 1px 5mm),
+    repeating-linear-gradient(to right, var(--line) 0 1px, transparent 1px 1mm);
+  background-size: 100% 100%, 100% 40%, 100% 20%;
+  background-repeat: repeat-x;
+  background-position-y: bottom;
+}
+
+.ruler--v .ruler__ticks {
+  position: absolute;
+  inset: 0;
+  background-image:
+    repeating-linear-gradient(to bottom, var(--line-strong) 0 1px, transparent 1px 10mm),
+    repeating-linear-gradient(to bottom, var(--line-strong) 0 1px, transparent 1px 5mm),
+    repeating-linear-gradient(to bottom, var(--line) 0 1px, transparent 1px 1mm);
+  background-size: 100% 100%, 40% 100%, 20% 100%;
+  background-repeat: repeat-y;
+  background-position-x: right;
+}
+
+.ruler__label {
+  position: absolute;
+  line-height: 1;
+}
+
+.ruler--h .ruler__label {
+  top: 2px;
+  transform: translateX(-50%);
+}
+
+.ruler--v .ruler__label {
+  left: 1px;
+  transform: translateY(-50%);
+  writing-mode: vertical-rl;
+  rotate: 180deg;
+}
+
+.ruler__page {
+  position: absolute;
+  left: 0;
+  right: 0;
+  height: 0;
+  border-top: 1px dashed var(--accent);
+  color: var(--accent);
+  font-weight: 600;
+  line-height: 1;
+  padding: 1px 0 0 1px;
+}
+
 /* ---------------------------------------------------------------- testo */
 .doc-body {
   outline: none;

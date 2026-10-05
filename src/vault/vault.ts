@@ -1,4 +1,5 @@
 // Operazioni sul vault: creazione, elenco dei documenti, lettura e scrittura con i file accanto.
+import { t } from '../i18n';
 import { platform, joinPath, baseName } from '../platform';
 import {
   DOCS_DIR,
@@ -60,7 +61,7 @@ export async function ensureVault(root: string, name?: string): Promise<VaultCon
   if (!(await platform.exists(gi))) await platform.writeText(gi, `${CACHE_DIR}/\n*.alexandria-tmp\n.DS_Store\nThumbs.db\n`);
   if (fresh) {
     try {
-      await platform.gitCommit(root, 'Vault creato');
+      await platform.gitCommit(root, t('vc.msg.created'));
     } catch {
       /* il primo commit puo' fallire se git non e' disponibile: il vault resta valido */
     }

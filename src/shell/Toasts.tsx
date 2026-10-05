@@ -8,6 +8,17 @@ export function Toasts() {
       {toasts.map((x) => (
         <div key={x.id} className={`toast toast--${x.kind}`}>
           <span>{x.text}</span>
+          {x.action && (
+            <button
+              className="toast__action"
+              onClick={() => {
+                x.action!.run();
+                useWorkspace.getState().dismissToast(x.id);
+              }}
+            >
+              {x.action.label}
+            </button>
+          )}
           <button className="icon-btn tiny" onClick={() => useWorkspace.getState().dismissToast(x.id)} aria-label="×">
             <X size={12} />
           </button>

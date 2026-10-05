@@ -7,6 +7,8 @@ import { readArchive, readText } from '../storage';
 import { PdfViewer } from './PdfViewer';
 import { TextViewer, textToBlocks } from './TextViewer';
 import { ImageViewer, MediaViewer, YoutubeViewer } from './MediaViewers';
+import { SnippetViewer } from './SnippetViewer';
+import { removeWithConfirm } from '../ui/remove';
 import { thumbUrl, KindIcon, subtitle } from '../ui/common';
 import { platform } from '../../platform';
 import type { Block } from '../html';
@@ -28,7 +30,7 @@ export function ResourceViewer() {
   useEffect(() => {
     setBlocks(null);
     if (!r) return;
-    if (['pdf', 'image', 'video', 'audio', 'youtube', 'reference'].includes(r.kind)) return;
+    if (['pdf', 'image', 'video', 'audio', 'youtube', 'reference', 'snippet'].includes(r.kind)) return;
     void (async () => {
       const s = r.library ? st.library : st.resources.some((x) => x.id === r.id) ? st.vault : st.library;
       const archived = s ? await readArchive(s, r.library ?? r.id) : null;
@@ -61,6 +63,7 @@ export function ResourceViewer() {
   if (r.kind === 'pdf' && path) body = <PdfViewer r={r} path={path} focusPin={focusPin} cropMode={crop} onPin={pin} />;
   else if (r.kind === 'image' && url) body = <ImageViewer r={r} url={url} focusPin={focusPin} cropMode={crop} onPin={pin} />;
   else if ((r.kind === 'video' || r.kind === 'audio') && url) body = <MediaViewer r={r} url={url} focusPin={focusPin} onPin={pin} />;
+  else if (r.kind === 'snippet') body = <SnippetViewer r={r} />;
   else if (r.kind === 'youtube') body = <YoutubeViewer r={r} thumb={thumbUrl(r)} focusPin={focusPin} onPin={pin} />;
   else if (r.kind === 'reference')
     body = (
@@ -93,6 +96,9 @@ export function ResourceViewer() {
               <ExternalLink size={14} /> {t('res.openBrowser')}
             </button>
           )}
+          <button className="icon-btn" onClick={() => void removeWithConfirm([r.id])} title={t('cmd.res.remove')}>
+            <Trash2 size={16} />
+          </button>
           <button className="icon-btn" onClick={() => st.openViewer(null)} title={t('common.close')}>
             <X size={18} />
           </button>

@@ -22,6 +22,12 @@ import {
   BookOpen,
   Image as ImageIcon,
   FileUp,
+  Paperclip,
+  SquareCode,
+  Trash2,
+  Landmark,
+  ScrollText,
+  Files,
 } from 'lucide-react';
 import { registerCommands, notifyCommandState } from '../commands/registry';
 import { viewComponents, globalComponents } from '../shell/views';
@@ -39,9 +45,18 @@ import { CitePicker } from '../citations/CitePicker';
 import { useCitations, insertBibliography, BUNDLED_STYLES, listCustomStyles, type StyleInfo } from '../citations/store';
 import { useDocSettings } from '../layout/docSettings';
 import { getEditor } from '../state/editorRef';
-import { setEditorFilesHandler } from '../editor/extensions/drop';
-import { importFiles } from './importer';
+import { setEditorFilesHandler, setEditorLinksHandler, setEditorPasteLinkHandler } from '../editor/extensions/drop';
+import { embedView, borderlessFooter } from '../editor/slots';
+import { DocLinksFooter } from './ui/DocLinksFooter';
+import { importAndInsert, upgradeLinkToEmbed, downgradeEmbedToLink } from './insertActions';
 import { relativeFromDoc } from '../vault/resolve';
+import { classifyTransfer, readTransfer } from './insert';
+import { InsertResourceDialog } from './ui/InsertResourceDialog';
+import { onGlobalPaste, onGlobalKeydown } from './pasteToBookshelf';
+import { renameDocRefs, dropDocRefs } from './docLinks';
+import { docHooks } from '../state/workspace';
+import { EmbedView } from './ui/EmbedView';
+import { removeWithConfirm, removalTargets } from './ui/remove';
 import { platform } from '../platform';
 import { t, useLang } from '../i18n';
 import type { RibbonSize } from '../state/prefs';
@@ -68,30 +83,17 @@ function StyleWidget({ size }: { size: RibbonSize }) {
   );
 }
 
-/** Immagini trascinate dal disco nel testo: diventano risorse del vault e figure nel documento. */
+/** File trascinati dal disco nel testo: immagini -> figure, il resto -> schede embed. */
 async function dropFilesIntoEditor(files: File[], pos: number) {
-  const images = files.filter((f) => f.type.startsWith('image/'));
-  const others = files.filter((f) => !f.type.startsWith('image/'));
-  const data = await Promise.all(images.map(async (f) => ({ name: f.name, mime: f.type, data: new Uint8Array(await f.arrayBuffer()) })));
-  const made = await importFiles(data, 'vault');
-  const e = getEditor();
-  const docRel = ws().activeDoc;
-  if (e && docRel) {
-    let at = pos;
-    for (const r of made) {
-      if (r.kind !== 'image' || !r.file) continue;
-      const node = e.schema.nodes.figure.create({ src: relativeFromDoc(docRel, `resources/${r.id}/${r.file}`), caption: r.title });
-      const $p = e.state.doc.resolve(Math.min(at, e.state.doc.content.size));
-      const insertAt = $p.depth > 0 ? $p.after(1) : at;
-      e.view.dispatch(e.state.tr.insert(insertAt, node));
-      at = insertAt + node.nodeSize;
-    }
-  }
-  if (others.length) {
-    const rest = await Promise.all(others.map(async (f) => ({ name: f.name, mime: f.type, data: new Uint8Array(await f.arrayBuffer()) })));
-    await importFiles(rest, 'vault');
-    ws().toast(t('res.addedToResources', { n: rest.length }), 'info');
-  }
+  await importAndInsert({ kind: 'files' }, files, pos);
+}
+
+/** Link trascinati da un'altra finestra (browser, mail...): importati e inseriti come schede. */
+function dropLinksIntoEditor(dt: DataTransfer, pos: number): boolean {
+  const c = classifyTransfer(readTransfer(dt));
+  if (!c || c.kind !== 'links') return false;
+  void importAndInsert(c, [], pos);
+  return true;
 }
 
 export function registerResources() {
@@ -104,13 +106,62 @@ export function registerResources() {
   globalComponents.push(ResourceViewer);
   registerWidget('citeStyle', StyleWidget);
   setEditorFilesHandler(dropFilesIntoEditor);
+  setEditorLinksHandler(dropLinksIntoEditor);
+  window.addEventListener('paste', onGlobalPaste);
+  docHooks.renamed.push((from, to) => {
+    const s = useResources.getState();
+    const r = renameDocRefs(s.links, s.whiteboard, from, to);
+    s.replaceRefs(r.links, r.whiteboard);
+  });
+  docHooks.deleted.push((rel) => {
+    const s = useResources.getState();
+    const r = dropDocRefs(s.links, s.whiteboard, rel);
+    s.replaceRefs(r.links, r.whiteboard);
+  });
+  window.addEventListener('keydown', onGlobalKeydown);
+  setEditorPasteLinkHandler((url) => {
+    void upgradeLinkToEmbed(url).then((id) => {
+      if (id) ws().toast(t('embed.auto'), 'info', { label: t('embed.keepLink'), run: () => downgradeEmbedToLink(id, url) });
+    });
+  });
+  registerDialog('insertResource', InsertResourceDialog);
+  embedView.set(EmbedView);
+  borderlessFooter.set(DocLinksFooter);
   // i pulsanti del ribbon seguono vista, ambito e selezione del gestore risorse
   useResources.subscribe((s, p) => {
-    if (s.view !== p.view || s.scope !== p.scope || s.selected !== p.selected) notifyCommandState();
+    if (s.view !== p.view || s.scope !== p.scope || s.selected !== p.selected || s.inspector !== p.inspector) notifyCommandState();
   });
 
   const st = () => useResources.getState();
   registerCommands([
+    { id: 'res.insert', label: 'slash.resource', icon: Paperclip, category: 'insert', views: ['editor'], run: () => ws().openDialog('insertResource') },
+    { id: 'res.insertSnippet', label: 'slash.snippet', icon: SquareCode, category: 'insert', views: ['editor'], run: () => ws().openDialog('insertResource', { kind: 'snippet' }) },
+    { id: 'res.newSnippet', label: 'cmd.res.newSnippet', icon: SquareCode, category: 'resources', run: () => ws().openDialog('addResource', { tab: 'snippet' }) },
+    {
+      id: 'view.resources',
+      label: 'cmd.view.resources',
+      icon: Library,
+      shortcut: 'Mod+1',
+      category: 'view',
+      isActive: () => ws().app.view === 'resources' && st().scope === 'vault',
+      run: () => {
+        ws().setView('resources');
+        st().setScope('vault');
+      },
+    },
+    {
+      id: 'view.library',
+      label: 'cmd.view.library',
+      icon: Landmark,
+      shortcut: 'Mod+4',
+      category: 'view',
+      isActive: () => ws().app.view === 'resources' && st().scope === 'library',
+      run: () => {
+        ws().setView('resources');
+        st().setScope('library');
+      },
+    },
+    { id: 'res.remove', label: 'cmd.res.remove', icon: Trash2, category: 'resources', views: ['resources'], isEnabled: () => removalTargets().length > 0, run: () => removeWithConfirm() },
     { id: 'res.add', label: 'cmd.res.add', icon: Plus, shortcut: 'Mod+Shift+A', category: 'resources', run: () => ws().openDialog('addResource') },
     {
       id: 'res.importBib',
@@ -185,6 +236,8 @@ export function registerResources() {
     { id: 'wb.note', label: 'cmd.wb.note', icon: StickyNote, category: 'whiteboard', views: ['resources'], run: () => (st().setView('whiteboard'), setTimeout(() => wbApi.addNote?.(), 50)) },
     { id: 'wb.frame', label: 'cmd.wb.frame', icon: Frame, category: 'whiteboard', views: ['resources'], run: () => (st().setView('whiteboard'), setTimeout(() => void wbApi.addFrame?.(), 50)) },
     { id: 'wb.connect', label: 'cmd.wb.connect', icon: Spline, category: 'whiteboard', views: ['resources'], run: () => ws().toast(t('wb.connectHint'), 'info') },
+    { id: 'wb.activeDoc', label: 'cmd.wb.activeDoc', icon: ScrollText, category: 'whiteboard', views: ['resources'], isEnabled: () => !!ws().activeDoc, run: () => (st().setView('whiteboard'), setTimeout(() => wbApi.addActiveDoc?.(), 50)) },
+    { id: 'wb.pickDocs', label: 'cmd.wb.pickDocs', icon: Files, category: 'whiteboard', views: ['resources'], run: () => (st().setView('whiteboard'), setTimeout(() => wbApi.pickDocs?.(), 50)) },
     { id: 'wb.fit', label: 'cmd.wb.fit', icon: Maximize, category: 'whiteboard', views: ['resources'], run: () => wbApi.fit?.() },
 
     // ----- citazioni

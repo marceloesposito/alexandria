@@ -29,8 +29,14 @@ import {
   PenLine,
   History,
   Eye,
+  FileText,
+  ScrollText,
+  Ruler,
+  Feather,
+  House,
 } from 'lucide-react';
-import { registerCommands } from './registry';
+import { registerCommands, notifyCommandState } from './registry';
+import { useZen } from '../state/zen';
 import { useWorkspace, ws } from '../state/workspace';
 import { flushSave, toggleSource, useDoc } from '../editor/session';
 import { getEditor } from '../state/editorRef';
@@ -49,10 +55,7 @@ async function chooseVault(create: boolean) {
     // una cartella qualsiasi diventa un vault: i .md esistenti in documents/ vengono letti
     ws().toast(t('vault.converted'), 'info');
   }
-  await ws().openVault(dir);
-  const st = ws();
-  if (st.docs.length) st.openDoc(st.docs[0].rel);
-  else await st.newDoc();
+  await ws().enterVault(dir);
 }
 
 export function registerAppCommands() {
@@ -68,6 +71,16 @@ export function registerAppCommands() {
         await flushSave(getEditor());
         await ws().newDoc();
         ws().setView('editor');
+      },
+    },
+    {
+      id: 'file.home',
+      label: 'cmd.file.home',
+      icon: House,
+      category: 'file',
+      run: async () => {
+        await flushSave(getEditor());
+        ws().closeVault();
       },
     },
     { id: 'file.openVault', label: 'cmd.file.openVault', icon: FolderOpen, shortcut: 'Mod+O', category: 'file', run: () => chooseVault(false) },
@@ -150,6 +163,11 @@ export function registerAppCommands() {
       run: () => toggleSource(getEditor()),
     },
     { id: 'view.preview', label: 'cmd.view.preview', icon: Eye, shortcut: 'Mod+Shift+P', category: 'view', views: ['editor'], isActive: () => prefs().showPreview, run: () => ws().setPrefs({ showPreview: !prefs().showPreview }) },
+    { id: 'view.layoutPage', label: 'cmd.view.layoutPage', icon: FileText, category: 'view', views: ['editor'], isActive: () => prefs().editorLayout === 'page', run: () => ws().setPrefs({ editorLayout: 'page' }) },
+    { id: 'view.layoutBorderless', label: 'cmd.view.layoutBorderless', icon: ScrollText, category: 'view', views: ['editor'], isActive: () => prefs().editorLayout === 'borderless', run: () => ws().setPrefs({ editorLayout: 'borderless' }) },
+    { id: 'view.rulers', label: 'cmd.view.rulers', icon: Ruler, category: 'view', views: ['editor'], isActive: () => prefs().rulers, isEnabled: () => prefs().editorLayout === 'page', run: () => ws().setPrefs({ rulers: !prefs().rulers }) },
+    { id: 'help.onboarding', label: 'cmd.help.onboarding', icon: Feather, category: 'help', run: () => ws().setPrefs({ onboardingDone: false }) },
+    { id: 'view.zen', label: 'cmd.view.zen', icon: Feather, shortcut: 'Mod+Shift+D', category: 'view', isActive: () => useZen.getState().on, run: () => useZen.getState().toggle() },
     { id: 'view.focus', label: 'cmd.view.focus', icon: Focus, shortcut: 'Mod+Shift+F', category: 'view', views: ['editor'], isActive: () => prefs().focusMode, run: () => ws().setPrefs({ focusMode: !prefs().focusMode }) },
     { id: 'view.zoomIn', label: 'cmd.view.zoomIn', icon: ZoomIn, shortcut: 'Mod+=', category: 'view', run: () => ws().setPrefs({ zoom: Math.min(2, Math.round((prefs().zoom + 0.1) * 10) / 10) }) },
     { id: 'view.zoomOut', label: 'cmd.view.zoomOut', icon: ZoomOut, shortcut: 'Mod+-', category: 'view', run: () => ws().setPrefs({ zoom: Math.max(0.6, Math.round((prefs().zoom - 0.1) * 10) / 10) }) },
@@ -194,3 +212,6 @@ export function registerAppCommands() {
 export function useViewIs(v: 'resources' | 'editor' | 'versions'): boolean {
   return useWorkspace((s) => s.app.view === v);
 }
+
+// i pulsanti di menu e ribbon seguono l'ingresso e l'uscita dalla scrittura minimale
+useZen.subscribe(() => notifyCommandState());

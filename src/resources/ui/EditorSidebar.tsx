@@ -6,7 +6,8 @@ import { useResources } from '../store';
 import { useWorkspace } from '../../state/workspace';
 import { KindIcon } from './common';
 import { CITE_MIME } from '../../editor/extensions/drop';
-import { FIGURE_MIME, LINK_MIME } from '../../editor/extensions/drop';
+import { FIGURE_MIME, LINK_MIME, EMBED_MIME } from '../../editor/extensions/drop';
+import { embedAttrsFor } from '../insert';
 import { relativeFromDoc } from '../../vault/resolve';
 import { displayAuthorYear, type Resource, type Layer } from '../model';
 import { t, useLang } from '../../i18n';
@@ -16,6 +17,8 @@ function setDragData(e: React.DragEvent, r: Resource, locator?: string, pinId?: 
   const docRel = useWorkspace.getState().activeDoc;
   if (r.kind === 'image' && r.file && !locator && !r.library && docRel) {
     e.dataTransfer.setData(FIGURE_MIME, JSON.stringify({ src: relativeFromDoc(docRel, `resources/${r.id}/${r.file}`), caption: r.title }));
+  } else if (r.kind === 'snippet' && !locator && docRel) {
+    e.dataTransfer.setData(EMBED_MIME, JSON.stringify(embedAttrsFor(r, docRel)));
   } else if (r.kind === 'web' && !r.isSource && !locator && r.url) {
     e.dataTransfer.setData(LINK_MIME, JSON.stringify({ href: r.url, text: r.title }));
   }

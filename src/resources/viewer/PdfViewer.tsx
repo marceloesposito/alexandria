@@ -1,7 +1,7 @@
 // PDF con pdf.js: pagine disegnate su canvas con il livello di testo selezionabile.
 // Pin da selezione (citazione + pagina) o da ritaglio rettangolare.
 import { useEffect, useRef, useState } from 'react';
-import { TextLayer, type PDFDocumentProxy } from 'pdfjs-dist';
+import { TextLayer, type PDFDocumentProxy } from 'pdfjs-dist/legacy/build/pdf.mjs';
 import 'pdfjs-dist/web/pdf_viewer.css';
 import { openPdf } from '../extract';
 import { platform } from '../../platform';

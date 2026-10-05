@@ -34,6 +34,11 @@ export const tauriPlatform: Platform = {
   fileUrl: (path) => convertFileSrc(path),
 
   appDataDir: () => invoke('app_data_dir'),
+  portableRoot: () => invoke<string | null>('portable_root'),
+  readClipboard: async () => {
+    const r = await invoke<{ text: string | null; files: string[]; imagePngB64: string | null }>('clipboard_read');
+    return { text: r.text, files: r.files, image: r.imagePngB64 ? base64ToBytes(r.imagePngB64) : null };
+  },
   documentsDir: () => invoke('documents_dir'),
   pickDirectory: async (title) => {
     const r = await open({ directory: true, multiple: false, title });
@@ -78,6 +83,11 @@ export const tauriPlatform: Platform = {
   fetchUrl: async (url, accept): Promise<FetchResult> => {
     const r = await invoke<RawFetch>('net_fetch', { url, accept: accept ?? null });
     return { status: r.status, url: r.url, contentType: r.contentType, body: base64ToBytes(r.bodyB64) };
+  },
+
+  snapshotUrl: async (url) => {
+    const b64 = await invoke<string | null>('net_snapshot', { url });
+    return b64 ? base64ToBytes(b64) : null;
   },
 
   typst: async (source, files, format): Promise<TypstOutput> => {

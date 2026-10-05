@@ -1,4 +1,5 @@
 // Colonna centrale: la pagina con l'editor a blocchi, i numeri di riga e la vista sorgente.
+// Due aspetti: Pagina (foglio con margini e righelli) o Senza bordi (testo a tutta colonna).
 import { useEffect, useRef, useState, type ReactNode } from 'react';
 import { useEditor, EditorContent } from '@tiptap/react';
 import DragHandle from '@tiptap/extension-drag-handle-react';
@@ -13,6 +14,8 @@ import { LineGutter } from './LineGutter';
 import { SourceView } from './SourceView';
 import { notifyCommandState } from '../commands/registry';
 import { useDocSettings, pageMetrics } from '../layout/docSettings';
+import { HorizontalRuler, VerticalRuler, RULER_SPACE_PX } from './Rulers';
+import { useZen } from '../state/zen';
 
 interface Props {
   /** sovrapposizioni allineate alla pagina (evidenziazione righe dei commenti, connettori) */
@@ -32,6 +35,11 @@ export function EditorPane({ overlay, pageRef: externalPageRef }: Props) {
   const scrollRef = useRef<HTMLDivElement>(null);
   const measureRaf = useRef(0);
   const [fit, setFit] = useState(1);
+  const zen = useZen((s) => s.on);
+  // la scrittura minimale e' sempre senza bordi, senza righelli e senza numeri di riga
+  const borderless = zen || prefs.editorLayout === 'borderless';
+  const lineNumbers = prefs.lineNumbers && !zen;
+  const rulers = !borderless && prefs.rulers && !sourceMode;
 
   const scheduleMeasure = () => {
     cancelAnimationFrame(measureRaf.current);
@@ -129,22 +137,24 @@ export function EditorPane({ overlay, pageRef: externalPageRef }: Props) {
   useEffect(() => {
     scheduleMeasure();
     // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [prefs.zoom, prefs.lineNumbers, layout, fit]);
+  }, [prefs.zoom, lineNumbers, layout, fit, borderless]);
 
   // la pagina si riduce per stare nella colonna quando lo spazio non basta
   useEffect(() => {
     const sc = scrollRef.current;
     if (!sc) return;
     const ro = new ResizeObserver(() => {
+      if (borderless) return setFit(1);
       const mm = 96 / 25.4;
       const pm = pageMetrics(layout);
       const pageW = (pm.textWidthMm + 2 * pm.padXmm) * mm;
-      const avail = sc.clientWidth - 48;
+      // con i righelli resta spazio a sinistra per quello verticale (e a destra, per centrare)
+      const avail = sc.clientWidth - 48 - (rulers ? 2 * RULER_SPACE_PX : 0);
       setFit(Math.min(1, Math.max(0.35, avail / (pageW * prefs.zoom))));
     });
     ro.observe(sc);
     return () => ro.disconnect();
-  }, [layout, prefs.zoom]);
+  }, [layout, prefs.zoom, borderless, rulers]);
 
   // file modificati fuori dall'app
   useEffect(() => {
@@ -167,7 +177,7 @@ export function EditorPane({ overlay, pageRef: externalPageRef }: Props) {
   const m = pageMetrics(layout);
   const style = {
     '--page-width': `${m.textWidthMm}mm`,
-    '--page-pad-x': `${m.padXmm}mm`,
+    '--page-pad-x': borderless ? '17mm' : `${m.padXmm}mm`,
     '--page-font-size': `${layout.fontSizePt}pt`,
     '--page-leading': String(layout.leading),
     '--page-font': layout.font === 'sans' ? 'var(--font-ui)' : 'var(--font-text)',
@@ -175,14 +185,19 @@ export function EditorPane({ overlay, pageRef: externalPageRef }: Props) {
   } as React.CSSProperties;
 
   return (
-    <div className={`editor-scroll ${prefs.focusMode ? 'is-focus' : ''}`} ref={scrollRef}>
+    <div
+      className={`editor-scroll ${prefs.focusMode ? 'is-focus' : ''} ${borderless ? 'is-borderless' : 'is-paged'} ${rulers ? 'has-rulers' : ''}`}
+      ref={scrollRef}
+    >
+      {rulers && <HorizontalRuler textWidthMm={m.textWidthMm} padXmm={m.padXmm} style={{ zoom: style.zoom }} />}
       {sourceMode ? (
         <div className="page page--source" style={style}>
           <SourceView />
         </div>
       ) : (
-        <div className="page" ref={pageRef} style={style} data-columns={layout.columns}>
-          {prefs.lineNumbers && <LineGutter />}
+        <div className={`page ${borderless ? 'page--borderless' : ''}`} ref={pageRef} style={style} data-columns={layout.columns}>
+          {rulers && <VerticalRuler pageRef={pageRef} textHeightMm={m.textHeightMm} />}
+          {lineNumbers && <LineGutter />}
           {overlay}
           {editor && (
             <DragHandle editor={editor} className="drag-handle">

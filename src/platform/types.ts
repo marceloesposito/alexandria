@@ -108,6 +108,10 @@ export interface Platform {
 
   // luoghi
   appDataDir(): Promise<string>;
+  /** cartella Alexandria-data se l'app gira in modalita' portable (chiavetta), altrimenti null */
+  portableRoot(): Promise<string | null>;
+  /** appunti di sistema letti dall'app nativa (file copiati, immagine, testo); null se non disponibile */
+  readClipboard(): Promise<{ text: string | null; files: string[]; image: Uint8Array | null } | null>;
   documentsDir(): Promise<string>;
   pickDirectory(title?: string): Promise<string | null>;
   pickFiles(title?: string): Promise<string[]>;
@@ -143,6 +147,8 @@ export interface Platform {
 
   // rete (solo su azione esplicita dell'utente)
   fetchUrl(url: string, accept?: string): Promise<FetchResult>;
+  /** foto della pagina (PNG) da una webview fuori schermo; null se non disponibile */
+  snapshotUrl(url: string): Promise<Uint8Array | null>;
 
   // impaginazione
   typst(source: string, files: TypstFile[], format: 'pdf' | 'svg'): Promise<TypstOutput>;

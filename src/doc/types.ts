@@ -58,6 +58,7 @@ export const BLOCK_TYPES = new Set([
   'codeBlock',
   'horizontalRule',
   'figure',
+  'embed',
   'mathBlock',
   'table',
   'pageBreak',
@@ -72,4 +73,17 @@ export function emptyDoc(): PMNode {
 
 export function text(t: string, marks?: PMMark[]): PMNode {
   return marks && marks.length ? { type: 'text', text: t, marks } : { type: 'text', text: t };
+}
+
+/**
+ * Gli embed (schede di link e risorse) diventano paragrafi con un link: gli esportatori
+ * non devono conoscerli e il testo esportato resta pulito.
+ */
+export function embedsToLinks(n: PMNode): PMNode {
+  if (n.type === 'embed') {
+    const href = String(n.attrs?.url ?? '');
+    const text = String(n.attrs?.title || href);
+    return { type: 'paragraph', content: text ? [{ type: 'text', text, marks: href ? [{ type: 'link', attrs: { href, title: null } }] : undefined }] : undefined };
+  }
+  return n.content ? { ...n, content: n.content.map(embedsToLinks) } : n;
 }

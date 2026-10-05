@@ -1,6 +1,6 @@
 # Stato dei lavori
 
-Aggiornato: 5 ottobre 2026.
+Aggiornato: 5 ottobre 2026 (M10).
 
 | Milestone | Stato | PR |
 | --- | --- | --- |
@@ -11,6 +11,7 @@ Aggiornato: 5 ottobre 2026.
 | M6–M7 Risorse, Library, whiteboard, grafo, layer, pin, citazioni CSL, bibliografia | fatto | #4 |
 | M8 Export (PDF Typst, DOCX, HTML, MD, TXT, LaTeX), anteprima, Layout, indice | fatto | #5 |
 | M9 Rifiniture: icona, digitazione e incolla in Markdown, prova dell'app vera, installer | fatto | #6 |
+| M10 Vista senza bordi, righelli, scrittura minimale, contatore flottante, embed con screenshot, snippet, build universale | fatto | #7 |
 
 ## Decisioni prese durante il lavoro
 
@@ -23,11 +24,70 @@ Aggiornato: 5 ottobre 2026.
 - **xmldom**: la versione aggiornata e' forzata solo per MathJax (mammoth richiede la 0.8).
 - **Pagine web**: archiviate come blocchi di solo testo (`page.json`), mai come HTML.
 
+- **Aspetto dell'editor** (Visualizza): Pagina, con righelli in cm e inizi di pagina stimati, oppure
+  Senza bordi (stile Notion/Obsidian). La **scrittura minimale** (Cmd/Ctrl+Maiusc+D, Esc per uscire)
+  nasconde tutto tranne il testo e mette la finestra a schermo intero; non si salva nello stato.
+- **Conteggi**: etichetta flottante in basso a destra al posto della barra di stato.
+- **Embed**: `[Titolo](url){embed resource=id image="..."}`. All'import di un link l'app fotografa la
+  pagina con una webview fuori schermo, senza focus, senza cookie e senza capability (WKWebView su
+  macOS, WebView2 su Windows); la foto e' ridotta a WebP o JPEG. Se non riesce resta og:image.
+  Negli export l'embed diventa un link.
+- **Snippet di codice**: nuovo tipo di risorsa (file `snippet.<ext>`), creato da Aggiungi risorse,
+  modificabile nel visualizzatore, inseribile nel testo dal menu / o trascinandolo.
+- **Rimozione delle risorse**: ribbon, menu Risorse, clic destro, Canc nella tabella, visualizzatore.
+- **OpenSSL** compilato dentro l'app (`vendored-openssl` di git2): niente dipendenza da Homebrew.
+- **Nomi tematici** (scelti dal committente, solo nelle stringhe di `src/i18n/`, uguali in IT ed EN):
+  documento -> Scroll (in italiano Pergamena), gestore risorse -> Bookshelf, schermata Editor -> Scriptorium, Versioni ->
+  History, commenti a margine -> Marginalia, whiteboard -> Tabula, pin -> Bookmarks, layer -> Strata.
+  Restano Library e Bibliografia; vault -> Compendium (la cartella creata al primo avvio si chiama "Il mio Compendium"; quelle esistenti non cambiano nome). Identificatori, cartelle
+  (`documents/`, `resources/`) e file su disco non cambiano.
+- **Navbar**: Bookshelf · Scriptorium · History | Library (Cmd/Ctrl+1..4). La Library e' una tab a
+  parte (stessa schermata della Bookshelf sulla raccolta comune); il selettore Vault/Library e' sparito.
+- **Barra degli strumenti**: ogni gruppo si trascina dalla maniglia in basso a destra (anche nel
+  cestino, con Annulla) e puo' essere esteso o compatto (un pulsante che apre gli strumenti in un
+  pannello); nella personalizzazione gli strumenti sono tessere con l'etichetta sotto l'icona e i gruppi
+  tolti si possono rimettere.
+- **Navbar** in stile Affinity: icone grandi colorate per sezione, etichetta sotto.
+- **Schermata iniziale** (stile VS Code / Adobe Home): all'avvio si sceglie il Compendium (riprendi
+  l'ultimo, recenti, nuovo, apri; al primo avvio "crea il tuo primo Compendium"). Si torna da File >
+  Schermata iniziale. Preferenze > All'avvio: schermata iniziale (predefinito) o ultimo Compendium.
+- **Template e master page** (Scriptorium > Layout > Template, File > Nuova da template...):
+  template predefiniti (Vuota, Articolo, Tesi, Saggio, Paper a due colonne) e dell'utente in
+  `<appData>/templates/*.json`, comuni a tutti i Compendium; un template e' testo di partenza +
+  impostazioni. Le master page non sono piu' tre fisse: si creano, rinominano, duplicano ed eliminano
+  (il corpo resta; una sezione con una master eliminata usa il corpo). "Nuova pergamena" resta vuota.
+- **Pergamene nella Tabula**: nodi proxy delle pergamene (la aperta o scelte dall'elenco), collegabili
+  fra loro e con le risorse; rinomina ed eliminazione aggiornano nodi e legami. Nella vista senza bordi
+  una barra di una riga mostra le pergamene collegate (clic per aprirle); non compare in Pagina, nella
+  scrittura minimale ne' nell'export.
+- **Incolla nella Bookshelf**: Cmd/Ctrl+V fuori dai campi crea la risorsa del tipo giusto; un link
+  incollato da solo su una riga vuota diventa una scheda embed.
+- **Portable**: cartella `Alexandria-data` accanto all'app (`node scripts/portable.mjs --mac ... --win ...`).
+- **macOS**: pacchetto firmato ad-hoc. Senza Developer ID e notarizzazione Apple, su altri Mac al primo
+  avvio serve Impostazioni di sistema > Privacy e sicurezza > Apri comunque.
+- **Workspace** (come Illustrator): Beginner (vicino alla modalita' focus: niente colonne, vista senza
+  bordi, una scheda "Essenziali" per ambiente; le altre schede restano nascoste), Studio (predefinito),
+  Pro (tutto visibile, icone piccole). Da Visualizza > Workspace o dal selettore in alto a destra;
+  "Salva workspace corrente" salva colonne, viste, barra e pannelli flottanti (`src/state/workspaces.ts`).
+- **Pannelli flottanti**: un gruppo trascinato fuori dalla barra diventa un pannello libero; altri gruppi
+  si aggiungono trascinandoli sopra; si richiudono nella barra (`src/commands/floatModel.ts`).
+- **History semplificata** (stile GitHub Desktop): a sinistra variante, "Salva una versione" e storia
+  verticale (salvataggi automatici nascosti); al centro la pergamena come documento; passando su una
+  versione il centro si divide nelle due versioni allineate (`src/versions/docDiff.ts`). Interfaccia in
+  parole semplici: versione (commit), variante (branch), unisci (merge), pubblica/scarica (push/pull).
+- **Introduzione** al primo avvio (sette pagine con le funzioni di ogni ambiente), riapribile da Aiuto.
+- **Bookshelf**: l'albero degli Strata mostra le risorse sotto gruppi e filtri, con filtro e ordinamento.
+
 ## Installer
 
 - `npm run tauri build`: installer NSIS 27,5 MB e MSI 34 MB (Windows), molto sotto i 200 MB.
 - Il workflow `release.yml` costruisce Windows e macOS (universale) a ogni tag `v*` e li
   allega a una release in bozza.
+- macOS in locale: `npm run tauri build -- --target universal-apple-darwin --bundles app,dmg`
+  (serve `rustup target add x86_64-apple-darwin`). Bastano i Command Line Tools, non serve Xcode.
+  Se fra gli SDK ce n'e' uno piu' nuovo del linker (es. un MacOSX27.0.sdk rimasto da una beta, con
+  architetture che `ld` non conosce: "unknown architecture" nei .tbd), indicare l'SDK giusto:
+  `SDKROOT=/Library/Developer/CommandLineTools/SDKs/MacOSX26.5.sdk npm run tauri build -- ...`
 
 ## Prove
 
@@ -37,9 +97,35 @@ Aggiornato: 5 ottobre 2026.
   (compila anche il sorgente prodotto dal test del convertitore del frontend).
 - Interfaccia: Chrome headless via CDP (`scripts/cdp.mjs`) sul server di sviluppo.
   App desktop: `ALEXANDRIA_TEST_OFFSCREEN=1` apre la finestra fuori schermo e senza focus.
+- Autotest dell'app nativa (WKWebView/WebView2, dove il browser di prova non arriva), con
+  `ALEXANDRIA_DATA_DIR` su una cartella di prova:
+  - `ALEXANDRIA_SNAPSHOT_TEST="<url>|<out.png>"`: solo la foto della pagina (Rust);
+  - `ALEXANDRIA_EMBED_TEST="<url>|<rapporto.json>"`: import del link, foto salvata, scheda nel testo,
+    immagine caricata; con `pdf:<percorso>` al posto dell'URL prova l'import di un PDF.
+- WKWebView non sa iterare i `ReadableStream` (`for await`), che pdf.js usa nella pagina e nel worker:
+  `src/lib/streamPolyfill.ts` li completa, caricato per primo e dal worker `src/resources/pdf.worker.ts`.
+- Asset protocol: `requireLiteralLeadingDot: false`, altrimenti le immagini in cartelle nascoste
+  (es. Compendium dentro una cartella che inizia con un punto) non si vedono.
+
+## In valutazione (A/B test del committente)
+
+- **Split dello Scriptorium** (piu' pergamene aperte affiancate): non implementato. Rischi da valutare
+  per Marginalia: oggi c'e' un solo editor attivo (`getEditor()`), le bolle si ancorano alle posizioni
+  di quell'editor e la colonna dei commenti segue una sola pagina; con due editor servirebbero colonne
+  (o colori) per pergamena, ancore per editor e salvataggio/checkpoint per ciascuna.
 
 ## Prossimi passi possibili
 
 - Firma degli installer e aggiornamenti automatici (oggi assenti per scelta: niente rete).
 - Corrispondenza esatta righe editor/PDF calcolando le righe con Typst in background.
 - Modelli di documento (tesi, articolo, saggio) come preset di impaginazione.
+
+## Verifica su Windows (5/10)
+
+Build di release `npm run tauri build` su Windows 11 (installer NSIS 27,6 MB), app avviata fuori
+schermo e senza focus con dati in una cartella di prova:
+- foto di un link con WebView2 (`ALEXANDRIA_SNAPSHOT_TEST`): riuscita in 1,8 s;
+- autotest dell'embed (`ALEXANDRIA_EMBED_TEST`): import di una pagina web, `screenshot.webp`
+  salvato, scheda nel testo con l'immagine caricata (1200 x 750);
+- import di un PDF: titolo e autore dai metadati, 2 pagine, miniatura, testo estratto;
+- schermata iniziale, creazione del primo Compendium, Scriptorium con righelli e contatore.

@@ -6,6 +6,7 @@ import { getCommand, runCommand, displayShortcut } from '../commands/registry';
 import { useCommandTick } from './useCommands';
 import { t, useLang } from '../i18n';
 import { useWorkspace } from '../state/workspace';
+import { workspaceItems } from './WorkspaceMenu';
 import { baseName } from '../platform';
 import { flushSave } from '../editor/session';
 import { getEditor } from '../state/editorRef';
@@ -23,6 +24,25 @@ function Entries({ items, onDone }: { items: MenuEntry[]; onDone: () => void }) 
       {items.map((it, i) => {
         if ('sep' in it) return <div key={i} className="menu-sep" />;
         if ('dynamic' in it) {
+          if (it.dynamic === 'workspaces') {
+            return workspaceItems().map((w, k) =>
+              w.sep ? (
+                <div key={`w${k}`} className="menu-sep" />
+              ) : (
+                <button
+                  key={`w${k}`}
+                  className={`menu-item ${w.danger ? 'is-danger' : ''}`}
+                  onClick={() => {
+                    onDone();
+                    w.onClick?.();
+                  }}
+                >
+                  <span className="menu-item__check">{w.checked ? <Check size={14} /> : null}</span>
+                  <span className="menu-item__label">{w.label}</span>
+                </button>
+              ),
+            );
+          }
           if (it.dynamic === 'documents') {
             return docs.map((d) => (
               <button
@@ -50,10 +70,7 @@ function Entries({ items, onDone }: { items: MenuEntry[]; onDone: () => void }) 
               onClick={async () => {
                 onDone();
                 await flushSave(getEditor());
-                await useWorkspace.getState().openVault(r);
-                const st = useWorkspace.getState();
-                if (st.docs.length) st.openDoc(st.docs[0].rel);
-                else await st.newDoc();
+                await useWorkspace.getState().enterVault(r);
               }}
             >
               <span className="menu-item__check" />

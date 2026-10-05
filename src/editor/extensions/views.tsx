@@ -10,6 +10,8 @@ import { citationRenderer, useCitationTick } from '../../citations/renderer';
 import { formatCitation, parseCitation } from '../../doc/citeSyntax';
 import type { CitationItem } from '../../doc/types';
 import { runCommand } from '../../commands/registry';
+import { useDocSettings } from '../../layout/docSettings';
+import { masterLabel } from '../../layout/TemplatesView';
 
 function Katex({ latex, display }: { latex: string; display: boolean }) {
   const ref = useRef<HTMLSpanElement>(null);
@@ -244,15 +246,17 @@ export function FigureView(props: NodeViewProps) {
 
 export function SectionBreakView(props: NodeViewProps) {
   const a = props.node.attrs;
+  const masters = useDocSettings((s) => s.settings.layout.masters);
   return (
     <NodeViewWrapper className={`nv-break nv-section ${props.selected ? 'is-selected' : ''}`} data-drag-handle>
       <span className="nv-break__label">{t('editor.section.label')}</span>
       <select className="select small" value={a.master} onChange={(e) => props.updateAttributes({ master: e.target.value })}>
-        {['title', 'body', 'appendix'].map((m) => (
-          <option key={m} value={m}>
-            {t(`layout.master.${m}`)}
+        {Object.entries(masters).map(([id, m]) => (
+          <option key={id} value={id}>
+            {masterLabel(id, m)}
           </option>
         ))}
+        {!masters[a.master] && <option value={a.master}>{t('tpl.masters.missing')}</option>}
       </select>
       <select className="select small" value={a.columns} onChange={(e) => props.updateAttributes({ columns: Number(e.target.value) })}>
         {[1, 2, 3].map((c) => (

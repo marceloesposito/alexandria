@@ -18,9 +18,14 @@ import {
   renameTab,
   toggleTabHidden,
   validateImported,
+  setGroupCompact,
+  removedGroups,
+  restoreGroup,
   type RibbonConfig,
 } from '../commands/ribbonModel';
 import { useRibbonConfig, labelOf } from './Ribbon';
+import { DEFAULT_RIBBON } from '../commands/defaults';
+import { floatingGroupIds } from '../commands/floatModel';
 import { useWorkspace } from '../state/workspace';
 import { t } from '../i18n';
 import type { View } from '../state/prefs';
@@ -47,6 +52,7 @@ export function RibbonCustomizer() {
   const [dropAt, setDropAt] = useState<{ group: string; index: number } | null>(null);
 
   const save = (next: RibbonConfig) => ws.setRibbon(next);
+  const floatIds = floatingGroupIds(useWorkspace((s) => s.app.floating));
   const tabs = cfg.tabs.filter((x) => x.view === view);
 
   const commands = useMemo(
@@ -147,15 +153,16 @@ export function RibbonCustomizer() {
             {commands.map((c) => (
               <div
                 key={c.id}
-                className="ribbon-custom__cmd"
+                className="ribbon-custom__cmd ribbon-custom__tile"
+                title={t(c.label)}
                 draggable
                 onDragStart={(e) => {
                   e.dataTransfer.setData(DRAG_MIME, JSON.stringify({ cmd: c.id, from: null } satisfies DragData));
                   e.dataTransfer.effectAllowed = 'copyMove';
                 }}
               >
-                {c.icon ? <c.icon size={16} /> : <span className="ribbon-custom__noicon" />}
-                <span>{t(c.label)}</span>
+                {c.icon ? <c.icon size={22} strokeWidth={1.6} /> : <span className="ribbon-custom__noicon" />}
+                <span className="ribbon-custom__tile-label">{t(c.label)}</span>
               </div>
             ))}
           </div>
@@ -198,6 +205,14 @@ export function RibbonCustomizer() {
                     <div className="ribbon-custom__group-head">
                       <span>{labelOf(g.label, g.custom)}</span>
                       <span className="grow" />
+                      <div className="ribbon-custom__mode" role="radiogroup" title={t('ribbon.custom.compactHint')}>
+                        <button role="radio" aria-checked={!g.compact} className={`seg small ${!g.compact ? 'is-active' : ''}`} onClick={() => save(setGroupCompact(cfg, g.id, false))}>
+                          {t('ribbon.custom.extended')}
+                        </button>
+                        <button role="radio" aria-checked={!!g.compact} className={`seg small ${g.compact ? 'is-active' : ''}`} onClick={() => save(setGroupCompact(cfg, g.id, true))}>
+                          {t('ribbon.custom.compactMode')}
+                        </button>
+                      </div>
                       <button className="icon-btn" disabled={gi === 0} onClick={() => save(moveGroup(cfg, g.id, -1))} title={t('ribbon.custom.moveLeft')}>
                         <ArrowLeft size={12} />
                       </button>
@@ -234,7 +249,7 @@ export function RibbonCustomizer() {
                         return (
                           <div
                             key={id}
-                            className={`ribbon-custom__item ${dropAt?.group === g.id && dropAt.index === i ? 'drop-before' : ''}`}
+                            className={`ribbon-custom__item ribbon-custom__tile ${dropAt?.group === g.id && dropAt.index === i ? 'drop-before' : ''}`}
                             draggable
                             onDragStart={(e) => e.dataTransfer.setData(DRAG_MIME, JSON.stringify({ cmd: id, from: g.id } satisfies DragData))}
                             onDragOver={(e) => {
@@ -246,8 +261,8 @@ export function RibbonCustomizer() {
                             }}
                             title={t(c.label)}
                           >
-                            {c.icon ? <c.icon size={16} /> : <span className="ribbon-custom__noicon" />}
-                            <span className="ribbon-custom__item-label">{t(c.label)}</span>
+                            {c.icon ? <c.icon size={20} strokeWidth={1.6} /> : <span className="ribbon-custom__noicon" />}
+                            <span className="ribbon-custom__tile-label">{t(c.label)}</span>
                             <button className="icon-btn tiny" onClick={() => save(removeCommand(cfg, g.id, id))} title={t('ribbon.custom.removeItem')}>
                               <X size={11} />
                             </button>
@@ -258,6 +273,16 @@ export function RibbonCustomizer() {
                     </div>
                   </div>
                 ))}
+                {removedGroups(cfg, DEFAULT_RIBBON, tab.id).filter((g) => !floatIds.has(g.id)).length > 0 && (
+                  <div className="ribbon-custom__removed">
+                    <span className="hint">{t('ribbon.custom.removedGroups')}:</span>
+                    {removedGroups(cfg, DEFAULT_RIBBON, tab.id).filter((g) => !floatIds.has(g.id)).map((g) => (
+                      <button key={g.id} className="btn small" onClick={() => save(restoreGroup(cfg, tab.id, g))} title={t('ribbon.custom.restore')}>
+                        <Plus size={12} /> {labelOf(g.label, g.custom)}
+                      </button>
+                    ))}
+                  </div>
+                )}
                 <button
                   className="btn small ribbon-custom__add"
                   onClick={async () => {

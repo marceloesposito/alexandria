@@ -1,14 +1,15 @@
 // Estrazione di testo, metadati e miniatura da ogni formato supportato.
 // Tutto avviene in locale; nessuna libreria scarica nulla da internet.
-import * as pdfjs from 'pdfjs-dist';
-import pdfWorkerUrl from 'pdfjs-dist/build/pdf.worker.min.mjs?url';
+// build legacy: la build moderna usa funzioni (es. iterazione dei ReadableStream) che WKWebView non ha
+import * as pdfjs from 'pdfjs-dist/legacy/build/pdf.mjs';
 import JSZip from 'jszip';
 import type { CslItem, ResourceKind } from './model';
 import { rtfToText } from './rtf';
 import { parsePage, parseName, parseDate, blocksToText, type Block } from './html';
 import { findDoi, findIsbn } from './detect';
 
-pdfjs.GlobalWorkerOptions.workerSrc = pdfWorkerUrl;
+// worker nostro: carica il polyfill dei ReadableStream prima di pdf.js (serve a WKWebView)
+pdfjs.GlobalWorkerOptions.workerPort = new Worker(new URL('./pdf.worker.ts', import.meta.url), { type: 'module' });
 
 export interface Extracted {
   title?: string;
@@ -37,6 +38,31 @@ export function decodeText(bytes: Uint8Array): string {
 async function canvasToBytes(canvas: HTMLCanvasElement): Promise<Uint8Array | undefined> {
   const blob: Blob | null = await new Promise((r) => canvas.toBlob(r, 'image/webp', 0.82));
   return blob ? new Uint8Array(await blob.arrayBuffer()) : undefined;
+}
+
+/**
+ * Foto di una pagina web ridotta a `maxW` pixel: WebP dove il motore sa codificarlo
+ * (WebView2), altrimenti JPEG (WKWebView ricade in silenzio su PNG, troppo pesante).
+ */
+export async function shrinkScreenshot(png: Uint8Array, maxW = 1200): Promise<{ data: Uint8Array; ext: string } | null> {
+  try {
+    const bmp = await createImageBitmap(new Blob([png as BlobPart], { type: 'image/png' }));
+    const scale = Math.min(1, maxW / bmp.width);
+    const c = document.createElement('canvas');
+    c.width = Math.max(1, Math.round(bmp.width * scale));
+    c.height = Math.max(1, Math.round(bmp.height * scale));
+    c.getContext('2d')!.drawImage(bmp, 0, 0, c.width, c.height);
+    for (const [mime, ext] of [
+      ['image/webp', 'webp'],
+      ['image/jpeg', 'jpg'],
+    ] as const) {
+      const blob: Blob | null = await new Promise((r) => c.toBlob(r, mime, 0.82));
+      if (blob && blob.type === mime) return { data: new Uint8Array(await blob.arrayBuffer()), ext };
+    }
+    return null;
+  } catch {
+    return null;
+  }
 }
 
 export async function imageThumb(bytes: Uint8Array, mime: string): Promise<{ thumb?: Uint8Array; width: number; height: number }> {

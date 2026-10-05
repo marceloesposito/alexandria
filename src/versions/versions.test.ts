@@ -44,7 +44,7 @@ describe('riassunto e messaggio', () => {
     expect(s.excerpt).toBe('Due [@rossi2020].');
   });
   it('propone un messaggio deterministico', () => {
-    expect(suggestCommitMessage(summarize(changes))).toBe('Introduzione: +1 paragrafo, +1 citazione; nuovo documento «Note»; +2 commenti');
+    expect(suggestCommitMessage(summarize(changes))).toBe('Introduzione: +1 paragrafo, +1 citazione; nuova pergamena «Note»; +2 commenti');
   });
 });
 

@@ -80,6 +80,8 @@ interface ResState {
 
   addLink(from: string, to: string, label?: string): void;
   removeLink(id: string): void;
+  /** sostituisce legami e Tabula insieme (pergamene rinominate o eliminate) */
+  replaceRefs(links: Link[], whiteboard: Whiteboard): void;
   updateLink(id: string, label: string): void;
   setWhiteboard(w: Whiteboard): void;
 
@@ -331,6 +333,12 @@ export const useResources = create<ResState>((set, get) => {
       const links = get().links.map((l) => (l.id === id ? { ...l, label } : l));
       set({ links });
       if (get().vault) void saveLinks(get().vault!.root, links);
+    },
+
+    replaceRefs(links, whiteboard) {
+      set({ links });
+      if (get().vault) void saveLinks(get().vault!.root, links);
+      get().setWhiteboard(whiteboard);
     },
 
     setWhiteboard(w) {

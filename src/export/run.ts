@@ -6,7 +6,7 @@ import { getEditor } from '../state/editorRef';
 import { flushSave, currentMarkdown } from '../editor/session';
 import { parseMarkdown } from '../doc/parse';
 import { serializeMarkdown } from '../doc/serialize';
-import type { PMNode, CitationItem } from '../doc/types';
+import { embedsToLinks, type PMNode, type CitationItem } from '../doc/types';
 import { useDocSettings } from '../layout/docSettings';
 import { useCitations, keysInDoc } from '../citations/store';
 import { useResources } from '../resources/store';
@@ -37,7 +37,7 @@ export async function prepare(): Promise<Prepared | null> {
   const editor = getEditor();
   if (!ws.vaultRoot || !ws.activeDoc || !editor) return null;
   await flushSave(editor);
-  const doc = parseMarkdown(currentMarkdown(editor));
+  const doc = embedsToLinks(parseMarkdown(currentMarkdown(editor)));
   const settings = useDocSettings.getState().settings;
   const title = settings.title || ws.docs.find((d) => d.rel === ws.activeDoc)?.title || t('doc.untitled');
 

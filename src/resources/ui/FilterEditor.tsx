@@ -19,7 +19,7 @@ const OPS: Record<FilterField, FilterOp[]> = {
   source: ['is'],
   pinned: ['is'],
 };
-const KINDS = ['pdf', 'text', 'markdown', 'rtf', 'docx', 'odt', 'epub', 'html', 'image', 'web', 'youtube', 'video', 'audio', 'reference', 'other'];
+const KINDS = ['pdf', 'text', 'markdown', 'rtf', 'docx', 'odt', 'epub', 'html', 'image', 'web', 'youtube', 'video', 'audio', 'reference', 'snippet', 'other'];
 
 export function FilterEditor({ initial, onClose, onSave }: { initial?: Layer; onClose: () => void; onSave: (name: string, rule: FilterRule) => void }) {
   const [name, setName] = useState(initial?.name ?? t('filter.defaultName'));

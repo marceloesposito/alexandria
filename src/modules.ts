@@ -6,6 +6,7 @@ import { registerComments } from './comments';
 import { registerVersions } from './versions';
 import { registerResources } from './resources';
 import { registerExport } from './export';
+import { registerTemplates } from './layout/templatesModule';
 import { registerDialog } from './shell/DialogHost';
 import { DocSettingsDialog } from './layout/DocSettingsDialog';
 
@@ -20,6 +21,7 @@ export function registerAll() {
   registerVersions();
   registerResources();
   registerExport();
+  registerTemplates();
   registerDialog('docSettings', DocSettingsDialog);
 }
 

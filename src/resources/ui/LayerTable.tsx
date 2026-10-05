@@ -6,6 +6,8 @@ import { isVisible, layersOf, yearOf, authorsOf, type Resource } from '../model'
 import { KindIcon, kindLabel } from './common';
 import { t } from '../../i18n';
 import { RESOURCES_MIME } from './LayersPanel';
+import { openContextMenu } from '../../components/ContextMenu';
+import { removeWithConfirm } from './remove';
 
 type SortKey = 'title' | 'kind' | 'author' | 'year';
 
@@ -32,7 +34,17 @@ export function LayerTable({ results }: { results: Set<string> | null }) {
 
   const st = useResources.getState();
   return (
-    <div className="layer-table">
+    <div
+      className="layer-table"
+      tabIndex={-1}
+      onKeyDown={(e) => {
+        // Canc / Backspace sulla selezione della tabella
+        if ((e.key === 'Delete' || e.key === 'Backspace') && selected.length && !/^(INPUT|TEXTAREA|SELECT)$/.test((e.target as HTMLElement).tagName)) {
+          e.preventDefault();
+          void removeWithConfirm(selected);
+        }
+      }}
+    >
       <table>
         <thead>
           <tr>
@@ -61,6 +73,14 @@ export function LayerTable({ results }: { results: Set<string> | null }) {
                 st.openInspector(r.id);
               }}
               onDoubleClick={() => st.openViewer(r.id)}
+              onContextMenu={(e) => {
+                const ids = selected.includes(r.id) ? selected : [r.id];
+                if (!selected.includes(r.id)) st.select([r.id]);
+                openContextMenu(e, [
+                  { label: t('embed.open'), onClick: () => st.openViewer(r.id) },
+                  { label: t('cmd.res.remove'), danger: true, onClick: () => void removeWithConfirm(ids) },
+                ]);
+              }}
             >
               <td className="layer-table__title">
                 <KindIcon kind={r.kind} /> {r.title}

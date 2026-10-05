@@ -37,7 +37,10 @@
         "object-src": "'none'",
         "base-uri": "'none'"
       },
-      "assetProtocol": { "enable": true, "scope": ["**"] }
+      "assetProtocol": {
+        "enable": true,
+        "scope": { "allow": ["**"], "requireLiteralLeadingDot": false }
+      }
     }
   },
   "bundle": {
@@ -52,6 +55,10 @@
       "icons/128x128@2x.png",
       "icons/icon.icns",
       "icons/icon.ico"
-    ]
+    ],
+    "macOS": {
+      "signingIdentity": "-",
+      "minimumSystemVersion": "10.15"
+    }
   }
 }

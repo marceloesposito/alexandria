@@ -3,7 +3,7 @@ import { GitCommitHorizontal, Save, GitBranch, GitBranchPlus, GitMerge, GitCompa
 import { registerCommands } from '../commands/registry';
 import { viewComponents } from '../shell/views';
 import { registerDialog } from '../shell/DialogHost';
-import { VersionsView } from './VersionsView';
+import { HistoryView } from './HistoryView';
 import { CommitDialog, NewBranchDialog, SwitchBranchDialog, MergeDialog, RemoteDialog } from './dialogs';
 import { useWorkspace, ws } from '../state/workspace';
 import { useVersions } from './store';
@@ -14,7 +14,7 @@ import { confirmDialog } from '../components/confirm';
 import { platform } from '../platform';
 
 export function registerVersions() {
-  viewComponents.versions = VersionsView;
+  viewComponents.versions = HistoryView;
   registerDialog('commit', CommitDialog);
   registerDialog('newBranch', NewBranchDialog);
   registerDialog('switchBranch', SwitchBranchDialog);

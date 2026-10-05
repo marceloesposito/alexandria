@@ -142,8 +142,16 @@ function withAlign(node: PMNode): PMNode {
 }
 
 function paragraph(n: M.Paragraph, ctx: Ctx): PMNode[] {
-  // Figure: immagine da sola nel paragrafo, eventualmente seguita da {attributi}
+  // Embed: link da solo nel paragrafo seguito da {embed attributi} (scheda con anteprima)
   const kids = n.children;
+  if (kids.length === 2 && kids[0].type === 'link' && kids[1].type === 'text') {
+    const m = /^\{embed(\s[^}]*)?\}$/.exec(kids[1].value.trim());
+    if (m) {
+      const a = parseAttrs(m[1] ?? '');
+      return [{ type: 'embed', attrs: { url: kids[0].url, title: plain(kids[0].children), resource: a.resource ?? null, image: a.image ?? null } }];
+    }
+  }
+  // Figure: immagine da sola nel paragrafo, eventualmente seguita da {attributi}
   const imgIdx = kids.findIndex((k) => k.type === 'image');
   if (imgIdx >= 0) {
     const img = kids[imgIdx] as M.Image;

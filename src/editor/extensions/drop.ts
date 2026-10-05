@@ -7,6 +7,8 @@ import type { EditorView } from '@tiptap/pm/view';
 export const CITE_MIME = 'application/x-alexandria-cite';
 export const FIGURE_MIME = 'application/x-alexandria-figure';
 export const LINK_MIME = 'application/x-alexandria-link';
+/** risorsa che diventa una scheda embed (snippet, file) */
+export const EMBED_MIME = 'application/x-alexandria-embed';
 
 export interface CiteDragData {
   key: string;
@@ -16,6 +18,21 @@ export interface CiteDragData {
 
 type FilesHandler = (files: File[], pos: number) => void | Promise<void>;
 let filesHandler: FilesHandler | null = null;
+type LinksHandler = (dt: DataTransfer, pos: number) => boolean;
+let linksHandler: LinksHandler | null = null;
+
+type PasteLinkHandler = (url: string) => void;
+let pasteLinkHandler: PasteLinkHandler | null = null;
+
+/** L'app registra qui i link incollati da soli su una riga vuota (diventano schede embed). */
+export function setEditorPasteLinkHandler(h: PasteLinkHandler | null) {
+  pasteLinkHandler = h;
+}
+
+/** L'app registra qui i link trascinati da altre finestre (diventano schede embed). */
+export function setEditorLinksHandler(h: LinksHandler | null) {
+  linksHandler = h;
+}
 
 /** L'app registra qui l'import dei file trascinati nel testo (immagini -> figure). */
 export function setEditorFilesHandler(h: FilesHandler | null) {
@@ -43,6 +60,19 @@ export const DropHandler = Extension.create({
               return false;
             },
           },
+          // un link incollato da solo su una riga vuota: subito come link, poi diventa una scheda
+          handlePaste(view, e) {
+            const dt = e.clipboardData;
+            if (!dt || dt.files.length || !pasteLinkHandler) return false;
+            const url = dt.getData('text/plain').trim();
+            if (!/^https?:\/\/\S+$/.test(url)) return false;
+            const { $from, empty } = view.state.selection;
+            if (!empty || $from.depth !== 1 || $from.parent.type.name !== 'paragraph' || $from.parent.content.size !== 0) return false;
+            const mark = view.state.schema.marks.link.create({ href: url });
+            view.dispatch(view.state.tr.replaceSelectionWith(view.state.schema.text(url, [mark]), false));
+            pasteLinkHandler(url);
+            return true;
+          },
           handleDrop(view, e) {
             const ev = e as DragEvent;
             const dt = ev.dataTransfer;
@@ -56,6 +86,16 @@ export const DropHandler = Extension.create({
               const $p = view.state.doc.resolve(pos);
               const at = $p.depth > 0 ? $p.after(1) : pos;
               view.dispatch(view.state.tr.insert(at, view.state.schema.nodes.figure.create({ src, caption })).scrollIntoView());
+              return true;
+            }
+            // snippet e altre risorse: scheda embed
+            const emb = dt.getData(EMBED_MIME);
+            if (emb) {
+              const pos = dropPos(view, ev);
+              if (pos === null) return true;
+              const $p = view.state.doc.resolve(pos);
+              const at = $p.depth > 0 ? $p.after(1) : pos;
+              view.dispatch(view.state.tr.insert(at, view.state.schema.nodes.embed.create(JSON.parse(emb))).scrollIntoView());
               return true;
             }
             // pagina web non citata come fonte: diventa un collegamento
@@ -92,6 +132,14 @@ export const DropHandler = Extension.create({
               return true;
             }
             const files = Array.from(dt.files ?? []);
+            // link da un'altra finestra (non un trascinamento dentro l'editor)
+            if (!files.length && !view.dragging && linksHandler) {
+              const pos = dropPos(view, ev);
+              if (pos !== null && linksHandler(dt, pos)) {
+                ev.preventDefault();
+                return true;
+              }
+            }
             if (files.length && filesHandler) {
               const pos = dropPos(view, ev);
               if (pos === null) return false;

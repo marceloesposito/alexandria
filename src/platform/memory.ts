@@ -338,6 +338,12 @@ export function createMemoryPlatform(opts: { persist?: boolean } = {}): Platform
       return URL.createObjectURL(new Blob([d as BlobPart]));
     },
 
+    async readClipboard() {
+      return null;
+    },
+    async portableRoot() {
+      return null;
+    },
     async appDataDir() {
       return '/appdata';
     },
@@ -526,6 +532,9 @@ export function createMemoryPlatform(opts: { persist?: boolean } = {}): Platform
         contentType: res.headers.get('content-type') ?? '',
         body: new Uint8Array(await res.arrayBuffer()),
       };
+    },
+    async snapshotUrl() {
+      return null; // solo nell'app desktop
     },
     async typst() {
       return { ok: false, errors: ['Typst is available only in the desktop app.'] };

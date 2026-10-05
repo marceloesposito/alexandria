@@ -1,6 +1,8 @@
 // Preferenze e stato dell'app (non del vault): salvate in <appData>/state.json.
 import type { Lang } from '../i18n';
 import type { RibbonConfig } from '../commands/ribbonModel';
+import type { FloatingPanel } from '../commands/floatModel';
+import type { WorkspaceLayout } from './workspaces';
 
 export type ThemePref = 'light' | 'dark' | 'system';
 export type View = 'resources' | 'editor' | 'versions';
@@ -17,6 +19,9 @@ export interface Prefs {
   /** colonna sinistra dell'editor: risorse o indice del documento */
   leftTab: 'resources' | 'outline';
   focusMode: boolean;
+  /** editor come pagina (con margini e righelli) o senza bordi, a tutta colonna */
+  editorLayout: 'page' | 'borderless';
+  rulers: boolean;
   zoom: number; // 0.6 .. 2
   ribbonSize: RibbonSize;
   ribbonCollapsed: boolean;
@@ -25,6 +30,12 @@ export interface Prefs {
   spellcheck: boolean;
   libraryPath: string | null;
   layerSuggestions: 'off' | 'suggest';
+  /** ordinamento dell'albero della Bookshelf */
+  resourceSort: 'title' | 'added' | 'author' | 'year' | 'kind';
+  /** introduzione vista (o saltata) */
+  onboardingDone: boolean;
+  /** all'avvio: schermata iniziale o ultimo Compendium */
+  startup: 'home' | 'last';
   authorName: string;
   leftWidth: number;
   rightWidth: number;
@@ -41,6 +52,8 @@ export const DEFAULT_PREFS: Prefs = {
   showPreview: false,
   leftTab: 'resources',
   focusMode: false,
+  editorLayout: 'page',
+  rulers: true,
   zoom: 1,
   ribbonSize: 'large',
   ribbonCollapsed: false,
@@ -49,6 +62,9 @@ export const DEFAULT_PREFS: Prefs = {
   spellcheck: true,
   libraryPath: null,
   layerSuggestions: 'suggest',
+  resourceSort: 'title',
+  onboardingDone: false,
+  startup: 'home',
   authorName: '',
   leftWidth: 280,
   rightWidth: 300,
@@ -69,6 +85,12 @@ export interface AppState {
   cursors: Record<string, DocCursor>; // chiave: vault|doc
   prefs: Prefs;
   ribbon: RibbonConfig | null; // null = predefinito
+  /** workspace attivo: 'beginner' | 'studio' | 'pro' o l'id di uno salvato */
+  workspace: string;
+  /** workspace salvati dall'utente */
+  workspaces: WorkspaceLayout[];
+  /** gruppi della barra staccati in pannelli flottanti */
+  floating: FloatingPanel[];
   view: View;
 }
 
@@ -82,6 +104,9 @@ export function defaultAppState(): AppState {
     cursors: {},
     prefs: { ...DEFAULT_PREFS },
     ribbon: null,
+    workspace: 'studio',
+    workspaces: [],
+    floating: [],
     view: 'editor',
   };
 }
@@ -100,6 +125,9 @@ export function normalizeAppState(raw: unknown): AppState {
     recentDocs: Array.isArray(r.recentDocs) ? r.recentDocs.slice(0, 20) : [],
     cursors: r.cursors && typeof r.cursors === 'object' ? r.cursors : {},
     view: r.view === 'resources' || r.view === 'versions' ? r.view : 'editor',
+    workspace: typeof r.workspace === 'string' ? r.workspace : 'studio',
+    workspaces: Array.isArray(r.workspaces) ? r.workspaces : [],
+    floating: Array.isArray(r.floating) ? r.floating : [],
   };
 }
 

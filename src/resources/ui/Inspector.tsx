@@ -2,12 +2,12 @@
 // tag, layer, pin; apertura nel visualizzatore.
 import { useEffect, useState } from 'react';
 import { X, BookOpen, ExternalLink, Trash2, Search, Library, Copy, Pin as PinIcon, Quote } from 'lucide-react';
+import { removeWithConfirm } from './remove';
 import { useResources } from '../store';
 import { type Resource, type CslItem, authorsOf, yearOf } from '../model';
 import { KindIcon, kindLabel, thumbUrl } from './common';
 import { t, useLang } from '../../i18n';
 import { platform } from '../../platform';
-import { confirmDialog } from '../../components/confirm';
 import { lookupDoi, lookupIsbn, addFromLibrary, sendToLibrary } from '../importer';
 import { parseName } from '../html';
 import { useWorkspace } from '../../state/workspace';
@@ -113,10 +113,7 @@ export function Inspector({ id }: { id: string }) {
       <footer className="inspector__foot">
         <button
           className="btn small btn--danger-ghost"
-          onClick={async () => {
-            if (await confirmDialog(t('res.confirmDelete', { title: r.title }), r.library ? t('res.confirmDeleteLibRef') : t('res.confirmDeleteHint'), { danger: true, okLabel: t('common.delete') }))
-              await st.remove([r.id]);
-          }}
+          onClick={() => void removeWithConfirm([r.id])}
         >
           <Trash2 size={13} /> {t('common.delete')}
         </button>

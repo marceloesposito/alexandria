@@ -31,7 +31,7 @@ export const DEFAULT_RIBBON: RibbonConfig = {
       label: 'ribbon.tab.insert',
       groups: [
         { id: 'ed-ins-blocks', label: 'ribbon.group.blocks', items: ['insert.quote', 'insert.codeBlock', 'insert.hr', 'insert.table', 'table.addRow', 'table.addColumn', 'table.deleteRow', 'table.deleteColumn'] },
-        { id: 'ed-ins-media', label: 'ribbon.group.media', items: ['insert.image', 'insert.math', 'insert.mathInline'] },
+        { id: 'ed-ins-media', label: 'ribbon.group.media', items: ['insert.image', 'res.insert', 'res.insertSnippet', 'insert.math', 'insert.mathInline'] },
         { id: 'ed-ins-links', label: 'ribbon.group.links', items: ['insert.link', 'insert.wikilink', 'comment.add'] },
         { id: 'ed-ins-pages', label: 'ribbon.group.pages', items: ['insert.pageBreak', 'insert.sectionBreak', 'insert.toc'] },
       ],
@@ -61,7 +61,8 @@ export const DEFAULT_RIBBON: RibbonConfig = {
       label: 'ribbon.tab.layout',
       groups: [
         { id: 'ed-lay-page', label: 'ribbon.group.page', items: ['layout.paper', 'layout.margins', 'layout.columns'] },
-        { id: 'ed-lay-type', label: 'ribbon.group.typography', items: ['layout.styles', 'layout.masters', 'layout.lineNumbersPdf'] },
+        { id: 'ed-lay-tpl', label: 'ribbon.group.templates', items: ['tpl.manage', 'tpl.newFrom', 'tpl.saveAs', 'layout.masters'] },
+        { id: 'ed-lay-type', label: 'ribbon.group.typography', items: ['layout.styles', 'layout.lineNumbersPdf'] },
         { id: 'ed-lay-out', label: 'ribbon.group.output', items: ['view.preview', 'file.export', 'file.exportPdf'] },
       ],
     },
@@ -71,7 +72,7 @@ export const DEFAULT_RIBBON: RibbonConfig = {
       label: 'ribbon.tab.view',
       groups: [
         { id: 'ed-view-panels', label: 'ribbon.group.panels', items: ['view.toggleLeft', 'view.outline', 'view.toggleRight', 'view.preview', 'view.source'] },
-        { id: 'ed-view-mode', label: 'ribbon.group.mode', items: ['view.focus', 'view.fullscreen', 'view.zoomOut', 'view.zoomIn'] },
+        { id: 'ed-view-mode', label: 'ribbon.group.mode', items: ['view.layoutPage', 'view.layoutBorderless', 'view.rulers', 'view.focus', 'view.zen', 'view.fullscreen', 'view.zoomOut', 'view.zoomIn'] },
         { id: 'ed-view-theme', label: 'ribbon.group.theme', items: ['view.themeLight', 'view.themeDark', 'view.themeSystem', 'view.customizeRibbon'] },
       ],
     },
@@ -82,10 +83,10 @@ export const DEFAULT_RIBBON: RibbonConfig = {
       view: 'resources',
       label: 'ribbon.tab.home',
       groups: [
-        { id: 'res-add', label: 'ribbon.group.add', items: ['res.add', 'res.importBib', 'res.library'] },
+        { id: 'res-add', label: 'ribbon.group.add', items: ['res.add', 'res.newSnippet', 'res.importBib'] },
         { id: 'res-views', label: 'ribbon.group.views', items: ['res.view.whiteboard', 'res.view.graph', 'res.view.layers'] },
-        { id: 'res-org', label: 'ribbon.group.organize', items: ['res.newLayer', 'res.newFilter', 'res.tags', 'res.suggest'] },
-        { id: 'res-tools', label: 'ribbon.group.whiteboard', items: ['wb.select', 'wb.pan', 'wb.note', 'wb.frame', 'wb.connect', 'wb.fit'] },
+        { id: 'res-org', label: 'ribbon.group.organize', items: ['res.newLayer', 'res.newFilter', 'res.tags', 'res.suggest', 'res.remove'] },
+        { id: 'res-tools', label: 'ribbon.group.whiteboard', items: ['wb.select', 'wb.pan', 'wb.note', 'wb.frame', 'wb.activeDoc', 'wb.pickDocs', 'wb.connect', 'wb.fit'] },
         { id: 'res-search', label: 'ribbon.group.find', items: ['res.search'] },
       ],
     },
@@ -109,7 +110,7 @@ export type MenuEntry =
   | { cmd: string }
   | { sep: true }
   | { label: string; submenu: MenuEntry[] }
-  | { dynamic: 'recentVaults' | 'documents' };
+  | { dynamic: 'recentVaults' | 'documents' | 'workspaces' };
 
 export interface MenuDef {
   id: string;
@@ -126,8 +127,10 @@ export const MENUS: MenuDef[] = [
     label: 'menu.file',
     items: [
       c('file.newDoc'),
+      c('tpl.newFrom'),
       { label: 'menu.file.documents', submenu: [{ dynamic: 'documents' }] },
       sep,
+      c('file.home'),
       c('file.openVault'),
       c('file.newVault'),
       { label: 'menu.file.recentVaults', submenu: [{ dynamic: 'recentVaults' }] },
@@ -174,6 +177,8 @@ export const MENUS: MenuDef[] = [
       { label: 'menu.insert.lists', submenu: [c('insert.bulletList'), c('insert.orderedList'), c('insert.taskList')] },
       c('insert.table'),
       c('insert.image'),
+      c('res.insert'),
+      c('res.insertSnippet'),
       c('insert.quote'),
       c('insert.codeBlock'),
       c('insert.math'),
@@ -220,9 +225,12 @@ export const MENUS: MenuDef[] = [
     id: 'view',
     label: 'menu.view',
     items: [
+      { label: 'menu.view.workspace', submenu: [{ dynamic: 'workspaces' }] },
+      sep,
       c('view.resources'),
       c('view.editor'),
       c('view.versions'),
+      c('view.library'),
       sep,
       c('view.toggleLeft'),
       c('view.outline'),
@@ -231,6 +239,8 @@ export const MENUS: MenuDef[] = [
       c('view.source'),
       c('view.lineNumbers'),
       c('view.focus'),
+      c('view.zen'),
+      { label: 'menu.view.editorLayout', submenu: [c('view.layoutPage'), c('view.layoutBorderless'), sep, c('view.rulers')] },
       sep,
       c('view.zoomIn'),
       c('view.zoomOut'),
@@ -253,6 +263,7 @@ export const MENUS: MenuDef[] = [
     label: 'menu.resources',
     items: [
       c('res.add'),
+      c('res.newSnippet'),
       c('res.importBib'),
       sep,
       c('res.view.whiteboard'),
@@ -264,10 +275,12 @@ export const MENUS: MenuDef[] = [
       c('res.tags'),
       c('res.suggest'),
       sep,
-      c('res.library'),
+      c('res.remove'),
+      sep,
+      c('view.library'),
       c('cite.manage'),
     ],
   },
   { id: 'prefs', label: 'menu.preferences', items: [c('app.preferences'), c('file.docSettings'), c('view.customizeRibbon')] },
-  { id: 'help', label: 'menu.help', items: [c('help.guide'), c('help.shortcuts'), c('help.markdown'), sep, c('help.about')] },
+  { id: 'help', label: 'menu.help', items: [c('help.onboarding'), c('help.guide'), c('help.shortcuts'), c('help.markdown'), sep, c('help.about')] },
 ];

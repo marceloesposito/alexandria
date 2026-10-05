@@ -1,6 +1,11 @@
 // Stato centrale dell'app: preferenze, vault aperto, documento attivo, finestre di dialogo.
 import { create } from 'zustand';
 import { platform, joinPath } from '../platform';
+
+async function ensureDir(p: string): Promise<string> {
+  if (!(await platform.exists(p))) await platform.mkdir(p);
+  return p;
+}
 import { setLang, t } from '../i18n';
 import {
   type AppState,
@@ -11,6 +16,9 @@ import {
   pushRecent,
 } from './prefs';
 import type { RibbonConfig } from '../commands/ribbonModel';
+import type { FloatingPanel } from '../commands/floatModel';
+import { DEFAULT_RIBBON } from '../commands/defaults';
+import { BUILT_IN, builtInWorkspace, applyWorkspace, captureWorkspace, type BuiltInWorkspace } from './workspaces';
 import {
   type VaultConfig,
   type DocInfo,
@@ -21,9 +29,14 @@ import {
   deleteDocument,
   duplicateDocument,
   saveVaultConfig,
+  writeJson,
 } from '../vault/vault';
+import { abs, docSettingsFile } from '../vault/paths';
+import { mapPaths, toStored, fromStored } from './portablePaths';
 
 export type DialogId =
+  | 'templates'
+  | 'insertResource'
   | 'ribbonCustomize'
   | 'preferences'
   | 'docSettings'
@@ -49,6 +62,8 @@ export interface Toast {
   id: number;
   kind: 'info' | 'ok' | 'error';
   text: string;
+  /** pulsante facoltativo (es. Annulla) */
+  action?: { label: string; run: () => void };
 }
 
 interface WorkspaceState {
@@ -69,10 +84,25 @@ interface WorkspaceState {
   setView(v: View): void;
   setPrefs(p: Partial<Prefs>): void;
   setRibbon(r: RibbonConfig | null): void;
+  /** barra e pannelli flottanti insieme (staccare o riagganciare un gruppo) */
+  setRibbonAndFloating(r: RibbonConfig | null, floating: FloatingPanel[]): void;
+  /** applica un workspace: Beginner, Studio, Pro o uno salvato */
+  applyWorkspaceLayout(id: string): void;
+  /** salva la disposizione attuale come workspace dell'utente */
+  saveWorkspaceLayout(name: string): string;
+  deleteWorkspaceLayout(id: string): void;
   openVault(root: string): Promise<void>;
+  /** Apre un Compendium e il suo ultimo Scroll (o il primo, o uno nuovo). */
+  enterVault(root: string): Promise<boolean>;
+  /** Chiude il Compendium e torna alla schermata iniziale. */
+  closeVault(): void;
+  /** Crea (o riapre) il Compendium predefinito in Documenti/Alexandria. */
+  createDefaultVault(): Promise<boolean>;
+  forgetRecent(root: string): void;
   refreshDocs(): Promise<void>;
   openDoc(rel: string): void;
-  newDoc(title?: string, folder?: string): Promise<string | null>;
+  /** nuova pergamena, vuota o con testo e impostazioni iniziali (template) */
+  newDoc(title?: string, folder?: string, init?: { markdown: string; settings: unknown }): Promise<string | null>;
   renameDoc(rel: string, title: string): Promise<void>;
   deleteDoc(rel: string): Promise<void>;
   duplicateDoc(rel: string): Promise<void>;
@@ -80,7 +110,7 @@ interface WorkspaceState {
   setCursor(rel: string, pos: number, scroll: number): void;
   openDialog(d: DialogId, arg?: unknown): void;
   closeDialog(): void;
-  toast(text: string, kind?: Toast['kind']): void;
+  toast(text: string, kind?: Toast['kind'], action?: Toast['action']): void;
   dismissToast(id: number): void;
   setSaveState(s: WorkspaceState['saveState']): void;
   bumpReload(): void;
@@ -90,12 +120,27 @@ let statePath: string | null = null;
 let saveTimer: ReturnType<typeof setTimeout> | null = null;
 let toastId = 0;
 
+let portableRoot: string | null = null;
+
+/** Chi tiene riferimenti alle pergamene (Tabula, collegamenti) si aggiorna qui. */
+export const docHooks = {
+  renamed: [] as ((from: string, to: string) => void)[],
+  deleted: [] as ((rel: string) => void)[],
+};
+
+/** Cartella dati della chiavetta, se l'app e' portable. */
+export function getPortableRoot(): string | null {
+  return portableRoot;
+}
+
 function persist(app: AppState) {
   if (!statePath) return;
   if (saveTimer) clearTimeout(saveTimer);
   const path = statePath;
   saveTimer = setTimeout(() => {
-    platform.writeText(path, JSON.stringify(app, null, 2)).catch(() => {
+    // in modalita' portable i percorsi della chiavetta si salvano relativi
+    const stored = portableRoot ? mapPaths(app, (p) => toStored(p, portableRoot)) : app;
+    platform.writeText(path, JSON.stringify(stored, null, 2)).catch(() => {
       /* uno stato non salvato vale per la sessione in corso */
     });
   }, 250);
@@ -123,7 +168,8 @@ export const useWorkspace = create<WorkspaceState>((set, get) => ({
     statePath = joinPath(dir, 'state.json');
     let app = defaultAppState();
     try {
-      if (await platform.exists(statePath)) app = normalizeAppState(JSON.parse(await platform.readText(statePath)));
+      portableRoot = await platform.portableRoot();
+      if (await platform.exists(statePath)) app = mapPaths(normalizeAppState(JSON.parse(await platform.readText(statePath))), (p) => fromStored(p, portableRoot));
     } catch {
       app = defaultAppState();
     }
@@ -135,19 +181,8 @@ export const useWorkspace = create<WorkspaceState>((set, get) => ({
     applyTheme(app.prefs.theme);
     set({ app });
 
-    // Avvio: ultimo vault e ultimo documento; al primo avvio un vault nuovo con un documento vuoto
-    let root = app.lastVault;
-    if (root && !(await platform.exists(root))) root = null;
-    if (!root) {
-      const docs = await platform.documentsDir();
-      root = joinPath(docs, 'Alexandria', t('vault.defaultName'));
-    }
-    await get().openVault(root);
-    const st = get();
-    const last = st.app.lastDoc && st.docs.find((d) => d.rel === st.app.lastDoc);
-    if (last) st.openDoc(last.rel);
-    else if (st.docs.length) st.openDoc(st.docs[0].rel);
-    else await st.newDoc();
+    // Avvio: la schermata iniziale sceglie il Compendium; chi lo preferisce riapre subito l'ultimo
+    if (app.prefs.startup === 'last' && app.lastVault && (await platform.exists(app.lastVault))) await get().enterVault(app.lastVault);
     set({ ready: true });
   },
 
@@ -171,6 +206,40 @@ export const useWorkspace = create<WorkspaceState>((set, get) => ({
     persist(app);
   },
 
+  setRibbonAndFloating(r, floating) {
+    const app = { ...get().app, ribbon: r, floating };
+    set({ app });
+    persist(app);
+  },
+
+  applyWorkspaceLayout(id) {
+    const cur = get().app;
+    const w = (BUILT_IN as string[]).includes(id) ? builtInWorkspace(id as BuiltInWorkspace, DEFAULT_RIBBON) : cur.workspaces.find((x) => x.id === id);
+    if (!w) return;
+    const a = applyWorkspace(w);
+    const app = { ...cur, workspace: id, prefs: { ...cur.prefs, ...a.prefs }, ribbon: a.ribbon, floating: a.floating };
+    set({ app });
+    persist(app);
+  },
+
+  saveWorkspaceLayout(name) {
+    const cur = get().app;
+    const existing = cur.workspaces.find((w) => w.name === name);
+    const id = existing?.id ?? `ws-${Date.now().toString(36)}`;
+    const w = captureWorkspace(id, name, cur.prefs, cur.ribbon, cur.floating);
+    const app = { ...cur, workspace: id, workspaces: existing ? cur.workspaces.map((x) => (x.id === id ? w : x)) : [...cur.workspaces, w] };
+    set({ app });
+    persist(app);
+    return id;
+  },
+
+  deleteWorkspaceLayout(id) {
+    const cur = get().app;
+    const app = { ...cur, workspaces: cur.workspaces.filter((w) => w.id !== id), workspace: cur.workspace === id ? 'studio' : cur.workspace };
+    set({ app });
+    persist(app);
+  },
+
   async openVault(root) {
     try {
       const cfg = await ensureVault(root);
@@ -185,6 +254,39 @@ export const useWorkspace = create<WorkspaceState>((set, get) => ({
     } catch (e) {
       get().toast(t('vault.openError', { error: String(e) }), 'error');
     }
+  },
+
+  async enterVault(root) {
+    if (!(await platform.exists(root))) {
+      get().toast(t('start.missing'), 'error');
+      return false;
+    }
+    const wasLast = get().app.lastVault === root;
+    await get().openVault(root);
+    const st = get();
+    if (st.vaultRoot !== root) return false;
+    // l'ultimo Scroll vale solo se apparteneva a questo Compendium
+    const last = wasLast && st.app.lastDoc ? st.docs.find((d) => d.rel === st.app.lastDoc) : undefined;
+    if (last) st.openDoc(last.rel);
+    else if (st.docs.length) st.openDoc(st.docs[0].rel);
+    else await st.newDoc();
+    if (get().app.view !== 'editor') get().setView('editor');
+    return true;
+  },
+
+  closeVault() {
+    set({ vaultRoot: null, vault: null, docs: [], activeDoc: null, dialog: null, dialogArg: null });
+  },
+
+  async createDefaultVault() {
+    const docs = await platform.documentsDir();
+    return get().enterVault(await ensureDir(joinPath(docs, 'Alexandria', t('vault.defaultName'))));
+  },
+
+  forgetRecent(root) {
+    const app = { ...get().app, recentVaults: get().app.recentVaults.filter((r) => r !== root), lastVault: get().app.lastVault === root ? null : get().app.lastVault };
+    set({ app });
+    persist(app);
   },
 
   async refreshDocs() {
@@ -207,10 +309,11 @@ export const useWorkspace = create<WorkspaceState>((set, get) => ({
     persist(app);
   },
 
-  async newDoc(title, folder = '') {
+  async newDoc(title, folder = '', init) {
     const { vaultRoot, docs } = get();
     if (!vaultRoot) return null;
-    const rel = await createDocument(vaultRoot, docs, title ?? t('doc.untitled'), folder);
+    const rel = await createDocument(vaultRoot, docs, title ?? t('doc.untitled'), folder, init?.markdown ?? '');
+    if (init) await writeJson(abs(vaultRoot, docSettingsFile(rel)), init.settings);
     await get().refreshDocs();
     get().openDoc(rel);
     return rel;
@@ -224,6 +327,7 @@ export const useWorkspace = create<WorkspaceState>((set, get) => ({
       const cfg = { ...vault, order: vault.order.map((r) => (r === rel ? next : r)) };
       await saveVaultConfig(vaultRoot, cfg);
       set({ vault: cfg });
+      docHooks.renamed.forEach((h) => h(rel, next));
       await get().refreshDocs();
       if (get().activeDoc === rel || get().activeDoc === null) get().openDoc(next);
     }
@@ -233,6 +337,7 @@ export const useWorkspace = create<WorkspaceState>((set, get) => ({
     const { vaultRoot } = get();
     if (!vaultRoot) return;
     await deleteDocument(vaultRoot, rel);
+    docHooks.deleted.forEach((h) => h(rel));
     await get().refreshDocs();
     if (!get().docs.length) await get().newDoc();
     else if (get().activeDoc) get().openDoc(get().activeDoc!);
@@ -269,10 +374,10 @@ export const useWorkspace = create<WorkspaceState>((set, get) => ({
   closeDialog() {
     set({ dialog: null, dialogArg: null });
   },
-  toast(text, kind = 'info') {
+  toast(text, kind = 'info', action) {
     const id = ++toastId;
-    set({ toasts: [...get().toasts, { id, kind, text }] });
-    setTimeout(() => get().dismissToast(id), kind === 'error' ? 8000 : 3500);
+    set({ toasts: [...get().toasts, { id, kind, text, action }] });
+    setTimeout(() => get().dismissToast(id), kind === 'error' || action ? 8000 : 3500);
   },
   dismissToast(id) {
     set({ toasts: get().toasts.filter((x) => x.id !== id) });

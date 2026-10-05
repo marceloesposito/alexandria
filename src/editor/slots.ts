@@ -1,6 +1,7 @@
 // Punti di aggancio della schermata Editor: i moduli (commenti, risorse, anteprima)
 // vi registrano i propri pannelli senza che l'editor dipenda da loro.
 import type { ComponentType, RefObject } from 'react';
+import type { NodeViewProps } from '@tiptap/react';
 
 export interface PageProps {
   pageRef: RefObject<HTMLDivElement | null>;
@@ -34,3 +35,7 @@ export const leftPanelSections = many<ComponentType>();
 export const rightPanel = single<ComponentType<PageProps>>();
 export const centerOverlay = single<ComponentType<PageProps>>();
 export const previewPanel = single<ComponentType>();
+/** scheda di un embed (link o risorsa): la disegna il modulo risorse */
+export const embedView = single<ComponentType<NodeViewProps>>();
+/** riga in fondo alla vista senza bordi (pergamene collegate): fuori dal testo e dall'export */
+export const borderlessFooter = single<ComponentType>();

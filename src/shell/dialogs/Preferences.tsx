@@ -4,7 +4,14 @@ import { Modal } from '../../components/Modal';
 import { useWorkspace } from '../../state/workspace';
 import { t, useLang } from '../../i18n';
 import { platform } from '../../platform';
-import type { Prefs } from '../../state/prefs';
+import type { Prefs, ThemePref } from '../../state/prefs';
+import { Sun, Moon, Monitor } from 'lucide-react';
+
+const THEMES: { id: ThemePref; icon: typeof Sun; label: string }[] = [
+  { id: 'light', icon: Sun, label: 'prefs.theme.light' },
+  { id: 'dark', icon: Moon, label: 'prefs.theme.dark' },
+  { id: 'system', icon: Monitor, label: 'prefs.theme.system' },
+];
 
 type Tab = 'general' | 'editor' | 'versions' | 'resources';
 
@@ -34,12 +41,27 @@ export function PreferencesDialog() {
                 <option value="en">English</option>
               </select>
             </label>
-            <label className="form__row">
+            <div className="form__row">
               <span>{t('prefs.theme')}</span>
-              <select className="select" value={prefs.theme} onChange={(e) => set({ theme: e.target.value as Prefs['theme'] })}>
-                <option value="system">{t('cmd.view.themeSystem')}</option>
-                <option value="light">{t('cmd.view.themeLight')}</option>
-                <option value="dark">{t('cmd.view.themeDark')}</option>
+              <div className="theme-toggle" role="radiogroup" aria-label={t('prefs.theme')}>
+                {THEMES.map(({ id, icon: Icon, label }) => (
+                  <button
+                    key={id}
+                    role="radio"
+                    aria-checked={prefs.theme === id}
+                    className={`seg ${prefs.theme === id ? 'is-active' : ''}`}
+                    onClick={() => set({ theme: id })}
+                  >
+                    <Icon size={13} /> {t(label)}
+                  </button>
+                ))}
+              </div>
+            </div>
+            <label className="form__row">
+              <span>{t('prefs.startup')}</span>
+              <select className="select" value={prefs.startup} onChange={(e) => set({ startup: e.target.value as Prefs['startup'] })}>
+                <option value="home">{t('prefs.startup.home')}</option>
+                <option value="last">{t('prefs.startup.last')}</option>
               </select>
             </label>
             <label className="form__row">

@@ -10,6 +10,7 @@ import TaskList from '@tiptap/extension-task-list';
 import TaskItem from '@tiptap/extension-task-item';
 import { t } from '../../i18n';
 import {
+  Embed,
   Figure,
   MathBlock,
   MathInline,
@@ -60,6 +61,7 @@ export function buildExtensions() {
       showOnlyCurrent: true,
     }),
     Figure,
+    Embed,
     MathBlock,
     MathInline,
     Footnote,
