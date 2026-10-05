@@ -37,12 +37,12 @@ Aggiornato: 5 ottobre 2026 (M10).
 - **Rimozione delle risorse**: ribbon, menu Risorse, clic destro, Canc nella tabella, visualizzatore.
 - **OpenSSL** compilato dentro l'app (`vendored-openssl` di git2): niente dipendenza da Homebrew.
 - **Nomi tematici** (scelti dal committente, solo nelle stringhe di `src/i18n/`, uguali in IT ed EN):
-  documento -> Scroll (in italiano Pergamena), gestore risorse -> Bookshelf, schermata Editor -> Scriptorium, Versioni ->
-  History, commenti a margine -> Marginalia, whiteboard -> Tabula, pin -> Bookmarks, layer -> Strata.
+  documento -> Scroll (in italiano Pergamena), gestore risorse -> Armarium (era Bookshelf), schermata Editor -> Scriptorium, Versioni ->
+  Palimpsestus (era History), commenti a margine -> Marginalia, whiteboard -> Tabula, pin -> Bookmarks, layer -> Strata. Le pergamene collegate in sequenza formano un Codex.
   Restano Library e Bibliografia; vault -> Compendium (la cartella creata al primo avvio si chiama "Il mio Compendium"; quelle esistenti non cambiano nome). Identificatori, cartelle
   (`documents/`, `resources/`) e file su disco non cambiano.
-- **Navbar**: Bookshelf · Scriptorium · History | Library (Cmd/Ctrl+1..4). La Library e' una tab a
-  parte (stessa schermata della Bookshelf sulla raccolta comune); il selettore Vault/Library e' sparito.
+- **Navbar**: Armarium · Scriptorium · Palimpsestus | Library (Cmd/Ctrl+1..4). La Library e' una tab a
+  parte (stessa schermata dell'Armarium sulla raccolta comune); il selettore Vault/Library e' sparito.
 - **Barra degli strumenti**: ogni gruppo si trascina dalla maniglia in basso a destra (anche nel
   cestino, con Annulla) e puo' essere esteso o compatto (un pulsante che apre gli strumenti in un
   pannello); nella personalizzazione gli strumenti sono tessere con l'etichetta sotto l'icona e i gruppi
@@ -60,7 +60,7 @@ Aggiornato: 5 ottobre 2026 (M10).
   fra loro e con le risorse; rinomina ed eliminazione aggiornano nodi e legami. Nella vista senza bordi
   una barra di una riga mostra le pergamene collegate (clic per aprirle); non compare in Pagina, nella
   scrittura minimale ne' nell'export.
-- **Incolla nella Bookshelf**: Cmd/Ctrl+V fuori dai campi crea la risorsa del tipo giusto; un link
+- **Incolla nell'Armarium**: Cmd/Ctrl+V fuori dai campi crea la risorsa del tipo giusto; un link
   incollato da solo su una riga vuota diventa una scheda embed.
 - **Portable**: cartella `Alexandria-data` accanto all'app (`node scripts/portable.mjs --mac ... --win ...`).
 - **macOS**: pacchetto firmato ad-hoc. Senza Developer ID e notarizzazione Apple, su altri Mac al primo
@@ -71,12 +71,12 @@ Aggiornato: 5 ottobre 2026 (M10).
   "Salva workspace corrente" salva colonne, viste, barra e pannelli flottanti (`src/state/workspaces.ts`).
 - **Pannelli flottanti**: un gruppo trascinato fuori dalla barra diventa un pannello libero; altri gruppi
   si aggiungono trascinandoli sopra; si richiudono nella barra (`src/commands/floatModel.ts`).
-- **History semplificata** (stile GitHub Desktop): a sinistra variante, "Salva una versione" e storia
+- **Palimpsestus semplificato** (stile GitHub Desktop): a sinistra variante, "Salva una versione" e storia
   verticale (salvataggi automatici nascosti); al centro la pergamena come documento; passando su una
   versione il centro si divide nelle due versioni allineate (`src/versions/docDiff.ts`). Interfaccia in
   parole semplici: versione (commit), variante (branch), unisci (merge), pubblica/scarica (push/pull).
 - **Introduzione** al primo avvio (sette pagine con le funzioni di ogni ambiente), riapribile da Aiuto.
-- **Bookshelf**: l'albero degli Strata mostra le risorse sotto gruppi e filtri, con filtro e ordinamento.
+- **Armarium**: l'albero degli Strata mostra le risorse sotto gruppi e filtri, con filtro e ordinamento.
 
 ## Installer
 
