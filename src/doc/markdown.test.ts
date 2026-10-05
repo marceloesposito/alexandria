@@ -28,6 +28,8 @@ const CANONICAL = [
   'Vedi [[Capitolo 2|il secondo]] e [[Note]].\n',
   'Una nota[^1] e un\'altra[^2].\n\n[^1]: Prima nota.\n[^2]: Seconda con *enfasi*.\n',
   '![Didascalia](img/a.png "titolo"){placement=top width=60%}\n',
+  '[Il sito](https://example.org/pagina){embed resource=r1a2 image="../resources/r1a2/shot.png"}\n',
+  '[Relazione.pdf](../resources/r9/Relazione.pdf){embed resource=r9}\n',
   '<!-- pagebreak -->\n',
   '<!-- section master="body" columns="2" -->\n',
   '<!-- toc -->\n',

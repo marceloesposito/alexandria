@@ -75,6 +75,15 @@ function block(n: PMNode, st: State): string {
       const caption = escapeText(String(a.caption ?? '')).replace(/\n/g, ' ');
       return `![${caption}](${encodeUrl(String(a.src ?? ''))}${title})${extra.length ? `{${extra.join(' ')}}` : ''}`;
     }
+    case 'embed': {
+      const a = n.attrs ?? {};
+      const extra = ['embed'];
+      if (a.resource) extra.push(`resource=${a.resource}`);
+      if (a.image) extra.push(`image="${String(a.image).replace(/"/g, '%22')}"`);
+      const url = String(a.url ?? '');
+      const title = escapeText(String(a.title || url)).replace(/\n/g, ' ');
+      return `[${title}](${encodeUrl(url)}){${extra.join(' ')}}`;
+    }
     case 'mathBlock':
       return `$$\n${String(n.attrs?.latex ?? '').trim()}\n$$`;
     case 'table':

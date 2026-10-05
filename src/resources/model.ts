@@ -16,6 +16,7 @@ export type ResourceKind =
   | 'video'
   | 'audio'
   | 'reference' // voce bibliografica senza file (da BibTeX/RIS/DOI)
+  | 'snippet' // frammento di codice scritto nell'app (file snippet.<ext>)
   | 'other';
 
 /** Voce CSL-JSON (sottoinsieme usato dall'app; i campi ignoti si conservano). */
@@ -85,6 +86,10 @@ export interface Resource {
     siteName?: string;
     description?: string;
     thumb?: string; // file dentro resources/<id>/
+    /** foto della pagina web scattata all'import (file dentro resources/<id>/) */
+    screenshot?: string;
+    /** linguaggio di uno snippet (es. 'ts', 'python') */
+    language?: string;
     videoId?: string;
     ocr?: boolean;
     archived?: boolean;

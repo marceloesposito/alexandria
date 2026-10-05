@@ -22,6 +22,8 @@ import {
   BookOpen,
   Image as ImageIcon,
   FileUp,
+  Paperclip,
+  SquareCode,
 } from 'lucide-react';
 import { registerCommands, notifyCommandState } from '../commands/registry';
 import { viewComponents, globalComponents } from '../shell/views';
@@ -39,9 +41,13 @@ import { CitePicker } from '../citations/CitePicker';
 import { useCitations, insertBibliography, BUNDLED_STYLES, listCustomStyles, type StyleInfo } from '../citations/store';
 import { useDocSettings } from '../layout/docSettings';
 import { getEditor } from '../state/editorRef';
-import { setEditorFilesHandler } from '../editor/extensions/drop';
-import { importFiles } from './importer';
+import { setEditorFilesHandler, setEditorLinksHandler } from '../editor/extensions/drop';
+import { embedView } from '../editor/slots';
+import { importAndInsert } from './insertActions';
 import { relativeFromDoc } from '../vault/resolve';
+import { classifyTransfer, readTransfer } from './insert';
+import { InsertResourceDialog } from './ui/InsertResourceDialog';
+import { EmbedView } from './ui/EmbedView';
 import { platform } from '../platform';
 import { t, useLang } from '../i18n';
 import type { RibbonSize } from '../state/prefs';
@@ -68,30 +74,17 @@ function StyleWidget({ size }: { size: RibbonSize }) {
   );
 }
 
-/** Immagini trascinate dal disco nel testo: diventano risorse del vault e figure nel documento. */
+/** File trascinati dal disco nel testo: immagini -> figure, il resto -> schede embed. */
 async function dropFilesIntoEditor(files: File[], pos: number) {
-  const images = files.filter((f) => f.type.startsWith('image/'));
-  const others = files.filter((f) => !f.type.startsWith('image/'));
-  const data = await Promise.all(images.map(async (f) => ({ name: f.name, mime: f.type, data: new Uint8Array(await f.arrayBuffer()) })));
-  const made = await importFiles(data, 'vault');
-  const e = getEditor();
-  const docRel = ws().activeDoc;
-  if (e && docRel) {
-    let at = pos;
-    for (const r of made) {
-      if (r.kind !== 'image' || !r.file) continue;
-      const node = e.schema.nodes.figure.create({ src: relativeFromDoc(docRel, `resources/${r.id}/${r.file}`), caption: r.title });
-      const $p = e.state.doc.resolve(Math.min(at, e.state.doc.content.size));
-      const insertAt = $p.depth > 0 ? $p.after(1) : at;
-      e.view.dispatch(e.state.tr.insert(insertAt, node));
-      at = insertAt + node.nodeSize;
-    }
-  }
-  if (others.length) {
-    const rest = await Promise.all(others.map(async (f) => ({ name: f.name, mime: f.type, data: new Uint8Array(await f.arrayBuffer()) })));
-    await importFiles(rest, 'vault');
-    ws().toast(t('res.addedToResources', { n: rest.length }), 'info');
-  }
+  await importAndInsert({ kind: 'files' }, files, pos);
+}
+
+/** Link trascinati da un'altra finestra (browser, mail...): importati e inseriti come schede. */
+function dropLinksIntoEditor(dt: DataTransfer, pos: number): boolean {
+  const c = classifyTransfer(readTransfer(dt));
+  if (!c || c.kind !== 'links') return false;
+  void importAndInsert(c, [], pos);
+  return true;
 }
 
 export function registerResources() {
@@ -104,6 +97,9 @@ export function registerResources() {
   globalComponents.push(ResourceViewer);
   registerWidget('citeStyle', StyleWidget);
   setEditorFilesHandler(dropFilesIntoEditor);
+  setEditorLinksHandler(dropLinksIntoEditor);
+  registerDialog('insertResource', InsertResourceDialog);
+  embedView.set(EmbedView);
   // i pulsanti del ribbon seguono vista, ambito e selezione del gestore risorse
   useResources.subscribe((s, p) => {
     if (s.view !== p.view || s.scope !== p.scope || s.selected !== p.selected) notifyCommandState();
@@ -111,6 +107,9 @@ export function registerResources() {
 
   const st = () => useResources.getState();
   registerCommands([
+    { id: 'res.insert', label: 'slash.resource', icon: Paperclip, category: 'insert', views: ['editor'], run: () => ws().openDialog('insertResource') },
+    { id: 'res.insertSnippet', label: 'slash.snippet', icon: SquareCode, category: 'insert', views: ['editor'], run: () => ws().openDialog('insertResource', { kind: 'snippet' }) },
+    { id: 'res.newSnippet', label: 'cmd.res.newSnippet', icon: SquareCode, category: 'resources', run: () => ws().openDialog('addResource', { tab: 'snippet' }) },
     { id: 'res.add', label: 'cmd.res.add', icon: Plus, shortcut: 'Mod+Shift+A', category: 'resources', run: () => ws().openDialog('addResource') },
     {
       id: 'res.importBib',

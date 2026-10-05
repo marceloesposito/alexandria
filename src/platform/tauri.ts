@@ -80,6 +80,11 @@ export const tauriPlatform: Platform = {
     return { status: r.status, url: r.url, contentType: r.contentType, body: base64ToBytes(r.bodyB64) };
   },
 
+  snapshotUrl: async (url) => {
+    const b64 = await invoke<string | null>('net_snapshot', { url });
+    return b64 ? base64ToBytes(b64) : null;
+  },
+
   typst: async (source, files, format): Promise<TypstOutput> => {
     const r = await invoke<RawTypst>('typst_compile', {
       source,

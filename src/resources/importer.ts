@@ -1,13 +1,13 @@
 // Importazione: file trascinati (anche in blocco), link, video, DOI, bibliografie.
 // Riconosce il formato, estrae testo e metadati, crea una scheda uniforme per ogni risorsa.
-import { platform, baseName } from '../platform';
+import { platform, baseName, joinPath } from '../platform';
 import { sha256Hex } from '../lib/bytes';
 import { useResources } from './store';
 import { useWorkspace } from '../state/workspace';
 import { detectFile, detectUrl, extOf, MIME_OF } from './detect';
 import { extract } from './extract';
 import { parsePage, blocksToText } from './html';
-import { writeItemFile, writeText, writeArchive, indexResource, type Scope } from './storage';
+import { writeItemFile, writeText, writeArchive, indexResource, itemDir, type Scope } from './storage';
 import { newResourceId, type Resource, type CslItem } from './model';
 import { parseBibliography } from '../citations/bib';
 import { makeCiteKey } from '../doc/citeSyntax';
@@ -190,6 +190,73 @@ async function fetchThumb(s: Scope, r: Resource, url: string | undefined) {
   }
 }
 
+/** Foto della pagina per l'anteprima (stile Notion); se la webview non ce la fa resta la miniatura og:image. */
+async function captureScreenshot(s: Scope, r: Resource, url: string) {
+  try {
+    const png = await platform.snapshotUrl(url);
+    if (!png) return;
+    const { shrinkScreenshot } = await import('./extract');
+    const shot = await shrinkScreenshot(png);
+    if (!shot) return;
+    const name = `screenshot.${shot.ext}`;
+    await writeItemFile(s, r.id, name, shot.data);
+    r.meta.screenshot = name;
+  } catch {
+    /* anteprima facoltativa */
+  }
+}
+
+/** Rifa la foto di una pagina web gia' importata. */
+export async function refreshScreenshot(id: string): Promise<boolean> {
+  const st = useResources.getState();
+  const r = st.get(id);
+  const s = r && (st.resources.some((x) => x.id === id) ? st.vault : st.library);
+  if (!r || !s || !r.url) return false;
+  const copy: Resource = { ...r, meta: { ...r.meta } };
+  await captureScreenshot(s, copy, r.url);
+  if (!copy.meta.screenshot) return false;
+  await st.update(id, { meta: copy.meta });
+  return true;
+}
+
+export const SNIPPET_LANGUAGES = ['text', 'ts', 'js', 'python', 'rust', 'go', 'java', 'c', 'cpp', 'cs', 'swift', 'kotlin', 'ruby', 'php', 'sql', 'html', 'css', 'json', 'yaml', 'toml', 'bash', 'md', 'tex', 'r'];
+
+const SNIPPET_EXT: Record<string, string> = { text: 'txt', python: 'py', rust: 'rs', ruby: 'rb', bash: 'sh', cpp: 'cpp', cs: 'cs', kotlin: 'kt' };
+
+export function snippetFileName(language: string): string {
+  return `snippet.${SNIPPET_EXT[language] ?? language}`;
+}
+
+/** Snippet di codice scritto nell'app: una risorsa come le altre (cercabile, collegabile, citabile nel testo). */
+export async function createSnippet(title: string, language: string, code: string, target: 'vault' | 'library' = 'vault'): Promise<Resource | null> {
+  const st = useResources.getState();
+  const s = scope(target);
+  if (!s) return null;
+  const r = blank('snippet', title.trim() || t('snippet.untitled'));
+  r.file = snippetFileName(language);
+  r.meta = { language, mime: 'text/plain', size: code.length };
+  await writeItemFile(s, r.id, r.file, new TextEncoder().encode(code));
+  await writeText(s, r.id, code);
+  await st.upsert(r, target);
+  await indexResource(s, r, code);
+  return r;
+}
+
+/** Salva il codice (e il linguaggio) di uno snippet esistente. */
+export async function saveSnippet(id: string, code: string, language?: string): Promise<void> {
+  const st = useResources.getState();
+  const r = st.get(id);
+  const s = r && (st.resources.some((x) => x.id === id) ? st.vault : st.library);
+  if (!r || !s) return;
+  const lang = language ?? r.meta.language ?? 'text';
+  const file = snippetFileName(lang);
+  if (r.file && r.file !== file) await platform.remove(joinPath(itemDir(s, id), r.file)).catch(() => undefined);
+  await writeItemFile(s, id, file, new TextEncoder().encode(code));
+  await writeText(s, id, code);
+  await st.update(id, { file, meta: { ...r.meta, language: lang, size: code.length } });
+  await indexResource(s, { ...r, file }, code);
+}
+
 /** Metadati CSL di un DOI (negoziazione del contenuto su doi.org). */
 export async function lookupDoi(doi: string): Promise<CslItem | null> {
   try {
@@ -296,6 +363,7 @@ export async function importUrls(urls: string[], target: 'vault' | 'library' = '
       const text = blocksToText(page.blocks);
       await writeText(s, r.id, text);
       await fetchThumb(s, r, page.image);
+      await captureScreenshot(s, r, res.url);
       await st.upsert(r, target);
       await indexResource(s, r, text);
       out.push(r);

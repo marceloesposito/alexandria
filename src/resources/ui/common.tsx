@@ -13,6 +13,7 @@ import {
   FileCode,
   Pin as PinIcon,
   Library,
+  SquareCode,
 } from 'lucide-react';
 import type { Resource, ResourceKind } from '../model';
 import { displayAuthorYear, domainOf } from '../model';
@@ -35,6 +36,7 @@ const ICONS: Record<ResourceKind, React.ComponentType<{ size?: number; className
   video: Film,
   audio: Music,
   reference: Quote,
+  snippet: SquareCode,
   other: File,
 };
 
@@ -48,6 +50,11 @@ export function kindLabel(kind: ResourceKind): string {
 }
 
 export function thumbUrl(r: Resource): string | null {
+  // la foto della pagina vince sulla miniatura og:image
+  for (const f of [r.meta.screenshot, r.meta.thumb]) {
+    const p = f ? fileOf(r, f) : null;
+    if (p) return platform.fileUrl(p);
+  }
   if (r.meta.thumb) {
     const p = fileOf(r, r.meta.thumb);
     if (p) return platform.fileUrl(p);

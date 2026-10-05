@@ -7,6 +7,8 @@ import type { EditorView } from '@tiptap/pm/view';
 export const CITE_MIME = 'application/x-alexandria-cite';
 export const FIGURE_MIME = 'application/x-alexandria-figure';
 export const LINK_MIME = 'application/x-alexandria-link';
+/** risorsa che diventa una scheda embed (snippet, file) */
+export const EMBED_MIME = 'application/x-alexandria-embed';
 
 export interface CiteDragData {
   key: string;
@@ -16,6 +18,13 @@ export interface CiteDragData {
 
 type FilesHandler = (files: File[], pos: number) => void | Promise<void>;
 let filesHandler: FilesHandler | null = null;
+type LinksHandler = (dt: DataTransfer, pos: number) => boolean;
+let linksHandler: LinksHandler | null = null;
+
+/** L'app registra qui i link trascinati da altre finestre (diventano schede embed). */
+export function setEditorLinksHandler(h: LinksHandler | null) {
+  linksHandler = h;
+}
 
 /** L'app registra qui l'import dei file trascinati nel testo (immagini -> figure). */
 export function setEditorFilesHandler(h: FilesHandler | null) {
@@ -58,6 +67,16 @@ export const DropHandler = Extension.create({
               view.dispatch(view.state.tr.insert(at, view.state.schema.nodes.figure.create({ src, caption })).scrollIntoView());
               return true;
             }
+            // snippet e altre risorse: scheda embed
+            const emb = dt.getData(EMBED_MIME);
+            if (emb) {
+              const pos = dropPos(view, ev);
+              if (pos === null) return true;
+              const $p = view.state.doc.resolve(pos);
+              const at = $p.depth > 0 ? $p.after(1) : pos;
+              view.dispatch(view.state.tr.insert(at, view.state.schema.nodes.embed.create(JSON.parse(emb))).scrollIntoView());
+              return true;
+            }
             // pagina web non citata come fonte: diventa un collegamento
             const link = dt.getData(LINK_MIME);
             if (link) {
@@ -92,6 +111,14 @@ export const DropHandler = Extension.create({
               return true;
             }
             const files = Array.from(dt.files ?? []);
+            // link da un'altra finestra (non un trascinamento dentro l'editor)
+            if (!files.length && !view.dragging && linksHandler) {
+              const pos = dropPos(view, ev);
+              if (pos !== null && linksHandler(dt, pos)) {
+                ev.preventDefault();
+                return true;
+              }
+            }
             if (files.length && filesHandler) {
               const pos = dropPos(view, ev);
               if (pos === null) return false;

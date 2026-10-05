@@ -1,7 +1,8 @@
 // Nodi di Alexandria oltre a quelli di StarterKit. I nomi e gli attributi coincidono con
 // il modello di src/doc (parse/serialize), cosi' il JSON dell'editor e' gia' il documento.
 import { Node, mergeAttributes } from '@tiptap/core';
-import { ReactNodeViewRenderer } from '@tiptap/react';
+import { ReactNodeViewRenderer, NodeViewWrapper, type NodeViewProps } from '@tiptap/react';
+import { embedView } from '../slots';
 import { FigureView, MathBlockView, MathInlineView, FootnoteView, CitationView, WikilinkView, SectionBreakView, TocView, BibliographyView } from './views';
 
 declare module '@tiptap/core' {
@@ -16,9 +17,64 @@ declare module '@tiptap/core' {
       insertPageBreak: () => ReturnType;
       insertSectionBreak: (attrs?: { master?: string; columns?: number }) => ReturnType;
       insertToc: () => ReturnType;
+      insertEmbed: (attrs: EmbedAttrs) => ReturnType;
     };
   }
 }
+
+export interface EmbedAttrs {
+  url: string;
+  title: string;
+  resource?: string | null;
+  image?: string | null;
+}
+
+function EmbedFallback(props: NodeViewProps) {
+  return (
+    <NodeViewWrapper className="nv-embed" data-drag-handle>
+      <div className="nv-embed__body">
+        <strong>{props.node.attrs.title}</strong>
+        <span className="hint">{props.node.attrs.url}</span>
+      </div>
+    </NodeViewWrapper>
+  );
+}
+
+/** Scheda di un link o di una risorsa (stile Notion): [Titolo](url){embed resource=... image=...} */
+export const Embed = Node.create({
+  name: 'embed',
+  group: 'block',
+  atom: true,
+  draggable: true,
+  addAttributes() {
+    return {
+      url: { default: '' },
+      title: { default: '' },
+      resource: { default: null },
+      image: { default: null },
+    };
+  },
+  parseHTML() {
+    return [{ tag: 'div[data-type="embed"]' }];
+  },
+  renderHTML({ HTMLAttributes }) {
+    return ['div', mergeAttributes(HTMLAttributes, { 'data-type': 'embed' })];
+  },
+  addNodeView() {
+    return ReactNodeViewRenderer((p: NodeViewProps) => {
+      const V = embedView.get() ?? EmbedFallback;
+      return <V {...p} />;
+    });
+  },
+  addCommands() {
+    return {
+      insertEmbed:
+        (attrs) =>
+        ({ commands }) =>
+          commands.insertContent({ type: this.name, attrs }),
+    };
+  },
+});
 
 export const Figure = Node.create({
   name: 'figure',

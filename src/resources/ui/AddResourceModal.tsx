@@ -1,13 +1,15 @@
 // Finestra "Aggiungi risorse": area di rilascio per file (anche molti insieme) e campo per i link.
 import { useRef, useState } from 'react';
-import { Upload, Link2, FolderOpen, BookMarked } from 'lucide-react';
+import { Upload, Link2, FolderOpen, BookMarked, SquareCode } from 'lucide-react';
 import { Modal } from '../../components/Modal';
 import { useWorkspace } from '../../state/workspace';
 import { useResources } from '../store';
-import { importFiles, importUrls, importPaths, importBibliography } from '../importer';
+import { importFiles, importUrls, importPaths, importBibliography, createSnippet, SNIPPET_LANGUAGES } from '../importer';
 import { splitLinks } from '../detect';
 import { platform } from '../../platform';
 import { t } from '../../i18n';
+
+type Tab = 'files' | 'links' | 'bib' | 'snippet';
 
 export function AddResourceModal() {
   const close = () => useWorkspace.getState().closeDialog();
@@ -16,8 +18,9 @@ export function AddResourceModal() {
   const [over, setOver] = useState(false);
   const [links, setLinks] = useState('');
   const [bib, setBib] = useState('');
-  const arg = useWorkspace((s) => s.dialogArg) as { tab?: 'files' | 'links' | 'bib' } | null;
-  const [tab, setTab] = useState<'files' | 'links' | 'bib'>(arg?.tab ?? 'files');
+  const arg = useWorkspace((s) => s.dialogArg) as { tab?: Tab } | null;
+  const [tab, setTab] = useState<Tab>(arg?.tab ?? 'files');
+  const [snip, setSnip] = useState({ title: '', language: 'ts', code: '' });
   const input = useRef<HTMLInputElement>(null);
   const found = splitLinks(links);
 
@@ -34,7 +37,7 @@ export function AddResourceModal() {
   return (
     <Modal title={scope === 'library' ? t('add.titleLibrary') : t('add.title')} onClose={close} size="medium">
       <div className="tabs-row add__tabs" role="tablist">
-        {(['files', 'links', 'bib'] as const).map((x) => (
+        {(['files', 'links', 'bib', 'snippet'] as const).map((x) => (
           <button key={x} role="tab" aria-selected={tab === x} className={`seg ${tab === x ? 'is-active' : ''}`} onClick={() => setTab(x)}>
             {t(`add.tab.${x}`)}
           </button>
@@ -103,6 +106,46 @@ export function AddResourceModal() {
               }}
             >
               {t('add.import')}
+            </button>
+          </div>
+        </div>
+      )}
+      {tab === 'snippet' && (
+        <div className="add__links">
+          <div className="add__snippet-row">
+            <label className="field-label">
+              <SquareCode size={12} /> {t('snippet.title')}
+            </label>
+            <input className="input" autoFocus value={snip.title} placeholder={t('snippet.untitled')} onChange={(e) => setSnip({ ...snip, title: e.target.value })} />
+            <select className="select" value={snip.language} aria-label={t('snippet.language')} onChange={(e) => setSnip({ ...snip, language: e.target.value })}>
+              {SNIPPET_LANGUAGES.map((l) => (
+                <option key={l} value={l}>
+                  {l}
+                </option>
+              ))}
+            </select>
+          </div>
+          <textarea
+            className="input mono"
+            rows={12}
+            spellCheck={false}
+            aria-label={t('snippet.code')}
+            value={snip.code}
+            onChange={(e) => setSnip({ ...snip, code: e.target.value })}
+          />
+          <p className="hint">{t('snippet.hint')}</p>
+          <div className="modal__actions modal__actions--inline">
+            <span className="grow" />
+            <button
+              className="btn btn--primary"
+              disabled={!snip.code.trim()}
+              onClick={async () => {
+                close();
+                const r = await createSnippet(snip.title, snip.language, snip.code, scope);
+                if (r) useWorkspace.getState().toast(t('snippet.saved'), 'ok');
+              }}
+            >
+              {t('snippet.create')}
             </button>
           </div>
         </div>

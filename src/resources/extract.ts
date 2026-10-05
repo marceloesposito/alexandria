@@ -39,6 +39,31 @@ async function canvasToBytes(canvas: HTMLCanvasElement): Promise<Uint8Array | un
   return blob ? new Uint8Array(await blob.arrayBuffer()) : undefined;
 }
 
+/**
+ * Foto di una pagina web ridotta a `maxW` pixel: WebP dove il motore sa codificarlo
+ * (WebView2), altrimenti JPEG (WKWebView ricade in silenzio su PNG, troppo pesante).
+ */
+export async function shrinkScreenshot(png: Uint8Array, maxW = 1200): Promise<{ data: Uint8Array; ext: string } | null> {
+  try {
+    const bmp = await createImageBitmap(new Blob([png as BlobPart], { type: 'image/png' }));
+    const scale = Math.min(1, maxW / bmp.width);
+    const c = document.createElement('canvas');
+    c.width = Math.max(1, Math.round(bmp.width * scale));
+    c.height = Math.max(1, Math.round(bmp.height * scale));
+    c.getContext('2d')!.drawImage(bmp, 0, 0, c.width, c.height);
+    for (const [mime, ext] of [
+      ['image/webp', 'webp'],
+      ['image/jpeg', 'jpg'],
+    ] as const) {
+      const blob: Blob | null = await new Promise((r) => c.toBlob(r, mime, 0.82));
+      if (blob && blob.type === mime) return { data: new Uint8Array(await blob.arrayBuffer()), ext };
+    }
+    return null;
+  } catch {
+    return null;
+  }
+}
+
 export async function imageThumb(bytes: Uint8Array, mime: string): Promise<{ thumb?: Uint8Array; width: number; height: number }> {
   try {
     const bmp = await createImageBitmap(new Blob([bytes as BlobPart], { type: mime || 'image/png' }));

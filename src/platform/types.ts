@@ -143,6 +143,8 @@ export interface Platform {
 
   // rete (solo su azione esplicita dell'utente)
   fetchUrl(url: string, accept?: string): Promise<FetchResult>;
+  /** foto della pagina (PNG) da una webview fuori schermo; null se non disponibile */
+  snapshotUrl(url: string): Promise<Uint8Array | null>;
 
   // impaginazione
   typst(source: string, files: TypstFile[], format: 'pdf' | 'svg'): Promise<TypstOutput>;

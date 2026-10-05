@@ -24,6 +24,7 @@ import {
 } from '../vault/vault';
 
 export type DialogId =
+  | 'insertResource'
   | 'ribbonCustomize'
   | 'preferences'
   | 'docSettings'

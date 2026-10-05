@@ -4,6 +4,7 @@ mod fsops;
 mod git;
 mod index;
 mod net;
+mod snapshot;
 mod typeset;
 
 #[cfg_attr(mobile, tauri::mobile_entry_point)]
@@ -61,6 +62,7 @@ pub fn run() {
             index::index_remove,
             index::index_search,
             net::net_fetch,
+            snapshot::net_snapshot,
             typeset::typst_compile,
         ])
         .run(tauri::generate_context!())

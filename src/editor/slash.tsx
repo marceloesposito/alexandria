@@ -23,6 +23,8 @@ import {
   Quote as CiteIcon,
   ListTree,
   Pilcrow,
+  Paperclip,
+  SquareCode,
 } from 'lucide-react';
 import { t } from '../i18n';
 import { runCommand } from '../commands/registry';
@@ -64,6 +66,26 @@ function items(): SlashItem[] {
       run: (e, r) => {
         del(e, r).run();
         void runCommand('insert.image');
+      },
+    },
+    {
+      id: 'resource',
+      label: t('slash.resource'),
+      keywords: 'resource risorsa file link embed url pdf bookmark',
+      icon: Paperclip,
+      run: (e, r) => {
+        del(e, r).run();
+        void runCommand('res.insert');
+      },
+    },
+    {
+      id: 'snippet',
+      label: t('slash.snippet'),
+      keywords: 'snippet code codice',
+      icon: SquareCode,
+      run: (e, r) => {
+        del(e, r).run();
+        void runCommand('res.insertSnippet');
       },
     },
     { id: 'footnote', label: t('slash.footnote'), keywords: 'note nota footnote', icon: Footprints, run: (e, r) => del(e, r).insertFootnote('').run() },

@@ -31,7 +31,7 @@ export const DEFAULT_RIBBON: RibbonConfig = {
       label: 'ribbon.tab.insert',
       groups: [
         { id: 'ed-ins-blocks', label: 'ribbon.group.blocks', items: ['insert.quote', 'insert.codeBlock', 'insert.hr', 'insert.table', 'table.addRow', 'table.addColumn', 'table.deleteRow', 'table.deleteColumn'] },
-        { id: 'ed-ins-media', label: 'ribbon.group.media', items: ['insert.image', 'insert.math', 'insert.mathInline'] },
+        { id: 'ed-ins-media', label: 'ribbon.group.media', items: ['insert.image', 'res.insert', 'res.insertSnippet', 'insert.math', 'insert.mathInline'] },
         { id: 'ed-ins-links', label: 'ribbon.group.links', items: ['insert.link', 'insert.wikilink', 'comment.add'] },
         { id: 'ed-ins-pages', label: 'ribbon.group.pages', items: ['insert.pageBreak', 'insert.sectionBreak', 'insert.toc'] },
       ],
@@ -82,7 +82,7 @@ export const DEFAULT_RIBBON: RibbonConfig = {
       view: 'resources',
       label: 'ribbon.tab.home',
       groups: [
-        { id: 'res-add', label: 'ribbon.group.add', items: ['res.add', 'res.importBib', 'res.library'] },
+        { id: 'res-add', label: 'ribbon.group.add', items: ['res.add', 'res.newSnippet', 'res.importBib', 'res.library'] },
         { id: 'res-views', label: 'ribbon.group.views', items: ['res.view.whiteboard', 'res.view.graph', 'res.view.layers'] },
         { id: 'res-org', label: 'ribbon.group.organize', items: ['res.newLayer', 'res.newFilter', 'res.tags', 'res.suggest'] },
         { id: 'res-tools', label: 'ribbon.group.whiteboard', items: ['wb.select', 'wb.pan', 'wb.note', 'wb.frame', 'wb.connect', 'wb.fit'] },
@@ -174,6 +174,8 @@ export const MENUS: MenuDef[] = [
       { label: 'menu.insert.lists', submenu: [c('insert.bulletList'), c('insert.orderedList'), c('insert.taskList')] },
       c('insert.table'),
       c('insert.image'),
+      c('res.insert'),
+      c('res.insertSnippet'),
       c('insert.quote'),
       c('insert.codeBlock'),
       c('insert.math'),
@@ -254,6 +256,7 @@ export const MENUS: MenuDef[] = [
     label: 'menu.resources',
     items: [
       c('res.add'),
+      c('res.newSnippet'),
       c('res.importBib'),
       sep,
       c('res.view.whiteboard'),
