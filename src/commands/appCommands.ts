@@ -1,5 +1,7 @@
 // Comandi dell'app: file, vista, preferenze, aiuto.
 import {
+  Search,
+  Command,
   FilePlus,
   FolderOpen,
   FolderPlus,
@@ -83,7 +85,9 @@ export function registerAppCommands() {
         ws().closeVault();
       },
     },
-    { id: 'file.openVault', label: 'cmd.file.openVault', icon: FolderOpen, shortcut: 'Mod+O', category: 'file', run: () => chooseVault(false) },
+    { id: 'file.openVault', label: 'cmd.file.openVault', icon: FolderOpen, shortcut: 'Mod+Alt+O', category: 'file', run: () => chooseVault(false) },
+    { id: 'nav.quickSwitcher', label: 'cmd.nav.quickSwitcher', icon: Search, shortcut: 'Mod+O', category: 'view', run: () => ws().openDialog('quickSwitcher') },
+    { id: 'nav.commandPalette', label: 'cmd.nav.commandPalette', icon: Command, shortcut: 'Mod+Shift+Space', category: 'view', run: () => ws().openDialog('quickSwitcher', { query: '>' }) },
     { id: 'file.newVault', label: 'cmd.file.newVault', icon: FolderPlus, category: 'file', run: () => chooseVault(true) },
     {
       id: 'file.renameDoc',

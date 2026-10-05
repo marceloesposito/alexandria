@@ -39,3 +39,5 @@ export const previewPanel = single<ComponentType>();
 export const embedView = single<ComponentType<NodeViewProps>>();
 /** riga in fondo alla vista senza bordi (pergamene collegate): fuori dal testo e dall'export */
 export const borderlessFooter = single<ComponentType>();
+/** anteprima di una citazione al passaggio del mouse (scheda della fonte): la disegna il modulo risorse */
+export const citationPreview = single<ComponentType<{ keys: string[] }>>();

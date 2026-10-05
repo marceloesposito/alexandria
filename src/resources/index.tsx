@@ -46,7 +46,10 @@ import { useCitations, insertBibliography, BUNDLED_STYLES, listCustomStyles, typ
 import { useDocSettings } from '../layout/docSettings';
 import { getEditor } from '../state/editorRef';
 import { setEditorFilesHandler, setEditorLinksHandler, setEditorPasteLinkHandler } from '../editor/extensions/drop';
-import { embedView, borderlessFooter } from '../editor/slots';
+import { embedView, borderlessFooter, citationPreview } from '../editor/slots';
+import { CitationPreview } from './ui/CitationPreview';
+import { addSwitcherSource } from '../shell/QuickSwitcher';
+import { KindIcon, ResourceCard, subtitle } from './ui/common';
 import { DocLinksFooter } from './ui/DocLinksFooter';
 import { importAndInsert, upgradeLinkToEmbed, downgradeEmbedToLink } from './insertActions';
 import { relativeFromDoc } from '../vault/resolve';
@@ -127,6 +130,18 @@ export function registerResources() {
   registerDialog('insertResource', InsertResourceDialog);
   embedView.set(EmbedView);
   borderlessFooter.set(DocLinksFooter);
+  citationPreview.set(CitationPreview);
+  // le risorse dell'Armarium nel Quick switcher
+  addSwitcherSource(() =>
+    useResources.getState().resources.map((r) => ({
+      id: `res:${r.id}`,
+      label: r.title,
+      sub: subtitle(r),
+      icon: ({ size }: { size?: number }) => <KindIcon kind={r.kind} size={size} />,
+      run: () => useResources.getState().openViewer(r.id),
+      preview: () => <ResourceCard r={r} />,
+    })),
+  );
   // i pulsanti del ribbon seguono vista, ambito e selezione del gestore risorse
   useResources.subscribe((s, p) => {
     if (s.view !== p.view || s.scope !== p.scope || s.selected !== p.selected || s.inspector !== p.inspector) notifyCommandState();
