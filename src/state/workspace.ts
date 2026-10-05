@@ -112,6 +112,12 @@ let toastId = 0;
 
 let portableRoot: string | null = null;
 
+/** Chi tiene riferimenti alle pergamene (Tabula, collegamenti) si aggiorna qui. */
+export const docHooks = {
+  renamed: [] as ((from: string, to: string) => void)[],
+  deleted: [] as ((rel: string) => void)[],
+};
+
 /** Cartella dati della chiavetta, se l'app e' portable. */
 export function getPortableRoot(): string | null {
   return portableRoot;
@@ -277,6 +283,7 @@ export const useWorkspace = create<WorkspaceState>((set, get) => ({
       const cfg = { ...vault, order: vault.order.map((r) => (r === rel ? next : r)) };
       await saveVaultConfig(vaultRoot, cfg);
       set({ vault: cfg });
+      docHooks.renamed.forEach((h) => h(rel, next));
       await get().refreshDocs();
       if (get().activeDoc === rel || get().activeDoc === null) get().openDoc(next);
     }
@@ -286,6 +293,7 @@ export const useWorkspace = create<WorkspaceState>((set, get) => ({
     const { vaultRoot } = get();
     if (!vaultRoot) return;
     await deleteDocument(vaultRoot, rel);
+    docHooks.deleted.forEach((h) => h(rel));
     await get().refreshDocs();
     if (!get().docs.length) await get().newDoc();
     else if (get().activeDoc) get().openDoc(get().activeDoc!);

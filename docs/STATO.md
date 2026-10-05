@@ -56,6 +56,15 @@ Aggiornato: 5 ottobre 2026 (M10).
   `<appData>/templates/*.json`, comuni a tutti i Compendium; un template e' testo di partenza +
   impostazioni. Le master page non sono piu' tre fisse: si creano, rinominano, duplicano ed eliminano
   (il corpo resta; una sezione con una master eliminata usa il corpo). "Nuova pergamena" resta vuota.
+- **Pergamene nella Tabula**: nodi proxy delle pergamene (la aperta o scelte dall'elenco), collegabili
+  fra loro e con le risorse; rinomina ed eliminazione aggiornano nodi e legami. Nella vista senza bordi
+  una barra di una riga mostra le pergamene collegate (clic per aprirle); non compare in Pagina, nella
+  scrittura minimale ne' nell'export.
+- **Incolla nella Bookshelf**: Cmd/Ctrl+V fuori dai campi crea la risorsa del tipo giusto; un link
+  incollato da solo su una riga vuota diventa una scheda embed.
+- **Portable**: cartella `Alexandria-data` accanto all'app (`node scripts/portable.mjs --mac ... --win ...`).
+- **macOS**: pacchetto firmato ad-hoc. Senza Developer ID e notarizzazione Apple, su altri Mac al primo
+  avvio serve Impostazioni di sistema > Privacy e sicurezza > Apri comunque.
 - **Introduzione** al primo avvio (cinque pagine), riapribile da Aiuto.
 - **Bookshelf**: l'albero degli Strata mostra le risorse sotto gruppi e filtri, con filtro e ordinamento.
 

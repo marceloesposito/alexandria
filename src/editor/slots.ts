@@ -37,3 +37,5 @@ export const centerOverlay = single<ComponentType<PageProps>>();
 export const previewPanel = single<ComponentType>();
 /** scheda di un embed (link o risorsa): la disegna il modulo risorse */
 export const embedView = single<ComponentType<NodeViewProps>>();
+/** riga in fondo alla vista senza bordi (pergamene collegate): fuori dal testo e dall'export */
+export const borderlessFooter = single<ComponentType>();

@@ -153,6 +153,8 @@ export interface Whiteboard {
   nodes: Record<string, { x: number; y: number; w?: number }>;
   notes: WbNote[];
   frames: WbFrame[];
+  /** pergamene messe sulla Tabula come nodi (percorsi relativi al Compendium) */
+  docs?: string[];
   viewport?: { x: number; y: number; zoom: number };
 }
 

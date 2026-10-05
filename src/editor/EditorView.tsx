@@ -9,6 +9,8 @@ import { leftPanelSections, rightPanel, centerOverlay, previewPanel } from './sl
 import { OutlinePanel } from './OutlinePanel';
 import { CountsBadge } from '../shell/CountsBadge';
 import { useZen } from '../state/zen';
+import { borderlessFooter } from './slots';
+import { useDoc } from './session';
 import { Library, ListTree } from 'lucide-react';
 import { t, useLang } from '../i18n';
 
@@ -19,6 +21,9 @@ export function EditorView() {
   const pageRef = useRef<HTMLDivElement>(null);
   const zen = useZen((s) => s.on);
   const bare = prefs.focusMode || zen;
+  const sourceMode = useDoc((s) => s.sourceMode);
+  // pergamene collegate: solo nella vista senza bordi (non in Pagina, scrittura minimale, sorgente)
+  const Footer = prefs.editorLayout === 'borderless' && !zen && !sourceMode ? borderlessFooter.get() : null;
   const Right = rightPanel.get();
   const Overlay = centerOverlay.get();
   const Preview = previewPanel.get();
@@ -56,9 +61,14 @@ export function EditorView() {
           <Splitter onDrag={(dx) => set({ leftWidth: Math.max(200, Math.min(520, useWorkspace.getState().app.prefs.leftWidth + dx)) })} />
         </>
       )}
-      <main className="editor-center">
+      <main className={`editor-center ${Footer ? 'has-footer' : ''}`}>
         {dialog === 'findReplace' && <FindReplace />}
         <EditorPane pageRef={pageRef} overlay={Overlay ? <Overlay pageRef={pageRef} /> : null} />
+        {Footer && (
+          <div className="doc-links-bar">
+            <Footer />
+          </div>
+        )}
         <CountsBadge />
       </main>
       {prefs.showPreview && !zen && Preview && (

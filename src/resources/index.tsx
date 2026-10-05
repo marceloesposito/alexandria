@@ -26,6 +26,8 @@ import {
   SquareCode,
   Trash2,
   Landmark,
+  ScrollText,
+  Files,
 } from 'lucide-react';
 import { registerCommands, notifyCommandState } from '../commands/registry';
 import { viewComponents, globalComponents } from '../shell/views';
@@ -44,12 +46,15 @@ import { useCitations, insertBibliography, BUNDLED_STYLES, listCustomStyles, typ
 import { useDocSettings } from '../layout/docSettings';
 import { getEditor } from '../state/editorRef';
 import { setEditorFilesHandler, setEditorLinksHandler, setEditorPasteLinkHandler } from '../editor/extensions/drop';
-import { embedView } from '../editor/slots';
+import { embedView, borderlessFooter } from '../editor/slots';
+import { DocLinksFooter } from './ui/DocLinksFooter';
 import { importAndInsert, upgradeLinkToEmbed, downgradeEmbedToLink } from './insertActions';
 import { relativeFromDoc } from '../vault/resolve';
 import { classifyTransfer, readTransfer } from './insert';
 import { InsertResourceDialog } from './ui/InsertResourceDialog';
 import { onGlobalPaste, onGlobalKeydown } from './pasteToBookshelf';
+import { renameDocRefs, dropDocRefs } from './docLinks';
+import { docHooks } from '../state/workspace';
 import { EmbedView } from './ui/EmbedView';
 import { removeWithConfirm, removalTargets } from './ui/remove';
 import { platform } from '../platform';
@@ -103,6 +108,16 @@ export function registerResources() {
   setEditorFilesHandler(dropFilesIntoEditor);
   setEditorLinksHandler(dropLinksIntoEditor);
   window.addEventListener('paste', onGlobalPaste);
+  docHooks.renamed.push((from, to) => {
+    const s = useResources.getState();
+    const r = renameDocRefs(s.links, s.whiteboard, from, to);
+    s.replaceRefs(r.links, r.whiteboard);
+  });
+  docHooks.deleted.push((rel) => {
+    const s = useResources.getState();
+    const r = dropDocRefs(s.links, s.whiteboard, rel);
+    s.replaceRefs(r.links, r.whiteboard);
+  });
   window.addEventListener('keydown', onGlobalKeydown);
   setEditorPasteLinkHandler((url) => {
     void upgradeLinkToEmbed(url).then((id) => {
@@ -111,6 +126,7 @@ export function registerResources() {
   });
   registerDialog('insertResource', InsertResourceDialog);
   embedView.set(EmbedView);
+  borderlessFooter.set(DocLinksFooter);
   // i pulsanti del ribbon seguono vista, ambito e selezione del gestore risorse
   useResources.subscribe((s, p) => {
     if (s.view !== p.view || s.scope !== p.scope || s.selected !== p.selected || s.inspector !== p.inspector) notifyCommandState();
@@ -220,6 +236,8 @@ export function registerResources() {
     { id: 'wb.note', label: 'cmd.wb.note', icon: StickyNote, category: 'whiteboard', views: ['resources'], run: () => (st().setView('whiteboard'), setTimeout(() => wbApi.addNote?.(), 50)) },
     { id: 'wb.frame', label: 'cmd.wb.frame', icon: Frame, category: 'whiteboard', views: ['resources'], run: () => (st().setView('whiteboard'), setTimeout(() => void wbApi.addFrame?.(), 50)) },
     { id: 'wb.connect', label: 'cmd.wb.connect', icon: Spline, category: 'whiteboard', views: ['resources'], run: () => ws().toast(t('wb.connectHint'), 'info') },
+    { id: 'wb.activeDoc', label: 'cmd.wb.activeDoc', icon: ScrollText, category: 'whiteboard', views: ['resources'], isEnabled: () => !!ws().activeDoc, run: () => (st().setView('whiteboard'), setTimeout(() => wbApi.addActiveDoc?.(), 50)) },
+    { id: 'wb.pickDocs', label: 'cmd.wb.pickDocs', icon: Files, category: 'whiteboard', views: ['resources'], run: () => (st().setView('whiteboard'), setTimeout(() => wbApi.pickDocs?.(), 50)) },
     { id: 'wb.fit', label: 'cmd.wb.fit', icon: Maximize, category: 'whiteboard', views: ['resources'], run: () => wbApi.fit?.() },
 
     // ----- citazioni

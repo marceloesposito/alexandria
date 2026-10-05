@@ -1,6 +1,7 @@
 // Whiteboard: risorse come schede libere, note, cornici; i collegamenti si tracciano
 // trascinando dai punti di aggancio. Posizioni e collegamenti sono salvati nel vault.
-import { useCallback, useEffect, useMemo, useRef } from 'react';
+import { useCallback, useEffect, useMemo, useRef, useState } from 'react';
+import { ScrollText, Link2 } from 'lucide-react';
 import {
   ReactFlow,
   Background,
@@ -31,10 +32,37 @@ import { openContextMenu } from '../../components/ContextMenu';
 import { promptDialog } from '../../components/confirm';
 import type { WbNote, WbFrame } from '../storage';
 import { RESOURCES_MIME } from './LayersPanel';
+import { DocPicker } from './DocPicker';
+import { docNodeId, relOfNode, linkedDocs } from '../docLinks';
+import { useWorkspace } from '../../state/workspace';
+import type { DocInfo } from '../../vault/vault';
 
 type ResNodeData = { r: Resource; color: string | null };
 type NoteNodeData = { note: WbNote };
 type FrameNodeData = { frame: WbFrame };
+type DocNodeData = { doc: DocInfo; active: boolean; linked: number };
+
+/** Proxy di una pergamena del Compendium: si collega come le risorse, doppio clic per aprirla. */
+function DocNode({ data, selected }: NodeProps<Node<DocNodeData>>) {
+  return (
+    <div className={`wb-doc ${selected ? 'is-selected' : ''} ${data.active ? 'is-active' : ''}`}>
+      <Handle type="target" position={Position.Left} className="wb-handle" />
+      <Handle type="source" position={Position.Right} className="wb-handle" />
+      <Handle type="target" position={Position.Top} id="t" className="wb-handle" />
+      <Handle type="source" position={Position.Bottom} id="b" className="wb-handle" />
+      <div className="wb-doc__icon">
+        <ScrollText size={20} strokeWidth={1.6} />
+      </div>
+      <div className="wb-doc__text">
+        <span className="wb-doc__kind">{data.active ? t('wb.doc.active') : t('wb.doc.kind')}</span>
+        <strong className="wb-doc__title">{data.doc.title}</strong>
+        <span className="wb-doc__meta">
+          <Link2 size={11} /> {t('wb.doc.links', { n: data.linked })}
+        </span>
+      </div>
+    </div>
+  );
+}
 
 function ResNode({ data, selected }: NodeProps<Node<ResNodeData>>) {
   return (
@@ -84,10 +112,10 @@ function updateFrame(id: string, patch: Partial<WbFrame>) {
   st.setWhiteboard({ ...st.whiteboard, frames: st.whiteboard.frames.map((n) => (n.id === id ? { ...n, ...patch } : n)) });
 }
 
-const nodeTypes = { res: ResNode, note: NoteNode, frame: FrameNode };
+const nodeTypes = { res: ResNode, note: NoteNode, frame: FrameNode, doc: DocNode };
 
 /** Comandi della whiteboard chiamati dal ribbon. */
-export const wbApi: { addNote?: () => void; addFrame?: () => void; fit?: () => void; pan?: boolean; setPan?: (v: boolean) => void } = {};
+export const wbApi: { addNote?: () => void; addFrame?: () => void; fit?: () => void; addActiveDoc?: () => void; pickDocs?: () => void; pan?: boolean; setPan?: (v: boolean) => void } = {};
 
 const uid = (p: string) => `${p}${Date.now().toString(36)}${Math.random().toString(36).slice(2, 5)}`;
 
@@ -102,6 +130,10 @@ function Board() {
   const selected = useResources((s) => s.selected);
   const flow = useReactFlow();
   const wrap = useRef<HTMLDivElement>(null);
+  const docs = useWorkspace((s) => s.docs);
+  const activeDoc = useWorkspace((s) => s.activeDoc);
+  // finestra di scelta delle pergamene: da mettere sulla Tabula o da collegare a una pergamena
+  const [picker, setPicker] = useState<{ mode: 'add' } | { mode: 'link'; rel: string } | null>(null);
 
   const visible = useMemo(() => resources.filter((r) => isVisible(r, layers, active, resources, texts)), [resources, layers, active, texts]);
 
@@ -140,8 +172,22 @@ function Board() {
             selected: selected.includes(n.id),
           }))
         : [];
-    return [...frames, ...res, ...notes];
-  }, [visible, wb, layers, selected, pos, resources, scope]);
+    // pergamene del Compendium messe sulla Tabula (solo nel Compendium, non nella Library)
+    const docNodes: Node[] =
+      scope === 'vault'
+        ? (wb.docs ?? [])
+            .map((rel) => docs.find((d) => d.rel === rel))
+            .filter((d): d is DocInfo => !!d)
+            .map((d, i) => ({
+              id: docNodeId(d.rel),
+              type: 'doc',
+              position: wb.nodes[docNodeId(d.rel)] ?? { x: -320, y: i * 130 },
+              data: { doc: d, active: d.rel === activeDoc, linked: linkedDocs(links, d.rel).length },
+              selected: selected.includes(docNodeId(d.rel)),
+            }))
+        : [];
+    return [...frames, ...res, ...notes, ...docNodes];
+  }, [visible, wb, layers, selected, pos, resources, scope, docs, activeDoc, links]);
 
   const ids = new Set(nodes.map((n) => n.id));
   const edges: Edge[] = links
@@ -173,7 +219,7 @@ function Board() {
         const w = st.whiteboard;
         const next = { ...w, nodes: { ...w.nodes }, notes: [...w.notes], frames: [...w.frames] };
         for (const n of moved) {
-          if (n.type === 'res') next.nodes[n.id] = { x: n.position.x, y: n.position.y };
+          if (n.type === 'res' || n.type === 'doc') next.nodes[n.id] = { x: n.position.x, y: n.position.y };
           if (n.type === 'note') next.notes = next.notes.map((x) => (x.id === n.id ? { ...x, x: n.position.x, y: n.position.y } : x));
           if (n.type === 'frame') next.frames = next.frames.map((x) => (x.id === n.id ? { ...x, x: n.position.x, y: n.position.y } : x));
         }
@@ -184,7 +230,14 @@ function Board() {
       const removed = changes.filter((c) => c.type === 'remove').map((c) => c.id);
       if (removed.length) {
         const w = st.whiteboard;
-        st.setWhiteboard({ ...w, notes: w.notes.filter((n) => !removed.includes(n.id)), frames: w.frames.filter((f) => !removed.includes(f.id)) });
+        // togliere una pergamena dalla Tabula non la cancella: sparisce solo il nodo
+        const goneDocs = removed.map(relOfNode).filter(Boolean) as string[];
+        st.setWhiteboard({
+          ...w,
+          notes: w.notes.filter((n) => !removed.includes(n.id)),
+          frames: w.frames.filter((f) => !removed.includes(f.id)),
+          docs: (w.docs ?? []).filter((r) => !goneDocs.includes(r)),
+        });
       }
     },
     [nodes],
@@ -197,6 +250,25 @@ function Board() {
   const onConnect = useCallback((c: Connection) => {
     if (c.source && c.target) useResources.getState().addLink(c.source, c.target);
   }, []);
+
+  /** Pergamene sulla Tabula, una sotto l'altra al centro della vista (quelle gia' presenti restano dove sono). */
+  const addDocs = (rels: string[]) => {
+    const st = useResources.getState();
+    const w = st.whiteboard;
+    const have = new Set(w.docs ?? []);
+    const fresh = rels.filter((r) => !have.has(r));
+    const p = center();
+    const nodes = { ...w.nodes };
+    const placed = (w.docs ?? []).map((r) => nodes[docNodeId(r)]).filter(Boolean);
+    const x0 = placed.length ? Math.min(...placed.map((n) => n.x)) : p.x - 120;
+    let y = placed.length ? Math.max(...placed.map((n) => n.y)) + 130 : p.y - 50;
+    for (const r of fresh) {
+      if (nodes[docNodeId(r)]) continue;
+      nodes[docNodeId(r)] = { x: x0, y };
+      y += 130;
+    }
+    st.setWhiteboard({ ...w, nodes, docs: [...(w.docs ?? []), ...fresh] });
+  };
 
   const center = () => {
     const r = wrap.current?.getBoundingClientRect();
@@ -217,6 +289,11 @@ function Board() {
       st.setWhiteboard({ ...st.whiteboard, frames: [...st.whiteboard.frames, { id: uid('f'), x: p.x - 300, y: p.y - 200, w: 600, h: 400, title }] });
     };
     wbApi.fit = () => flow.fitView({ padding: 0.15, duration: 300 });
+    wbApi.addActiveDoc = () => {
+      const rel = useWorkspace.getState().activeDoc;
+      if (rel) addDocs([rel]);
+    };
+    wbApi.pickDocs = () => setPicker({ mode: 'add' });
   });
 
   return (
@@ -234,13 +311,33 @@ function Board() {
         onNodesChange={onNodesChange}
         onEdgesChange={onEdgesChange}
         onConnect={onConnect}
-        onNodeClick={(_, n) => n.type === 'res' && useResources.getState().openInspector(n.id)}
-        onNodeDoubleClick={(_, n) => n.type === 'res' && useResources.getState().openViewer(n.id)}
+        onNodeClick={(_, n) => {
+          if (n.type === 'res') useResources.getState().openInspector(n.id);
+        }}
+        onNodeDoubleClick={(_, n) => {
+          if (n.type === 'res') useResources.getState().openViewer(n.id);
+          const rel = relOfNode(n.id);
+          if (n.type === 'doc' && rel) {
+            useWorkspace.getState().openDoc(rel);
+            useWorkspace.getState().setView('editor');
+          }
+        }}
         onEdgeDoubleClick={async (_, e) => {
           const label = await promptDialog(t('wb.linkLabel'), String(e.label ?? ''));
           if (label !== null) useResources.getState().updateLink(e.id, label);
         }}
         onNodeContextMenu={(e, n) => {
+          const rel = relOfNode(n.id);
+          if (n.type === 'doc' && rel) {
+            e.preventDefault();
+            openContextMenu(e as React.MouseEvent, [
+              { label: t('wb.doc.open'), onClick: () => (useWorkspace.getState().openDoc(rel), useWorkspace.getState().setView('editor')) },
+              { label: t('wb.doc.linkTo'), onClick: () => setPicker({ mode: 'link', rel }) },
+              { sep: true, label: '' },
+              { label: t('wb.doc.remove'), onClick: () => onNodesChange([{ type: 'remove', id: n.id }]) },
+            ]);
+            return;
+          }
           if (n.type !== 'res') return;
           e.preventDefault();
           openContextMenu(e as React.MouseEvent, [
@@ -271,6 +368,22 @@ function Board() {
         <MiniMap pannable zoomable className="wb-minimap" />
         <Controls showInteractive={false} />
       </ReactFlow>
+      {picker?.mode === 'add' && (
+        <DocPicker title={t('wb.doc.addTitle')} action={t('wb.doc.addAction')} exclude={wb.docs ?? []} onPick={addDocs} onClose={() => setPicker(null)} />
+      )}
+      {picker?.mode === 'link' && (
+        <DocPicker
+          title={t('wb.doc.linkTitle', { name: docs.find((d) => d.rel === picker.rel)?.title ?? '' })}
+          action={t('wb.doc.linkAction')}
+          exclude={[picker.rel, ...linkedDocs(links, picker.rel)]}
+          onPick={(rels) => {
+            // le pergamene collegate compaiono anche sulla Tabula, cosi' il legame si vede
+            addDocs(rels);
+            for (const r of rels) useResources.getState().addLink(docNodeId(picker.rel), docNodeId(r));
+          }}
+          onClose={() => setPicker(null)}
+        />
+      )}
     </div>
   );
 }

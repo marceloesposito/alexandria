@@ -48,6 +48,7 @@ function useSearch(query: string): Set<string> | null {
 export function ResourcesView() {
   useLang();
   const view = useResources((s) => s.view);
+  const boardUsed = useResources((s) => !!(s.whiteboard.docs?.length || s.whiteboard.notes.length || s.whiteboard.frames.length));
   const scope = useResources((s) => s.scope);
   const resources = useResources((s) => (s.scope === 'vault' ? s.resources : s.libraryItems));
   const inspector = useResources((s) => s.inspector);
@@ -71,6 +72,16 @@ export function ResourcesView() {
     { id: 'graph', icon: Network, label: t('res.view.graph') },
     { id: 'layers', icon: Layers, label: t('res.view.layers') },
   ];
+
+  const empty = (
+    <div className="resources__empty">
+      <button className="big-plus" onClick={add} aria-label={t('res.add')}>
+        <Plus size={56} strokeWidth={1.2} />
+      </button>
+      <p>{scope === 'library' ? t('res.emptyLibrary') : t('res.empty')}</p>
+      <p className="hint">{t('res.emptyHint')}</p>
+    </div>
+  );
 
   return (
     <div
@@ -136,16 +147,14 @@ export function ResourcesView() {
           </button>
         </div>
         <div className="resources__canvas">
-          {resources.length === 0 ? (
-            <div className="resources__empty">
-              <button className="big-plus" onClick={add} aria-label={t('res.add')}>
-                <Plus size={56} strokeWidth={1.2} />
-              </button>
-              <p>{scope === 'library' ? t('res.emptyLibrary') : t('res.empty')}</p>
-              <p className="hint">{t('res.emptyHint')}</p>
-            </div>
+          {resources.length === 0 && !(scope === 'vault' && view === 'whiteboard') ? (
+            empty
           ) : view === 'whiteboard' ? (
-            <Whiteboard />
+            <>
+              {/* nel Compendium la Tabula c'e' sempre: puo' contenere pergamene e note anche senza risorse */}
+              <Whiteboard />
+              {resources.length === 0 && !boardUsed && <div className="resources__empty is-overlay">{empty}</div>}
+            </>
           ) : view === 'graph' ? (
             <GraphView />
           ) : (
