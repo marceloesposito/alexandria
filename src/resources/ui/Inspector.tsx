@@ -1,7 +1,7 @@
 // Ispettore di una risorsa: metadati bibliografici modificabili, fonte e chiave di citazione,
 // tag, layer, pin; apertura nel visualizzatore.
 import { useEffect, useState } from 'react';
-import { X, BookOpen, ExternalLink, Trash2, Search, Library, Copy, Pin as PinIcon, Quote } from 'lucide-react';
+import { PanelRight, X, BookOpen, ExternalLink, Trash2, Search, Library, Copy, Pin as PinIcon, Quote } from 'lucide-react';
 import { removeWithConfirm } from './remove';
 import { useResources } from '../store';
 import { type Resource, type CslItem, authorsOf, yearOf } from '../model';
@@ -11,6 +11,7 @@ import { platform } from '../../platform';
 import { lookupDoi, lookupIsbn, addFromLibrary, sendToLibrary } from '../importer';
 import { parseName } from '../html';
 import { useWorkspace } from '../../state/workspace';
+import { useSidePane } from '../../editor/paneStore';
 import { TypeSelect, PropField, TypeIcon, useType } from '../../types/ui';
 import { emptyObject } from '../../types/model';
 
@@ -40,6 +41,15 @@ export function Inspector({ id }: { id: string }) {
       <div className="inspector__actions">
         <button className="btn small" onClick={() => st.openViewer(r.id)}>
           <BookOpen size={13} /> {t('res.open')}
+        </button>
+        <button
+          className="btn small"
+          onClick={() => {
+            useWorkspace.getState().setView('editor');
+            useSidePane.getState().open({ kind: 'resource', id: r.id });
+          }}
+        >
+          <PanelRight size={13} /> {t('pane.openAside')}
         </button>
         {r.url && (
           <button className="btn small" onClick={() => void platform.openExternal(r.url!)}>

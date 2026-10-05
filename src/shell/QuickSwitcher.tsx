@@ -9,6 +9,7 @@ import { fuzzyFilter } from '../lib/fuzzy';
 import { flushSave } from '../editor/session';
 import { getEditor } from '../state/editorRef';
 import { DocPreview } from './DocPreview';
+import { useSidePane } from '../editor/paneStore';
 import { t, useLang } from '../i18n';
 
 export interface SwitcherItem {
@@ -18,6 +19,8 @@ export interface SwitcherItem {
   icon?: LucideIcon | ComponentType<{ size?: number }>;
   hint?: string;
   run(): void | Promise<void>;
+  /** apre l'elemento nei riquadri accanto all'editor (Alt+Invio) */
+  aside?: () => void;
   preview?: () => ReactNode;
 }
 
@@ -38,6 +41,10 @@ function docItems(): SwitcherItem[] {
       await flushSave(getEditor());
       useWorkspace.getState().openDoc(d.rel);
       useWorkspace.getState().setView('editor');
+    },
+    aside: () => {
+      useWorkspace.getState().setView('editor');
+      useSidePane.getState().open({ kind: 'doc', rel: d.rel });
     },
     preview: () => <DocPreview rel={d.rel} />,
   }));
@@ -100,7 +107,10 @@ export function QuickSwitcher() {
                 setSel((s) => Math.max(0, s - 1));
               } else if (e.key === 'Enter') {
                 e.preventDefault();
-                choose(current);
+                if (e.altKey && current?.aside) {
+                  close();
+                  current.aside();
+                } else choose(current);
               } else if (e.key === 'Escape') {
                 e.preventDefault();
                 e.stopPropagation();

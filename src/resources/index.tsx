@@ -49,6 +49,9 @@ import { setEditorFilesHandler, setEditorLinksHandler, setEditorPasteLinkHandler
 import { embedView, borderlessFooter, citationPreview } from '../editor/slots';
 import { CitationPreview } from './ui/CitationPreview';
 import { addSwitcherSource } from '../shell/QuickSwitcher';
+import { paneResource } from '../editor/SidePane';
+import { useSidePane } from '../editor/paneStore';
+import { PaneResource } from './viewer/PaneResource';
 import { KindIcon, ResourceCard, subtitle } from './ui/common';
 import { DocLinksFooter } from './ui/DocLinksFooter';
 import { importAndInsert, upgradeLinkToEmbed, downgradeEmbedToLink } from './insertActions';
@@ -131,6 +134,8 @@ export function registerResources() {
   embedView.set(EmbedView);
   borderlessFooter.set(DocLinksFooter);
   citationPreview.set(CitationPreview);
+  paneResource.body = PaneResource;
+  paneResource.title = (id) => useResources.getState().get(id)?.title ?? id;
   // le risorse dell'Armarium nel Quick switcher
   addSwitcherSource(() =>
     useResources.getState().resources.map((r) => ({
@@ -139,6 +144,7 @@ export function registerResources() {
       sub: subtitle(r),
       icon: ({ size }: { size?: number }) => <KindIcon kind={r.kind} size={size} />,
       run: () => useResources.getState().openViewer(r.id),
+      aside: () => useSidePane.getState().open({ kind: 'resource', id: r.id }),
       preview: () => <ResourceCard r={r} />,
     })),
   );

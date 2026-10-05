@@ -23,6 +23,9 @@ import { useTypes } from '../types/store';
 import type { DocSettings } from '../layout/model';
 import { headerRows, typeById } from '../types/model';
 
+/** Immagine con percorso dalla radice del vault (usato quando si uniscono pergamene di cartelle diverse). */
+export const VAULT_SRC = 'vault:';
+
 export type ExportFormat = 'pdf' | 'docx' | 'html' | 'md' | 'txt' | 'tex';
 
 const MIME: Record<string, string> = { png: 'image/png', jpg: 'image/jpeg', jpeg: 'image/jpeg', gif: 'image/gif', webp: 'image/webp', svg: 'image/svg+xml' };
@@ -50,6 +53,7 @@ export function exportHeader(settings: DocSettings): ExportContext['header'] {
   return rows.length ? { rows, layout: h.layout, align: h.align } : undefined;
 }
 
+/** Prepara la pergamena aperta nell'editor. */
 export async function prepare(): Promise<Prepared | null> {
   const ws = useWorkspace.getState();
   const editor = getEditor();
@@ -58,6 +62,24 @@ export async function prepare(): Promise<Prepared | null> {
   const doc = embedsToLinks(parseMarkdown(currentMarkdown(editor)));
   const settings = useDocSettings.getState().settings;
   const title = settings.title || ws.docs.find((d) => d.rel === ws.activeDoc)?.title || t('doc.untitled');
+  return prepareDoc(doc, settings, title, ws.vaultRoot, ws.activeDoc, keysInDoc(editor));
+}
+
+/** Citazioni in ordine di comparsa in un documento (anche nelle note). */
+export function keysOfDoc(doc: PMNode): string[] {
+  const keys: string[] = [];
+  const walk = (n: PMNode) => {
+    if (n.type === 'citation') for (const it of (n.attrs?.items ?? []) as CitationItem[]) keys.push(it.key);
+    if (n.type === 'footnote' && typeof n.attrs?.text === 'string') for (const m of n.attrs.text.matchAll(/@([\p{L}\p{N}_][\p{L}\p{N}_:.-]*)/gu)) keys.push(m[1]);
+    n.content?.forEach(walk);
+  };
+  walk(doc);
+  return keys.filter((k, i) => keys.indexOf(k) === i);
+}
+
+/** Prepara un documento qualsiasi (una pergamena o un Codex già unito). */
+export async function prepareDoc(doc: PMNode, settings: DocSettings, title: string, vaultRoot: string, baseRel: string, citeOrder: string[]): Promise<Prepared> {
+  const ws = { vaultRoot, activeDoc: baseRel };
 
   // immagini
   const assets = collectAssets(doc, parseMarkdown);
@@ -71,7 +93,7 @@ export async function prepare(): Promise<Prepared | null> {
         const r = await platform.fetchUrl(src);
         data = r.body;
         ext = r.contentType.split('/')[1]?.replace('jpeg', 'jpg').replace('svg+xml', 'svg') || ext;
-      } else data = await platform.readBytes(resolveDocPath(src, ws.vaultRoot, ws.activeDoc));
+      } else data = await platform.readBytes(src.startsWith(VAULT_SRC) ? joinPath(ws.vaultRoot, src.slice(VAULT_SRC.length)) : resolveDocPath(src, ws.vaultRoot, ws.activeDoc));
       images.set(src, { path: `img/${i++}.${ext}`, data, mime: MIME[ext] ?? 'image/png' });
     } catch {
       /* immagine mancante: segnaposto nel PDF */
@@ -101,7 +123,7 @@ export async function prepare(): Promise<Prepared | null> {
     await useCitations.getState().rebuild();
     cite = useCitations.getState().engine;
   }
-  cite?.setOrder(keysInDoc(editor));
+  cite?.setOrder(citeOrder);
   const ctx: ExportContext = {
     settings,
     title,
@@ -137,9 +159,8 @@ export async function renderPreview(): Promise<{ pages: string[]; errors: string
   return { pages: out.svgPages ?? [], errors: out.errors };
 }
 
-function bibItems(): ({ id: string } & Record<string, unknown>)[] {
-  const editor = getEditor();
-  const keys = new Set(keysInDoc(editor));
+function bibItems(doc: PMNode): ({ id: string } & Record<string, unknown>)[] {
+  const keys = new Set(keysOfDoc(doc));
   return useResources
     .getState()
     .resources.filter((r) => r.isSource && r.citeKey && keys.has(r.citeKey))
@@ -149,9 +170,9 @@ function bibItems(): ({ id: string } & Record<string, unknown>)[] {
 export const EXTENSIONS: Record<ExportFormat, string> = { pdf: 'pdf', docx: 'docx', html: 'html', md: 'md', txt: 'txt', tex: 'tex' };
 
 /** Esporta nel formato scelto; chiede dove salvare. Restituisce il percorso o null. */
-export async function exportTo(format: ExportFormat, target?: string): Promise<string | null> {
+export async function exportTo(format: ExportFormat, target?: string, prepared?: Prepared): Promise<string | null> {
   const ws = useWorkspace.getState();
-  const p = await prepare();
+  const p = prepared ?? (await prepare());
   if (!p) return null;
   const name = `${p.ctx.title}.${EXTENSIONS[format]}`;
   const path = target ?? (await platform.saveDialog(name, [EXTENSIONS[format]]));
@@ -174,7 +195,7 @@ export async function exportTo(format: ExportFormat, target?: string): Promise<s
         break;
       case 'md': {
         await platform.writeText(path, serializeMarkdown(p.doc));
-        const bib = bibItems();
+        const bib = bibItems(p.doc);
         if (bib.length) await platform.writeText(`${stripExt(path)}.bib`, toBibtex(bib as never));
         break;
       }
@@ -182,7 +203,7 @@ export async function exportTo(format: ExportFormat, target?: string): Promise<s
         const bibName = `${stripExt(baseName(path))}.bib`;
         const out = toLatex(p.doc, p.ctx, bibName);
         await platform.writeText(path, out.tex);
-        await platform.writeText(joinPath(dirName(path), bibName), toBibtex(bibItems() as never));
+        await platform.writeText(joinPath(dirName(path), bibName), toBibtex(bibItems(p.doc) as never));
         for (const im of out.images) {
           const asset = p.images.find((x) => x === p.ctx.image(im.src));
           if (asset) await platform.writeBytes(joinPath(dirName(path), `${stripExt(bibName)}_files`, im.name), asset.data);

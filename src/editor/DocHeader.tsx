@@ -1,7 +1,11 @@
 // Header della pergamena: tipo e proprietà, modificabili sul posto. Compare nella vista senza bordi e,
 // se l'autore lo chiede, anche in pagina e nell'export (impostazioni in DocSettings.header).
 import { useRef, useState } from 'react';
-import { Settings2 } from 'lucide-react';
+import { Settings2, ArrowLeft, ArrowRight, Link2 } from 'lucide-react';
+import { useResources } from '../resources/store';
+import { neighbours } from '../codex/model';
+import { appendToCodex } from '../codex/store';
+import { DocPicker } from '../resources/ui/DocPicker';
 import { useDocSettings } from '../layout/docSettings';
 import { useTypes } from '../types/store';
 import { TypeIcon, TypeSelect, PropField } from '../types/ui';
@@ -15,7 +19,11 @@ export function DocHeader({ borderless }: { borderless: boolean }) {
   const settings = useDocSettings((s) => s.settings);
   const types = useTypes((s) => s.types);
   const [open, setOpen] = useState(false);
+  const [picking, setPicking] = useState(false);
   const gear = useRef<HTMLButtonElement>(null);
+  const links = useResources((s) => s.links);
+  const docs = useWorkspace((s) => s.docs);
+  const active = useWorkspace((s) => s.activeDoc);
   const h = settings.header;
   if (borderless ? !h.borderless : !h.paged) return null;
   const obj = settings.object;
@@ -25,6 +33,9 @@ export function DocHeader({ borderless }: { borderless: boolean }) {
   const setHeader = (patch: Partial<HeaderSettings>) => update({ header: { ...h, ...patch } });
   const shown = (key: string) => !h.fields.length || h.fields.includes(key);
   const props = type ? type.properties.filter((d) => shown(d.key)) : [];
+  const nb = active ? neighbours(links, active) : null;
+  const titleOf = (rel: string) => docs.find((d) => d.rel === rel)?.title ?? rel;
+  const go = (rel: string) => useWorkspace.getState().openDoc(rel);
 
   return (
     <header className={`doc-header doc-header--${h.layout} ${h.align === 'center' ? 'is-center' : ''} ${type ? '' : 'is-empty'}`} contentEditable={false}>
@@ -32,6 +43,22 @@ export function DocHeader({ borderless }: { borderless: boolean }) {
         {type && <TypeIcon icon={type.icon} color={type.color} />}
         <TypeSelect target="doc" value={obj.type} onChange={(id) => update({ object: { ...obj, type: id } })} className="doc-header__type-select" />
         <span className="grow" />
+        {nb?.prev && (
+          <button className="doc-header__nav" title={t('header.prev')} onClick={() => go(nb.prev!)}>
+            <ArrowLeft size={12} /> {titleOf(nb.prev)}
+          </button>
+        )}
+        {nb?.next ? (
+          <button className="doc-header__nav" title={t('header.next')} onClick={() => go(nb.next!)}>
+            {titleOf(nb.next)} <ArrowRight size={12} />
+          </button>
+        ) : (
+          active && (
+            <button className="doc-header__nav" title={t('header.continueHint')} onClick={() => setPicking(true)}>
+              <Link2 size={12} /> {t('header.continue')}
+            </button>
+          )
+        )}
         <button ref={gear} className="icon-btn tiny" title={t('header.settings')} onClick={() => setOpen(!open)}>
           <Settings2 size={13} />
         </button>
@@ -45,6 +72,21 @@ export function DocHeader({ borderless }: { borderless: boolean }) {
             </label>
           ))}
         </div>
+      )}
+      {picking && active && (
+        <DocPicker
+          title={t('header.continueTitle', { name: titleOf(active) })}
+          action={t('header.continueAction')}
+          exclude={nb?.members ?? [active]}
+          onPick={(rels) => {
+            let order = nb?.members.length ? nb.members : [active];
+            for (const r of rels) {
+              appendToCodex(order, r);
+              order = [...order, r];
+            }
+          }}
+          onClose={() => setPicking(false)}
+        />
       )}
       <Popover anchor={gear.current} open={open} onClose={() => setOpen(false)} placement="below">
         <div className="popover__form header-settings">

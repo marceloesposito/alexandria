@@ -43,6 +43,8 @@ export interface Prefs {
   leftWidth: number;
   rightWidth: number;
   previewWidth: number;
+  /** larghezza dei riquadri accanto all'editor */
+  paneWidth: number;
 }
 
 export const DEFAULT_PREFS: Prefs = {
@@ -74,6 +76,7 @@ export const DEFAULT_PREFS: Prefs = {
   leftWidth: 280,
   rightWidth: 300,
   previewWidth: 440,
+  paneWidth: 460,
 };
 
 export interface DocCursor {
