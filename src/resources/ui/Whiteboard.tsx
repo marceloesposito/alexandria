@@ -366,7 +366,7 @@ function Board() {
       >
         <Background variant={BackgroundVariant.Dots} gap={22} size={1.2} />
         <MiniMap pannable zoomable className="wb-minimap" />
-        <Controls showInteractive={false} />
+        <Controls showInteractive={false} className="wb-controls" />
       </ReactFlow>
       {picker?.mode === 'add' && (
         <DocPicker title={t('wb.doc.addTitle')} action={t('wb.doc.addAction')} exclude={wb.docs ?? []} onPick={addDocs} onClose={() => setPicker(null)} />

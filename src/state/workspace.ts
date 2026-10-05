@@ -56,6 +56,7 @@ export type DialogId =
   | 'openVault'
   | 'renameDoc'
   | 'markdownGuide'
+  | 'quickSwitcher'
   | null;
 
 export interface Toast {

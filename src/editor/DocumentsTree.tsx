@@ -8,6 +8,8 @@ import { getEditor } from '../state/editorRef';
 import { openContextMenu } from '../components/ContextMenu';
 import { confirmDialog } from '../components/confirm';
 import { useDoc } from './session';
+import { HoverCard, useHoverCard } from '../components/HoverCard';
+import { DocPreview } from '../shell/DocPreview';
 
 const MIME = 'application/x-alexandria-doc';
 
@@ -16,6 +18,7 @@ export function DocumentsTree() {
   const active = useWorkspace((s) => s.activeDoc);
   const counts = useDoc((s) => s.counts);
   const [dropBefore, setDropBefore] = useState<string | null>(null);
+  const hover = useHoverCard();
 
   const open = async (rel: string) => {
     if (rel === active) return;
@@ -54,6 +57,11 @@ export function DocumentsTree() {
           <Plus size={14} />
         </button>
       </header>
+      {hover.anchor?.dataset.rel && (
+        <HoverCard anchor={hover.anchor} cardProps={hover.cardProps} placement="right">
+          <DocPreview rel={hover.anchor.dataset.rel} />
+        </HoverCard>
+      )}
       <ul className="tree" role="tree">
         {docs.map((d) => (
           <li
@@ -62,7 +70,10 @@ export function DocumentsTree() {
             aria-selected={d.rel === active}
             className={`tree__item ${d.rel === active ? 'is-active' : ''} ${dropBefore === d.rel ? 'drop-before' : ''}`}
             draggable
-            onDragStart={(e) => e.dataTransfer.setData(MIME, d.rel)}
+            onDragStart={(e) => {
+              hover.close();
+              e.dataTransfer.setData(MIME, d.rel);
+            }}
             onDragOver={(e) => {
               if (!e.dataTransfer.types.includes(MIME)) return;
               e.preventDefault();
@@ -77,9 +88,13 @@ export function DocumentsTree() {
               order.splice(order.indexOf(d.rel), 0, from);
               void useWorkspace.getState().reorderDocs(order);
             }}
-            onClick={() => void open(d.rel)}
+            onClick={() => {
+              hover.close();
+              void open(d.rel);
+            }}
             onContextMenu={(e) => menu(e, d.rel, d.title)}
-            title={d.rel}
+            data-rel={d.rel}
+            {...(d.rel === active ? {} : hover.triggerProps)}
           >
             <FileText size={14} className="tree__icon" />
             <span className="tree__label">{d.folder ? `${d.folder}/` : ''}{d.title}</span>

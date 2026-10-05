@@ -3,6 +3,7 @@ import type { ComponentType } from 'react';
 import { useWorkspace, type DialogId } from '../state/workspace';
 import { RibbonCustomizer } from './RibbonCustomizer';
 import { PreferencesDialog } from './dialogs/Preferences';
+import { QuickSwitcher } from './QuickSwitcher';
 import { RenameDocDialog, GoToLineDialog, AboutDialog, ShortcutsDialog, MarkdownGuideDialog, HelpDialog } from './dialogs/SimpleDialogs';
 
 const registry = new Map<Exclude<DialogId, null>, ComponentType>([
@@ -14,6 +15,7 @@ const registry = new Map<Exclude<DialogId, null>, ComponentType>([
   ['shortcuts', ShortcutsDialog],
   ['markdownGuide', MarkdownGuideDialog],
   ['help', HelpDialog],
+  ['quickSwitcher', QuickSwitcher],
 ]);
 
 export function registerDialog(id: Exclude<DialogId, null>, c: ComponentType) {

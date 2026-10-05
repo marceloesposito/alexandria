@@ -12,6 +12,9 @@ import type { CitationItem } from '../../doc/types';
 import { runCommand } from '../../commands/registry';
 import { useDocSettings } from '../../layout/docSettings';
 import { masterLabel } from '../../layout/TemplatesView';
+import { HoverCard, useHoverCard } from '../../components/HoverCard';
+import { DocPreview } from '../../shell/DocPreview';
+import { citationPreview } from '../slots';
 
 function Katex({ latex, display }: { latex: string; display: boolean }) {
   const ref = useRef<HTMLSpanElement>(null);
@@ -140,12 +143,25 @@ export function CitationView(props: NodeViewProps) {
   const label = r.label(items);
   const [draft, setDraft] = useState(formatCitation(items));
   useEffect(() => setDraft(formatCitation(items)), [props.node.attrs.items]); // eslint-disable-line react-hooks/exhaustive-deps
-  const desc = items.map((i) => r.describe(i.key) ?? `@${i.key}`).join('\n');
+  const hover = useHoverCard();
+  const Preview = citationPreview.get();
   return (
     <NodeViewWrapper as="span" className={`nv-citation ${props.selected ? 'is-selected' : ''} ${r.isNoteStyle() ? 'is-note' : ''}`}>
-      <span ref={ref} onClick={() => setOpen(true)} title={desc}>
+      <span
+        ref={ref}
+        {...hover.triggerProps}
+        onClick={() => {
+          hover.close();
+          if (props.editor.isEditable) setOpen(true);
+        }}
+      >
         {r.isNoteStyle() ? <sup className="nv-citation__note" /> : label}
       </span>
+      {Preview && !open && (
+        <HoverCard anchor={hover.anchor} cardProps={hover.cardProps}>
+          <Preview keys={items.map((i) => i.key)} />
+        </HoverCard>
+      )}
       <Popover anchor={ref.current} open={open} onClose={() => setOpen(false)}>
         <div className="popover__form">
           <label className="field-label">{t('editor.citation.edit')}</label>
@@ -179,9 +195,16 @@ export function WikilinkView(props: NodeViewProps) {
   const docs = useWorkspace((s) => s.docs);
   const target = String(props.node.attrs.target);
   const doc = docs.find((d) => d.title.toLowerCase() === target.toLowerCase());
+  const hover = useHoverCard();
   return (
     <NodeViewWrapper as="span" className={`nv-wikilink ${doc ? '' : 'is-missing'} ${props.selected ? 'is-selected' : ''}`}>
+      {doc && (
+        <HoverCard anchor={hover.anchor} cardProps={hover.cardProps}>
+          <DocPreview rel={doc.rel} />
+        </HoverCard>
+      )}
       <span
+        {...hover.triggerProps}
         onClick={(e) => {
           if (e.ctrlKey || e.metaKey || e.detail === 2) {
             if (doc) useWorkspace.getState().openDoc(doc.rel);

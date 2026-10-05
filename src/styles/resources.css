@@ -352,6 +352,18 @@
   border-radius: var(--radius);
 }
 
+/* minimappa e controlli della Tabula: semitrasparenti, pieni solo al passaggio del mouse */
+.wb-minimap,
+.wb-controls {
+  opacity: 0.35;
+  transition: opacity 0.15s ease;
+}
+
+.wb-minimap:hover,
+.wb-controls:hover {
+  opacity: 1;
+}
+
 /* ---------------------------------------------------------------- grafo */
 .graph {
   position: absolute;
