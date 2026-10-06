@@ -84,12 +84,19 @@ export function inline(nodes: PMNode[], ctx: ExportContext, excluded: Set<string
   return out;
 }
 
+let inNote = 0;
+
 function footnoteBody(md: string, ctx: ExportContext): string {
   const doc = parseMarkdown(md);
-  return (doc.content ?? [])
-    .map((b) => (b.content ? inline(b.content, ctx) : ''))
-    .filter(Boolean)
-    .join(' #parbreak() ');
+  inNote++;
+  try {
+    return (doc.content ?? [])
+      .map((b) => (b.content ? inline(b.content, ctx) : ''))
+      .filter(Boolean)
+      .join(' #parbreak() ');
+  } finally {
+    inNote--;
+  }
 }
 
 function leaf(node: PMNode, ctx: ExportContext): string {
@@ -101,7 +108,7 @@ function leaf(node: PMNode, ctx: ExportContext): string {
     case 'footnote':
       return `#footnote[${footnoteBody(String(node.attrs?.text ?? ''), ctx)}]`;
     case 'citation': {
-      const c = ctx.cite((node.attrs?.items as CitationItem[]) ?? []);
+      const c = ctx.cite((node.attrs?.items as CitationItem[]) ?? [], inNote > 0);
       return c.note ? `#footnote[${lit(c.text)}]` : lit(c.text);
     }
     case 'wikilink':

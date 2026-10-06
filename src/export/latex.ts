@@ -53,6 +53,7 @@ export function toLatex(doc: PMNode, ctx: ExportContext, bibFile: string): Latex
   const images: { src: string; name: string }[] = [];
   const style = STYLE_MAP[ctx.settings.citationStyle] ?? 'authoryear';
   const note = ctx.settings.citationStyle.includes('notes');
+  let inNote = 0;
 
   const cite = (items: CitationItem[]) => {
     const one = (it: CitationItem) => {
@@ -62,6 +63,8 @@ export function toLatex(doc: PMNode, ctx: ExportContext, bibFile: string): Latex
       if (!it.prefix) return { pre: '', post, key: it.key };
       return { pre: `[${escapeTex(it.prefix)}]`, post: post || '[]', key: it.key };
     };
+    // dentro una nota a piè di pagina la fonte va per esteso (biblatex \fullcite)
+    if (inNote > 0) return items.map((it) => `\\fullcite${one(it).pre}${one(it).post}{${it.key}}`).join('; ');
     if (items.length === 1) {
       const c = one(items[0]);
       const cmd = items[0].suppressAuthor ? '\\autocite*' : note ? '\\autocite' : '\\parencite';
@@ -111,7 +114,10 @@ export function toLatex(doc: PMNode, ctx: ExportContext, bibFile: string): Latex
         return cite((n.attrs?.items as CitationItem[]) ?? []);
       case 'footnote': {
         const d = parseMarkdown(String(n.attrs?.text ?? ''));
-        return `\\footnote{${(d.content ?? []).map((p) => inline(p.content)).join(' ')}}`;
+        inNote++;
+        const body = (d.content ?? []).map((p) => inline(p.content)).join(' ');
+        inNote--;
+        return `\\footnote{${body}}`;
       }
       case 'mathInline':
         return `$${n.attrs?.latex ?? ''}$`;

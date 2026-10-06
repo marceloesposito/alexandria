@@ -141,6 +141,7 @@ export async function toDocx(doc: PMNode, ctx: ExportContext): Promise<Uint8Arra
   }
 
   let changeId = 0;
+  let inNote = 0;
   const run = (text: string, s: RunStyle): TextRun => {
     const o: IRunOptions = {
       text,
@@ -200,7 +201,7 @@ export async function toDocx(doc: PMNode, ctx: ExportContext): Promise<Uint8Arra
           child = new TextRun({ break: 1 });
           break;
         case 'citation': {
-          const c = ctx.cite((n.attrs?.items as CitationItem[]) ?? []);
+          const c = ctx.cite((n.attrs?.items as CitationItem[]) ?? [], inNote > 0);
           if (c.note) {
             fnId++;
             footnotes[fnId] = { children: [new Paragraph({ children: [new TextRun(c.text)] })] };
@@ -211,7 +212,10 @@ export async function toDocx(doc: PMNode, ctx: ExportContext): Promise<Uint8Arra
         case 'footnote': {
           fnId++;
           const d = parseMarkdown(String(n.attrs?.text ?? ''));
-          footnotes[fnId] = { children: (d.content ?? []).map((p) => new Paragraph({ children: inline(p.content) })) };
+          const id = fnId;
+          inNote++;
+          footnotes[id] = { children: (d.content ?? []).map((p) => new Paragraph({ children: inline(p.content) })) };
+          inNote--;
           child = new FootnoteReferenceRun(fnId);
           break;
         }

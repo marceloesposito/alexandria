@@ -29,7 +29,8 @@ export interface ExportContext {
   title: string;
   /** lingua di scrittura del Compendium */
   lang: WritingLang;
-  cite(items: CitationItem[]): CiteOut;
+  /** inNote: la citazione sta già dentro una nota a piè di pagina (fonte per esteso, mai una nota nella nota) */
+  cite(items: CitationItem[], inNote?: boolean): CiteOut;
   image(src: string): ImageAsset | null;
   math(latex: string, display: boolean): MathAsset | null;
   /** header con tipo e proprietà, se l'autore l'ha incluso nell'export */

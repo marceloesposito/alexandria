@@ -3,6 +3,8 @@
 import { Extension } from '@tiptap/core';
 import { Plugin, PluginKey } from '@tiptap/pm/state';
 import type { EditorView } from '@tiptap/pm/view';
+import { formatCitation } from '../../doc/citeSyntax';
+import { useWorkspace } from '../../state/workspace';
 
 export const CITE_MIME = 'application/x-alexandria-cite';
 export const FIGURE_MIME = 'application/x-alexandria-figure';
@@ -118,14 +120,18 @@ export const DropHandler = Extension.create({
               } catch {
                 return true;
               }
-              const node = view.state.schema.nodes.citation.create({
-                items: [{ key: data.key, ...(data.locator ? { locator: data.locator } : {}) }],
-              });
+              const items = [{ key: data.key, ...(data.locator ? { locator: data.locator } : {}) }];
+              // fonte trascinata: nota a piè di pagina con la fonte (o citazione nel testo, a scelta; Alt inverte)
+              const asNote = (useWorkspace.getState().app.prefs.dropSource !== 'citation') !== ev.altKey;
+              const node = asNote
+                ? view.state.schema.nodes.footnote.create({ text: formatCitation(items) })
+                : view.state.schema.nodes.citation.create({ items });
               // uno spazio prima se la citazione si attacca a una parola
               const $pos = view.state.doc.resolve(pos);
               const before = $pos.parent.textBetween(Math.max(0, $pos.parentOffset - 1), $pos.parentOffset, '', '');
               let tr = view.state.tr;
-              if (before && !/\s/.test(before)) tr = tr.insertText(' ', pos);
+              // lo spazio serve alla citazione nel testo, non all'apice della nota
+              if (!asNote && before && !/\s/.test(before)) tr = tr.insertText(' ', pos);
               tr = tr.insert(tr.mapping.map(pos), node);
               view.dispatch(tr.scrollIntoView());
               view.focus();

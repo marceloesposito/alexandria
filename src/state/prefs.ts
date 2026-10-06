@@ -47,6 +47,8 @@ export interface Prefs {
   paneWidth: number;
   /** revisioni tracciate nell'export: testo pulito o evidenziate */
   exportRevisions: 'clean' | 'marked';
+  /** fonte trascinata dall'Armarium nel testo: nota a piè di pagina o citazione nel testo */
+  dropSource: 'footnote' | 'citation';
   /** barra flottante di formattazione nello Scriptorium */
   formatBar: 'open' | 'collapsed' | 'hidden';
 }
@@ -82,6 +84,7 @@ export const DEFAULT_PREFS: Prefs = {
   previewWidth: 440,
   paneWidth: 460,
   exportRevisions: 'clean',
+  dropSource: 'footnote',
   formatBar: 'open',
 };
 

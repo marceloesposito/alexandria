@@ -1460,4 +1460,8 @@ export const it: Record<string, string> = {
   'remote.progress': "Scaricamento: {a} di {b} oggetti",
   'remote.opened': "Compendium scaricato e aperto",
   'remote.error': "Scaricamento non riuscito: {error}",
+  'prefs.dropSource': "Fonte trascinata nel testo",
+  'prefs.dropSource.footnote': "Nota a piè di pagina con la fonte",
+  'prefs.dropSource.citation': "Citazione nel testo",
+  'prefs.dropSourceHint': "Tenendo premuto Alt mentre la rilasci ottieni l'altra forma. Nella nota la fonte compare per esteso nell'export.",
 };
