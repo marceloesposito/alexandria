@@ -150,6 +150,14 @@ export function PreferencesDialog() {
             </div>
             <p className="hint">{t('prefs.libraryHint')}</p>
             <label className="form__row">
+              <span>{t('prefs.dropSource')}</span>
+              <select className="select" value={prefs.dropSource} onChange={(e) => set({ dropSource: e.target.value as Prefs['dropSource'] })}>
+                <option value="footnote">{t('prefs.dropSource.footnote')}</option>
+                <option value="citation">{t('prefs.dropSource.citation')}</option>
+              </select>
+            </label>
+            <p className="hint">{t('prefs.dropSourceHint')}</p>
+            <label className="form__row">
               <span>{t('prefs.layerSuggestions')}</span>
               <select className="select" value={prefs.layerSuggestions} onChange={(e) => set({ layerSuggestions: e.target.value as Prefs['layerSuggestions'] })}>
                 <option value="suggest">{t('prefs.layerSuggestions.on')}</option>

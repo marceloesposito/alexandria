@@ -18,6 +18,7 @@ import { toPlainText } from './plain';
 import { toHtml } from './html';
 import { toLatex } from './latex';
 import { toUtf8 } from '../lib/bytes';
+import { fullNote } from '../citations/fullNote';
 import { useComments } from '../comments/store';
 import { injectCommentMarks, type ExportComment } from './comments';
 import { getLang, t } from '../i18n';
@@ -164,14 +165,19 @@ export async function prepareDoc(doc: PMNode, settings: DocSettings, title: stri
     await useCitations.getState().rebuild();
     cite = useCitations.getState().engine;
   }
+  // fonte per esteso nelle note a piè di pagina: una voce di bibliografia per chiave, prima di fissare l'ordine
+  const refs = new Map<string, string>();
+  if (cite) for (const k of citeOrder) refs.set(k, cite.bibliography([k], 'text')[0] ?? '');
   cite?.setOrder(citeOrder);
   const ctx: ExportContext = {
     settings,
     title,
     // la lingua del testo e' quella del Compendium, non quella dell'interfaccia
     lang: getWritingLang(),
-    cite: (items: CitationItem[]) =>
-      cite
+    cite: (items: CitationItem[], inNote = false) =>
+      inNote
+        ? { text: cite?.isNote ? cite.cluster(items) : fullNote(items, (k) => refs.get(k) || null), note: false }
+        : cite
         ? { text: cite.cluster(items), note: cite.isNote }
         : { text: `(${items.map((x) => x.key + (x.locator ? ', ' + x.locator : '')).join('; ')})`, note: false },
     image: (src) => images.get(src) ?? null,

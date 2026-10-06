@@ -83,6 +83,7 @@ export function toHtml(doc: PMNode, ctx: ExportContext): string {
     return out;
   };
 
+  let inNote = 0;
   const note = (html: string) => {
     notes.push(html);
     const k = notes.length;
@@ -96,12 +97,15 @@ export function toHtml(doc: PMNode, ctx: ExportContext): string {
       case 'hardBreak':
         return '<br>';
       case 'citation': {
-        const c = ctx.cite((n.attrs?.items as CitationItem[]) ?? []);
+        const c = ctx.cite((n.attrs?.items as CitationItem[]) ?? [], inNote > 0);
         return c.note ? note(escapeHtml(c.text)) : `<span class="cite">${escapeHtml(c.text)}</span>`;
       }
       case 'footnote': {
         const d = parseMarkdown(String(n.attrs?.text ?? ''));
-        return note((d.content ?? []).map((p) => inline(p.content)).join(' '));
+        inNote++;
+        const body = (d.content ?? []).map((p) => inline(p.content)).join(' ');
+        inNote--;
+        return note(body);
       }
       case 'wikilink':
         return escapeHtml(String(n.attrs?.alias || n.attrs?.target || ''));

@@ -1460,4 +1460,8 @@ export const en: Record<string, string> = {
   'remote.progress': "Downloading: {a} of {b} objects",
   'remote.opened': "Compendium downloaded and opened",
   'remote.error': "Download failed: {error}",
+  'prefs.dropSource': "Source dragged into the text",
+  'prefs.dropSource.footnote': "Footnote with the source",
+  'prefs.dropSource.citation': "In-text citation",
+  'prefs.dropSourceHint': "Hold Alt while dropping to get the other form. In the note the source appears in full when exporting.",
 };

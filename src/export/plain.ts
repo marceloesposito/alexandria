@@ -5,22 +5,28 @@ import { docTexts } from '../i18n/writing';
 import type { PMNode, CitationItem } from '../doc/types';
 import { plainText } from '../doc/counts';
 import type { ExportContext } from './context';
+import { parseMarkdown } from '../doc/parse';
 
 export function toPlainText(doc: PMNode, ctx: ExportContext): string {
   const notes: string[] = [];
+  let inNote = 0;
   const inline = (nodes: PMNode[] = []): string =>
     nodes
       .map((n) => {
         if (n.type === 'text') return n.text ?? '';
         if (n.type === 'hardBreak') return '\n';
         if (n.type === 'citation') {
-          const c = ctx.cite((n.attrs?.items as CitationItem[]) ?? []);
+          const c = ctx.cite((n.attrs?.items as CitationItem[]) ?? [], inNote > 0);
           if (!c.note) return c.text;
           notes.push(c.text);
           return `[${notes.length}]`;
         }
         if (n.type === 'footnote') {
-          notes.push(String(n.attrs?.text ?? '').replace(/[*_`]/g, ''));
+          // la nota si legge come testo, con le citazioni per esteso
+          inNote++;
+          const body = (parseMarkdown(String(n.attrs?.text ?? '')).content ?? []).map((p) => inline(p.content)).join(' ');
+          inNote--;
+          notes.push(body);
           return `[${notes.length}]`;
         }
         if (n.type === 'mathInline') return String(n.attrs?.latex ?? '');

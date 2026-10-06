@@ -108,12 +108,34 @@ export function MathInlineView(props: NodeViewProps) {
   );
 }
 
+/** Chiavi delle fonti citate nel testo di una nota ([@chiave, p. 12]). */
+function noteKeys(text: string): string[] {
+  return [...new Set([...String(text ?? '').matchAll(/@([\p{L}\p{N}_][\p{L}\p{N}_:.-]*)/gu)].map((m) => m[1]))];
+}
+
 export function FootnoteView(props: NodeViewProps) {
   const ref = useRef<HTMLElement>(null);
   const [open, setOpen] = useEditing(props);
+  const hover = useHoverCard();
+  const keys = noteKeys(props.node.attrs.text);
+  const Preview = citationPreview.get();
   return (
-    <NodeViewWrapper as="sup" className={`nv-footnote ${props.selected ? 'is-selected' : ''}`}>
-      <span ref={ref} className="nv-footnote__ref" onClick={() => setOpen(true)} title={props.node.attrs.text || t('editor.footnote.empty')} />
+    <NodeViewWrapper as="sup" className={`nv-footnote ${props.selected ? 'is-selected' : ''} ${keys.length ? 'has-source' : ''}`}>
+      <span
+        ref={ref}
+        className="nv-footnote__ref"
+        {...(keys.length ? hover.triggerProps : {})}
+        onClick={() => {
+          hover.close();
+          setOpen(true);
+        }}
+        title={keys.length ? undefined : props.node.attrs.text || t('editor.footnote.empty')}
+      />
+      {Preview && keys.length > 0 && !open && (
+        <HoverCard anchor={hover.anchor} cardProps={hover.cardProps}>
+          <Preview keys={keys} />
+        </HoverCard>
+      )}
       <Popover anchor={ref.current} open={open} onClose={() => setOpen(false)}>
         <div className="popover__form">
           <label className="field-label">{t('editor.footnote.label')}</label>
