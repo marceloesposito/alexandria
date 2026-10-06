@@ -8,6 +8,7 @@ mod clipboard;
 mod net;
 mod portable;
 mod snapshot;
+mod thesaurus;
 mod typeset;
 
 /// File .recensio da aprire (passato all'avvio o, su macOS, dal Finder): lo legge una volta il frontend.
@@ -146,6 +147,7 @@ pub fn run() {
             net::net_fetch,
             snapshot::net_snapshot,
             snapshot::net_render,
+            thesaurus::thesaurus_lookup,
             portable::portable_root,
             clipboard::clipboard_read,
             selftest_spec,

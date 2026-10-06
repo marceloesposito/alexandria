@@ -63,6 +63,15 @@ Aggiornato: 7 ottobre 2026 (M11).
   qui soltanto le righe diverse da quella in cui si scrive sono attenuate (il blocco col cursore riceve
   `has-focus`, `src/editor/extensions/focusBlock.ts`). Nella vista normale e nella modalita' focus tutta
   la pergamena resta leggibile.
+- **Thesaurus offline** (italiano e inglese, lingua di scrittura del Compendium): parola selezionata, tasto
+  destro > "Cerca sinonimi" (o Maiusc+F7); senza una selezione fatta prima resta il menu del sistema col
+  controllo ortografico. Il pannello mostra i significati per categoria, i termini simili e i contrari;
+  un clic sostituisce la parola con le stesse maiuscole. Se la parola non c'e' si provano le forme base
+  (bella -> bello, cities -> city) e in italiano il sinonimo si accorda (amena). Dati: thesaurus MyThes di
+  LibreOffice, compressi in `src-tauri/resources/thesaurus/` (0,7 + 4 MB) con le licenze accanto:
+  italiano di LibreItalia (GPL-3, distribuito come file separato, non incluso nel codice MIT), inglese da
+  WordNet (licenza Princeton). Il Rust (`thesaurus.rs`) decomprime e indicizza alla prima richiesta
+  (16 ms e 60 ms) e restituisce il blocco grezzo; l'interpretazione e' in `src/thesaurus/model.ts`.
 - **Lettura continua del Codex**: la pergamena aperta resta leggibile, il testo delle altre pergamene
   collegate e' attenuato (piu' chiaro al passaggio del mouse).
 - **Spostamento dei blocchi come in Notion** (`src/editor/extensions/blockReorder.ts`): mentre si trascina
@@ -220,10 +229,7 @@ Aggiornato: 7 ottobre 2026 (M11).
 
 ## Prossimi passi possibili
 
-- **Thesaurus offline** (richiesta del committente, da fare in futuro): parola selezionata, clic destro >
-  "Cerca sinonimi", solo italiano e inglese, senza rete. Dati possibili: i thesaurus di LibreOffice
-  (formato MyThes, `th_it_IT` e `th_en_US`, licenze libere LGPL/BSD), qualche MB ciascuno, letti nel Rust
-  o in un indice SQLite; la lingua e' quella di scrittura del Compendium.
+- Thesaurus: lemmatizzazione vera (oggi solo regole semplici per le forme base) e altre lingue.
 
 - Firma degli installer e aggiornamenti automatici (oggi assenti per scelta: niente rete).
 - Corrispondenza esatta righe editor/PDF calcolando le righe con Typst in background.

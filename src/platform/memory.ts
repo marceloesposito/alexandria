@@ -11,6 +11,7 @@ import type {
   SearchHit,
 } from './types';
 import { utf8, toUtf8, bytesToBase64, base64ToBytes } from '../lib/bytes';
+import { findBlock } from '../thesaurus/model';
 
 type FileData = Uint8Array;
 
@@ -66,6 +67,18 @@ function fakeSha(): string {
   shaCounter += 1;
   const rnd = Math.random().toString(16).slice(2, 10);
   return (Date.now().toString(16) + rnd + shaCounter.toString(16)).padEnd(40, '0').slice(0, 40);
+}
+
+// thesaurus nel browser: file compresso delle risorse, letto una volta per lingua
+const thesaurusText: Partial<Record<'it' | 'en', Promise<string>>> = {};
+
+async function loadThesaurus(lang: 'it' | 'en'): Promise<string> {
+  const res = await fetch(`/src-tauri/resources/thesaurus/th_${lang}.dat.gz`);
+  if (!res.ok) throw new Error(`thesaurus ${res.status}`);
+  const bytes = new Uint8Array(await res.arrayBuffer());
+  // il server di sviluppo lo manda con Content-Encoding: gzip e il browser lo ha gia' decompresso
+  if (bytes[0] !== 0x1f || bytes[1] !== 0x8b) return new TextDecoder().decode(bytes);
+  return new Response(new Blob([bytes]).stream().pipeThrough(new DecompressionStream('gzip'))).text();
 }
 
 export function createMemoryPlatform(opts: { persist?: boolean } = {}): Platform {
@@ -560,6 +573,15 @@ export function createMemoryPlatform(opts: { persist?: boolean } = {}): Platform
     },
     async renderPage() {
       return null; // solo nell'app desktop
+    },
+    async thesaurus(lang, word) {
+      // nel browser di sviluppo i dati arrivano dal server di Vite (stessi file delle risorse dell'app)
+      try {
+        const text = await (thesaurusText[lang] ??= loadThesaurus(lang));
+        return findBlock(text, word);
+      } catch {
+        return null;
+      }
     },
     async typst() {
       return { ok: false, errors: ['Typst is available only in the desktop app.'] };

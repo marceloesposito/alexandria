@@ -180,6 +180,10 @@ export interface Platform {
    */
   renderPage(url: string, opts?: { interactive?: boolean }): Promise<{ url: string; html: string; png: Uint8Array | null } | null>;
 
+  // thesaurus offline (dati MyThes nelle risorse dell'app)
+  /** blocco grezzo del thesaurus per una parola (null: non c'e') */
+  thesaurus(lang: 'it' | 'en', word: string): Promise<string | null>;
+
   // impaginazione
   typst(source: string, files: TypstFile[], format: 'pdf' | 'svg'): Promise<TypstOutput>;
 }

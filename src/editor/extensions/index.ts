@@ -30,6 +30,7 @@ import { MarkdownShortcuts } from './inputRules';
 import { Insertion, Deletion, TrackChanges } from './track';
 import { FocusBlock } from './focusBlock';
 import { BlockReorder } from './blockReorder';
+import { ThesaurusMenu } from '../../thesaurus/ui';
 
 /** Tabella con l'allineamento delle colonne del Markdown (GFM). */
 const AlignedTable = Table.extend({
@@ -66,6 +67,7 @@ export function buildExtensions() {
     }),
     FocusBlock,
     BlockReorder,
+    ThesaurusMenu,
     Figure,
     Embed,
     MathBlock,

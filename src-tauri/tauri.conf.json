@@ -47,6 +47,9 @@
     "active": true,
     "targets": ["nsis", "msi", "dmg", "app"],
     "category": "Productivity",
+    "resources": {
+      "resources/thesaurus/": "thesaurus/"
+    },
     "fileAssociations": [
       {
         "ext": ["recensio"],

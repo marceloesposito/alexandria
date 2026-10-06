@@ -98,6 +98,8 @@ export const tauriPlatform: Platform = {
     return b64 ? base64ToBytes(b64) : null;
   },
 
+  thesaurus: (lang, word) => invoke<string | null>('thesaurus_lookup', { lang, word }),
+
   renderPage: async (url, opts) => {
     const r = await invoke<{ url: string; html: string; pngB64: string | null } | null>('net_render', { url, interactive: opts?.interactive ?? false });
     return r ? { url: r.url, html: r.html, png: r.pngB64 ? base64ToBytes(r.pngB64) : null } : null;

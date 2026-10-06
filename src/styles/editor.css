@@ -1356,3 +1356,109 @@
 .editor-scroll:has(.is-reordering) .prosemirror-dropcursor-block {
   display: none;
 }
+
+/* ---------------------------------------------------------------- thesaurus */
+.thes {
+  position: fixed;
+  z-index: 300;
+  width: 340px;
+  max-height: min(420px, 70vh);
+  display: flex;
+  flex-direction: column;
+  background: var(--paper);
+  border: 1px solid var(--line);
+  border-radius: var(--radius);
+  box-shadow: var(--shadow);
+  font-size: var(--fs-ui-small);
+}
+
+.thes__head {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  padding: 8px 8px 8px 12px;
+  border-bottom: 1px solid var(--line);
+  color: var(--ink);
+  font-weight: 600;
+}
+
+.thes__head > span:nth-child(2) {
+  flex: 1;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.thes__lang {
+  padding: 1px 6px;
+  border: 1px solid var(--line);
+  border-radius: 999px;
+  color: var(--muted);
+  font-size: 10px;
+  font-weight: 500;
+}
+
+.thes__body {
+  overflow: auto;
+  padding: 8px 12px;
+}
+
+.thes__meaning + .thes__meaning {
+  margin-top: 10px;
+}
+
+.thes__pos {
+  margin-bottom: 4px;
+  color: var(--muted);
+  font-style: italic;
+}
+
+.thes__terms {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 4px;
+}
+
+.thes__terms + .thes__terms {
+  margin-top: 4px;
+}
+
+.thes__label {
+  color: var(--muted);
+}
+
+.thes__term {
+  padding: 2px 8px;
+  border: 1px solid var(--line);
+  border-radius: 999px;
+  background: var(--paper);
+  color: var(--ink);
+  font-family: var(--font-text);
+  font-size: 14px;
+  cursor: pointer;
+}
+
+.thes__term:hover {
+  border-color: var(--accent);
+  background: var(--accent-soft);
+}
+
+.thes__term.is-rel {
+  color: var(--muted);
+  border-style: dashed;
+}
+
+.thes__term.is-ant {
+  color: var(--series-7);
+}
+
+.thes__foot {
+  padding: 6px 12px;
+  border-top: 1px solid var(--line);
+  font-size: 11px;
+}
+
+.thes__base {
+  margin: 0 0 8px;
+}
