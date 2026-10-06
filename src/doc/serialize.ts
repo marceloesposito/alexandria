@@ -1,5 +1,6 @@
 // Albero del documento -> Markdown (Pandoc/GFM). Deve fare il giro completo con parse.ts:
 // parse(serialize(doc)) == doc per ogni documento prodotto dall'editor.
+import { calloutMarker, isCalloutKind } from './callouts';
 import { markColor } from './colors';
 import type { PMNode, PMMark, MarkType, CitationItem } from './types';
 import { MARK_ORDER } from './types';
@@ -31,7 +32,9 @@ function blocks(nodes: PMNode[], st: State, tight: boolean): string {
 
 function alignSuffix(n: PMNode): string {
   const a = n.attrs?.textAlign;
-  return a && a !== 'left' ? ` <!-- align:${a} -->` : '';
+  // stile del paragrafo (didascalia) e allineamento: commenti in coda al blocco
+  const style = n.attrs?.textStyle === 'caption' ? ' <!-- style:caption -->' : '';
+  return style + (a && a !== 'left' ? ` <!-- align:${a} -->` : '');
 }
 
 function block(n: PMNode, st: State): string {
@@ -44,6 +47,13 @@ function block(n: PMNode, st: State): string {
       const level = Number(n.attrs?.level ?? 1);
       const s = inline(n.content ?? [], st).replace(/\n/g, ' ');
       return '#'.repeat(level) + ' ' + s + alignSuffix(n);
+    }
+    case 'callout': {
+      // "> [!NOTE] Titolo", una riga vuota, poi il contenuto (sintassi degli avvisi di GitHub/Obsidian)
+      const kind = isCalloutKind(n.attrs?.kind) ? n.attrs.kind : 'note';
+      const head = calloutMarker(kind, escapeText(String(n.attrs?.title ?? '')));
+      const body = blocks(n.content ?? [], st, false);
+      return ['> ' + head, '>', ...body.split('\n').map((l) => (l ? '> ' + l : '>'))].join('\n');
     }
     case 'blockquote':
       return blocks(n.content ?? [], st, false)

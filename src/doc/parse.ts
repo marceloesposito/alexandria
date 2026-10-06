@@ -1,6 +1,7 @@
 // Markdown -> albero del documento. Markdown di Pandoc/GFM con le estensioni di Alexandria:
 // citazioni [@chiave], [[wikilink]], note [^n], formule $...$, figure ![..](..){attr},
 // e commenti HTML per interruzioni di pagina, sezioni, sommario e bibliografia.
+import { parseCalloutMarker } from './callouts';
 import { isHighlightColor, isTextColor } from './colors';
 import { unified } from 'unified';
 import remarkParse from 'remark-parse';
@@ -76,8 +77,10 @@ function block(n: M.RootContent, ctx: Ctx): PMNode[] {
       return [withAlign({ type: 'heading', attrs: { level: n.depth }, content: inlines(n.children, ctx) })];
     case 'paragraph':
       return paragraph(n, ctx);
-    case 'blockquote':
-      return [{ type: 'blockquote', content: nonEmpty(blocks(n.children, ctx)) }];
+    case 'blockquote': {
+      const content = blocks(n.children, ctx);
+      return [asCallout(content) ?? { type: 'blockquote', content: nonEmpty(content) }];
+    }
     case 'list':
       return [list(n, ctx)];
     case 'code':
@@ -123,18 +126,38 @@ function nonEmpty(content: PMNode[]): PMNode[] {
   return content.length ? content : [{ type: 'paragraph' }];
 }
 
+/**
+ * Citazione che comincia con "[!NOTE] Titolo" (avvisi di GitHub/Obsidian): blocco evidenziato.
+ * Il titolo e' la prima riga; il resto del primo paragrafo (se c'e') e gli altri blocchi sono il contenuto.
+ */
+function asCallout(content: PMNode[]): PMNode | null {
+  const first = content[0];
+  if (first?.type !== 'paragraph') return null;
+  const nodes = first.content ?? [];
+  const t0 = nodes[0];
+  if (t0?.type !== 'text' || t0.marks?.length || !t0.text) return null;
+  const nl = t0.text.indexOf('\n');
+  const m = parseCalloutMarker(nl < 0 ? t0.text : t0.text.slice(0, nl));
+  if (!m) return null;
+  const rest = (nl < 0 ? nodes.slice(1) : [{ ...t0, text: t0.text.slice(nl + 1) }, ...nodes.slice(1)]).filter((x) => x.type !== 'text' || x.text);
+  const body = [...(rest.length ? [{ ...first, content: rest }] : []), ...content.slice(1)];
+  return { type: 'callout', attrs: { kind: m.kind, title: m.title }, content: nonEmpty(body) };
+}
+
 function withAlign(node: PMNode): PMNode {
-  // un commento <!-- align:center --> in coda al blocco imposta l'allineamento
+  // commenti in coda al blocco: <!-- style:caption --> (didascalia) e <!-- align:center --> (allineamento)
   const content = node.content ?? [];
-  const last = content[content.length - 1];
-  if (last && last.type === 'alignMarker') {
+  let last = content[content.length - 1];
+  while (last && last.type === 'alignMarker') {
     content.pop();
     const prev = content[content.length - 1];
     if (prev?.type === 'text' && prev.text) {
       prev.text = prev.text.replace(/\s+$/, '');
       if (!prev.text) content.pop();
     }
-    node.attrs = { ...(node.attrs ?? {}), textAlign: last.attrs?.align };
+    if (last.attrs?.style === 'caption') node.attrs = { ...(node.attrs ?? {}), textStyle: 'caption' };
+    else node.attrs = { ...(node.attrs ?? {}), textAlign: last.attrs?.align };
+    last = content[content.length - 1];
   }
   // scarta eventuali altri marcatori
   node.content = content.filter((c) => c.type !== 'alignMarker');
@@ -283,6 +306,7 @@ function inlines(nodes: M.PhrasingContent[], ctx: Ctx, marks: PMMark[] = []): PM
         const span = /^<(\/?)span(\s[^>]*)?>$/i.exec(v);
         const track = /^<(\/?)(ins|del)(\s[^>]*)?>$/i.exec(v);
         const align = /^<!--\s*align:(left|center|right|justify)\s*-->$/.exec(v);
+        const pstyle = /^<!--\s*style:caption\s*-->$/.test(v);
         if (tag) {
           const type = HTML_MARKS[tag[2].toLowerCase()];
           const color = type === 'highlight' ? htmlAttr(tag[3], 'data-color') : null;
@@ -297,6 +321,8 @@ function inlines(nodes: M.PhrasingContent[], ctx: Ctx, marks: PMMark[] = []): PM
           out.push({ type: 'hardBreak' });
         } else if (align) {
           out.push({ type: 'alignMarker', attrs: { align: align[1] } });
+        } else if (pstyle) {
+          out.push({ type: 'alignMarker', attrs: { style: 'caption' } });
         } else {
           out.push(txt(n.value, active));
         }

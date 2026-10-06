@@ -63,6 +63,15 @@ Aggiornato: 7 ottobre 2026 (M11).
   qui soltanto le righe diverse da quella in cui si scrive sono attenuate (il blocco col cursore riceve
   `has-focus`, `src/editor/extensions/focusBlock.ts`). Nella vista normale e nella modalita' focus tutta
   la pergamena resta leggibile.
+- **Riquadri evidenziati (callout)**: fondo molto chiaro, bordino, icona e intestazione in stile didascalia
+  (titolo libero o il nome del tipo); cinque tipi: nota, suggerimento, importante, attenzione, pericolo. Nel
+  Markdown la sintassi degli avvisi di GitHub/Obsidian (`> [!WARNING] Titolo`, riga vuota, contenuto;
+  `src/doc/callouts.ts`). Da Inserisci > Riquadro evidenziato, dal menu / (uno per tipo) e dal gruppo
+  Blocchi; negli export riquadro colorato (Typst, HTML, Word come tabella a una cella), in LaTeX una
+  citazione con intestazione. L'intestazione senza titolo e' nella lingua di scrittura (`docTexts`).
+- **Stile di paragrafo "Didascalia"**: nel menu degli stili, in Formato e nel menu /; nel Markdown
+  `<!-- style:caption -->` in coda al paragrafo (accanto a `<!-- align:... -->`); negli export lo stile
+  "caption" del layout (Typst), `p.caption` (HTML), lo stile Caption di Word.
 - **Thesaurus offline** (italiano e inglese, lingua di scrittura del Compendium): parola selezionata, tasto
   destro > "Cerca sinonimi" (o Maiusc+F7); senza una selezione fatta prima resta il menu del sistema col
   controllo ortografico. Il pannello mostra i significati per categoria, i termini simili e i contrari;

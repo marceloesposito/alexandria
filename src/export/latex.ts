@@ -1,4 +1,6 @@
 // Documento -> LaTeX con biblatex (le citazioni restano chiavi, la bibliografia va nel .bib).
+import { calloutHeading } from '../doc/callouts';
+import { docTexts } from '../i18n/writing';
 import type { PMNode, PMMark, CitationItem } from '../doc/types';
 import { MARK_ORDER } from '../doc/types';
 import { parseMarkdown } from '../doc/parse';
@@ -123,7 +125,12 @@ export function toLatex(doc: PMNode, ctx: ExportContext, bibFile: string): Latex
   const block = (b: PMNode): string => {
     switch (b.type) {
       case 'paragraph': {
-        const t = inline(b.content);
+        let t = inline(b.content);
+        // didascalia: corpo piccolo, corsivo, centrata se non e' allineata diversamente
+        if (b.attrs?.textStyle === 'caption') {
+          t = `{\\small\\itshape ${t}}`;
+          if (!b.attrs?.textAlign) return `\\begin{center}\n${t}\n\\end{center}`;
+        }
         if (b.attrs?.textAlign === 'center') return `\\begin{center}\n${t}\n\\end{center}`;
         if (b.attrs?.textAlign === 'right') return `\\begin{flushright}\n${t}\n\\end{flushright}`;
         return t;
@@ -134,6 +141,10 @@ export function toLatex(doc: PMNode, ctx: ExportContext, bibFile: string): Latex
       }
       case 'blockquote':
         return `\\begin{quote}\n${blocks(b.content)}\n\\end{quote}`;
+      case 'callout': {
+        const { heading } = calloutHeading(b.attrs?.kind, b.attrs?.title, docTexts(ctx.lang).callouts);
+        return `\\begin{quote}\n\\textbf{\\textsc{${escapeTex(heading)}}}\\par\n${blocks(b.content)}\n\\end{quote}`;
+      }
       case 'bulletList':
       case 'taskList':
         return `\\begin{itemize}\n${(b.content ?? []).map((i) => `\\item${b.type === 'taskList' ? (i.attrs?.checked ? '[$\\boxtimes$]' : '[$\\square$]') : ''} ${blocks(i.content)}`).join('\n')}\n\\end{itemize}`;

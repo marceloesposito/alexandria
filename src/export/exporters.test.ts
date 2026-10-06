@@ -68,6 +68,32 @@ describe('LaTeX', () => {
   });
 });
 
+describe('riquadri evidenziati e didascalie negli export', () => {
+  const md = '> [!WARNING]\n>\n> Controllare le date.\n\n> [!TIP] Consiglio pratico\n>\n> Rileggi ad alta voce.\n\nFigura 1. <!-- style:caption -->\n';
+
+  it('HTML: riquadro colorato, intestazione nella lingua del documento, didascalia', () => {
+    const h = toHtml(parseMarkdown(md), ctx());
+    expect(h).toContain('class="callout callout-warning"');
+    expect(h).toContain('>Attenzione</p>'); // senza titolo: il nome del tipo in italiano
+    expect(h).toContain('>Consiglio pratico</p>');
+    expect(h).toContain('<p class="caption">Figura 1.</p>');
+  });
+
+  it('Typst: blocco con fondo e bordo, didascalia con lo stile del layout', async () => {
+    const { toTypst } = await import('./typst');
+    const src = toTypst(parseMarkdown(md), ctx());
+    expect(src).toContain('#block(width: 100%, inset: (x: 10pt, y: 8pt), radius: 3pt, fill: rgb("#fbf5ea"), stroke: 0.6pt + rgb("#a8741a"))');
+    expect(src).toContain('#upper[#"Attenzione"]');
+    expect(src).toMatch(/#align\(center\)\[#text\(size: 10pt, style: "italic"\)\[#"Figura 1."\]\]/);
+  });
+
+  it('testo semplice: intestazione tra parentesi e contenuto rientrato', () => {
+    const p = toPlainText(parseMarkdown(md), ctx());
+    expect(p).toContain('[Attenzione]');
+    expect(p).toContain('    Controllare le date.');
+  });
+});
+
 describe('colori negli export', () => {
   const md = 'Testo <span data-color="red">rosso</span> e <mark data-color="green">verde</mark> e <mark>giallo</mark>.\n';
 

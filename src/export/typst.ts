@@ -2,6 +2,7 @@
 // carattere dell'utente puo' essere interpretato come markup; la formattazione e' fatta
 // con chiamate esplicite (#strong, #emph, #footnote...). Le impostazioni di pagina, gli stili
 // di paragrafo e le pagine mastro vengono dalle impostazioni del documento.
+import { calloutHeading, CALLOUT_HEX } from '../doc/callouts';
 import { markColor, TEXT_HEX, HIGHLIGHT_HEX, type TextColor, type HighlightColor } from '../doc/colors';
 import type { PMNode, PMMark, CitationItem } from '../doc/types';
 import { MARK_ORDER } from '../doc/types';
@@ -151,6 +152,12 @@ function block(b: PMNode, ctx: ExportContext, st: State): string {
     case 'paragraph': {
       const body = inline(b.content ?? [], ctx);
       if (!body) return '';
+      if (b.attrs?.textStyle === 'caption') {
+        // stile "didascalia" del layout (corpo, corsivo, allineamento)
+        const cs = ctx.settings.layout.styles.caption;
+        const a = alignName(b.attrs?.textAlign) ?? alignName(cs.align) ?? 'center';
+        return `#align(${a})[#text(size: ${cs.sizePt}pt${cs.italic ? ', style: "italic"' : ''})[${body}]]`;
+      }
       const a = alignName(b.attrs?.textAlign);
       return a ? `#align(${a})[${body}]` : body;
     }
@@ -162,6 +169,13 @@ function block(b: PMNode, ctx: ExportContext, st: State): string {
     }
     case 'blockquote':
       return `#quote(block: true)[${blocks(b.content ?? [], ctx, st)}]`;
+    case 'callout': {
+      // riquadro evidenziato: fondo chiaro, bordino, intestazione piccola nel colore del tipo
+      const { kind, heading } = calloutHeading(b.attrs?.kind, b.attrs?.title, docTexts(ctx.lang).callouts);
+      const c = CALLOUT_HEX[kind];
+      const head = `#text(size: 0.78em, weight: "bold", tracking: 0.04em, fill: rgb("${c.stroke}"))[#upper[${lit(heading)}]]`;
+      return `#block(width: 100%, inset: (x: 10pt, y: 8pt), radius: 3pt, fill: rgb("${c.fill}"), stroke: 0.6pt + rgb("${c.stroke}"))[${head}\n\n${blocks(b.content ?? [], ctx, st)}]`;
+    }
     case 'bulletList':
       return `#list(${listItems(b.content ?? [], ctx, st)})`;
     case 'orderedList':

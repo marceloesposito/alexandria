@@ -60,6 +60,7 @@ export const BLOCK_TYPES = new Set([
   'paragraph',
   'heading',
   'blockquote',
+  'callout',
   'bulletList',
   'orderedList',
   'taskList',

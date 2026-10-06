@@ -1,6 +1,7 @@
 // Documento -> DOCX (Word) con la libreria docx: stili, note, immagini, tabelle, elenchi,
 // formato pagina e margini dalle impostazioni, intestazione e numeri di pagina.
 import { markColor, TEXT_HEX, HIGHLIGHT_WORD, type TextColor, type HighlightColor } from '../doc/colors';
+import { calloutHeading, CALLOUT_HEX } from '../doc/callouts';
 import {
   CommentRangeStart,
   CommentRangeEnd,
@@ -26,6 +27,8 @@ import {
   PageNumber,
   TableOfContents,
   LevelFormat,
+  BorderStyle,
+  ShadingType,
   type IRunOptions,
   type ParagraphChild,
 } from 'docx';
@@ -240,8 +243,40 @@ export async function toDocx(doc: PMNode, ctx: ExportContext): Promise<Uint8Arra
     for (const b of nodes) {
       switch (b.type) {
         case 'paragraph':
+          if (b.attrs?.textStyle === 'caption') {
+            // stile "Didascalia" di Word, come le didascalie delle figure
+            out.push(new Paragraph({ style: 'Caption', alignment: align(b.attrs?.textAlign) ?? AlignmentType.CENTER, children: inline(b.content) }));
+            break;
+          }
           out.push(new Paragraph({ children: inline(b.content), alignment: align(b.attrs?.textAlign), ...(listRef ? { numbering: { reference: listRef, level } } : {}) }));
           break;
+        case 'callout': {
+          // riquadro evidenziato: una tabella a una cella, fondo chiaro e bordino nel colore del tipo
+          const { kind, heading } = calloutHeading(b.attrs?.kind, b.attrs?.title, docTexts(ctx.lang).callouts);
+          const c = CALLOUT_HEX[kind];
+          const line = { style: BorderStyle.SINGLE, size: 4, color: c.stroke.slice(1) };
+          out.push(
+            new Table({
+              width: { size: 100, type: WidthType.PERCENTAGE },
+              rows: [
+                new TableRow({
+                  children: [
+                    new TableCell({
+                      shading: { type: ShadingType.CLEAR, color: 'auto', fill: c.fill.slice(1) },
+                      borders: { top: line, bottom: line, left: line, right: line },
+                      margins: { top: 100, bottom: 100, left: 160, right: 160 },
+                      children: [
+                        new Paragraph({ children: [new TextRun({ text: heading.toUpperCase(), bold: true, size: 16, color: c.stroke.slice(1) })] }),
+                        ...(blocks(b.content ?? [], level).filter((x) => !(x instanceof TableOfContents)) as (Paragraph | Table)[]),
+                      ],
+                    }),
+                  ],
+                }),
+              ],
+            }),
+          );
+          break;
+        }
         case 'heading':
           out.push(new Paragraph({ heading: HEADINGS[Math.min(5, Number(b.attrs?.level ?? 1) - 1)], children: inline(b.content), alignment: align(b.attrs?.textAlign) }));
           break;

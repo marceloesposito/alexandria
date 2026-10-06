@@ -1462,3 +1462,100 @@
 .thes__base {
   margin: 0 0 8px;
 }
+
+/* ---------------------------------------------------------------- blocchi evidenziati (callout) */
+.nv-callout {
+  --callout: var(--series-2);
+  margin: 0.9em 0;
+  padding: 8px 14px 10px;
+  background: color-mix(in srgb, var(--callout) 6%, var(--paper));
+  border: 1px solid color-mix(in srgb, var(--callout) 35%, transparent);
+  border-radius: 6px;
+}
+
+.nv-callout.is-tip {
+  --callout: var(--series-3);
+}
+
+.nv-callout.is-important {
+  --callout: var(--series-4);
+}
+
+.nv-callout.is-warning {
+  --callout: var(--series-5);
+}
+
+.nv-callout.is-caution {
+  --callout: var(--series-7);
+}
+
+.nv-callout.is-selected {
+  outline: 2px solid var(--accent);
+  outline-offset: 1px;
+}
+
+/* intestazione in stile didascalia: piccola, maiuscoletto, nel colore del tipo */
+.nv-callout__head {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  margin-bottom: 2px;
+  color: var(--callout);
+  font-family: var(--font-ui);
+  font-size: 11px;
+  font-weight: 600;
+  letter-spacing: 0.06em;
+  text-transform: uppercase;
+  user-select: none;
+}
+
+.nv-callout__title {
+  flex: 1;
+  min-width: 0;
+  padding: 0;
+  border: 0;
+  background: transparent;
+  color: inherit;
+  font: inherit;
+  letter-spacing: inherit;
+  text-transform: inherit;
+  outline: none;
+}
+
+.nv-callout__title::placeholder {
+  color: inherit;
+  opacity: 1;
+}
+
+.nv-callout__kind {
+  padding: 0 2px;
+  border: 0;
+  background: transparent;
+  color: var(--muted);
+  font-size: 11px;
+  opacity: 0;
+  transition: opacity 0.15s;
+}
+
+.nv-callout:hover .nv-callout__kind,
+.nv-callout.is-selected .nv-callout__kind,
+.nv-callout__kind:focus {
+  opacity: 1;
+}
+
+.nv-callout__body > :first-child {
+  margin-top: 0;
+}
+
+.nv-callout__body > :last-child {
+  margin-bottom: 0;
+}
+
+/* stile di paragrafo "Didascalia" (come le didascalie delle figure) */
+.doc-body p[data-style="caption"] {
+  color: var(--muted);
+  font-size: 0.85em;
+  font-style: italic;
+  /* centrata come nell'export; un allineamento scelto a mano (style del paragrafo) prevale */
+  text-align: center;
+}

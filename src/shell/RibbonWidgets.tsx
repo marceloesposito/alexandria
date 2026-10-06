@@ -23,6 +23,7 @@ function currentBlock(): string {
   for (let l = 1; l <= 6; l++) if (e.isActive('heading', { level: l })) return `h${l}`;
   if (e.isActive('blockquote')) return 'quote';
   if (e.isActive('codeBlock')) return 'code';
+  if (e.isActive('paragraph', { textStyle: 'caption' })) return 'caption';
   return 'p';
 }
 
@@ -41,7 +42,8 @@ function BlockStyle({ size }: { size: RibbonSize }) {
           if (!e) return;
           const v = ev.target.value;
           const c = e.chain().focus();
-          if (v === 'p') c.setParagraph().run();
+          if (v === 'p') c.setParagraph().updateAttributes('paragraph', { textStyle: null }).run();
+          else if (v === 'caption') c.setParagraph().updateAttributes('paragraph', { textStyle: 'caption' }).run();
           else if (v === 'quote') c.setParagraph().toggleBlockquote().run();
           else if (v === 'code') c.toggleCodeBlock().run();
           else c.setHeading({ level: Number(v.slice(1)) as 1 | 2 | 3 | 4 | 5 | 6 }).run();
@@ -53,6 +55,7 @@ function BlockStyle({ size }: { size: RibbonSize }) {
             {t('style.heading', { n: l })}
           </option>
         ))}
+        <option value="caption">{t('style.caption')}</option>
         <option value="quote">{t('style.quote')}</option>
         <option value="code">{t('style.code')}</option>
       </select>

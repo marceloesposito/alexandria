@@ -21,6 +21,8 @@ import {
   SectionBreak,
   Toc,
   Bibliography,
+  Callout,
+  ParagraphStyle,
 } from './nodes';
 import { SlashCommands } from '../slash';
 import { DropHandler } from './drop';
@@ -79,6 +81,8 @@ export function buildExtensions() {
     SectionBreak,
     Toc,
     Bibliography,
+    Callout,
+    ParagraphStyle,
     SlashCommands,
     DropHandler,
     SearchHighlight,

@@ -53,14 +53,41 @@ export interface DocTexts {
   bibliography: string;
   /** bibliografia generata senza fonti */
   bibEmpty: string;
+  /** intestazione dei riquadri evidenziati senza titolo, per tipo */
+  callouts: { note: string; tip: string; important: string; warning: string; caution: string };
 }
 
 const DOC_TEXTS: Record<WritingLang, DocTexts> = {
-  it: { toc: 'Indice', bibliography: 'Bibliografia', bibEmpty: 'Nessuna fonte citata.' },
-  en: { toc: 'Contents', bibliography: 'References', bibEmpty: 'No sources cited.' },
-  de: { toc: 'Inhaltsverzeichnis', bibliography: 'Literaturverzeichnis', bibEmpty: 'Keine Quellen zitiert.' },
-  fr: { toc: 'Table des matières', bibliography: 'Bibliographie', bibEmpty: 'Aucune source citée.' },
-  es: { toc: 'Índice', bibliography: 'Bibliografía', bibEmpty: 'No se citan fuentes.' },
+  it: {
+    toc: 'Indice',
+    bibliography: 'Bibliografia',
+    bibEmpty: 'Nessuna fonte citata.',
+    callouts: { note: 'Nota', tip: 'Suggerimento', important: 'Importante', warning: 'Attenzione', caution: 'Pericolo' },
+  },
+  en: {
+    toc: 'Contents',
+    bibliography: 'References',
+    bibEmpty: 'No sources cited.',
+    callouts: { note: 'Note', tip: 'Tip', important: 'Important', warning: 'Warning', caution: 'Caution' },
+  },
+  de: {
+    toc: 'Inhaltsverzeichnis',
+    bibliography: 'Literaturverzeichnis',
+    bibEmpty: 'Keine Quellen zitiert.',
+    callouts: { note: 'Hinweis', tip: 'Tipp', important: 'Wichtig', warning: 'Achtung', caution: 'Vorsicht' },
+  },
+  fr: {
+    toc: 'Table des matières',
+    bibliography: 'Bibliographie',
+    bibEmpty: 'Aucune source citée.',
+    callouts: { note: 'Note', tip: 'Conseil', important: 'Important', warning: 'Attention', caution: 'Danger' },
+  },
+  es: {
+    toc: 'Índice',
+    bibliography: 'Bibliografía',
+    bibEmpty: 'No se citan fuentes.',
+    callouts: { note: 'Nota', tip: 'Consejo', important: 'Importante', warning: 'Atención', caution: 'Peligro' },
+  },
 };
 
 /** Testi che finiscono dentro il documento, nella lingua di scrittura. */
