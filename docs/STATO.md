@@ -37,10 +37,12 @@ Aggiornato: 5 ottobre 2026 (M10).
 - **Rimozione delle risorse**: ribbon, menu Risorse, clic destro, Canc nella tabella, visualizzatore.
 - **OpenSSL** compilato dentro l'app (`vendored-openssl` di git2): niente dipendenza da Homebrew.
 - **Nomi tematici** (scelti dal committente, solo nelle stringhe di `src/i18n/`, uguali in IT ed EN):
-  documento -> Scroll (in italiano Pergamena), gestore risorse -> Bookshelf, schermata Editor -> Scriptorium, Versioni ->
+  documento -> Scroll (anche in italiano: "lo Scroll", plurale invariato), gestore risorse -> Bookshelf, schermata Editor -> Scriptorium, Versioni ->
   History, commenti a margine -> Marginalia, whiteboard -> Tabula, pin -> Bookmarks, layer -> Strata.
   Restano Library e Bibliografia; vault -> Compendium (la cartella creata al primo avvio si chiama "Il mio Compendium"; quelle esistenti non cambiano nome). Identificatori, cartelle
-  (`documents/`, `resources/`) e file su disco non cambiano.
+  (`documents/`, `resources/`) e file su disco non cambiano. I nomi sono nomi propri, mai tradotti:
+  il glossario in `src/i18n/glossary.ts` li elenca con le traduzioni da evitare e un test controlla
+  ogni lingua contro l'inglese (una lingua nuova eredita la stessa identita').
 - **Navbar**: Bookshelf · Scriptorium · History | Library (Cmd/Ctrl+1..4). La Library e' una tab a
   parte (stessa schermata della Bookshelf sulla raccolta comune); il selettore Vault/Library e' sparito.
 - **Barra degli strumenti**: ogni gruppo si trascina dalla maniglia in basso a destra (anche nel
