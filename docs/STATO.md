@@ -238,6 +238,12 @@ Aggiornato: 7 ottobre 2026 (M11).
 
 ## Prossimi passi possibili
 
+- **Personalizzazione dei singoli stili di testo** (richiesta del committente, da fare): oggi Layout > Stili
+  di paragrafo regola, per pergamena, corpo, peso, corsivo, allineamento, spazi, rientro, interlinea e
+  maiuscoletto di sette stili (corpo, H1-H3, citazione, didascalia, nota) e vale soprattutto per l'export.
+  Mancano: carattere e colore per stile, H4-H6 e l'intestazione dei riquadri, la resa identica
+  nell'editor, stili condivisi dal Compendium o dai template invece che per pergamena, stili nuovi creati
+  dall'utente (applicabili come la Didascalia, `textStyle` del paragrafo).
 - Thesaurus: lemmatizzazione vera (oggi solo regole semplici per le forme base) e altre lingue.
 
 - Firma degli installer e aggiornamenti automatici (oggi assenti per scelta: niente rete).
