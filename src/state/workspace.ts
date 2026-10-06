@@ -62,6 +62,7 @@ export type DialogId =
   | 'recensio'
   | 'review'
   | 'openRemote'
+  | 'append'
   | 'writingLang'
   | null;
 

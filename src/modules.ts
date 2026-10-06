@@ -14,6 +14,7 @@ import { RecensioDialog } from './recensio/ui';
 import { ReviewDialog } from './review/ReviewDialog';
 import { registerWritingLang } from './shell/WritingLang';
 import { registerColorWidgets } from './editor/FormatBar';
+import { AppendDialog } from './vault/AppendDialog';
 
 let done = false;
 
@@ -33,6 +34,7 @@ export function registerAll() {
   registerDialog('docSettings', DocSettingsDialog);
   registerDialog('recensio', RecensioDialog);
   registerDialog('review', ReviewDialog);
+  registerDialog('append', AppendDialog);
 }
 
 // accesso agli store per le prove nel browser (solo sviluppo)

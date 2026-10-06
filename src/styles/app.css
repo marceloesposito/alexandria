@@ -2917,3 +2917,13 @@ table.kv td:last-child {
   gap: 6px;
   color: var(--muted);
 }
+
+/* ---------------------------------------------------------------- aggiungi da un altro Compendium */
+.append-list {
+  max-height: 280px;
+  overflow-y: auto;
+}
+
+.append-list__members {
+  padding-left: 22px;
+}
