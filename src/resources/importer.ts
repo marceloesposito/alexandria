@@ -460,10 +460,10 @@ export async function addFromLibrary(ids: string[], copy = false): Promise<void>
     if (copy) {
       for (const name of [item.file, item.meta.thumb, 'page.json'].filter(Boolean) as string[]) {
         const src = `${lib.root}/items/${id}/${name}`;
-        if (await platform.exists(src)) await platform.copy(src, `${vault.root}/resources/${r.id}/${name}`);
+        if (await platform.exists(src)) await platform.copy(src, `${itemDir(vault, r.id)}/${name}`);
       }
     } else if (item.meta.thumb) {
-      await platform.copy(`${lib.root}/items/${id}/${item.meta.thumb}`, `${vault.root}/resources/${r.id}/${item.meta.thumb}`);
+      await platform.copy(`${lib.root}/items/${id}/${item.meta.thumb}`, `${itemDir(vault, r.id)}/${item.meta.thumb}`);
     }
     const text = (await platform.exists(`${lib.root}/.text/${id}.txt`)) ? await platform.readText(`${lib.root}/.text/${id}.txt`) : '';
     await writeText(vault, r.id, text);
@@ -484,7 +484,7 @@ export async function sendToLibrary(ids: string[]): Promise<void> {
     if (st.libraryItems.some((x) => x.meta.sha256 && x.meta.sha256 === r.meta.sha256)) continue;
     const item: Resource = { ...r, id: newResourceId(), layers: [], pins: [] };
     for (const name of [r.file, r.meta.thumb, 'page.json'].filter(Boolean) as string[]) {
-      const src = `${vault.root}/resources/${r.id}/${name}`;
+      const src = `${itemDir(vault, r.id)}/${name}`;
       if (await platform.exists(src)) await platform.copy(src, `${lib.root}/items/${item.id}/${name}`);
     }
     const text = await st.textOf(r.id);

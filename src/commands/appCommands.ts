@@ -1,5 +1,6 @@
 // Comandi dell'app: file, vista, preferenze, aiuto.
 import {
+  Import,
   Send,
   NotebookPen,
   PanelTop,
@@ -99,6 +100,7 @@ export function registerAppCommands() {
     { id: 'file.newJournal', label: 'cmd.file.newJournal', icon: NotebookPen, category: 'file', run: async () => void (await flushSave(getEditor()), ws().createFromTemplate('journal')) },
     { id: 'file.recensioCreate', label: 'cmd.file.recensioCreate', icon: Send, category: 'file', isEnabled: () => !!ws().activeDoc, run: () => ws().openDialog('recensio') },
     { id: 'file.recensioOpen', label: 'cmd.file.recensioOpen', icon: ScrollText, category: 'file', run: async () => (await import('../recensio/session')).pickRecensio() },
+    { id: 'file.append', label: 'cmd.file.append', icon: Import, category: 'file', isEnabled: () => !!ws().vaultRoot, run: () => ws().openDialog('append') },
     { id: 'file.newVault', label: 'cmd.file.newVault', icon: FolderPlus, category: 'file', run: () => chooseVault(true) },
     {
       id: 'file.renameDoc',

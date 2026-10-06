@@ -140,6 +140,7 @@ export const MENUS: MenuDef[] = [
       c('file.openVault'),
       c('file.newVault'),
       c('file.newJournal'),
+      c('file.append'),
       c('file.journalToday'),
       { label: 'menu.file.recentVaults', submenu: [{ dynamic: 'recentVaults' }] },
       c('file.revealVault'),

@@ -58,7 +58,17 @@ export function DocumentsTree() {
       <header className="side-section__head">
         <span>{t('side.documents')}</span>
         {!reviewing && (
-          <button className="icon-btn" title={t('cmd.file.newDoc')} onClick={() => void useWorkspace.getState().newDoc()}>
+          <button
+            className="icon-btn"
+            title={t('cmd.file.newDoc')}
+            onClick={() => void useWorkspace.getState().newDoc()}
+            onContextMenu={(e) =>
+              openContextMenu(e, [
+                { label: t('cmd.file.newDoc'), onClick: () => void useWorkspace.getState().newDoc() },
+                { label: t('cmd.file.append'), onClick: () => useWorkspace.getState().openDialog('append') },
+              ])
+            }
+          >
             <Plus size={14} />
           </button>
         )}
