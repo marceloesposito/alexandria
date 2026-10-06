@@ -19,6 +19,7 @@ Aggiornato: 7 ottobre 2026 (M11).
 | M11 Modello di Compendium Diario e Voce di oggi | fatto | #15 |
 | M11 Revisioni tracciate (Suggerisci), Marginalia da revisione, andata e ritorno con Word | fatto | #16 |
 | M11 Copia per revisione (.recensio), modalita' revisore, import su branch, risposta ai revisori | fatto | #17 |
+| Stessa identita' in tutte le lingue: nomi tematici mai tradotti, glossario con test | fatto | in revisione |
 
 ## Decisioni prese durante il lavoro
 
@@ -44,7 +45,7 @@ Aggiornato: 7 ottobre 2026 (M11).
 - **Rimozione delle risorse**: ribbon, menu Risorse, clic destro, Canc nella tabella, visualizzatore.
 - **OpenSSL** compilato dentro l'app (`vendored-openssl` di git2): niente dipendenza da Homebrew.
 - **Nomi tematici** (scelti dal committente, solo nelle stringhe di `src/i18n/`, uguali in IT ed EN):
-  documento -> Scroll (in italiano Pergamena), gestore risorse -> Armarium (era Bookshelf), schermata Editor -> Scriptorium, Versioni ->
+  documento -> Scroll (anche in italiano: "lo Scroll", plurale invariato; era Pergamena), gestore risorse -> Armarium (era Bookshelf), schermata Editor -> Scriptorium, Versioni ->
   Palimpsestus (era History), commenti a margine -> Marginalia, whiteboard -> Tabula, pin -> Bookmarks, layer -> Strata. Le pergamene collegate in sequenza formano un Codex.
   Restano Library e Bibliografia; vault -> Compendium (la cartella creata al primo avvio si chiama "Il mio Compendium"; quelle esistenti non cambiano nome). Identificatori, cartelle
   (`documents/`, `resources/`) e file su disco non cambiano.
@@ -118,6 +119,9 @@ Aggiornato: 7 ottobre 2026 (M11).
 
 - **Nomi**: Bookshelf -> Armarium, History -> Palimpsestus, Library -> Bibliotheca, Librum -> Codex
   (solo testi visibili; identificatori interni invariati).
+- **Stessa identita' in tutte le lingue**: i nomi tematici sono nomi propri, mai tradotti (Scroll anche
+  in italiano). `src/i18n/glossary.ts` li elenca con le traduzioni e i nomi vecchi da evitare; un test
+  controlla ogni lingua contro l'inglese, cosi' una lingua nuova eredita la stessa identita'.
 - **Codex**: nessun oggetto nuovo su disco oltre a `.alexandria/codices/<radice>.json` (nome,
   separatore, titoli come capitoli): la catena sono i legami direzionali fra pergamene gia' in
   `links.json`, letti in profondita' nell'ordine di creazione (`src/codex/model.ts`). Riordinare
