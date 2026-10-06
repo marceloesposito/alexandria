@@ -14,6 +14,7 @@ import type { CitationItem, PMNode } from '../doc/types';
 import type { CslItem } from '../resources/model';
 import { cslHtmlToInline } from './html';
 import { t } from '../i18n';
+import { CITATION_LOCALES, docTexts, getWritingLang } from '../i18n/writing';
 
 export interface StyleInfo {
   id: string;
@@ -100,9 +101,11 @@ export const useCitations = create<CiteState>(() => ({
     const sources = useResources.getState().resources.filter((r) => r.isSource && r.citeKey);
     const items = new Map<string, CslItem>(sources.map((r) => [r.citeKey!, { ...(r.csl ?? {}), title: r.csl?.title ?? r.title, type: r.csl?.type ?? 'document' }]));
     try {
-      const lang = settings.citationLocale;
-      const [style, it, en] = await Promise.all([styleXml(settings.citationStyle), bundled('locales-it-IT.xml'), bundled('locales-en-US.xml')]);
-      const engine = new CitationEngine({ style, lang, items, locales: { 'it-IT': it, 'en-US': en } });
+      // la locale chiesta (se e' nel pacchetto) piu' l'inglese, che fa da riserva
+      const lang = CITATION_LOCALES.some((l) => l.id === settings.citationLocale) ? settings.citationLocale : 'en-US';
+      const ids = [...new Set([lang, 'en-US'])];
+      const [style, ...xml] = await Promise.all([styleXml(settings.citationStyle), ...ids.map((id) => bundled(`locales-${id}.xml`))]);
+      const engine = new CitationEngine({ style, lang, items, locales: Object.fromEntries(ids.map((id, i) => [id, xml[i]])) });
       useCitations.setState({ engine, styleId: settings.citationStyle, error: null });
       engine.setOrder(keysInDoc(getEditor()));
       setCitationRenderer({
@@ -140,12 +143,12 @@ export function insertBibliography(editor: Editor): number {
   if (!engine) return 0;
   const keys = keysInDoc(editor).filter((k) => engine.has(k));
   const entries = engine.bibliography(keys, 'html');
-  const title = useDocSettings.getState().settings.bibliographyTitle || t('cite.bibTitle');
+  const title = useDocSettings.getState().settings.bibliographyTitle || docTexts(getWritingLang()).bibliography;
   const content: PMNode[] = [
     { type: 'heading', attrs: { level: 2 }, content: [{ type: 'text', text: title }] },
     ...(entries.length
       ? entries.map((html) => ({ type: 'paragraph', content: cslHtmlToInline(html) }))
-      : [{ type: 'paragraph', content: [{ type: 'text', text: t('cite.bibEmpty') }] }]),
+      : [{ type: 'paragraph', content: [{ type: 'text', text: docTexts(getWritingLang()).bibEmpty }] }]),
   ];
   const node = editor.schema.nodeFromJSON({ type: 'bibliography', content });
   let existing: { pos: number; size: number } | null = null;

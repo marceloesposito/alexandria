@@ -6,7 +6,8 @@ async function ensureDir(p: string): Promise<string> {
   if (!(await platform.exists(p))) await platform.mkdir(p);
   return p;
 }
-import { setLang, t } from '../i18n';
+import { setLang, getLang, t } from '../i18n';
+import { setWritingLang, writingLangOf, type WritingLang } from '../i18n/writing';
 import {
   type AppState,
   type Prefs,
@@ -60,6 +61,7 @@ export type DialogId =
   | 'types'
   | 'recensio'
   | 'review'
+  | 'writingLang'
   | null;
 
 export interface Toast {
@@ -101,6 +103,8 @@ interface WorkspaceState {
   enterVault(root: string, transient?: boolean): Promise<boolean>;
   /** Chiude il Compendium e torna alla schermata iniziale. */
   closeVault(): void;
+  /** lingua di scrittura del Compendium aperto (salvata in .alexandria/vault.json) */
+  setWritingLanguage(lang: WritingLang): Promise<void>;
   /** Crea (o riapre) il Compendium predefinito in Documenti/Alexandria. */
   createDefaultVault(): Promise<boolean>;
   /** nuovo Compendium da un modello (per ora: 'journal') */
@@ -258,6 +262,7 @@ export const useWorkspace = create<WorkspaceState>((set, get) => ({
             lastVault: root,
             recentVaults: pushRecent(get().app.recentVaults, root, (a, b) => a === b, 12),
           };
+      setWritingLang(writingLangOf(cfg.language, getLang()));
       set({ vaultRoot: root, vault: cfg, docs, activeDoc: null, app });
       persist(app);
     } catch (e) {
@@ -285,6 +290,15 @@ export const useWorkspace = create<WorkspaceState>((set, get) => ({
 
   closeVault() {
     set({ vaultRoot: null, vault: null, docs: [], activeDoc: null, dialog: null, dialogArg: null });
+  },
+
+  async setWritingLanguage(lang) {
+    const { vaultRoot, vault } = get();
+    if (!vaultRoot || !vault) return;
+    const cfg = { ...vault, language: lang };
+    await saveVaultConfig(vaultRoot, cfg);
+    set({ vault: cfg });
+    setWritingLang(lang);
   },
 
   async createDefaultVault() {

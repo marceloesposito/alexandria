@@ -1,4 +1,5 @@
 // Impostazioni documento: dati, citazioni, pagina, testo, stili di paragrafo, pagine mastro.
+import { CITATION_LOCALES } from '../i18n/writing';
 import { useEffect, useState } from 'react';
 import { FileUp } from 'lucide-react';
 import { Modal } from '../components/Modal';
@@ -98,9 +99,11 @@ export function DocSettingsDialog() {
             <label className="form__row">
               <span>{t('docset.citeLang')}</span>
               <select className="select" value={settings.citationLocale} onChange={(e) => update({ citationLocale: e.target.value })}>
-                <option value="it-IT">Italiano</option>
-                <option value="en-US">English (US)</option>
-                <option value="en-GB">English (UK)</option>
+                {CITATION_LOCALES.map((l) => (
+                  <option key={l.id} value={l.id}>
+                    {l.name}
+                  </option>
+                ))}
               </select>
             </label>
             <label className="form__row">

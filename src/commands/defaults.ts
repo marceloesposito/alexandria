@@ -3,8 +3,8 @@ import type { RibbonConfig } from './ribbonModel';
 
 export const DEFAULT_RIBBON: RibbonConfig = {
   version: 1,
-  // rev 2: citazioni e bibliografia anche in Home
-  rev: 2,
+  // rev 2: citazioni e bibliografia anche in Home; rev 3: lingua di scrittura
+  rev: 3,
   tabs: [
     // ----- editor
     {
@@ -21,6 +21,7 @@ export const DEFAULT_RIBBON: RibbonConfig = {
         },
         // subito dopo il carattere: visibile anche su schermi normali, senza scorrere la barra
         { id: 'ed-home-cite', label: 'ribbon.group.citations', items: ['cite.insert', 'cite.bibliography'], since: 2 },
+        { id: 'ed-home-lang', label: 'ribbon.group.writingLang', items: ['doc.writingLang'], since: 3 },
         {
           id: 'ed-home-para',
           label: 'ribbon.group.paragraph',

@@ -40,6 +40,7 @@ import {
   Ruler,
   Feather,
   House,
+  Languages,
 } from 'lucide-react';
 import { useDocSettings } from '../layout/docSettings';
 import { registerCommands, notifyCommandState } from './registry';
@@ -236,6 +237,18 @@ export function registerAppCommands() {
     { id: 'help.shortcuts', label: 'cmd.help.shortcuts', icon: Keyboard, category: 'help', run: () => ws().openDialog('shortcuts') },
     { id: 'help.markdown', label: 'cmd.help.markdown', icon: BookText, category: 'help', run: () => ws().openDialog('markdownGuide') },
     { id: 'help.about', label: 'cmd.help.about', icon: Info, category: 'help', run: () => ws().openDialog('about') },
+    // ----- lingua di scrittura del Compendium (sezione della barra dello Scriptorium)
+    {
+      id: 'doc.writingLang',
+      label: 'cmd.doc.writingLang',
+      hint: 'cmd.doc.writingLangHint',
+      icon: Languages,
+      category: 'file',
+      views: ['editor'],
+      widget: 'writingLang',
+      isEnabled: () => !!ws().vaultRoot,
+      run: () => ws().openDialog('writingLang'),
+    },
   ]);
 }
 

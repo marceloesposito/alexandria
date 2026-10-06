@@ -7,6 +7,7 @@ import { MARK_ORDER } from '../doc/types';
 import { parseMarkdown } from '../doc/parse';
 import type { ExportContext } from './context';
 import type { LayoutSettings, MasterId, MasterPage, ParaStyle } from '../layout/model';
+import { docTexts } from '../i18n/writing';
 
 /** Stringa Typst sicura. */
 export function str(s: string): string {
@@ -210,7 +211,7 @@ function block(b: PMNode, ctx: ExportContext, st: State): string {
       return pageSetup(ctx, master, columns, st.section, reset);
     }
     case 'toc':
-      return `#outline(title: [${lit(ctx.lang === 'it' ? 'Indice' : 'Contents')}], indent: auto)`;
+      return `#outline(title: [${lit(docTexts(ctx.lang).toc)}], indent: auto)`;
     case 'bibliography': {
       const inner = (b.content ?? [])
         .map((c) =>

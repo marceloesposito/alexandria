@@ -52,6 +52,17 @@ describe('template', () => {
     expect(made.settings.title).toBe('Nuova');
   });
 
+  it('un predefinito segue la lingua di scrittura del Compendium, non quella dell\'interfaccia', () => {
+    const tesi = builtInTemplates('it').find((x) => x.id === 'thesis')!;
+    const de = instantiate(tesi, 'Arbeit', 'de');
+    expect(de.settings.citationLocale).toBe('de-DE');
+    expect(de.settings.bibliographyTitle).toBe('Literaturverzeichnis');
+    expect(de.markdown).toBe(builtInTemplates('en').find((x) => x.id === 'thesis')!.markdown);
+    // quelli dell'utente restano come salvati
+    const mine = templateFromDoc('t2', 'Mio', '', 'testo\n', defaultDocSettings('it'));
+    expect(instantiate(mine, 'x', 'de').settings.citationLocale).toBe('it-IT');
+  });
+
   it('un file di template rovinato viene scartato', () => {
     expect(parseTemplate({ name: 'x' }, 'it')).toBeNull();
     const ok = parseTemplate({ id: 'a', name: 'A', markdown: '', settings: {} }, 'it');

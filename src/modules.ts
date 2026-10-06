@@ -12,6 +12,7 @@ import { DocSettingsDialog } from './layout/DocSettingsDialog';
 import { registerRevision } from './revision';
 import { RecensioDialog } from './recensio/ui';
 import { ReviewDialog } from './review/ReviewDialog';
+import { registerWritingLang } from './shell/WritingLang';
 
 let done = false;
 
@@ -19,6 +20,7 @@ export function registerAll() {
   if (done) return;
   done = true;
   registerAppCommands();
+  registerWritingLang();
   registerEditorCommands();
   registerComments();
   registerRevision();

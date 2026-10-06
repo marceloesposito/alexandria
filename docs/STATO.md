@@ -21,6 +21,7 @@ Aggiornato: 7 ottobre 2026 (M11).
 | M11 Copia per revisione (.recensio), modalita' revisore, import su branch, risposta ai revisori | fatto | #17 |
 | Stessa identita' in tutte le lingue (glossario con test, pergamena in italiano), Bookmarks -> Excerpta | fatto | #18 |
 | Indice dei contenuti nell'export, bibliografia in un clic visibile nello Scriptorium | fatto | #18 |
+| Index in tutte le lingue; lingua di scrittura per Compendium, separata dall'interfaccia | fatto | #18 |
 
 ## Decisioni prese durante il lavoro
 
@@ -125,8 +126,19 @@ Aggiornato: 7 ottobre 2026 (M11).
   i passaggi estratti dalle fonti); "Indices" e' stato scartato perche' si confondeva con l'indice dei
   contenuti e con un eventuale indice analitico.
 - **Index**: l'indice dei contenuti si chiama Index in tutte le lingue (scheda della colonna sinistra,
-  blocco da inserire, menu /, opzione dell'export). Resta nella lingua del documento solo il titolo
-  stampato dentro il testo e nel PDF ("Indice"/"Contents": `DOCUMENT_TEXT_KEYS` nel glossario).
+  blocco da inserire, menu /, opzione dell'export). Il titolo stampato dentro il testo e nel PDF e'
+  nella lingua di scrittura ("Indice", "Contents", "Inhaltsverzeichnis"...).
+- **Lingua di scrittura per Compendium**, separata da quella dell'interfaccia: `language` in
+  `.alexandria/vault.json` (assente = lingua dell'interfaccia, come prima). Si sceglie dalla sezione
+  "Lingua di scrittura" in Home dello Scriptorium (o dalla tavolozza dei comandi). Lingue: italiano,
+  inglese, tedesco, francese, spagnolo (locale CSL nel pacchetto, `public/csl/locales-*.xml`).
+  Decide: attributo `lang` dell'editor (controllo ortografico e sillabazione della webview), lingua
+  dell'export (Typst `text(lang)`, babel, `<html lang>`, titolo dell'indice in Word), lingua delle
+  citazioni e titolo della bibliografia delle pergamene nuove e dei template predefiniti (testo di
+  partenza in italiano o inglese), testi inseriti nel documento (`docTexts` in `src/i18n/writing.ts`).
+  Al cambio di lingua le pergamene con i predefiniti della vecchia lingua passano alla nuova
+  (`retargetLanguage`); le scelte fatte a mano restano. Restano nella lingua dell'interfaccia le
+  etichette dell'header (Autore, Data, Tipo) quando l'header va nell'export.
 - **Index nell'export**: opzione per pergamena (`layout.tocInExport`, nel dialogo
   Esporta per tutti i formati tranne Markdown); se la pergamena non ha gia' un blocco indice se ne
   mette uno in testa al documento esportato (`src/export/toc.ts`), il .md non cambia. Vale anche per i Codex.

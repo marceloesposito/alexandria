@@ -25,6 +25,7 @@ import { useTypes } from '../types/store';
 import type { DocSettings } from '../layout/model';
 import { headerRows, typeById } from '../types/model';
 import { withToc } from './toc';
+import { getWritingLang } from '../i18n/writing';
 
 /** Immagine con percorso dalla radice del vault (usato quando si uniscono pergamene di cartelle diverse). */
 export const VAULT_SRC = 'vault:';
@@ -167,7 +168,8 @@ export async function prepareDoc(doc: PMNode, settings: DocSettings, title: stri
   const ctx: ExportContext = {
     settings,
     title,
-    lang: settings.citationLocale.startsWith('it') ? 'it' : getLang(),
+    // la lingua del testo e' quella del Compendium, non quella dell'interfaccia
+    lang: getWritingLang(),
     cite: (items: CitationItem[]) =>
       cite
         ? { text: cite.cluster(items), note: cite.isNote }

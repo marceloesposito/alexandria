@@ -21,6 +21,8 @@ export interface VaultConfig {
   created: string;
   /** Ordine manuale dei documenti (percorsi relativi); quelli assenti vanno in coda per nome */
   order: string[];
+  /** lingua di scrittura del Compendium ('it', 'en', ...); assente = quella dell'interfaccia */
+  language?: string;
 }
 
 export interface DocInfo {

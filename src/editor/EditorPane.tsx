@@ -8,6 +8,7 @@ import { TextSelection } from '@tiptap/pm/state';
 import { buildExtensions } from './extensions';
 import { setEditor, getEditor } from '../state/editorRef';
 import { useWorkspace } from '../state/workspace';
+import { getWritingLang, useWritingLang } from '../i18n/writing';
 import { useDoc, loadDocument, scheduleSave, flushSave, updateSelectionCounts, checkExternalChange } from './session';
 import { measureLines, setLines } from './lines';
 import { LineGutter } from './LineGutter';
@@ -29,6 +30,7 @@ export function EditorPane({ overlay, pageRef: externalPageRef }: Props) {
   const activeDoc = useWorkspace((s) => s.activeDoc);
   const reloadToken = useWorkspace((s) => s.reloadToken);
   const prefs = useWorkspace((s) => s.app.prefs);
+  const writingLang = useWritingLang();
   const sourceMode = useDoc((s) => s.sourceMode);
   const layout = useDocSettings((s) => s.settings.layout);
   const localPageRef = useRef<HTMLDivElement>(null);
@@ -54,7 +56,7 @@ export function EditorPane({ overlay, pageRef: externalPageRef }: Props) {
   const editor = useEditor({
     extensions: buildExtensions(),
     editorProps: {
-      attributes: { class: 'doc-body', spellcheck: String(prefs.spellcheck) },
+      attributes: { class: 'doc-body', spellcheck: String(prefs.spellcheck), lang: getWritingLang() },
     },
     onUpdate: ({ editor }) => {
       scheduleSave(editor);
@@ -174,6 +176,11 @@ export function EditorPane({ overlay, pageRef: externalPageRef }: Props) {
   useEffect(() => {
     editor?.view.dom.setAttribute('spellcheck', String(prefs.spellcheck));
   }, [editor, prefs.spellcheck]);
+
+  // lingua del testo (controllo ortografico e sillabazione): quella del Compendium, non dell'interfaccia
+  useEffect(() => {
+    editor?.view.dom.setAttribute('lang', writingLang);
+  }, [editor, writingLang]);
 
   const m = pageMetrics(layout);
   const style = {

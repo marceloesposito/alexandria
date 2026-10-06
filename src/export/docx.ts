@@ -31,6 +31,7 @@ import {
 import type { PMNode, CitationItem } from '../doc/types';
 import { parseMarkdown } from '../doc/parse';
 import type { ExportContext } from './context';
+import { docTexts } from '../i18n/writing';
 
 const MM = 56.6929; // twip per millimetro
 
@@ -294,7 +295,7 @@ export async function toDocx(doc: PMNode, ctx: ExportContext): Promise<Uint8Arra
           out.push(new Paragraph({ children: [new PageBreak()] }));
           break;
         case 'toc':
-          out.push(new TableOfContents(ctx.lang === 'it' ? 'Indice' : 'Contents', { hyperlink: true, headingStyleRange: '1-3' }));
+          out.push(new TableOfContents(docTexts(ctx.lang).toc, { hyperlink: true, headingStyleRange: '1-3' }));
           break;
         case 'bibliography':
           for (const c of b.content ?? []) {

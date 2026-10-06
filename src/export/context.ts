@@ -2,6 +2,7 @@
 import type { DocSettings } from '../layout/model';
 import type { CitationItem, PMNode } from '../doc/types';
 import type { ExportComment } from './comments';
+import type { WritingLang } from '../i18n/writing';
 
 export interface CiteOut {
   /** testo nel corpo (stili autore-data e numerici) oppure testo della nota (stili a note) */
@@ -26,7 +27,8 @@ export interface ImageAsset {
 export interface ExportContext {
   settings: DocSettings;
   title: string;
-  lang: 'it' | 'en';
+  /** lingua di scrittura del Compendium */
+  lang: WritingLang;
   cite(items: CitationItem[]): CiteOut;
   image(src: string): ImageAsset | null;
   math(latex: string, display: boolean): MathAsset | null;

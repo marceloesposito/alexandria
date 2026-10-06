@@ -26,15 +26,12 @@ export const GLOSSARY: Record<string, GlossaryTerm> = {
   Codex: { pattern: /\bCodex\b/, avoid: [/\bLibrum\b/] },
 };
 
-/** Testi che finiscono dentro il documento (e nell'export): restano nella lingua del documento. */
-export const DOCUMENT_TEXT_KEYS = new Set(['editor.toc.title']);
-
 /** Chiavi in cui `text` (nella lingua `lang`) non rispetta il glossario rispetto all'inglese `ref`. */
 export function glossaryViolations(ref: Record<string, string>, text: Record<string, string>, lang = 'en'): string[] {
   const out: string[] = [];
   for (const [key, value] of Object.entries(text)) {
     const base = ref[key];
-    if (base === undefined || DOCUMENT_TEXT_KEYS.has(key)) continue;
+    if (base === undefined) continue;
     for (const [name, term] of Object.entries(GLOSSARY)) {
       const local = term.local?.[lang];
       if (term.pattern.test(base) && !(local ?? term.pattern).test(value)) out.push(`${key}: manca ${name}`);

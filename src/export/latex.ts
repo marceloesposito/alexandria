@@ -4,6 +4,7 @@ import { MARK_ORDER } from '../doc/types';
 import { parseMarkdown } from '../doc/parse';
 import { parseLocator } from '../citations/engine';
 import type { ExportContext } from './context';
+import { BABEL } from '../i18n/writing';
 
 export function escapeTex(s: string): string {
   // il backslash passa da un segnaposto, altrimenti le sue graffe verrebbero escapate
@@ -180,7 +181,7 @@ export function toLatex(doc: PMNode, ctx: ExportContext, bibFile: string): Latex
 
   const ctxName = (s: string) => `${bibFile.replace(/\.bib$/, '')}_files/${s}`;
   const L = ctx.settings.layout;
-  const babel = ctx.lang === 'it' ? 'italian' : 'english';
+  const babel = BABEL[ctx.lang];
   const hasBib = (doc.content ?? []).some((b) => b.type === 'bibliography');
   const tex = `% Generato da Alexandria
 \\documentclass[${Math.round(L.fontSizePt)}pt${L.facingPages ? ',twoside' : ''}${L.columns > 1 ? ',twocolumn' : ''}]{article}

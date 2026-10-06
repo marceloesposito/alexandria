@@ -1,10 +1,10 @@
 // Impostazioni del documento aperto, caricate e salvate accanto al .md.
 import { create } from 'zustand';
-import { type DocSettings, defaultDocSettings, normalizeDocSettings } from './model';
+import { type DocSettings, defaultDocSettings, normalizeDocSettings, retargetLanguage } from './model';
 import { readJson, writeJson } from '../vault/vault';
 import { abs, docSettingsFile } from '../vault/paths';
 import { useWorkspace } from '../state/workspace';
-import { getLang } from '../i18n';
+import { getWritingLang, type WritingLang } from '../i18n/writing';
 
 export { pageMetrics } from './model';
 
@@ -28,10 +28,10 @@ function save(rel: string, s: DocSettings) {
 
 export const useDocSettings = create<S>((set, get) => ({
   rel: null,
-  settings: defaultDocSettings(getLang()),
+  settings: defaultDocSettings(getWritingLang()),
   async load(root, rel) {
     const raw = await readJson<unknown>(abs(root, docSettingsFile(rel)), null);
-    set({ rel, settings: normalizeDocSettings(raw, getLang()) });
+    set({ rel, settings: normalizeDocSettings(raw, getWritingLang()) });
   },
   update(patch) {
     const s = { ...get().settings, ...patch };
@@ -53,3 +53,20 @@ useWorkspace.subscribe((st, prev) => {
     void useDocSettings.getState().load(st.vaultRoot, st.activeDoc);
   }
 });
+
+/** Dopo il cambio di lingua del Compendium: le pergamene con i predefiniti della vecchia lingua passano alla nuova. */
+export async function retargetDocsLanguage(from: WritingLang, to: WritingLang): Promise<void> {
+  const { vaultRoot, docs } = useWorkspace.getState();
+  if (!vaultRoot || from === to) return;
+  const open = useDocSettings.getState();
+  for (const d of docs) {
+    if (d.rel === open.rel) continue;
+    const path = abs(vaultRoot, docSettingsFile(d.rel));
+    const raw = await readJson<unknown>(path, null);
+    if (!raw) continue; // senza file: prende gia' i predefiniti della lingua nuova
+    const cur = normalizeDocSettings(raw, from);
+    const next = retargetLanguage(cur, from, to);
+    if (next.citationLocale !== cur.citationLocale || next.bibliographyTitle !== cur.bibliographyTitle) await writeJson(path, next);
+  }
+  if (open.rel) open.replace(retargetLanguage(open.settings, from, to));
+}

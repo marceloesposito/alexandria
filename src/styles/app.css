@@ -2705,3 +2705,11 @@ table.kv td:last-child {
   width: calc(100% - 16px);
   justify-content: center;
 }
+
+/* lingua di scrittura dalla tavolozza dei comandi */
+.writing-langs {
+  display: grid;
+  grid-template-columns: repeat(2, 1fr);
+  gap: 8px;
+  margin-top: 12px;
+}

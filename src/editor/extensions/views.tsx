@@ -3,6 +3,7 @@ import { useEffect, useRef, useState } from 'react';
 import { NodeViewWrapper, NodeViewContent, type NodeViewProps } from '@tiptap/react';
 import katex from 'katex';
 import { t } from '../../i18n';
+import { docTexts, useWritingLang } from '../../i18n/writing';
 import { Popover } from '../../components/Popover';
 import { useWorkspace } from '../../state/workspace';
 import { assetUrl } from '../../vault/resolve';
@@ -293,6 +294,7 @@ export function SectionBreakView(props: NodeViewProps) {
 }
 
 export function TocView(props: NodeViewProps) {
+  const writingLang = useWritingLang();
   const headings: { level: number; text: string }[] = [];
   props.editor.state.doc.descendants((n) => {
     if (n.type.name === 'heading') headings.push({ level: n.attrs.level, text: n.textContent });
@@ -300,7 +302,7 @@ export function TocView(props: NodeViewProps) {
   });
   return (
     <NodeViewWrapper className={`nv-toc ${props.selected ? 'is-selected' : ''}`} data-drag-handle>
-      <div className="nv-toc__title">{t('editor.toc.title')}</div>
+      <div className="nv-toc__title">{docTexts(writingLang).toc}</div>
       {headings.length === 0 && <div className="hint">{t('editor.toc.empty')}</div>}
       {headings.map((h, i) => (
         <div key={i} className={`nv-toc__item level-${h.level}`}>

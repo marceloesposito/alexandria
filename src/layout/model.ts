@@ -1,5 +1,6 @@
 // Impostazioni del documento: stile di citazione e impaginazione (stile InDesign semplificato).
 // Salvate in .alexandria/doc-settings/<doc>.json e usate da editor, anteprima ed export.
+import { CITATION_LOCALE, docTexts, type WritingLang } from '../i18n/writing';
 import { type ObjectData, type HeaderSettings, emptyObject, defaultHeader, normalizeObject, normalizeHeader } from '../types/model';
 
 export type Paper = 'a4' | 'a5' | 'letter' | 'b5' | 'custom';
@@ -133,23 +134,35 @@ export function defaultLayout(): LayoutSettings {
   };
 }
 
-export function defaultDocSettings(lang: 'it' | 'en' = 'it'): DocSettings {
+export function defaultDocSettings(lang: WritingLang = 'it'): DocSettings {
   return {
     version: 1,
     title: '',
     author: '',
     date: '',
     citationStyle: 'apa',
-    citationLocale: lang === 'it' ? 'it-IT' : 'en-US',
-    bibliographyTitle: lang === 'it' ? 'Bibliografia' : 'References',
+    citationLocale: CITATION_LOCALE[lang],
+    bibliographyTitle: docTexts(lang).bibliography,
     layout: defaultLayout(),
     object: emptyObject(),
     header: defaultHeader(),
   };
 }
 
+/**
+ * Cambio della lingua di scrittura del Compendium: lingua delle citazioni e titolo della
+ * bibliografia seguono la nuova lingua solo se erano ancora i predefiniti della vecchia
+ * (una scelta fatta a mano resta).
+ */
+export function retargetLanguage(s: DocSettings, from: WritingLang, to: WritingLang): DocSettings {
+  const patch: Partial<DocSettings> = {};
+  if (s.citationLocale === CITATION_LOCALE[from]) patch.citationLocale = CITATION_LOCALE[to];
+  if (s.bibliographyTitle === docTexts(from).bibliography) patch.bibliographyTitle = docTexts(to).bibliography;
+  return { ...s, ...patch };
+}
+
 /** Unisce impostazioni salvate (anche di versioni vecchie) con i valori predefiniti. */
-export function normalizeDocSettings(raw: unknown, lang: 'it' | 'en' = 'it'): DocSettings {
+export function normalizeDocSettings(raw: unknown, lang: WritingLang = 'it'): DocSettings {
   const d = defaultDocSettings(lang);
   if (!raw || typeof raw !== 'object') return d;
   const r = raw as Partial<DocSettings>;
