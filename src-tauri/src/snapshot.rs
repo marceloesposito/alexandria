@@ -8,7 +8,7 @@ use std::sync::atomic::{AtomicU32, Ordering};
 use std::time::Duration;
 use tauri::webview::PageLoadEvent;
 use tauri::{Manager, WebviewUrl, WebviewWindowBuilder};
-use tokio::sync::mpsc::{unbounded_channel, UnboundedSender};
+use tokio::sync::mpsc::{unbounded_channel, UnboundedReceiver, UnboundedSender};
 
 static NEXT: AtomicU32 = AtomicU32::new(1);
 const WIDTH: f64 = 1280.0;
@@ -29,48 +29,171 @@ pub async fn net_snapshot(app: tauri::AppHandle, url: String) -> CmdResult<Optio
     }
 }
 
-/// Apre la pagina in una finestra di servizio, aspetta che sia disegnata e la fotografa.
-/// Ogni passo che fallisce lo dice nell'errore (per l'autotest e per i log).
-pub async fn take(app: &tauri::AppHandle, url: &str) -> Result<Vec<u8>, String> {
+/// Come si apre la finestra di servizio.
+#[derive(Clone, Copy, PartialEq)]
+enum Mode {
+    /// foto del link: fuori schermo, senza cookie
+    Snapshot,
+    /// lettura automatica: fuori schermo; tiene i cookie del controllo anti-bot gia' superato
+    Offscreen,
+    /// lettura con l'utente: finestra normale al centro, per superare a mano un controllo "sei umano?"
+    Visible,
+}
+
+/// Finestra di servizio sulla pagina; il canale segnala ogni caricamento completato.
+fn open_window(app: &tauri::AppHandle, url: &str, mode: Mode) -> Result<(String, tauri::WebviewWindow, UnboundedReceiver<()>), String> {
     let parsed: tauri::Url = url.parse().map_err(|e| format!("indirizzo non valido: {e}"))?;
     let label = format!("snapshot-{}", NEXT.fetch_add(1, Ordering::Relaxed));
-    let (loaded_tx, mut loaded) = unbounded_channel::<()>();
-    let win = WebviewWindowBuilder::new(app, &label, WebviewUrl::External(parsed))
-        .title("Alexandria snapshot")
+    let (loaded_tx, loaded) = unbounded_channel::<()>();
+    let mut b = WebviewWindowBuilder::new(app, &label, WebviewUrl::External(parsed))
         .inner_size(WIDTH, HEIGHT)
-        .position(-32000.0, -32000.0)
-        .decorations(false)
-        .focused(false)
-        .skip_taskbar(true)
         .visible(true)
-        .incognito(true)
+        .incognito(mode == Mode::Snapshot)
         .on_page_load(move |_w, p| {
             if p.event() == PageLoadEvent::Finished {
                 let _ = loaded_tx.send(());
             }
-        })
-        .build()
-        .map_err(|e| format!("finestra di servizio: {e}"))?;
+        });
+    b = if mode == Mode::Visible {
+        b.title("Alexandria").inner_size(1000.0, 760.0).center().focused(true)
+    } else {
+        b.title("Alexandria snapshot").position(-32000.0, -32000.0).decorations(false).focused(false).skip_taskbar(true)
+    };
+    let win = b.build().map_err(|e| format!("finestra di servizio: {e}"))?;
+    Ok((label, win, loaded))
+}
 
-    let result = async {
-        tokio::time::timeout(Duration::from_secs(20), loaded.recv())
-            .await
-            .map_err(|_| "la pagina non ha finito di caricarsi entro 20 s".to_string())?
-            .ok_or("canale di caricamento chiuso")?;
-        // immagini, font e script che arrivano dopo l'evento di caricamento
-        tokio::time::sleep(Duration::from_millis(1500)).await;
-        let (tx, mut rx) = unbounded_channel::<Result<Vec<u8>, String>>();
-        win.with_webview(move |wv| capture(wv, tx)).map_err(|e| format!("webview non raggiungibile: {e}"))?;
-        tokio::time::timeout(Duration::from_secs(10), rx.recv())
-            .await
-            .map_err(|_| "la foto non e' arrivata entro 10 s".to_string())?
-            .ok_or("canale della foto chiuso")?
-    }
-    .await;
-
-    if let Some(w) = app.get_webview_window(&label) {
+fn close_window(app: &tauri::AppHandle, label: &str) {
+    if let Some(w) = app.get_webview_window(label) {
         let _ = w.destroy();
     }
+}
+
+async fn wait_loaded(loaded: &mut UnboundedReceiver<()>) -> Result<(), String> {
+    tokio::time::timeout(Duration::from_secs(20), loaded.recv())
+        .await
+        .map_err(|_| "la pagina non ha finito di caricarsi entro 20 s".to_string())?
+        .ok_or_else(|| "canale di caricamento chiuso".to_string())
+}
+
+async fn photo(win: &tauri::WebviewWindow) -> Result<Vec<u8>, String> {
+    let (tx, mut rx) = unbounded_channel::<Result<Vec<u8>, String>>();
+    win.with_webview(move |wv| capture(wv, tx)).map_err(|e| format!("webview non raggiungibile: {e}"))?;
+    tokio::time::timeout(Duration::from_secs(10), rx.recv())
+        .await
+        .map_err(|_| "la foto non e' arrivata entro 10 s".to_string())?
+        .ok_or("canale della foto chiuso")?
+}
+
+/// Valuta uno script nella pagina e ne restituisce il risultato serializzato in JSON.
+async fn eval_json(win: &tauri::WebviewWindow, js: &str) -> Result<String, String> {
+    let (tx, mut rx) = unbounded_channel::<String>();
+    win.eval_with_callback(js, move |out| {
+        let _ = tx.send(out);
+    })
+    .map_err(|e| format!("script nella pagina: {e}"))?;
+    tokio::time::timeout(Duration::from_secs(10), rx.recv())
+        .await
+        .map_err(|_| "lo script non ha risposto entro 10 s".to_string())?
+        .ok_or_else(|| "canale dello script chiuso".to_string())
+}
+
+/// Apre la pagina in una finestra di servizio, aspetta che sia disegnata e la fotografa.
+/// Ogni passo che fallisce lo dice nell'errore (per l'autotest e per i log).
+pub async fn take(app: &tauri::AppHandle, url: &str) -> Result<Vec<u8>, String> {
+    let (label, win, mut loaded) = open_window(app, url, Mode::Snapshot)?;
+    let result = async {
+        wait_loaded(&mut loaded).await?;
+        // immagini, font e script che arrivano dopo l'evento di caricamento
+        tokio::time::sleep(Duration::from_millis(1500)).await;
+        photo(&win).await
+    }
+    .await;
+    close_window(app, &label);
+    result
+}
+
+/// Pagina letta dal motore web: indirizzo finale, HTML dopo gli script, foto (facoltativa).
+#[derive(serde::Serialize)]
+#[serde(rename_all = "camelCase")]
+pub struct Rendered {
+    pub url: String,
+    pub html: String,
+    pub png_b64: Option<String>,
+}
+
+/// Controllo "sei un browser?" (Cloudflare e simili): si riconosce da titolo e moduli tipici.
+const CHALLENGE_JS: &str = r#"(() => {
+  const t = (document.title || '').toLowerCase();
+  const title = /just a moment|un momento|attention required|checking your browser|verify you are human|einen moment|un instant/.test(t);
+  const form = !!document.querySelector('#challenge-form, #challenge-running, #challenge-stage, #cf-challenge-running, .cf-turnstile, [name="cf-turnstile-response"]');
+  return title || form;
+})()"#;
+
+const PAGE_JS: &str = r#"(() => JSON.stringify({ url: location.href, html: document.documentElement.outerHTML }))()"#;
+
+/// Per i siti che rifiutano lo scaricamento diretto (403/429/503, controlli anti-bot): la pagina si
+/// apre nel motore web dell'app, che esegue gli script del controllo; quando la pagina vera e' pronta
+/// se ne prendono HTML e foto. None se il controllo non si supera da solo (serve un clic umano).
+/// Con `interactive` la finestra e' visibile: l'utente supera il controllo e la finestra si chiude
+/// da sola appena la pagina vera e' letta (o quando l'utente la chiude).
+#[tauri::command]
+pub async fn net_render(app: tauri::AppHandle, url: String, interactive: Option<bool>) -> CmdResult<Option<Rendered>> {
+    if !(url.starts_with("http://") || url.starts_with("https://")) {
+        return Err("Sono ammessi solo indirizzi http(s)".into());
+    }
+    match render(&app, &url, interactive.unwrap_or(false)).await {
+        Ok(r) => Ok(Some(r)),
+        Err(e) => {
+            eprintln!("render {url}: {e}");
+            Ok(None)
+        }
+    }
+}
+
+pub async fn render(app: &tauri::AppHandle, url: &str, interactive: bool) -> Result<Rendered, String> {
+    let mode = if interactive { Mode::Visible } else { Mode::Offscreen };
+    let (label, win, mut loaded) = open_window(app, url, mode)?;
+    let result = async {
+        // a mano il caricamento puo' durare di piu' (controllo, poi la pagina vera)
+        if interactive {
+            let _ = tokio::time::timeout(Duration::from_secs(60), loaded.recv()).await;
+        } else {
+            wait_loaded(&mut loaded).await?;
+        }
+        // il controllo anti-bot ricarica la pagina quando e' superato: 25 s da solo, 3 minuti con l'utente
+        let wait = if interactive { 180 } else { 25 };
+        let deadline = tokio::time::Instant::now() + Duration::from_secs(wait);
+        loop {
+            tokio::time::sleep(Duration::from_millis(800)).await;
+            if app.get_webview_window(&label).is_none() {
+                return Err("finestra chiusa dall'utente".to_string());
+            }
+            let challenge = eval_json(&win, CHALLENGE_JS).await.map(|v| v.trim() == "true").unwrap_or(true);
+            if !challenge {
+                break;
+            }
+            if tokio::time::Instant::now() > deadline {
+                return Err("controllo anti-bot non superato".to_string());
+            }
+            // un nuovo caricamento (la pagina vera) sveglia subito il ciclo
+            let _ = tokio::time::timeout(Duration::from_millis(1200), loaded.recv()).await;
+        }
+        tokio::time::sleep(Duration::from_millis(1500)).await;
+        let raw = eval_json(&win, PAGE_JS).await?;
+        // eval_with_callback serializza il risultato: qui e' una stringa JSON che contiene un JSON
+        let inner: String = serde_json::from_str(&raw).map_err(|e| format!("risposta della pagina: {e}"))?;
+        #[derive(serde::Deserialize)]
+        struct Page {
+            url: String,
+            html: String,
+        }
+        let page: Page = serde_json::from_str(&inner).map_err(|e| format!("risposta della pagina: {e}"))?;
+        let png_b64 = photo(&win).await.ok().map(|png| base64::engine::general_purpose::STANDARD.encode(png));
+        Ok(Rendered { url: page.url, html: page.html, png_b64 })
+    }
+    .await;
+    close_window(app, &label);
     result
 }
 

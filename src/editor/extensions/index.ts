@@ -28,6 +28,7 @@ import { SearchHighlight } from '../search';
 import { CommentAnchors } from '../../comments/plugin';
 import { MarkdownShortcuts } from './inputRules';
 import { Insertion, Deletion, TrackChanges } from './track';
+import { FocusBlock } from './focusBlock';
 
 /** Tabella con l'allineamento delle colonne del Markdown (GFM). */
 const AlignedTable = Table.extend({
@@ -61,6 +62,7 @@ export function buildExtensions() {
       placeholder: ({ node }) => (node.type.name === 'heading' ? t('editor.placeholder.heading') : t('editor.placeholder.paragraph')),
       showOnlyCurrent: true,
     }),
+    FocusBlock,
     Figure,
     Embed,
     MathBlock,

@@ -52,7 +52,19 @@ export async function runSelfTest() {
     }
     const made = await importUrls([url], 'vault');
     const r = made[0] ?? useResources.getState().resources.find((x) => x.url?.startsWith(url));
-    step('risorsa', r ? { kind: r.kind, title: r.title, screenshot: r.meta.screenshot ?? null, thumb: r.meta.thumb ?? null } : null);
+    step(
+      'risorsa',
+      r
+        ? {
+            kind: r.kind,
+            title: r.title,
+            autori: (r.csl?.author ?? []).map((a) => a.literal ?? [a.given, a.family].filter(Boolean).join(' ')),
+            bloccata: !!r.meta.blocked,
+            screenshot: r.meta.screenshot ?? null,
+            thumb: r.meta.thumb ?? null,
+          }
+        : null,
+    );
     if (r?.meta.screenshot) {
       const s = useResources.getState().vault!;
       const { itemDir } = await import('./resources/storage');

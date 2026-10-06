@@ -12,6 +12,7 @@ import { newResourceId, type Resource, type CslItem } from './model';
 import { parseBibliography } from '../citations/bib';
 import { makeCiteKey } from '../doc/citeSyntax';
 import { safeFileName } from '../vault/paths';
+import { titleFromUrl, siteOf } from './urlTitle';
 import { t } from '../i18n';
 
 export interface InFile {
@@ -198,7 +199,15 @@ async function fetchThumb(s: Scope, r: Resource, url: string | undefined) {
 /** Foto della pagina per l'anteprima (stile Notion); se la webview non ce la fa resta la miniatura og:image. */
 async function captureScreenshot(s: Scope, r: Resource, url: string) {
   try {
-    const png = await platform.snapshotUrl(url);
+    await storeScreenshot(s, r, await platform.snapshotUrl(url));
+  } catch {
+    /* anteprima facoltativa */
+  }
+}
+
+/** Salva la foto della pagina (ridotta) accanto alla risorsa. */
+async function storeScreenshot(s: Scope, r: Resource, png: Uint8Array | null) {
+  try {
     if (!png) return;
     const { shrinkScreenshot } = await import('./extract');
     const shot = await shrinkScreenshot(png);
@@ -297,6 +306,50 @@ export async function lookupIsbn(isbn: string): Promise<CslItem | null> {
   }
 }
 
+/**
+ * Pagina web archiviata come risorsa: testo a blocchi, metadati, miniatura e foto. La foto puo'
+ * arrivare gia' scattata (pagina letta nel motore web), altrimenti la si scatta ora.
+ */
+async function saveWebPage(s: Scope, target: 'vault' | 'library', html: string, url: string, png?: Uint8Array | null, existing?: Resource): Promise<Resource> {
+  const st = useResources.getState();
+  const page = parsePage(html, url);
+  // una risorsa gia' salvata (link bloccato) si completa al suo posto: tag, gruppi e legami restano
+  const r: Resource = existing ? { ...existing, kind: 'web', title: page.title } : blank('web', page.title);
+  r.url = url;
+  r.csl = page.csl;
+  r.meta = { siteName: page.siteName, description: page.description, archived: true, mime: 'text/html' };
+  await writeArchive(s, r.id, page.blocks);
+  const text = blocksToText(page.blocks);
+  await writeText(s, r.id, text);
+  await fetchThumb(s, r, page.image);
+  if (png) await storeScreenshot(s, r, png);
+  else await captureScreenshot(s, r, url);
+  await st.upsert(r, target);
+  await indexResource(s, r, text);
+  return r;
+}
+
+/**
+ * Link salvato senza pagina perche' il sito chiedeva un controllo "sei umano?": si apre una finestra
+ * normale sul sito, l'utente supera il controllo e la pagina letta completa la risorsa.
+ */
+export async function verifyBlocked(id: string): Promise<boolean> {
+  const st = useResources.getState();
+  const r = st.get(id);
+  const inVault = st.resources.some((x) => x.id === id);
+  const s = inVault ? st.vault : st.library;
+  if (!r?.url || !s) return false;
+  toast(t('import.verifyOpen', { site: siteOf(r.url) }), 'info');
+  const page = await platform.renderPage(r.url, { interactive: true });
+  if (!page) {
+    toast(t('import.verifyFailed'), 'error');
+    return false;
+  }
+  const done = await saveWebPage(s, inVault ? 'vault' : 'library', page.html, page.url, page.png, { ...r, meta: {} });
+  toast(t('import.verifyDone', { title: done.title }), 'ok');
+  return true;
+}
+
 export async function importUrls(urls: string[], target: 'vault' | 'library' = 'vault'): Promise<Resource[]> {
   const st = useResources.getState();
   const s = scope(target);
@@ -346,8 +399,32 @@ export async function importUrls(urls: string[], target: 'vault' | 'library' = '
         out.push(r);
         continue;
       }
-      const res = await platform.fetchUrl(info.url);
-      if (res.status >= 400) throw new Error(`HTTP ${res.status}`);
+      let res: Awaited<ReturnType<typeof platform.fetchUrl>> | null = null;
+      try {
+        res = await platform.fetchUrl(info.url);
+      } catch {
+        res = null;
+      }
+      if (!res || res.status >= 400) {
+        // il sito rifiuta chi non e' un browser (es. il controllo di Cloudflare): si legge la pagina
+        // nel motore web dell'app; se nemmeno cosi' si riesce, si tiene almeno il link
+        const page = await platform.renderPage(info.url);
+        if (page) {
+          out.push(await saveWebPage(s, target, page.html, page.url, page.png));
+        } else {
+          const title = titleFromUrl(info.url);
+          const r = blank('web', title);
+          r.url = info.url;
+          r.csl = { type: 'webpage', title, URL: info.url, 'container-title': siteOf(info.url) };
+          r.meta = { siteName: siteOf(info.url), blocked: true };
+          await st.upsert(r, target);
+          out.push(r);
+          useWorkspace
+            .getState()
+            .toast(t('import.blocked', { site: siteOf(info.url), status: res ? `HTTP ${res.status}` : t('import.noNetwork') }), 'info', { label: t('import.verify'), run: () => void verifyBlocked(r.id) });
+        }
+        continue;
+      }
       const isHtml = /html/.test(res.contentType) || (info.kind === 'web' && !res.contentType);
       if (!isHtml) {
         // file diretto (pdf, immagine, ...): stesso percorso dei file trascinati
@@ -359,19 +436,7 @@ export async function importUrls(urls: string[], target: 'vault' | 'library' = '
         out.push(...made);
         continue;
       }
-      const page = parsePage(new TextDecoder().decode(res.body), res.url);
-      const r = blank('web', page.title);
-      r.url = res.url;
-      r.csl = page.csl;
-      r.meta = { siteName: page.siteName, description: page.description, archived: true, mime: 'text/html' };
-      await writeArchive(s, r.id, page.blocks);
-      const text = blocksToText(page.blocks);
-      await writeText(s, r.id, text);
-      await fetchThumb(s, r, page.image);
-      await captureScreenshot(s, r, res.url);
-      await st.upsert(r, target);
-      await indexResource(s, r, text);
-      out.push(r);
+      out.push(await saveWebPage(s, target, new TextDecoder().decode(res.body), res.url));
     } catch (e) {
       toast(t('import.urlError', { url: info.url, error: String(e instanceof Error ? e.message : e) }), 'error');
     }

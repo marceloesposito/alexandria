@@ -1393,4 +1393,11 @@ export const en: Record<string, string> = {
   'cmd.doc.writingLang': "Writing language",
   'cmd.doc.writingLangHint': "Language of this Compendium's text: spellcheck, hyphenation, export and citation language of new Scrolls. The interface language is set in Preferences.",
   'ribbon.group.writingLang': "Writing language",
+  'import.blocked': "{site} does not let the page be read ({status}): the link is saved with a title taken from the address.",
+  'import.noNetwork': "network unreachable",
+  'res.blockedHint': "The site asks for an \"are you human?\" check before showing the page: for now only the link is saved, with a title taken from the address. With \"Verify the site\" the page opens in a window, you pass the check and Alexandria reads it (title, authors, text, photo). Otherwise enter a DOI or ISBN below and use \"Complete from DOI/ISBN\".",
+  'import.verify': "Verify the site",
+  'import.verifyOpen': "Opening {site}: pass the check in the window, then it closes by itself.",
+  'import.verifyFailed': "The page was not read: the check was not passed or the window was closed.",
+  'import.verifyDone': "“{title}” read and saved in the Armarium.",
 };

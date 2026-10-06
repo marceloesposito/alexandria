@@ -42,6 +42,15 @@ Aggiornato: 7 ottobre 2026 (M11).
   pagina con una webview fuori schermo, senza focus, senza cookie e senza capability (WKWebView su
   macOS, WebView2 su Windows); la foto e' ridotta a WebP o JPEG. Se non riesce resta og:image.
   Negli export l'embed diventa un link.
+- **Siti che rifiutano lo scaricamento** (403/429/503, controlli anti-bot come Cloudflare): l'import
+  legge la pagina nel motore web dell'app (`net_render` in `snapshot.rs`: finestra fuori schermo che
+  esegue gli script del controllo, poi HTML e foto con `eval_with_callback`). Se il sito chiede un
+  controllo "sei umano?", il link si salva comunque (titolo dall'indirizzo, `titleFromUrl`) e
+  "Verifica il sito" (nel messaggio e nell'ispettore) apre una finestra normale: l'utente supera il
+  controllo e la risorsa si completa al suo posto. Le finestre di lettura tengono i cookie del controllo
+  superato (quelle della sola foto restano senza cookie). Autotest: `ALEXANDRIA_RENDER_TEST="<url>|<file>"`.
+- **Modalita' focus**: il blocco col cursore riceve `has-focus` (`src/editor/extensions/focusBlock.ts`);
+  prima non lo metteva nessuno e con la modalita' focus attiva tutto il testo restava attenuato.
 - **Snippet di codice**: nuovo tipo di risorsa (file `snippet.<ext>`), creato da Aggiungi risorse,
   modificabile nel visualizzatore, inseribile nel testo dal menu / o trascinandolo.
 - **Rimozione delle risorse**: ribbon, menu Risorse, clic destro, Canc nella tabella, visualizzatore.

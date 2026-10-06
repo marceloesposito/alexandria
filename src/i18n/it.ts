@@ -1393,4 +1393,11 @@ export const it: Record<string, string> = {
   'cmd.doc.writingLang': "Lingua di scrittura",
   'cmd.doc.writingLangHint': "Lingua del testo di questo Compendium: controllo ortografico, sillabazione, export e lingua delle citazioni delle pergamene nuove. La lingua dell'interfaccia si cambia nelle Preferenze.",
   'ribbon.group.writingLang': "Lingua di scrittura",
+  'import.blocked': "{site} non lascia leggere la pagina ({status}): ho salvato il link con il titolo ricavato dall'indirizzo.",
+  'import.noNetwork': "rete non raggiungibile",
+  'res.blockedHint': "Il sito chiede un controllo «sei umano?» prima di mostrare la pagina: per ora c'è solo il link, con il titolo ricavato dall'indirizzo. Con «Verifica il sito» la pagina si apre in una finestra, superi il controllo e Alexandria la legge (titolo, autori, testo, foto). In alternativa scrivi DOI o ISBN qui sotto e usa «Completa da DOI/ISBN».",
+  'import.verify': "Verifica il sito",
+  'import.verifyOpen': "Si apre {site}: supera il controllo nella finestra, poi si chiude da sola.",
+  'import.verifyFailed': "La pagina non è stata letta: il controllo non è stato superato o la finestra è stata chiusa.",
+  'import.verifyDone': "«{title}» letto e salvato nell'Armarium.",
 };

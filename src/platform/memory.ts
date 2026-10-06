@@ -558,6 +558,9 @@ export function createMemoryPlatform(opts: { persist?: boolean } = {}): Platform
     async snapshotUrl() {
       return null; // solo nell'app desktop
     },
+    async renderPage() {
+      return null; // solo nell'app desktop
+    },
     async typst() {
       return { ok: false, errors: ['Typst is available only in the desktop app.'] };
     },

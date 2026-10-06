@@ -8,7 +8,7 @@ import { type Resource, type CslItem, authorsOf, yearOf } from '../model';
 import { KindIcon, kindLabel, thumbUrl } from './common';
 import { t, useLang } from '../../i18n';
 import { platform } from '../../platform';
-import { lookupDoi, lookupIsbn, addFromLibrary, sendToLibrary } from '../importer';
+import { lookupDoi, lookupIsbn, addFromLibrary, sendToLibrary, verifyBlocked } from '../importer';
 import { parseName } from '../html';
 import { useWorkspace } from '../../state/workspace';
 import { useSidePane } from '../../editor/paneStore';
@@ -183,6 +183,14 @@ function MetaEditor({ r }: { r: Resource }) {
   return (
     <section className="inspector__section">
       <h4>{t('res.metadata')}</h4>
+      {r.meta.blocked && (
+        <>
+          <p className="hint">{t('res.blockedHint')}</p>
+          <button className="btn" onClick={() => void verifyBlocked(r.id)}>
+            {t('import.verify')}
+          </button>
+        </>
+      )}
       {field('title', t('meta.title'))}
       <label className="form__stack">
         <span className="field-label">{t('meta.authors')}</span>
