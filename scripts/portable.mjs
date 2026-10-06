@@ -5,7 +5,7 @@
 //     LEGGIMI.txt / README.txt
 // Uso: node scripts/portable.mjs [--mac <Alexandria.app>] [--win <alexandria.exe>] [--out <cartella>]
 import { cpSync, mkdirSync, writeFileSync, existsSync, rmSync } from 'node:fs';
-import { join } from 'node:path';
+import { dirname, join } from 'node:path';
 
 const args = Object.fromEntries(
   process.argv
@@ -28,7 +28,12 @@ if (existsSync(out)) rmSync(out, { recursive: true, force: true });
 mkdirSync(join(out, 'Alexandria-data'), { recursive: true });
 
 if (args.mac) cpSync(args.mac, join(out, 'Alexandria.app'), { recursive: true, verbatimSymlinks: true });
-if (args.win) cpSync(args.win, join(out, 'Alexandria.exe'));
+if (args.win) {
+  cpSync(args.win, join(out, 'Alexandria.exe'));
+  // risorse dell'app accanto all'eseguibile (thesaurus con le licenze), come le mette l'installer
+  const res = join(dirname(args.win), 'thesaurus');
+  if (existsSync(res)) cpSync(res, join(out, 'thesaurus'), { recursive: true });
+}
 
 writeFileSync(
   join(out, 'Alexandria-data', 'LEGGIMI.txt'),
