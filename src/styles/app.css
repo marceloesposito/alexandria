@@ -2698,3 +2698,10 @@ table.kv td:last-child {
   font-family: var(--font-text);
   background: var(--chrome);
 }
+
+/* colonna sinistra: bibliografia in un clic */
+.side-bib__btn {
+  margin: 6px 8px 2px;
+  width: calc(100% - 16px);
+  justify-content: center;
+}

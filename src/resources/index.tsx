@@ -37,12 +37,13 @@ import { leftPanelSections } from '../editor/slots';
 import { ResourcesView } from './ui/ResourcesView';
 import { AddResourceModal } from './ui/AddResourceModal';
 import { ResourceTreeSection, PinnedSection } from './ui/EditorSidebar';
+import { BibliographySection } from '../citations/BibliographySection';
 import { useResources } from './store';
 import { wbApi } from './ui/Whiteboard';
 import { ws } from '../state/workspace';
 import { promptDialog } from '../components/confirm';
 import { CitePicker } from '../citations/CitePicker';
-import { useCitations, insertBibliography, BUNDLED_STYLES, listCustomStyles, type StyleInfo } from '../citations/store';
+import { useCitations, insertBibliography, keysInDoc, BUNDLED_STYLES, listCustomStyles, type StyleInfo } from '../citations/store';
 import { useDocSettings } from '../layout/docSettings';
 import { getEditor } from '../state/editorRef';
 import { setEditorFilesHandler, setEditorLinksHandler, setEditorPasteLinkHandler } from '../editor/extensions/drop';
@@ -108,6 +109,7 @@ export function registerResources() {
   registerDialog('cite', CitePicker);
   leftPanelSections.add(ResourceTreeSection);
   leftPanelSections.add(PinnedSection);
+  leftPanelSections.add(BibliographySection);
   // il visualizzatore si apre da ogni vista (anche dai pin della colonna sinistra dell'editor)
   globalComponents.push(ResourceViewer);
   registerWidget('citeStyle', StyleWidget);
@@ -267,6 +269,7 @@ export function registerResources() {
     {
       id: 'cite.bibliography',
       label: 'cmd.cite.bibliography',
+      hint: 'cmd.cite.bibliographyHint',
       icon: BookMarked,
       category: 'citations',
       views: ['editor'],
@@ -275,7 +278,9 @@ export function registerResources() {
         if (!e) return;
         if (!useCitations.getState().engine) await useCitations.getState().rebuild();
         const n = insertBibliography(e);
-        ws().toast(n ? t('cite.bibDone', { n }) : t('cite.bibNone'), n ? 'ok' : 'info');
+        // citazioni presenti ma senza fonte nell'Armarium: lo si dice, invece di "nessuna citazione"
+        const empty = keysInDoc(e).length ? t('cite.bibUnknown') : t('cite.bibNone');
+        ws().toast(n ? t('cite.bibDone', { n }) : empty, n ? 'ok' : 'info');
       },
     },
     { id: 'cite.manage', label: 'cmd.cite.manage', icon: Library, category: 'citations', run: () => (ws().setView('resources'), st().setView('layers')) },

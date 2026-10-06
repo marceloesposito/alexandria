@@ -31,6 +31,7 @@ function ExportDialog() {
   const [busy, setBusy] = useState(false);
   const lineNumbers = useDocSettings((s) => s.settings.layout.lineNumbersInPdf);
   const revisions = useWorkspace((s) => s.app.prefs.exportRevisions);
+  const toc = useDocSettings((s) => s.settings.layout.tocInExport);
   return (
     <Modal
       title={t('export.title')}
@@ -64,18 +65,26 @@ function ExportDialog() {
           </button>
         ))}
       </div>
-      {format === 'pdf' && (
-        <label className="check" style={{ marginTop: 12 }}>
-          <input type="checkbox" checked={lineNumbers} onChange={(e) => useDocSettings.getState().updateLayout({ lineNumbersInPdf: e.target.checked })} />
-          {t('docset.lineNumbersPdf')}
-        </label>
-      )}
-      {(format === 'pdf' || format === 'docx' || format === 'html') && (
-        <label className="check" style={{ marginTop: 8 }}>
-          <input type="checkbox" checked={revisions === 'marked'} onChange={(e) => useWorkspace.getState().setPrefs({ exportRevisions: e.target.checked ? 'marked' : 'clean' })} />
-          {format === 'docx' ? t('export.revisionsDocx') : t('export.revisions')}
-        </label>
-      )}
+      <div className="export-options">
+        {format !== 'md' && (
+          <label className="check">
+            <input type="checkbox" checked={toc} onChange={(e) => useDocSettings.getState().updateLayout({ tocInExport: e.target.checked })} />
+            {t('export.toc')}
+          </label>
+        )}
+        {format === 'pdf' && (
+          <label className="check">
+            <input type="checkbox" checked={lineNumbers} onChange={(e) => useDocSettings.getState().updateLayout({ lineNumbersInPdf: e.target.checked })} />
+            {t('docset.lineNumbersPdf')}
+          </label>
+        )}
+        {(format === 'pdf' || format === 'docx' || format === 'html') && (
+          <label className="check">
+            <input type="checkbox" checked={revisions === 'marked'} onChange={(e) => useWorkspace.getState().setPrefs({ exportRevisions: e.target.checked ? 'marked' : 'clean' })} />
+            {format === 'docx' ? t('export.revisionsDocx') : t('export.revisions')}
+          </label>
+        )}
+      </div>
       {format === 'pdf' && platform.kind !== 'tauri' && <p className="hint">{t('preview.desktopOnly')}</p>}
     </Modal>
   );

@@ -3,6 +3,8 @@ import type { RibbonConfig } from './ribbonModel';
 
 export const DEFAULT_RIBBON: RibbonConfig = {
   version: 1,
+  // rev 2: citazioni e bibliografia anche in Home
+  rev: 2,
   tabs: [
     // ----- editor
     {
@@ -17,6 +19,8 @@ export const DEFAULT_RIBBON: RibbonConfig = {
           label: 'ribbon.group.character',
           items: ['fmt.bold', 'fmt.italic', 'fmt.underline', 'fmt.strike', 'fmt.highlight', 'fmt.superscript', 'fmt.subscript', 'fmt.code', 'fmt.clear'],
         },
+        // subito dopo il carattere: visibile anche su schermi normali, senza scorrere la barra
+        { id: 'ed-home-cite', label: 'ribbon.group.citations', items: ['cite.insert', 'cite.bibliography'], since: 2 },
         {
           id: 'ed-home-para',
           label: 'ribbon.group.paragraph',

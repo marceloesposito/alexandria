@@ -751,6 +751,15 @@
   gap: 8px;
 }
 
+/* opzioni dell'export: una per riga */
+.export-options {
+  display: flex;
+  flex-direction: column;
+  align-items: flex-start;
+  gap: 8px;
+  margin-top: 12px;
+}
+
 .export-format {
   display: flex;
   flex-direction: column;

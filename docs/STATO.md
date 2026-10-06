@@ -19,11 +19,12 @@ Aggiornato: 7 ottobre 2026 (M11).
 | M11 Modello di Compendium Diario e Voce di oggi | fatto | #15 |
 | M11 Revisioni tracciate (Suggerisci), Marginalia da revisione, andata e ritorno con Word | fatto | #16 |
 | M11 Copia per revisione (.recensio), modalita' revisore, import su branch, risposta ai revisori | fatto | #17 |
-| Stessa identita' in tutte le lingue (glossario con test, pergamena in italiano), Bookmarks -> Indices | fatto | #18 |
+| Stessa identita' in tutte le lingue (glossario con test, pergamena in italiano), Bookmarks -> Excerpta | fatto | #18 |
+| Indice dei contenuti nell'export, bibliografia in un clic visibile nello Scriptorium | fatto | #18 |
 
 ## Decisioni prese durante il lavoro
 
-- **Colonna sinistra dell'editor**: selettore Risorse | Sommario (era Indice; richiesta del committente,
+- **Colonna sinistra dell'editor**: selettore Risorse | Indice (richiesta del committente,
   5/10). L'indice mostra H1–H3, si aggiorna mentre si scrive, evidenzia la sezione corrente.
 - **Righe del PDF e dell'editor**: stesso carattere (Libertinus Serif), stessa misura e
   stesso corpo; la corrispondenza riga per riga e' molto vicina ma non garantita al 100%
@@ -46,7 +47,7 @@ Aggiornato: 7 ottobre 2026 (M11).
 - **OpenSSL** compilato dentro l'app (`vendored-openssl` di git2): niente dipendenza da Homebrew.
 - **Nomi tematici** (scelti dal committente, solo nelle stringhe di `src/i18n/`, uguali in IT ed EN):
   documento -> Scroll (in italiano Pergamena), gestore risorse -> Armarium (era Bookshelf), schermata Editor -> Scriptorium, Versioni ->
-  Palimpsestus (era History), commenti a margine -> Marginalia, whiteboard -> Tabula, pin -> Indices (un Index; era Bookmarks), layer -> Strata. Le pergamene collegate in sequenza formano un Codex.
+  Palimpsestus (era History), commenti a margine -> Marginalia, whiteboard -> Tabula, pin -> Excerpta (un Excerptum; era Bookmarks), layer -> Strata. Le pergamene collegate in sequenza formano un Codex.
   Restano Library e Bibliografia; vault -> Compendium (la cartella creata al primo avvio si chiama "Il mio Compendium"; quelle esistenti non cambiano nome). Identificatori, cartelle
   (`documents/`, `resources/`) e file su disco non cambiano.
 - **Navbar**: Armarium · Scriptorium · Palimpsestus | Library (Cmd/Ctrl+1..4). La Library e' una tab a
@@ -120,8 +121,19 @@ Aggiornato: 7 ottobre 2026 (M11).
 - **Nomi**: Bookshelf -> Armarium, History -> Palimpsestus, Library -> Bibliotheca, Librum -> Codex
   (solo testi visibili; identificatori interni invariati).
 - **Stessa identita' in tutte le lingue**: i nomi tematici sono nomi propri, mai tradotti; unica
-  eccezione voluta: in italiano lo Scroll e' la pergamena. Bookmarks -> Indices (singolare Index); il
-  sommario nella colonna sinistra, in italiano, si chiama Sommario per non confondersi con gli Indices.
+  eccezione voluta: in italiano lo Scroll e' la pergamena. Bookmarks -> Excerpta (singolare Excerptum:
+  i passaggi estratti dalle fonti); "Indices" e' stato scartato perche' si confondeva con l'indice dei
+  contenuti e con un eventuale indice analitico.
+- **Indice dei contenuti nell'export**: opzione per pergamena (`layout.tocInExport`, nel dialogo
+  Esporta per tutti i formati tranne Markdown); se la pergamena non ha gia' un blocco indice se ne
+  mette uno in testa al documento esportato (`src/export/toc.ts`), il .md non cambia. Vale anche per i Codex.
+- **Bibliografia in un clic**: "Genera bibliografia" (prima solo "Bibliografia" in Riferimenti) e' anche
+  in Home (gruppo Citazioni) e negli Essenziali di Beginner; nella colonna sinistra la sezione
+  Bibliografia conta le fonti citate, segnala le citazioni senza fonte nell'Armarium e ha il pulsante
+  (Aggiorna se la bibliografia c'e' gia').
+- **Barra salvata e gruppi nuovi**: `RibbonConfig.rev` e `RibbonGroup.since`. Un gruppo predefinito nato
+  dopo l'ultima revisione vista entra al suo posto anche nelle barre personalizzate; se l'utente poi
+  lo toglie non torna.
   `src/i18n/glossary.ts` li elenca con le traduzioni e i nomi vecchi da evitare; un test
   controlla ogni lingua contro l'inglese, cosi' una lingua nuova eredita la stessa identita'.
 - **Codex**: nessun oggetto nuovo su disco oltre a `.alexandria/codices/<radice>.json` (nome,

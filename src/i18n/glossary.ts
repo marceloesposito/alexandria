@@ -19,7 +19,7 @@ export const GLOSSARY: Record<string, GlossaryTerm> = {
   Palimpsestus: { pattern: /\bPalimpsestus\b/, avoid: [/\bstoria\b/i, /\bcronologia\b/i, /\bhistory\b/] },
   Marginalia: { pattern: /\bMarginalia\b/, avoid: [] },
   Tabula: { pattern: /\bTabula\b/, avoid: [/\blavagn/i, /whiteboard/i, /\bboard\b/] },
-  Indices: { pattern: /\bInd(ex|ices)\b/, avoid: [/bookmark/i, /segnalibr/i] },
+  Excerpta: { pattern: /\bExcerpt(um|a)\b/, avoid: [/bookmark/i, /segnalibr/i, /\bInd(ex|ices)\b/] },
   Strata: { pattern: /\bStrata\b/, avoid: [] },
   Bibliotheca: { pattern: /\bBibliotheca\b/, avoid: [/\blibreria\b/i, /\bbiblioteca\b/i] },
   Codex: { pattern: /\bCodex\b/, avoid: [/\bLibrum\b/] },

@@ -52,6 +52,8 @@ export interface LayoutSettings {
   widowsOrphans: boolean;
   baselineGrid: boolean;
   lineNumbersInPdf: boolean;
+  /** indice dei contenuti in testa all'export (se la pergamena non ne ha gia' uno) */
+  tocInExport: boolean;
   headingNumbers: boolean;
   masters: Record<MasterId, MasterPage>;
   styles: Record<ParaStyleId, ParaStyle>;
@@ -112,6 +114,7 @@ export function defaultLayout(): LayoutSettings {
     widowsOrphans: true,
     baselineGrid: false,
     lineNumbersInPdf: false,
+    tocInExport: false,
     headingNumbers: false,
     masters: {
       title: { header: '', footer: '', pageNumbers: 'none', numbering: '1', firstPagePlain: true },
