@@ -61,7 +61,7 @@ export function journalTemplate(lang: 'it' | 'en', today = new Date()): Compendi
           ? [
               '# Il tuo diario',
               '',
-              'Ogni giorno uno Scroll nuovo: **Voce di oggi** (menu File o Ctrl/Cmd+Alt+J) lo crea nella cartella Diario, con la data, e lo collega alla voce precedente.',
+              'Ogni giorno una pergamena nuova: **Voce di oggi** (menu File o Ctrl/Cmd+Alt+J) la crea nella cartella Diario, con la data, e la collega alla voce precedente.',
               '',
               'Le voci collegate formano un **Codex**: nella colonna a sinistra, sotto Codex, puoi leggerle di seguito come un libro, riordinarle o esportarle in PDF.',
               '',

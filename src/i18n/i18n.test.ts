@@ -20,7 +20,7 @@ describe('i18n', () => {
 
   it('i nomi del glossario sono gli stessi in tutte le lingue', () => {
     expect(glossaryViolations(en, en)).toEqual([]);
-    expect(glossaryViolations(en, itDict)).toEqual([]);
+    expect(glossaryViolations(en, itDict, 'it')).toEqual([]);
   });
 
   it('le variabili coincidono fra le lingue', () => {
