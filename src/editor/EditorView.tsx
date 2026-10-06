@@ -8,6 +8,8 @@ import { Splitter } from '../components/Splitter';
 import { leftPanelSections, rightPanel, centerOverlay, previewPanel } from './slots';
 import { OutlinePanel } from './OutlinePanel';
 import { CountsBadge } from '../shell/CountsBadge';
+import { FormatBar } from './FormatBar';
+import { ThesaurusPanel } from '../thesaurus/ui';
 import { useZen } from '../state/zen';
 import { borderlessFooter } from './slots';
 import { useDoc } from './session';
@@ -80,7 +82,9 @@ export function EditorView() {
             <Footer />
           </div>
         )}
+        {!zen && !sourceMode && !reading && <FormatBar />}
         <CountsBadge />
+        <ThesaurusPanel />
       </main>
       {paneTabs > 0 && !zen && (
         <>

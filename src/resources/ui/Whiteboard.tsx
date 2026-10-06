@@ -21,11 +21,18 @@ import {
   applyNodeChanges,
   BackgroundVariant,
   MarkerType,
+  ConnectionMode,
+  BaseEdge,
+  getBezierPath,
+  useInternalNode,
+  type EdgeProps,
+  type InternalNode,
+  type MiniMapNodeProps,
 } from '@xyflow/react';
 import '@xyflow/react/dist/style.css';
 import { useResources } from '../store';
 import { isVisible, isLocked, colorOf, type Resource } from '../model';
-import { ResourceCard } from './common';
+import { ResourceCard, thumbUrl } from './common';
 import { removeWithConfirm } from './remove';
 import { t } from '../../i18n';
 import { openContextMenu } from '../../components/ContextMenu';
@@ -34,6 +41,7 @@ import type { WbNote, WbFrame } from '../storage';
 import { RESOURCES_MIME } from './LayersPanel';
 import { DocPicker } from './DocPicker';
 import { docNodeId, relOfNode, linkedDocs } from '../docLinks';
+import { placeDocNodes, facingSides, type Side, type Rect } from '../tabula';
 import { useWorkspace } from '../../state/workspace';
 import type { DocInfo } from '../../vault/vault';
 
@@ -42,14 +50,72 @@ type NoteNodeData = { note: WbNote };
 type FrameNodeData = { frame: WbFrame };
 type DocNodeData = { doc: DocInfo; active: boolean; linked: number };
 
-/** Proxy di una pergamena del Compendium: si collega come le risorse, doppio clic per aprirla. */
+const POS: Record<Side, Position> = { top: Position.Top, right: Position.Right, bottom: Position.Bottom, left: Position.Left };
+
+/** Punti di aggancio sui quattro lati: da ognuno parte o arriva un collegamento. */
+function Handles() {
+  return (
+    <>
+      {(Object.keys(POS) as Side[]).map((side) => (
+        <Handle key={side} type="source" id={side} position={POS[side]} className={`wb-handle wb-handle--${side}`} />
+      ))}
+    </>
+  );
+}
+
+function rectOf(n: InternalNode): Rect {
+  return { x: n.internals.positionAbsolute.x, y: n.internals.positionAbsolute.y, w: n.measured.width ?? 0, h: n.measured.height ?? 0 };
+}
+
+/** Freccia che si attacca ai lati che si guardano (sopra, sotto, destra, sinistra) e li segue. */
+function FloatingEdge({ id, source, target, markerEnd, label, style }: EdgeProps) {
+  const a = useInternalNode(source);
+  const b = useInternalNode(target);
+  if (!a || !b) return null;
+  const f = facingSides(rectOf(a), rectOf(b));
+  const [path, labelX, labelY] = getBezierPath({
+    sourceX: f.start.x,
+    sourceY: f.start.y,
+    sourcePosition: POS[f.from],
+    targetX: f.end.x,
+    targetY: f.end.y,
+    targetPosition: POS[f.to],
+  });
+  return <BaseEdge id={id} path={path} markerEnd={markerEnd} style={style} label={label} labelX={labelX} labelY={labelY} className="wb-edge" interactionWidth={16} />;
+}
+
+const edgeTypes = { floating: FloatingEdge };
+
+/**
+ * Miniatura di un nodo nel navigatore: una schedina col colore del suo tipo (pergamena, fonte col
+ * colore del gruppo, nota, cornice) e, per le fonti che ce l'hanno, l'immagine di anteprima.
+ */
+function MiniNode({ id, x, y, width, height, className, color, selected }: MiniMapNodeProps) {
+  const r = useResources((s) => (className === 'mm-res' ? s.resources.find((x) => x.id === id) ?? s.libraryItems.find((x) => x.id === id) : undefined));
+  const thumb = r ? thumbUrl(r) : null;
+  const cls = `mm ${className} ${selected ? 'is-selected' : ''}`;
+  if (className === 'mm-frame') return <rect className={cls} x={x} y={y} width={width} height={height} rx={8} />;
+  const band = Math.min(height * 0.28, 40);
+  return (
+    <g className={cls}>
+      <rect className="mm__card" x={x} y={y} width={width} height={height} rx={10} style={color ? { stroke: color } : undefined} />
+      {thumb ? (
+        <image href={thumb} x={x + 4} y={y + 4} width={width - 8} height={height * 0.62} preserveAspectRatio="xMidYMid slice" />
+      ) : (
+        <rect className="mm__band" x={x} y={y} width={width} height={band} rx={10} style={color ? { fill: color } : undefined} />
+      )}
+      {/* righe di testo stilizzate */}
+      <rect className="mm__line" x={x + width * 0.12} y={y + height * 0.72} width={width * 0.7} height={Math.max(4, height * 0.06)} rx={2} />
+      <rect className="mm__line" x={x + width * 0.12} y={y + height * 0.84} width={width * 0.45} height={Math.max(4, height * 0.06)} rx={2} />
+    </g>
+  );
+}
+
+/** Una pergamena del Compendium: nodo fisso (sempre presente), si collega come le risorse, doppio clic per aprirla. */
 function DocNode({ data, selected }: NodeProps<Node<DocNodeData>>) {
   return (
     <div className={`wb-doc ${selected ? 'is-selected' : ''} ${data.active ? 'is-active' : ''}`}>
-      <Handle type="target" position={Position.Left} className="wb-handle" />
-      <Handle type="source" position={Position.Right} className="wb-handle" />
-      <Handle type="target" position={Position.Top} id="t" className="wb-handle" />
-      <Handle type="source" position={Position.Bottom} id="b" className="wb-handle" />
+      <Handles />
       <div className="wb-doc__icon">
         <ScrollText size={20} strokeWidth={1.6} />
       </div>
@@ -67,10 +133,7 @@ function DocNode({ data, selected }: NodeProps<Node<DocNodeData>>) {
 function ResNode({ data, selected }: NodeProps<Node<ResNodeData>>) {
   return (
     <div className={`wb-node ${selected ? 'is-selected' : ''}`}>
-      <Handle type="target" position={Position.Left} className="wb-handle" />
-      <Handle type="source" position={Position.Right} className="wb-handle" />
-      <Handle type="target" position={Position.Top} id="t" className="wb-handle" />
-      <Handle type="source" position={Position.Bottom} id="b" className="wb-handle" />
+      <Handles />
       <ResourceCard r={data.r} color={data.color} />
     </div>
   );
@@ -80,8 +143,7 @@ function NoteNode({ data, selected }: NodeProps<Node<NoteNodeData>>) {
   return (
     <div className={`wb-note ${selected ? 'is-selected' : ''}`}>
       <NodeResizer isVisible={selected} minWidth={120} minHeight={70} onResizeEnd={(_, p) => updateNote(data.note.id, { w: p.width, h: p.height, x: p.x, y: p.y })} />
-      <Handle type="target" position={Position.Left} className="wb-handle" />
-      <Handle type="source" position={Position.Right} className="wb-handle" />
+      <Handles />
       <textarea
         className="wb-note__text nodrag"
         defaultValue={data.note.text}
@@ -115,7 +177,7 @@ function updateFrame(id: string, patch: Partial<WbFrame>) {
 const nodeTypes = { res: ResNode, note: NoteNode, frame: FrameNode, doc: DocNode };
 
 /** Comandi della whiteboard chiamati dal ribbon. */
-export const wbApi: { addNote?: () => void; addFrame?: () => void; fit?: () => void; addActiveDoc?: () => void; pickDocs?: () => void; pan?: boolean; setPan?: (v: boolean) => void } = {};
+export const wbApi: { addNote?: () => void; addFrame?: () => void; fit?: () => void; addActiveDoc?: () => void; pan?: boolean; setPan?: (v: boolean) => void } = {};
 
 const uid = (p: string) => `${p}${Date.now().toString(36)}${Math.random().toString(36).slice(2, 5)}`;
 
@@ -133,7 +195,7 @@ function Board() {
   const docs = useWorkspace((s) => s.docs);
   const activeDoc = useWorkspace((s) => s.activeDoc);
   // finestra di scelta delle pergamene: da mettere sulla Tabula o da collegare a una pergamena
-  const [picker, setPicker] = useState<{ mode: 'add' } | { mode: 'link'; rel: string } | null>(null);
+  const [picker, setPicker] = useState<{ mode: 'link'; rel: string } | null>(null);
 
   const visible = useMemo(() => resources.filter((r) => isVisible(r, layers, active, resources, texts)), [resources, layers, active, texts]);
 
@@ -142,6 +204,19 @@ function Board() {
     (r: Resource, i: number) => wb.nodes[r.id] ?? { x: (i % 5) * 270, y: Math.floor(i / 5) * 250 },
     [wb.nodes],
   );
+
+  // misure dei nodi (le manda React Flow con le modifiche 'dimensions')
+  const [sizes, setSizes] = useState<Record<string, { width: number; height: number }>>({});
+  const docPos = useMemo(() => placeDocNodes(docs.map((d) => d.rel), wb.nodes), [docs, wb.nodes]);
+
+  // le pergamene appena comparse si fissano dove sono state messe: spostarne una non fa saltare le altre
+  useEffect(() => {
+    if (scope !== 'vault') return;
+    const missing = Object.entries(docPos).filter(([id]) => !wb.nodes[id]);
+    if (!missing.length) return;
+    const st = useResources.getState();
+    st.setWhiteboard({ ...st.whiteboard, nodes: { ...st.whiteboard.nodes, ...Object.fromEntries(missing) } });
+  }, [docPos, wb.nodes, scope]);
 
   const nodes: Node[] = useMemo(() => {
     const frames: Node[] = wb.frames.map((f) => ({
@@ -172,38 +247,51 @@ function Board() {
             selected: selected.includes(n.id),
           }))
         : [];
-    // pergamene del Compendium messe sulla Tabula (solo nel Compendium, non nella Library)
+    // tutte le pergamene del Compendium sono nodi fissi: sempre presenti, si spostano ma non si tolgono
+    // (solo nel Compendium, non nella Library)
     const docNodes: Node[] =
       scope === 'vault'
-        ? (wb.docs ?? [])
-            .map((rel) => docs.find((d) => d.rel === rel))
-            .filter((d): d is DocInfo => !!d)
-            .map((d, i) => ({
-              id: docNodeId(d.rel),
-              type: 'doc',
-              position: wb.nodes[docNodeId(d.rel)] ?? { x: -320, y: i * 130 },
-              data: { doc: d, active: d.rel === activeDoc, linked: linkedDocs(links, d.rel).length },
-              selected: selected.includes(docNodeId(d.rel)),
-            }))
+        ? docs.map((d) => ({
+            id: docNodeId(d.rel),
+            type: 'doc',
+            position: docPos[docNodeId(d.rel)],
+            data: { doc: d, active: d.rel === activeDoc, linked: linkedDocs(links, d.rel).length },
+            deletable: false,
+            selected: selected.includes(docNodeId(d.rel)),
+          }))
         : [];
-    return [...frames, ...res, ...notes, ...docNodes];
-  }, [visible, wb, layers, selected, pos, resources, scope, docs, activeDoc, links]);
+    // le misure prese da React Flow tornano nei nodi: senza, il navigatore non sa disegnarli
+    return [...frames, ...res, ...notes, ...docNodes].map((n) => (sizes[n.id] ? { ...n, measured: sizes[n.id] } : n));
+  }, [visible, wb, layers, selected, pos, resources, scope, docs, activeDoc, links, docPos, sizes]);
 
   const ids = new Set(nodes.map((n) => n.id));
   const edges: Edge[] = links
     .filter((l) => ids.has(l.from) && ids.has(l.to))
     .map((l) => ({
       id: l.id,
+      type: 'floating',
       source: l.from,
       target: l.to,
       label: l.label,
-      className: 'wb-edge',
       markerEnd: { type: MarkerType.ArrowClosed, width: 14, height: 14 },
     }));
 
   const onNodesChange = useCallback(
     (changes: NodeChange[]) => {
       const st = useResources.getState();
+      const dims = changes.filter((c) => c.type === 'dimensions' && c.dimensions);
+      if (dims.length)
+        setSizes((prev) => {
+          let next = prev;
+          for (const c of dims) {
+            if (c.type !== 'dimensions' || !c.dimensions) continue;
+            const old = prev[c.id];
+            if (old && old.width === c.dimensions.width && old.height === c.dimensions.height) continue;
+            if (next === prev) next = { ...prev };
+            next[c.id] = c.dimensions;
+          }
+          return next;
+        });
       const sel = changes.filter((c) => c.type === 'select');
       if (sel.length) {
         const cur = new Set(st.selected);
@@ -227,16 +315,14 @@ function Board() {
         useResources.setState({ whiteboard: next });
         if (finished.length) st.setWhiteboard(next);
       }
-      const removed = changes.filter((c) => c.type === 'remove').map((c) => c.id);
+      // le pergamene sono nodi fissi: non si tolgono dalla Tabula
+      const removed = changes.filter((c) => c.type === 'remove' && !relOfNode(c.id)).map((c) => (c as { id: string }).id);
       if (removed.length) {
         const w = st.whiteboard;
-        // togliere una pergamena dalla Tabula non la cancella: sparisce solo il nodo
-        const goneDocs = removed.map(relOfNode).filter(Boolean) as string[];
         st.setWhiteboard({
           ...w,
           notes: w.notes.filter((n) => !removed.includes(n.id)),
           frames: w.frames.filter((f) => !removed.includes(f.id)),
-          docs: (w.docs ?? []).filter((r) => !goneDocs.includes(r)),
         });
       }
     },
@@ -251,23 +337,11 @@ function Board() {
     if (c.source && c.target) useResources.getState().addLink(c.source, c.target);
   }, []);
 
-  /** Pergamene sulla Tabula, una sotto l'altra al centro della vista (quelle gia' presenti restano dove sono). */
-  const addDocs = (rels: string[]) => {
-    const st = useResources.getState();
-    const w = st.whiteboard;
-    const have = new Set(w.docs ?? []);
-    const fresh = rels.filter((r) => !have.has(r));
-    const p = center();
-    const nodes = { ...w.nodes };
-    const placed = (w.docs ?? []).map((r) => nodes[docNodeId(r)]).filter(Boolean);
-    const x0 = placed.length ? Math.min(...placed.map((n) => n.x)) : p.x - 120;
-    let y = placed.length ? Math.max(...placed.map((n) => n.y)) + 130 : p.y - 50;
-    for (const r of fresh) {
-      if (nodes[docNodeId(r)]) continue;
-      nodes[docNodeId(r)] = { x: x0, y };
-      y += 130;
-    }
-    st.setWhiteboard({ ...w, nodes, docs: [...(w.docs ?? []), ...fresh] });
+  /** Porta in vista il nodo di una pergamena. */
+  const focusDoc = (rel: string) => {
+    const id = docNodeId(rel);
+    useResources.getState().select([id]);
+    void flow.fitView({ nodes: [{ id }], padding: 0.6, maxZoom: 1, duration: 300 });
   };
 
   const center = () => {
@@ -291,9 +365,8 @@ function Board() {
     wbApi.fit = () => flow.fitView({ padding: 0.15, duration: 300 });
     wbApi.addActiveDoc = () => {
       const rel = useWorkspace.getState().activeDoc;
-      if (rel) addDocs([rel]);
+      if (rel) focusDoc(rel);
     };
-    wbApi.pickDocs = () => setPicker({ mode: 'add' });
   });
 
   return (
@@ -311,6 +384,9 @@ function Board() {
         onNodesChange={onNodesChange}
         onEdgesChange={onEdgesChange}
         onConnect={onConnect}
+        edgeTypes={edgeTypes}
+        connectionMode={ConnectionMode.Loose}
+        connectionRadius={36}
         onNodeClick={(_, n) => {
           if (n.type === 'res') useResources.getState().openInspector(n.id);
         }}
@@ -333,8 +409,6 @@ function Board() {
             openContextMenu(e as React.MouseEvent, [
               { label: t('wb.doc.open'), onClick: () => (useWorkspace.getState().openDoc(rel), useWorkspace.getState().setView('editor')) },
               { label: t('wb.doc.linkTo'), onClick: () => setPicker({ mode: 'link', rel }) },
-              { sep: true, label: '' },
-              { label: t('wb.doc.remove'), onClick: () => onNodesChange([{ type: 'remove', id: n.id }]) },
             ]);
             return;
           }
@@ -365,20 +439,23 @@ function Board() {
         fitView={!wb.viewport}
       >
         <Background variant={BackgroundVariant.Dots} gap={22} size={1.2} />
-        <MiniMap pannable zoomable className="wb-minimap" />
+        <MiniMap
+          pannable
+          zoomable
+          className="wb-minimap"
+          style={{ width: 240, height: 170 }}
+          nodeComponent={MiniNode}
+          nodeClassName={(n) => `mm-${n.type ?? 'res'}`}
+          nodeColor={(n) => (n.type === 'res' ? ((n.data as ResNodeData).color ?? '') : '')}
+        />
         <Controls showInteractive={false} className="wb-controls" />
       </ReactFlow>
-      {picker?.mode === 'add' && (
-        <DocPicker title={t('wb.doc.addTitle')} action={t('wb.doc.addAction')} exclude={wb.docs ?? []} onPick={addDocs} onClose={() => setPicker(null)} />
-      )}
       {picker?.mode === 'link' && (
         <DocPicker
           title={t('wb.doc.linkTitle', { name: docs.find((d) => d.rel === picker.rel)?.title ?? '' })}
           action={t('wb.doc.linkAction')}
           exclude={[picker.rel, ...linkedDocs(links, picker.rel)]}
           onPick={(rels) => {
-            // le pergamene collegate compaiono anche sulla Tabula, cosi' il legame si vede
-            addDocs(rels);
             for (const r of rels) useResources.getState().addLink(docNodeId(picker.rel), docNodeId(r));
           }}
           onClose={() => setPicker(null)}

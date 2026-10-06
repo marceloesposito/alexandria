@@ -1,5 +1,7 @@
 // Documento -> testo semplice: titoli sottolineati, elenchi con trattini, citazioni come testo,
 // note numerate raccolte in fondo.
+import { calloutHeading } from '../doc/callouts';
+import { docTexts } from '../i18n/writing';
 import type { PMNode, CitationItem } from '../doc/types';
 import { plainText } from '../doc/counts';
 import type { ExportContext } from './context';
@@ -37,6 +39,10 @@ export function toPlainText(doc: PMNode, ctx: ExportContext): string {
         return indent + inline(b.content).replace(/\n/g, '\n' + indent);
       case 'blockquote':
         return (b.content ?? []).map((c) => block(c, indent + '    ')).join('\n\n');
+      case 'callout': {
+        const { heading } = calloutHeading(b.attrs?.kind, b.attrs?.title, docTexts(ctx.lang).callouts);
+        return [`${indent}[${heading}]`, ...(b.content ?? []).map((c) => block(c, indent + '    '))].join('\n\n');
+      }
       case 'bulletList':
       case 'orderedList':
       case 'taskList':

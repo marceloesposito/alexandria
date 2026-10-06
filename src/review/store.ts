@@ -16,7 +16,8 @@ import { flushSave } from '../editor/session';
 import { getEditor } from '../state/editorRef';
 import { checkpoint } from '../versions/actions';
 import { normalizeRound, newItemId, changesMarkdown, responseLetter, splitLetter, type ReviewRound, type ReviewItem } from './model';
-import { getLang, t } from '../i18n';
+import { t } from '../i18n';
+import { getWritingLang } from '../i18n/writing';
 
 const DIR = `${META_DIR}/reviews`;
 
@@ -89,7 +90,7 @@ export function itemsFromLetter(letter: string): ReviewItem[] {
 
 async function settingsOf(rel: string | null) {
   const root = useWorkspace.getState().vaultRoot!;
-  return normalizeDocSettings(rel ? await readJson<unknown>(abs(root, docSettingsFile(rel)), null) : null, getLang());
+  return normalizeDocSettings(rel ? await readJson<unknown>(abs(root, docSettingsFile(rel)), null) : null, getWritingLang());
 }
 
 /** Esporta la lettera di risposta (impaginazione della pergamena aperta). */

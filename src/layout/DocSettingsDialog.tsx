@@ -1,11 +1,12 @@
 // Impostazioni documento: dati, citazioni, pagina, testo, stili di paragrafo, pagine mastro.
+import { CITATION_LOCALES } from '../i18n/writing';
 import { useEffect, useState } from 'react';
 import { FileUp } from 'lucide-react';
 import { Modal } from '../components/Modal';
 import { useWorkspace } from '../state/workspace';
 import { useDocSettings } from './docSettings';
 import { masterLabel } from './TemplatesView';
-import { PAPERS, withPaper, type LayoutSettings, type MasterId, type ParaStyleId, type ParaStyle, type MasterPage, type Paper } from './model';
+import { PAPERS, withPaper, STYLE_FONTS, EDITOR_FONT, type LayoutSettings, type MasterId, type ParaStyleId, type ParaStyle, type MasterPage, type Paper, type StyleFont } from './model';
 import { BUNDLED_STYLES, listCustomStyles, type StyleInfo } from '../citations/store';
 import { runCommand } from '../commands/registry';
 import { t, useLang } from '../i18n';
@@ -98,9 +99,11 @@ export function DocSettingsDialog() {
             <label className="form__row">
               <span>{t('docset.citeLang')}</span>
               <select className="select" value={settings.citationLocale} onChange={(e) => update({ citationLocale: e.target.value })}>
-                <option value="it-IT">Italiano</option>
-                <option value="en-US">English (US)</option>
-                <option value="en-GB">English (UK)</option>
+                {CITATION_LOCALES.map((l) => (
+                  <option key={l.id} value={l.id}>
+                    {l.name}
+                  </option>
+                ))}
               </select>
             </label>
             <label className="form__row">
@@ -227,6 +230,16 @@ export function DocSettingsDialog() {
               ))}
             </ul>
             <div className="form">
+              <label className="form__row">
+                <span>{t('pstyle.font')}</span>
+                <select className="select" value={ps.font ?? 'inherit'} onChange={(e) => setStyle(styleId, { font: e.target.value as StyleFont })}>
+                  {STYLE_FONTS.map((f) => (
+                    <option key={f} value={f} style={f !== 'inherit' ? { fontFamily: EDITOR_FONT[f] } : undefined}>
+                      {t(`pstyle.font.${f}`)}
+                    </option>
+                  ))}
+                </select>
+              </label>
               <div className="form__row">
                 <span>{t('pstyle.size')}</span>
                 <Num value={ps.sizePt} step={0.5} min={6} max={40} onChange={(v) => setStyle(styleId, { sizePt: v })} suffix="pt" />

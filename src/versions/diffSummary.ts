@@ -3,6 +3,7 @@
 import { diffLines } from 'diff';
 import type { FileChange } from '../platform/types';
 import { t, tn } from '../i18n';
+import { docsDir, resDir, isDocPath } from '../vault/paths';
 
 export interface LineStats {
   added: number;
@@ -98,7 +99,8 @@ function commentsCount(s: string | null): number {
 }
 
 export function docTitle(path: string): string {
-  return path.replace(/^documents\//, '').replace(/\.md$/i, '');
+  const prefix = docsDir() + '/';
+  return (path.startsWith(prefix) ? path.slice(prefix.length) : path).replace(/\.md$/i, '');
 }
 
 export function summarize(changes: FileChange[]): ChangeSummary {
@@ -114,7 +116,8 @@ export function summarize(changes: FileChange[]): ChangeSummary {
     excerpt: '',
   };
   for (const c of changes) {
-    if (/^documents\/.+\.md$/i.test(c.path) && !c.binary) {
+    const res = resDir() + '/';
+    if (isDocPath(c.path) && !c.binary) {
       const stats = lineStats(c.before, c.after);
       s.docs.push({
         path: c.path,
@@ -129,10 +132,10 @@ export function summarize(changes: FileChange[]): ChangeSummary {
       if (!s.excerpt && stats.samples.length) s.excerpt = stats.samples[0];
     } else if (/^\.alexandria\/comments\//.test(c.path)) {
       s.commentsDelta += commentsCount(c.after) - commentsCount(c.before);
-    } else if (/^resources\/[^/]+\/meta\.json$/.test(c.path)) {
+    } else if (c.path.startsWith(res) && /^[^/]+\/meta\.json$/.test(c.path.slice(res.length))) {
       if (c.status === 'added') s.resourcesAdded++;
       else if (c.status === 'deleted') s.resourcesRemoved++;
-    } else if (!/^resources\//.test(c.path)) {
+    } else if (!c.path.startsWith(res)) {
       s.otherFiles++;
     }
   }

@@ -9,6 +9,8 @@ export interface RibbonGroup {
   items: string[]; // id dei comandi
   /** sintetizzato: un solo pulsante che apre gli strumenti in un pannello */
   compact?: boolean;
+  /** revisione dei predefiniti in cui il gruppo e' comparso (assente = 1) */
+  since?: number;
 }
 
 export interface RibbonTab {
@@ -22,6 +24,8 @@ export interface RibbonTab {
 
 export interface RibbonConfig {
   version: 1;
+  /** ultima revisione dei predefiniti vista da questa barra (assente = 1) */
+  rev?: number;
   tabs: RibbonTab[];
 }
 
@@ -179,7 +183,20 @@ export function reconcile(saved: RibbonConfig | null, defaults: RibbonConfig, kn
     groups: t.groups.map((g) => ({ ...g, items: g.items.filter((id) => known.has(id)) })),
   }));
   for (const d of defaults.tabs) if (!tabs.some((t) => t.id === d.id)) tabs.push(d);
-  return { version: 1, tabs };
+  // gruppi predefiniti nati dopo l'ultima revisione vista: entrano al loro posto nella scheda
+  // (quelli gia' visti e tolti dall'utente non tornano)
+  const seen = saved.rev ?? 1;
+  const present = new Set(tabs.flatMap((t) => t.groups.map((g) => g.id)));
+  for (const d of defaults.tabs) {
+    const i = tabs.findIndex((t) => t.id === d.id);
+    d.groups.forEach((g, at) => {
+      if ((g.since ?? 1) <= seen || present.has(g.id)) return;
+      const groups = [...tabs[i].groups];
+      groups.splice(Math.min(at, groups.length), 0, g);
+      tabs[i] = { ...tabs[i], groups };
+    });
+  }
+  return { version: 1, rev: Math.max(seen, defaults.rev ?? 1), tabs };
 }
 
 export function tabsForView(cfg: RibbonConfig, view: View): RibbonTab[] {

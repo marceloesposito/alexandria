@@ -27,7 +27,6 @@ import {
   Trash2,
   Landmark,
   ScrollText,
-  Files,
 } from 'lucide-react';
 import { registerCommands, notifyCommandState } from '../commands/registry';
 import { viewComponents, globalComponents } from '../shell/views';
@@ -37,12 +36,13 @@ import { leftPanelSections } from '../editor/slots';
 import { ResourcesView } from './ui/ResourcesView';
 import { AddResourceModal } from './ui/AddResourceModal';
 import { ResourceTreeSection, PinnedSection } from './ui/EditorSidebar';
+import { BibliographySection } from '../citations/BibliographySection';
 import { useResources } from './store';
 import { wbApi } from './ui/Whiteboard';
 import { ws } from '../state/workspace';
 import { promptDialog } from '../components/confirm';
 import { CitePicker } from '../citations/CitePicker';
-import { useCitations, insertBibliography, BUNDLED_STYLES, listCustomStyles, type StyleInfo } from '../citations/store';
+import { useCitations, insertBibliography, keysInDoc, BUNDLED_STYLES, listCustomStyles, type StyleInfo } from '../citations/store';
 import { useDocSettings } from '../layout/docSettings';
 import { getEditor } from '../state/editorRef';
 import { setEditorFilesHandler, setEditorLinksHandler, setEditorPasteLinkHandler } from '../editor/extensions/drop';
@@ -108,6 +108,7 @@ export function registerResources() {
   registerDialog('cite', CitePicker);
   leftPanelSections.add(ResourceTreeSection);
   leftPanelSections.add(PinnedSection);
+  leftPanelSections.add(BibliographySection);
   // il visualizzatore si apre da ogni vista (anche dai pin della colonna sinistra dell'editor)
   globalComponents.push(ResourceViewer);
   registerWidget('citeStyle', StyleWidget);
@@ -258,7 +259,6 @@ export function registerResources() {
     { id: 'wb.frame', label: 'cmd.wb.frame', icon: Frame, category: 'whiteboard', views: ['resources'], run: () => (st().setView('whiteboard'), setTimeout(() => void wbApi.addFrame?.(), 50)) },
     { id: 'wb.connect', label: 'cmd.wb.connect', icon: Spline, category: 'whiteboard', views: ['resources'], run: () => ws().toast(t('wb.connectHint'), 'info') },
     { id: 'wb.activeDoc', label: 'cmd.wb.activeDoc', icon: ScrollText, category: 'whiteboard', views: ['resources'], isEnabled: () => !!ws().activeDoc, run: () => (st().setView('whiteboard'), setTimeout(() => wbApi.addActiveDoc?.(), 50)) },
-    { id: 'wb.pickDocs', label: 'cmd.wb.pickDocs', icon: Files, category: 'whiteboard', views: ['resources'], run: () => (st().setView('whiteboard'), setTimeout(() => wbApi.pickDocs?.(), 50)) },
     { id: 'wb.fit', label: 'cmd.wb.fit', icon: Maximize, category: 'whiteboard', views: ['resources'], run: () => wbApi.fit?.() },
 
     // ----- citazioni
@@ -267,6 +267,7 @@ export function registerResources() {
     {
       id: 'cite.bibliography',
       label: 'cmd.cite.bibliography',
+      hint: 'cmd.cite.bibliographyHint',
       icon: BookMarked,
       category: 'citations',
       views: ['editor'],
@@ -275,7 +276,9 @@ export function registerResources() {
         if (!e) return;
         if (!useCitations.getState().engine) await useCitations.getState().rebuild();
         const n = insertBibliography(e);
-        ws().toast(n ? t('cite.bibDone', { n }) : t('cite.bibNone'), n ? 'ok' : 'info');
+        // citazioni presenti ma senza fonte nell'Armarium: lo si dice, invece di "nessuna citazione"
+        const empty = keysInDoc(e).length ? t('cite.bibUnknown') : t('cite.bibNone');
+        ws().toast(n ? t('cite.bibDone', { n }) : empty, n ? 'ok' : 'info');
       },
     },
     { id: 'cite.manage', label: 'cmd.cite.manage', icon: Library, category: 'citations', run: () => (ws().setView('resources'), st().setView('layers')) },

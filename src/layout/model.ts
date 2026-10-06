@@ -1,5 +1,6 @@
 // Impostazioni del documento: stile di citazione e impaginazione (stile InDesign semplificato).
 // Salvate in .alexandria/doc-settings/<doc>.json e usate da editor, anteprima ed export.
+import { CITATION_LOCALE, docTexts, type WritingLang } from '../i18n/writing';
 import { type ObjectData, type HeaderSettings, emptyObject, defaultHeader, normalizeObject, normalizeHeader } from '../types/model';
 
 export type Paper = 'a4' | 'a5' | 'letter' | 'b5' | 'custom';
@@ -20,7 +21,40 @@ export interface MasterPage {
   firstPagePlain: boolean;
 }
 
+/** Carattere di uno stile: quello del documento o una delle tre famiglie incluse nell'app. */
+export type StyleFont = 'inherit' | 'serif' | 'sans' | 'mono';
+export const STYLE_FONTS: StyleFont[] = ['inherit', 'serif', 'sans', 'mono'];
+
+/** Famiglie nell'editor (variabili dei token: Libertinus Serif, Inter, JetBrains Mono). */
+export const EDITOR_FONT: Record<Exclude<StyleFont, 'inherit'>, string> = {
+  serif: 'var(--font-text)',
+  sans: 'var(--font-ui)',
+  mono: 'var(--font-mono)',
+};
+
+/** Famiglie per il PDF (font inclusi in Typst). */
+export const TYPST_FONT: Record<Exclude<StyleFont, 'inherit'>, string> = {
+  serif: '("Libertinus Serif", "New Computer Modern")',
+  sans: '("New Computer Modern Sans", "DejaVu Sans")',
+  mono: '("DejaVu Sans Mono",)',
+};
+
+/** Famiglie per HTML e Word (con i ripieghi di sistema). */
+export const WEB_FONT: Record<Exclude<StyleFont, 'inherit'>, string> = {
+  serif: '"Libertinus Serif", Georgia, serif',
+  sans: 'Inter, "Helvetica Neue", Arial, sans-serif',
+  mono: '"JetBrains Mono", Menlo, Consolas, monospace',
+};
+export const WORD_FONT: Record<Exclude<StyleFont, 'inherit'>, string> = { serif: 'Libertinus Serif', sans: 'Calibri', mono: 'Consolas' };
+
+/** Carattere effettivo di uno stile: il suo, o quello del documento. */
+export function styleFont(s: ParaStyle, layout: { font: 'serif' | 'sans' }): Exclude<StyleFont, 'inherit'> {
+  return s.font && s.font !== 'inherit' ? s.font : layout.font;
+}
+
 export interface ParaStyle {
+  /** carattere: quello del documento ('inherit') o serif, sans, monospace */
+  font: StyleFont;
   sizePt: number;
   weight: 'regular' | 'bold';
   italic: boolean;
@@ -52,6 +86,8 @@ export interface LayoutSettings {
   widowsOrphans: boolean;
   baselineGrid: boolean;
   lineNumbersInPdf: boolean;
+  /** indice dei contenuti in testa all'export (se la pergamena non ne ha gia' uno) */
+  tocInExport: boolean;
   headingNumbers: boolean;
   masters: Record<MasterId, MasterPage>;
   styles: Record<ParaStyleId, ParaStyle>;
@@ -80,6 +116,7 @@ export const PAPERS: Record<Exclude<Paper, 'custom'>, [number, number]> = {
 };
 
 const style = (p: Partial<ParaStyle>): ParaStyle => ({
+  font: 'inherit',
   sizePt: 12,
   weight: 'regular',
   italic: false,
@@ -112,6 +149,7 @@ export function defaultLayout(): LayoutSettings {
     widowsOrphans: true,
     baselineGrid: false,
     lineNumbersInPdf: false,
+    tocInExport: false,
     headingNumbers: false,
     masters: {
       title: { header: '', footer: '', pageNumbers: 'none', numbering: '1', firstPagePlain: true },
@@ -130,23 +168,35 @@ export function defaultLayout(): LayoutSettings {
   };
 }
 
-export function defaultDocSettings(lang: 'it' | 'en' = 'it'): DocSettings {
+export function defaultDocSettings(lang: WritingLang = 'it'): DocSettings {
   return {
     version: 1,
     title: '',
     author: '',
     date: '',
     citationStyle: 'apa',
-    citationLocale: lang === 'it' ? 'it-IT' : 'en-US',
-    bibliographyTitle: lang === 'it' ? 'Bibliografia' : 'References',
+    citationLocale: CITATION_LOCALE[lang],
+    bibliographyTitle: docTexts(lang).bibliography,
     layout: defaultLayout(),
     object: emptyObject(),
     header: defaultHeader(),
   };
 }
 
+/**
+ * Cambio della lingua di scrittura del Compendium: lingua delle citazioni e titolo della
+ * bibliografia seguono la nuova lingua solo se erano ancora i predefiniti della vecchia
+ * (una scelta fatta a mano resta).
+ */
+export function retargetLanguage(s: DocSettings, from: WritingLang, to: WritingLang): DocSettings {
+  const patch: Partial<DocSettings> = {};
+  if (s.citationLocale === CITATION_LOCALE[from]) patch.citationLocale = CITATION_LOCALE[to];
+  if (s.bibliographyTitle === docTexts(from).bibliography) patch.bibliographyTitle = docTexts(to).bibliography;
+  return { ...s, ...patch };
+}
+
 /** Unisce impostazioni salvate (anche di versioni vecchie) con i valori predefiniti. */
-export function normalizeDocSettings(raw: unknown, lang: 'it' | 'en' = 'it'): DocSettings {
+export function normalizeDocSettings(raw: unknown, lang: WritingLang = 'it'): DocSettings {
   const d = defaultDocSettings(lang);
   if (!raw || typeof raw !== 'object') return d;
   const r = raw as Partial<DocSettings>;

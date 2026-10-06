@@ -7,6 +7,7 @@ import { mergeText, resolveText, conflictsLeft, mergeJsonText, withMarkers, type
 import { completeMerge, abortMerge } from './actions';
 import { t } from '../i18n';
 import { docTitle } from './diffSummary';
+import { isDocPath } from '../vault/paths';
 
 interface FileState {
   path: string;
@@ -91,7 +92,7 @@ export function MergeView({ merge }: { merge: MergeResult }) {
       <div className="merge__files">
         {files.map((f, fi) => (
           <section key={f.path} className="merge__file">
-            <h3>{f.path.startsWith('documents/') ? docTitle(f.path) : f.path}</h3>
+            <h3>{isDocPath(f.path) ? docTitle(f.path) : f.path}</h3>
             {f.kind === 'json' && <p className="hint">{t('vc.merge.jsonAuto')}</p>}
             {f.kind === 'binary' && <p className="hint">{t('vc.merge.binary')}</p>}
             {f.kind === 'text' &&

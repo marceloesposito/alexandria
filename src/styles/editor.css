@@ -290,6 +290,57 @@
   padding: 0 0.05em;
 }
 
+/* evidenziazione e testo a colori: tavolozza con nomi, dai token del tema (chiaro e scuro) */
+.doc-body mark[data-color='yellow'],
+.swatch--hl-yellow {
+  background: var(--mark);
+}
+.doc-body mark[data-color='green'],
+.swatch--hl-green {
+  background: color-mix(in srgb, var(--series-3) 30%, transparent);
+}
+.doc-body mark[data-color='blue'],
+.swatch--hl-blue {
+  background: color-mix(in srgb, var(--series-2) 30%, transparent);
+}
+.doc-body mark[data-color='pink'],
+.swatch--hl-pink {
+  background: color-mix(in srgb, var(--series-7) 25%, transparent);
+}
+.doc-body mark[data-color='orange'],
+.swatch--hl-orange {
+  background: color-mix(in srgb, var(--series-5) 30%, transparent);
+}
+.doc-body mark[data-color='purple'],
+.swatch--hl-purple {
+  background: color-mix(in srgb, var(--series-4) 28%, transparent);
+}
+
+.doc-body .tc[data-color='red'],
+.swatch--tc-red {
+  color: var(--series-7);
+}
+.doc-body .tc[data-color='orange'],
+.swatch--tc-orange {
+  color: var(--series-5);
+}
+.doc-body .tc[data-color='green'],
+.swatch--tc-green {
+  color: var(--series-3);
+}
+.doc-body .tc[data-color='blue'],
+.swatch--tc-blue {
+  color: var(--series-2);
+}
+.doc-body .tc[data-color='purple'],
+.swatch--tc-purple {
+  color: var(--series-4);
+}
+.doc-body .tc[data-color='grey'],
+.swatch--tc-grey {
+  color: var(--series-8);
+}
+
 .doc-body table {
   border-collapse: collapse;
   width: 100%;
@@ -635,14 +686,25 @@
 }
 
 /* ---------------------------------------------------------------- modalita' focus */
-.editor-scroll.is-focus .doc-body > * {
+/* righe attenuate tranne quella in cui si scrive: solo nella modalita' Zen (scrittura minimale);
+   altrove tutta la pergamena resta leggibile */
+.app--zen .doc-body > * {
   opacity: 0.35;
   transition: opacity 0.2s;
 }
 
-.editor-scroll.is-focus .doc-body > .has-focus,
-.editor-scroll.is-focus .doc-body > *:focus-within {
+.app--zen .doc-body > .has-focus {
   opacity: 1;
+}
+
+/* lettura continua: attenuato solo il testo delle altre pergamene del Codex */
+.codex-reader__part.is-other > :not(.codex-reader__part-head) {
+  opacity: 0.4;
+  transition: opacity 0.2s;
+}
+
+.codex-reader__part.is-other:hover > :not(.codex-reader__part-head) {
+  opacity: 0.75;
 }
 
 /* ---------------------------------------------------------------- colonna sinistra: risorse / indice */
@@ -749,6 +811,15 @@
   display: grid;
   grid-template-columns: repeat(3, 1fr);
   gap: 8px;
+}
+
+/* opzioni dell'export: una per riga */
+.export-options {
+  display: flex;
+  flex-direction: column;
+  align-items: flex-start;
+  gap: 8px;
+  margin-top: 12px;
 }
 
 .export-format {
@@ -1269,4 +1340,243 @@
   overflow: hidden;
   text-overflow: ellipsis;
   white-space: nowrap;
+}
+
+/* spostamento dei blocchi: gli altri scorrono per fare posto, come in Notion */
+.doc-body.is-reordering > .is-reorder-moving {
+  transition: transform 0.16s ease;
+}
+
+.doc-body.is-reordering > .is-reorder-source {
+  /* il blocco segue il puntatore (immagine del trascinamento): al suo posto resta solo il vuoto */
+  opacity: 0;
+}
+
+/* la linea di rilascio non serve: il posto si vede dal vuoto */
+.editor-scroll:has(.is-reordering) .prosemirror-dropcursor-block {
+  display: none;
+}
+
+/* ---------------------------------------------------------------- thesaurus */
+.thes {
+  position: fixed;
+  z-index: 300;
+  width: 340px;
+  max-height: min(420px, 70vh);
+  display: flex;
+  flex-direction: column;
+  background: var(--paper);
+  border: 1px solid var(--line);
+  border-radius: var(--radius);
+  box-shadow: var(--shadow);
+  font-size: var(--fs-ui-small);
+}
+
+.thes__head {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  padding: 8px 8px 8px 12px;
+  border-bottom: 1px solid var(--line);
+  color: var(--ink);
+  font-weight: 600;
+}
+
+.thes__head > span:nth-child(2) {
+  flex: 1;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.thes__lang {
+  padding: 1px 6px;
+  border: 1px solid var(--line);
+  border-radius: 999px;
+  color: var(--muted);
+  font-size: 10px;
+  font-weight: 500;
+}
+
+.thes__body {
+  overflow: auto;
+  padding: 8px 12px;
+}
+
+.thes__meaning + .thes__meaning {
+  margin-top: 10px;
+}
+
+.thes__pos {
+  margin-bottom: 4px;
+  color: var(--muted);
+  font-style: italic;
+}
+
+.thes__terms {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 4px;
+}
+
+.thes__terms + .thes__terms {
+  margin-top: 4px;
+}
+
+.thes__label {
+  color: var(--muted);
+}
+
+.thes__term {
+  padding: 2px 8px;
+  border: 1px solid var(--line);
+  border-radius: 999px;
+  background: var(--paper);
+  color: var(--ink);
+  font-family: var(--font-text);
+  font-size: 14px;
+  cursor: pointer;
+}
+
+.thes__term:hover {
+  border-color: var(--accent);
+  background: var(--accent-soft);
+}
+
+.thes__term.is-rel {
+  color: var(--muted);
+  border-style: dashed;
+}
+
+.thes__term.is-ant {
+  color: var(--series-7);
+}
+
+.thes__foot {
+  padding: 6px 12px;
+  border-top: 1px solid var(--line);
+  font-size: 11px;
+}
+
+.thes__base {
+  margin: 0 0 8px;
+}
+
+/* ---------------------------------------------------------------- blocchi evidenziati (callout) */
+.nv-callout {
+  --callout: var(--series-2);
+  margin: 0.9em 0;
+  padding: 8px 14px 10px;
+  background: color-mix(in srgb, var(--callout) 6%, var(--paper));
+  border: 1px solid color-mix(in srgb, var(--callout) 35%, transparent);
+  border-radius: 6px;
+}
+
+.nv-callout.is-tip {
+  --callout: var(--series-3);
+}
+
+.nv-callout.is-important {
+  --callout: var(--series-4);
+}
+
+.nv-callout.is-warning {
+  --callout: var(--series-5);
+}
+
+.nv-callout.is-caution {
+  --callout: var(--series-7);
+}
+
+.nv-callout.is-selected {
+  outline: 2px solid var(--accent);
+  outline-offset: 1px;
+}
+
+/* intestazione in stile didascalia: piccola, maiuscoletto, nel colore del tipo */
+.nv-callout__head {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  margin-bottom: 2px;
+  color: var(--callout);
+  font-family: var(--font-ui);
+  font-size: 11px;
+  font-weight: 600;
+  letter-spacing: 0.06em;
+  text-transform: uppercase;
+  user-select: none;
+}
+
+.nv-callout__title {
+  flex: 1;
+  min-width: 0;
+  padding: 0;
+  border: 0;
+  background: transparent;
+  color: inherit;
+  font: inherit;
+  letter-spacing: inherit;
+  text-transform: inherit;
+  outline: none;
+}
+
+.nv-callout__title::placeholder {
+  color: inherit;
+  opacity: 1;
+}
+
+.nv-callout__kind {
+  padding: 0 2px;
+  border: 0;
+  background: transparent;
+  color: var(--muted);
+  font-size: 11px;
+  opacity: 0;
+  transition: opacity 0.15s;
+}
+
+.nv-callout:hover .nv-callout__kind,
+.nv-callout.is-selected .nv-callout__kind,
+.nv-callout__kind:focus {
+  opacity: 1;
+}
+
+.nv-callout__body > :first-child {
+  margin-top: 0;
+}
+
+.nv-callout__body > :last-child {
+  margin-bottom: 0;
+}
+
+/* stile di paragrafo "Didascalia" (come le didascalie delle figure) */
+.doc-body p[data-style="caption"] {
+  color: var(--muted);
+  font-size: 0.85em;
+  font-style: italic;
+  /* centrata come nell'export; un allineamento scelto a mano (style del paragrafo) prevale */
+  text-align: center;
+}
+
+/* carattere per stile (Layout > Stili di paragrafo): se non scelto, quello della pagina */
+.doc-body h1 {
+  font-family: var(--style-font-h1, inherit);
+}
+
+.doc-body h2 {
+  font-family: var(--style-font-h2, inherit);
+}
+
+.doc-body h3 {
+  font-family: var(--style-font-h3, inherit);
+}
+
+.doc-body blockquote {
+  font-family: var(--style-font-quote, inherit);
+}
+
+.doc-body p[data-style="caption"] {
+  font-family: var(--style-font-caption, inherit);
 }

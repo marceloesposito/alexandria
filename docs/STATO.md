@@ -19,10 +19,13 @@ Aggiornato: 7 ottobre 2026 (M11).
 | M11 Modello di Compendium Diario e Voce di oggi | fatto | #15 |
 | M11 Revisioni tracciate (Suggerisci), Marginalia da revisione, andata e ritorno con Word | fatto | #16 |
 | M11 Copia per revisione (.recensio), modalita' revisore, import su branch, risposta ai revisori | fatto | #17 |
+| Stessa identita' in tutte le lingue (glossario con test, pergamena in italiano), Bookmarks -> Excerpta | fatto | #18 |
+| Indice dei contenuti nell'export, bibliografia in un clic visibile nello Scriptorium | fatto | #18 |
+| Index in tutte le lingue; lingua di scrittura per Compendium, separata dall'interfaccia | fatto | #18 |
 
 ## Decisioni prese durante il lavoro
 
-- **Colonna sinistra dell'editor**: selettore Risorse | Indice (richiesta del committente,
+- **Colonna sinistra dell'editor**: selettore Risorse | Index (richiesta del committente,
   5/10). L'indice mostra H1–H3, si aggiorna mentre si scrive, evidenzia la sezione corrente.
 - **Righe del PDF e dell'editor**: stesso carattere (Libertinus Serif), stessa misura e
   stesso corpo; la corrispondenza riga per riga e' molto vicina ma non garantita al 100%
@@ -39,15 +42,70 @@ Aggiornato: 7 ottobre 2026 (M11).
   pagina con una webview fuori schermo, senza focus, senza cookie e senza capability (WKWebView su
   macOS, WebView2 su Windows); la foto e' ridotta a WebP o JPEG. Se non riesce resta og:image.
   Negli export l'embed diventa un link.
+- **Siti che rifiutano lo scaricamento** (403/429/503, controlli anti-bot come Cloudflare): l'import
+  legge la pagina nel motore web dell'app (`net_render` in `snapshot.rs`: finestra fuori schermo che
+  esegue gli script del controllo, poi HTML e foto con `eval_with_callback`). Se il sito chiede un
+  controllo "sei umano?", il link si salva comunque (titolo dall'indirizzo, `titleFromUrl`) e
+  "Verifica il sito" (nel messaggio e nell'ispettore) apre una finestra normale: l'utente supera il
+  controllo e la risorsa si completa al suo posto. Le finestre di lettura tengono i cookie del controllo
+  superato (quelle della sola foto restano senza cookie). Autotest: `ALEXANDRIA_RENDER_TEST="<url>|<file>"`.
+- **Colore del testo ed evidenziatore**: tavolozza con nomi (`src/doc/colors.ts`: rosso, arancio, verde, blu,
+  viola, grigio; evidenziatori giallo, verde, blu, rosa, arancio, viola). Nel Markdown
+  `<span data-color="red">` e `<mark data-color="green">` (il giallo resta `<mark>`); colori fuori
+  tavolozza o `<span>` qualsiasi restano testo. Nell'editor i token del tema, negli export i colori di
+  stampa (PDF, HTML, Word; in LaTeX e testo semplice resta il testo). Nel gruppo Carattere della Home e
+  nella barra flottante.
+- **Barra flottante di formattazione** in basso al centro dello Scriptorium (`src/editor/FormatBar.tsx`):
+  stili, grassetto/corsivo/sottolineato/barrato, colore, evidenziatore, elenchi, link, cancella formato;
+  si riduce a una pillola, si nasconde da Visualizza > Aspetto dello Scriptorium (`prefs.formatBar`). Non
+  compare nella scrittura minimale ne' nella vista sorgente; con la barra aperta il contatore sale sopra.
+- **Silentium** (era "scrittura minimale" / Zen; nome nel glossario): solo il testo, a schermo intero, e
+  qui soltanto le righe diverse da quella in cui si scrive sono attenuate (il blocco col cursore riceve
+  `has-focus`, `src/editor/extensions/focusBlock.ts`). Nella vista normale e nella modalita' focus tutta
+  la pergamena resta leggibile.
+- **Riquadri evidenziati (callout)**: fondo molto chiaro, bordino, icona e intestazione in stile didascalia
+  (titolo libero o il nome del tipo); cinque tipi: nota, suggerimento, importante, attenzione, pericolo. Nel
+  Markdown la sintassi degli avvisi di GitHub/Obsidian (`> [!WARNING] Titolo`, riga vuota, contenuto;
+  `src/doc/callouts.ts`). Da Inserisci > Riquadro evidenziato, dal menu / (uno per tipo) e dal gruppo
+  Blocchi; negli export riquadro colorato (Typst, HTML, Word come tabella a una cella), in LaTeX una
+  citazione con intestazione. L'intestazione senza titolo e' nella lingua di scrittura (`docTexts`).
+- **Carattere per stile** (Layout > Stili di paragrafo > Carattere): "Come il documento", Serif, Sans o
+  Monospace per corpo, H1-H3, citazione, didascalia e nota (`ParaStyle.font`; gli stili salvati prima valgono
+  "come il documento"). Nell'editor Libertinus Serif, Inter e JetBrains Mono (variabili `--style-font-*`), nel
+  PDF Libertinus Serif, New Computer Modern Sans e DejaVu Sans Mono, in HTML le stesse famiglie con i ripieghi
+  di sistema, in Word Libertinus Serif, Calibri e Consolas (corpo e titoli 1-3).
+- **Stile di paragrafo "Didascalia"**: nel menu degli stili, in Formato e nel menu /; nel Markdown
+  `<!-- style:caption -->` in coda al paragrafo (accanto a `<!-- align:... -->`); negli export lo stile
+  "caption" del layout (Typst), `p.caption` (HTML), lo stile Caption di Word.
+- **Thesaurus offline** (italiano e inglese, lingua di scrittura del Compendium): parola selezionata, tasto
+  destro > "Cerca sinonimi" (o Maiusc+F7); senza una selezione fatta prima resta il menu del sistema col
+  controllo ortografico. Il pannello mostra i significati per categoria, i termini simili e i contrari;
+  un clic sostituisce la parola con le stesse maiuscole. Se la parola non c'e' si provano le forme base
+  (bella -> bello, cities -> city) e in italiano il sinonimo si accorda (amena). Dati: thesaurus MyThes di
+  LibreOffice, compressi in `src-tauri/resources/thesaurus/` (0,7 + 4 MB) con le licenze accanto:
+  italiano di LibreItalia (GPL-3, distribuito come file separato, non incluso nel codice MIT), inglese da
+  WordNet (licenza Princeton). Il Rust (`thesaurus.rs`) decomprime e indicizza alla prima richiesta
+  (16 ms e 60 ms) e restituisce il blocco grezzo; l'interpretazione e' in `src/thesaurus/model.ts`.
+- **Lettura continua del Codex**: la pergamena aperta resta leggibile, il testo delle altre pergamene
+  collegate e' attenuato (piu' chiaro al passaggio del mouse).
+- **Spostamento dei blocchi come in Notion** (`src/editor/extensions/blockReorder.ts`): mentre si trascina
+  uno o piu' blocchi dalla maniglia, gli altri scorrono per aprire il vuoto dove andranno; al rilascio lo
+  spostamento lo fa il plugin, nel posto esatto del vuoto. Il disegno passa da decorazioni (ProseMirror
+  ridisegna i blocchi toccati direttamente nel DOM).
 - **Snippet di codice**: nuovo tipo di risorsa (file `snippet.<ext>`), creato da Aggiungi risorse,
   modificabile nel visualizzatore, inseribile nel testo dal menu / o trascinandolo.
 - **Rimozione delle risorse**: ribbon, menu Risorse, clic destro, Canc nella tabella, visualizzatore.
 - **OpenSSL** compilato dentro l'app (`vendored-openssl` di git2): niente dipendenza da Homebrew.
 - **Nomi tematici** (scelti dal committente, solo nelle stringhe di `src/i18n/`, uguali in IT ed EN):
   documento -> Scroll (in italiano Pergamena), gestore risorse -> Armarium (era Bookshelf), schermata Editor -> Scriptorium, Versioni ->
-  Palimpsestus (era History), commenti a margine -> Marginalia, whiteboard -> Tabula, pin -> Bookmarks, layer -> Strata. Le pergamene collegate in sequenza formano un Codex.
-  Restano Library e Bibliografia; vault -> Compendium (la cartella creata al primo avvio si chiama "Il mio Compendium"; quelle esistenti non cambiano nome). Identificatori, cartelle
-  (`documents/`, `resources/`) e file su disco non cambiano.
+  Palimpsestus (era History), commenti a margine -> Marginalia, whiteboard -> Tabula, pin -> Excerpta (un Excerptum; era Bookmarks), layer -> Strata. Le pergamene collegate in sequenza formano un Codex.
+  Restano Library e Bibliografia; vault -> Compendium. Identificatori interni invariati.
+- **Cartelle con i nomi dell'app**: un Compendium nuovo si chiama "Compendium" e contiene `Pergamene/`
+  (`Scrolls/` con l'interfaccia in inglese) e `Armarium/`; i nomi stanno in `vault.json` (`dirs`) e tutto il
+  codice li legge da li' (`docsDir()`, `resDir()`, `isDocPath()` in `src/vault/paths.ts`). I Compendium di
+  prima (e le cartelle che hanno gia' `documents/`) restano con `documents/` e `resources/`: spostarli
+  romperebbe la storia delle versioni. La copia per revisione porta con se' le cartelle d'origine.
+  Una pergamena senza titolo si chiama "Pergamena Senza Titolo" / "Untitled Scroll".
 - **Navbar**: Armarium · Scriptorium · Palimpsestus | Library (Cmd/Ctrl+1..4). La Library e' una tab a
   parte (stessa schermata dell'Armarium sulla raccolta comune); il selettore Vault/Library e' sparito.
 - **Barra degli strumenti**: ogni gruppo si trascina dalla maniglia in basso a destra (anche nel
@@ -63,8 +121,19 @@ Aggiornato: 7 ottobre 2026 (M11).
   `<appData>/templates/*.json`, comuni a tutti i Compendium; un template e' testo di partenza +
   impostazioni. Le master page non sono piu' tre fisse: si creano, rinominano, duplicano ed eliminano
   (il corpo resta; una sezione con una master eliminata usa il corpo). "Nuova pergamena" resta vuota.
-- **Pergamene nella Tabula**: nodi proxy delle pergamene (la aperta o scelte dall'elenco), collegabili
-  fra loro e con le risorse; rinomina ed eliminazione aggiornano nodi e legami. Nella vista senza bordi
+- **Pergamene nella Tabula**: ogni pergamena del Compendium e' un nodo fisso (sempre presente, si sposta
+  ma non si toglie; la prima volta in colonna a sinistra delle risorse, poi la posizione resta salvata),
+  collegabile alle fonti e alle altre pergamene; i collegamenti entrano anche nel Grafo, che con
+  almeno una pergamena non e' mai vuoto. "Vai alla pergamena aperta" la porta in vista.
+  Rinomina ed eliminazione aggiornano nodi e legami.
+- **Navigatore della Tabula** (in basso a destra): miniature dei nodi (pergamene in blu, fonti col colore
+  del gruppo e l'immagine di anteprima se c'e', note in giallo, cornici tratteggiate), sempre leggibile.
+  Era vuoto perche' i nodi controllati non riportavano le misure di React Flow: ora le modifiche
+  'dimensions' tornano nei nodi come `measured`.
+- **Collegamenti nella Tabula**: quattro punti di aggancio per nodo (sopra, sotto, destra, sinistra),
+  14 px con un'area cliccabile piu' larga; ognuno puo' iniziare o ricevere un collegamento
+  (`ConnectionMode.Loose`). Le frecce si attaccano ai lati che si guardano e li seguono quando i nodi
+  si spostano (`facingSides` in `src/resources/tabula.ts`). Nella vista senza bordi
   una barra di una riga mostra le pergamene collegate (clic per aprirle); non compare in Pagina, nella
   scrittura minimale ne' nell'export.
 - **Incolla nell'Armarium**: Cmd/Ctrl+V fuori dai campi crea la risorsa del tipo giusto; un link
@@ -118,6 +187,36 @@ Aggiornato: 7 ottobre 2026 (M11).
 
 - **Nomi**: Bookshelf -> Armarium, History -> Palimpsestus, Library -> Bibliotheca, Librum -> Codex
   (solo testi visibili; identificatori interni invariati).
+- **Stessa identita' in tutte le lingue**: i nomi tematici sono nomi propri, mai tradotti; unica
+  eccezione voluta: in italiano lo Scroll e' la pergamena. Bookmarks -> Excerpta (singolare Excerptum:
+  i passaggi estratti dalle fonti); "Indices" e' stato scartato perche' si confondeva con l'indice dei
+  contenuti e con un eventuale indice analitico.
+- **Index**: l'indice dei contenuti si chiama Index in tutte le lingue (scheda della colonna sinistra,
+  blocco da inserire, menu /, opzione dell'export). Il titolo stampato dentro il testo e nel PDF e'
+  nella lingua di scrittura ("Indice", "Contents", "Inhaltsverzeichnis"...).
+- **Lingua di scrittura per Compendium**, separata da quella dell'interfaccia: `language` in
+  `.alexandria/vault.json` (assente = lingua dell'interfaccia, come prima). Si sceglie dalla sezione
+  "Lingua di scrittura" in Home dello Scriptorium (o dalla tavolozza dei comandi). Lingue: italiano,
+  inglese, tedesco, francese, spagnolo (locale CSL nel pacchetto, `public/csl/locales-*.xml`).
+  Decide: attributo `lang` dell'editor (controllo ortografico e sillabazione della webview), lingua
+  dell'export (Typst `text(lang)`, babel, `<html lang>`, titolo dell'indice in Word), lingua delle
+  citazioni e titolo della bibliografia delle pergamene nuove e dei template predefiniti (testo di
+  partenza in italiano o inglese), testi inseriti nel documento (`docTexts` in `src/i18n/writing.ts`).
+  Al cambio di lingua le pergamene con i predefiniti della vecchia lingua passano alla nuova
+  (`retargetLanguage`); le scelte fatte a mano restano. Restano nella lingua dell'interfaccia le
+  etichette dell'header (Autore, Data, Tipo) quando l'header va nell'export.
+- **Index nell'export**: opzione per pergamena (`layout.tocInExport`, nel dialogo
+  Esporta per tutti i formati tranne Markdown); se la pergamena non ha gia' un blocco indice se ne
+  mette uno in testa al documento esportato (`src/export/toc.ts`), il .md non cambia. Vale anche per i Codex.
+- **Bibliografia in un clic**: "Genera bibliografia" (prima solo "Bibliografia" in Riferimenti) e' anche
+  in Home (gruppo Citazioni) e negli Essenziali di Beginner; nella colonna sinistra la sezione
+  Bibliografia conta le fonti citate, segnala le citazioni senza fonte nell'Armarium e ha il pulsante
+  (Aggiorna se la bibliografia c'e' gia').
+- **Barra salvata e gruppi nuovi**: `RibbonConfig.rev` e `RibbonGroup.since`. Un gruppo predefinito nato
+  dopo l'ultima revisione vista entra al suo posto anche nelle barre personalizzate; se l'utente poi
+  lo toglie non torna.
+  `src/i18n/glossary.ts` li elenca con le traduzioni e i nomi vecchi da evitare; un test
+  controlla ogni lingua contro l'inglese, cosi' una lingua nuova eredita la stessa identita'.
 - **Codex**: nessun oggetto nuovo su disco oltre a `.alexandria/codices/<radice>.json` (nome,
   separatore, titoli come capitoli): la catena sono i legami direzionali fra pergamene gia' in
   `links.json`, letti in profondita' nell'ordine di creazione (`src/codex/model.ts`). Riordinare
@@ -143,6 +242,14 @@ Aggiornato: 7 ottobre 2026 (M11).
   (o colori) per pergamena, ancore per editor e salvataggio/checkpoint per ciascuna.
 
 ## Prossimi passi possibili
+
+- **Personalizzazione dei singoli stili di testo** (richiesta del committente, da fare): oggi Layout > Stili
+  di paragrafo regola, per pergamena, corpo, peso, corsivo, allineamento, spazi, rientro, interlinea e
+  maiuscoletto di sette stili (corpo, H1-H3, citazione, didascalia, nota) e vale soprattutto per l'export.
+  Il carattere per stile c'e' gia' (sotto). Mancano: colore per stile, H4-H6 e l'intestazione dei riquadri, la resa identica
+  nell'editor, stili condivisi dal Compendium o dai template invece che per pergamena, stili nuovi creati
+  dall'utente (applicabili come la Didascalia, `textStyle` del paragrafo).
+- Thesaurus: lemmatizzazione vera (oggi solo regole semplici per le forme base) e altre lingue.
 
 - Firma degli installer e aggiornamenti automatici (oggi assenti per scelta: niente rete).
 - Corrispondenza esatta righe editor/PDF calcolando le righe con Typst in background.

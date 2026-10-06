@@ -1,5 +1,9 @@
 // Documento -> pagina HTML autonoma (stili inclusi, immagini e formule incorporate, note in fondo).
 // Si scrive in un file: tutto il testo dell'utente passa da escapeHtml.
+import { calloutHeading, CALLOUT_HEX } from '../doc/callouts';
+import { WEB_FONT, styleFont } from '../layout/model';
+import { docTexts } from '../i18n/writing';
+import { markColor, TEXT_HEX, HIGHLIGHT_HEX, type TextColor, type HighlightColor } from '../doc/colors';
 import type { PMNode, PMMark, CitationItem } from '../doc/types';
 import { MARK_ORDER } from '../doc/types';
 import { parseMarkdown } from '../doc/parse';
@@ -58,14 +62,22 @@ export function toHtml(doc: PMNode, ctx: ExportContext): string {
         i++;
         continue;
       }
-      const key = m.type === 'link' ? `link:${m.attrs?.href}` : m.type;
+      const keyOf = (x: PMMark) => (x.type === 'link' ? `link:${x.attrs?.href}` : x.type === 'highlight' || x.type === 'textColor' ? `${x.type}:${markColor(x) ?? ''}` : x.type);
+      const key = keyOf(m);
       let j = i;
-      while (j < nodes.length && (nodes[j].marks ?? []).some((x) => (x.type === 'link' ? `link:${x.attrs?.href}` : x.type) === key)) j++;
+      while (j < nodes.length && (nodes[j].marks ?? []).some((x) => keyOf(x) === key)) j++;
       const inner = inline(nodes.slice(i, j), new Set([...excluded, m.type]));
+      const color = markColor(m);
       out +=
         m.type === 'link'
           ? `<a href="${escapeHtml(safeHref(String(m.attrs?.href ?? '')))}" rel="noreferrer">${inner}</a>`
-          : `<${TAGS[m.type]}>${inner}</${TAGS[m.type]}>`;
+          : m.type === 'textColor'
+            ? color
+              ? `<span style="color: ${TEXT_HEX[color as TextColor]}">${inner}</span>`
+              : inner
+            : m.type === 'highlight' && color
+              ? `<mark style="background: ${HIGHLIGHT_HEX[color as HighlightColor]}">${inner}</mark>`
+              : `<${TAGS[m.type]}>${inner}</${TAGS[m.type]}>`;
       i = j;
     }
     return out;
@@ -107,13 +119,18 @@ export function toHtml(doc: PMNode, ctx: ExportContext): string {
   const block = (b: PMNode): string => {
     switch (b.type) {
       case 'paragraph':
-        return `<p${align(b)}>${inline(b.content)}</p>`;
+        return `<p${b.attrs?.textStyle === 'caption' ? ' class="caption"' : ''}${align(b)}>${inline(b.content)}</p>`;
       case 'heading': {
         const l = Math.min(6, Number(b.attrs?.level ?? 1));
         return `<h${l}${align(b)}>${inline(b.content)}</h${l}>`;
       }
       case 'blockquote':
         return `<blockquote>${blocks(b.content)}</blockquote>`;
+      case 'callout': {
+        const { kind, heading } = calloutHeading(b.attrs?.kind, b.attrs?.title, docTexts(ctx.lang).callouts);
+        const c = CALLOUT_HEX[kind];
+        return `<aside class="callout callout-${kind}" style="background: ${c.fill}; border: 1px solid ${c.stroke}; border-radius: 4px; padding: .6em 1em; margin: 1em 0;"><p class="callout-title" style="color: ${c.stroke};">${escapeHtml(heading)}</p>${blocks(b.content)}</aside>`;
+      }
       case 'bulletList':
         return `<ul>${(b.content ?? []).map((i) => `<li>${blocks(i.content)}</li>`).join('')}</ul>`;
       case 'orderedList':
@@ -168,7 +185,20 @@ export function toHtml(doc: PMNode, ctx: ExportContext): string {
   const fn = notes.length
     ? `<section class="footnotes"><hr><ol>${notes.map((n, i) => `<li id="fn${i + 1}">${n} <a href="#fnref${i + 1}">↩</a></li>`).join('')}</ol></section>`
     : '';
-  const font = L.font === 'sans' ? 'system-ui, sans-serif' : "'Libertinus Serif', Georgia, 'Times New Roman', serif";
+  const font = WEB_FONT[styleFont(L.styles.body, L)];
+  // stili con un carattere loro (Layout > Stili di paragrafo)
+  const styleCss = (
+    [
+      ['h1', 'h1'],
+      ['h2', 'h2'],
+      ['h3', 'h3'],
+      ['quote', 'blockquote'],
+      ['caption', 'figcaption, p.caption'],
+    ] as const
+  )
+    .filter(([id]) => L.styles[id].font !== 'inherit')
+    .map(([id, sel]) => `${sel} { font-family: ${WEB_FONT[L.styles[id].font as 'serif']}; }`)
+    .join(' ');
   return `<!doctype html>
 <html lang="${ctx.lang}">
 <head>
@@ -179,8 +209,10 @@ export function toHtml(doc: PMNode, ctx: ExportContext): string {
 <style>
 body { font-family: ${font}; font-size: ${L.fontSizePt}pt; line-height: ${L.leading}; max-width: ${Math.round(L.widthMm - L.marginInnerMm - L.marginOuterMm)}mm; margin: 2em auto; padding: 0 1em; color: #1f1c17; background: #fffdf8; ${L.justify ? 'text-align: justify; hyphens: auto;' : ''} }
 h1, h2, h3 { line-height: 1.25; text-align: left; }
+${styleCss}
 blockquote { margin: 1em 0; padding-left: 1.2em; border-left: 2px solid #c4bba9; color: #4a453c; }
-figure { margin: 1.5em 0; text-align: center; } figure img { max-width: 100%; } figcaption { font-style: italic; font-size: .9em; }
+figure { margin: 1.5em 0; text-align: center; } figure img { max-width: 100%; } figcaption, p.caption { font-style: italic; font-size: .9em; } p.caption { text-align: center; }
+.callout-title { margin: 0 0 .3em; font-size: .75em; font-weight: 600; letter-spacing: .05em; text-transform: uppercase; } .callout > :last-child { margin-bottom: 0; }
 table { border-collapse: collapse; margin: 1em 0; } th, td { border: 1px solid #c4bba9; padding: .3em .6em; }
 pre { background: #f3f0e8; padding: .8em; overflow-x: auto; } code { font-size: .9em; }
 .math-block { text-align: center; margin: 1em 0; } .math svg { vertical-align: middle; }

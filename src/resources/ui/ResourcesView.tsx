@@ -48,7 +48,9 @@ function useSearch(query: string): Set<string> | null {
 export function ResourcesView() {
   useLang();
   const view = useResources((s) => s.view);
-  const boardUsed = useResources((s) => !!(s.whiteboard.docs?.length || s.whiteboard.notes.length || s.whiteboard.frames.length));
+  const boardUsed = useResources((s) => !!(s.whiteboard.notes.length || s.whiteboard.frames.length));
+  // le pergamene sono nodi fissi della Tabula e del grafo: con almeno una pergamena le due viste non sono mai vuote
+  const hasDocs = useWorkspace((s) => s.docs.length > 0);
   const scope = useResources((s) => s.scope);
   const resources = useResources((s) => (s.scope === 'vault' ? s.resources : s.libraryItems));
   const inspector = useResources((s) => s.inspector);
@@ -147,13 +149,13 @@ export function ResourcesView() {
           </button>
         </div>
         <div className="resources__canvas">
-          {resources.length === 0 && !(scope === 'vault' && view === 'whiteboard') ? (
+          {resources.length === 0 && !(scope === 'vault' && (view === 'whiteboard' || (view === 'graph' && hasDocs))) ? (
             empty
           ) : view === 'whiteboard' ? (
             <>
-              {/* nel Compendium la Tabula c'e' sempre: puo' contenere pergamene e note anche senza risorse */}
+              {/* nel Compendium la Tabula c'e' sempre: contiene le pergamene e le note anche senza risorse */}
               <Whiteboard />
-              {resources.length === 0 && !boardUsed && <div className="resources__empty is-overlay">{empty}</div>}
+              {resources.length === 0 && !boardUsed && !hasDocs && <div className="resources__empty is-overlay">{empty}</div>}
             </>
           ) : view === 'graph' ? (
             <GraphView />

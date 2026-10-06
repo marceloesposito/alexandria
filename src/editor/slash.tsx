@@ -25,7 +25,16 @@ import {
   Pilcrow,
   Paperclip,
   SquareCode,
+  Captions,
+  Info,
+  Lightbulb,
+  Star,
+  TriangleAlert,
+  OctagonAlert,
 } from 'lucide-react';
+import { CALLOUT_KINDS, type CalloutKind } from '../doc/callouts';
+
+const CALLOUT_SLASH_ICONS: Record<CalloutKind, typeof Info> = { note: Info, tip: Lightbulb, important: Star, warning: TriangleAlert, caution: OctagonAlert };
 import { t } from '../i18n';
 import { runCommand } from '../commands/registry';
 
@@ -48,6 +57,15 @@ function items(): SlashItem[] {
     { id: 'ol', label: t('slash.ordered'), keywords: 'list elenco numerato', icon: ListOrdered, run: (e, r) => del(e, r).toggleOrderedList().run() },
     { id: 'task', label: t('slash.task'), keywords: 'todo checklist attivita', icon: ListChecks, run: (e, r) => del(e, r).toggleTaskList().run() },
     { id: 'quote', label: t('slash.quote'), keywords: 'blockquote citazione', icon: Quote, run: (e, r) => del(e, r).toggleBlockquote().run() },
+    // blocchi evidenziati: uno per tipo, con la sua icona
+    ...CALLOUT_KINDS.map((k) => ({
+      id: `callout-${k}`,
+      label: t('slash.callout', { kind: t(`callout.${k}`) }),
+      keywords: `callout alert avviso riquadro evidenziato highlight box ${k} ${t(`callout.${k}`)}`,
+      icon: CALLOUT_SLASH_ICONS[k],
+      run: (e: Editor, r: Range) => del(e, r).wrapIn('callout', { kind: k, title: '' }).run(),
+    })),
+    { id: 'caption', label: t('slash.caption'), keywords: 'caption didascalia legenda', icon: Captions, run: (e, r) => del(e, r).setParagraph().updateAttributes('paragraph', { textStyle: 'caption' }).run() },
     { id: 'code', label: t('slash.code'), keywords: 'code codice', icon: Code2, run: (e, r) => del(e, r).toggleCodeBlock().run() },
     { id: 'hr', label: t('slash.divider'), keywords: 'divider separatore linea', icon: Minus, run: (e, r) => del(e, r).setHorizontalRule().run() },
     { id: 'math', label: t('slash.math'), keywords: 'math formula equazione latex', icon: Sigma, run: (e, r) => del(e, r).insertMathBlock('').run() },

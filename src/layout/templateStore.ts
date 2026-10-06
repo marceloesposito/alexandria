@@ -3,6 +3,7 @@ import { create } from 'zustand';
 import { platform, joinPath } from '../platform';
 import { getLang, t } from '../i18n';
 import { useWorkspace } from '../state/workspace';
+import { getWritingLang } from '../i18n/writing';
 import { builtInTemplates, instantiate, parseTemplate, templateFromDoc, type Template } from './templates';
 import { useDocSettings } from './docSettings';
 import { currentMarkdown } from '../editor/session';
@@ -58,7 +59,7 @@ export const useTemplates = create<S>((set, get) => ({
 export async function newDocFromTemplate(tpl: Template, title?: string): Promise<string | null> {
   const ws = useWorkspace.getState();
   const name = title?.trim() || (tpl.id === 'blank' ? t('doc.untitled') : tpl.name);
-  const { markdown, settings } = instantiate(tpl, name, getLang());
+  const { markdown, settings } = instantiate(tpl, name, getWritingLang());
   const rel = await ws.newDoc(name, '', { markdown, settings });
   if (rel) ws.setView('editor');
   return rel;

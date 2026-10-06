@@ -4,8 +4,8 @@
 import { create } from 'zustand';
 import { platform, joinPath, dirName, baseName } from '../platform';
 import { useWorkspace } from '../state/workspace';
-import { readDocument, readJson, writeJson } from '../vault/vault';
-import { abs, commentsFile, RES_DIR } from '../vault/paths';
+import { readDocument, readJson, writeJson, ensureVault } from '../vault/vault';
+import { abs, commentsFile, setVaultDirs, vaultDirs } from '../vault/paths';
 import { parseMarkdown } from '../doc/parse';
 import { keysOfDoc } from '../export/run';
 import { useResources, dirOf } from '../resources/store';
@@ -15,7 +15,7 @@ import { getEditor } from '../state/editorRef';
 import { useTrack } from '../editor/extensions/track';
 import { checkpoint, createBranch, startMerge } from '../versions/actions';
 import { useVersions } from '../versions/store';
-import { packRecensio, unpackRecensio, returnedName, reviewBranch, RECENSIO_EXT, RECENSIO_FORMAT, type RecensioManifest, type RecensioContent } from './format';
+import { packRecensio, unpackRecensio, returnedName, reviewBranch, recensioDirs, RECENSIO_EXT, RECENSIO_FORMAT, type RecensioManifest, type RecensioContent } from './format';
 import { promptDialog } from '../components/confirm';
 import { t } from '../i18n';
 
@@ -78,6 +78,7 @@ export async function createRecensio(rels: string[], title: string, includeFiles
     created: new Date().toISOString(),
     baseSha,
     docs: rels.map((rel) => ({ rel, title: ws.docs.find((d) => d.rel === rel)?.title ?? rel })),
+    dirs: vaultDirs(),
   };
   const path = await platform.saveDialog(`${title}.${RECENSIO_EXT}`, [RECENSIO_EXT]);
   if (!path) return null;
@@ -121,19 +122,23 @@ async function openAsReviewer(path: string, content: RecensioContent) {
   // cartella di lavoro: un Compendium temporaneo con le pergamene, i commenti e le fonti
   const root = joinPath(await platform.appDataDir(), 'recensio', `r${Date.now().toString(36)}`);
   await platform.mkdir(root);
+  // stesse cartelle del Compendium d'origine: i percorsi delle pergamene restano quelli dell'autore
+  const dirs = recensioDirs(content.manifest);
+  setVaultDirs(dirs);
   for (const d of content.manifest.docs) {
     await platform.mkdir(dirName(abs(root, d.rel)));
     await platform.writeText(abs(root, d.rel), content.texts[d.rel] ?? '');
     if (content.comments[d.rel]) await writeJson(abs(root, commentsFile(d.rel)), content.comments[d.rel]);
   }
   for (const [id, s] of Object.entries(content.sources)) {
-    const dir = joinPath(root, RES_DIR, id);
+    const dir = joinPath(root, dirs.res, id);
     await platform.mkdir(dir);
     await writeJson(joinPath(dir, 'meta.json'), s.meta);
     for (const [name, data] of Object.entries(s.files)) await platform.writeBytes(joinPath(dir, name), data);
   }
   useReview.setState({ session: { path, manifest: { ...content.manifest, reviewer: { name: reviewer.trim() } }, root, previous: ws.vaultRoot } });
   useTrack.getState().set({ suggest: true, locked: true, reviewer: reviewer.trim(), author: reviewer.trim() });
+  await ensureVault(root, content.manifest.compendium || undefined, dirs);
   await ws.enterVault(root, true);
   useWorkspace.getState().setView('editor');
 }

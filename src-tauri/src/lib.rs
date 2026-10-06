@@ -8,6 +8,7 @@ mod clipboard;
 mod net;
 mod portable;
 mod snapshot;
+mod thesaurus;
 mod typeset;
 
 /// File .recensio da aprire (passato all'avvio o, su macOS, dal Finder): lo legge una volta il frontend.
@@ -82,6 +83,23 @@ pub fn run() {
                     handle.exit(0);
                 });
             }
+            // autotest della lettura nel motore web (siti con controllo anti-bot):
+            // ALEXANDRIA_RENDER_TEST="<url>|<file.html>" salva l'HTML letto ed esce
+            if let Ok(spec) = std::env::var("ALEXANDRIA_RENDER_TEST") {
+                let handle = app.handle().clone();
+                tauri::async_runtime::spawn(async move {
+                    let (url, out) = spec.split_once('|').unwrap_or((spec.as_str(), "render-test.html"));
+                    let t0 = std::time::Instant::now();
+                    match snapshot::render(&handle, url, std::env::var("ALEXANDRIA_RENDER_VISIBLE").is_ok()).await {
+                        Ok(r) => {
+                            let _ = std::fs::write(out, &r.html);
+                            eprintln!("RENDER OK {} caratteri, foto {}, in {:?} -> {out} ({})", r.html.len(), r.png_b64.is_some(), t0.elapsed(), r.url);
+                        }
+                        Err(e) => eprintln!("RENDER ERRORE dopo {:?}: {e}", t0.elapsed()),
+                    }
+                    handle.exit(0);
+                });
+            }
             Ok(())
         })
         .plugin(tauri_plugin_opener::init())
@@ -128,6 +146,8 @@ pub fn run() {
             index::index_search,
             net::net_fetch,
             snapshot::net_snapshot,
+            snapshot::net_render,
+            thesaurus::thesaurus_lookup,
             portable::portable_root,
             clipboard::clipboard_read,
             selftest_spec,

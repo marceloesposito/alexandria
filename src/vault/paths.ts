@@ -1,8 +1,47 @@
 // Disposizione dei file in un vault. Tutti i percorsi "rel" sono relativi alla radice del vault.
 import { joinPath } from '../platform';
 
-export const DOCS_DIR = 'documents';
-export const RES_DIR = 'resources';
+/**
+ * Cartelle delle pergamene e delle risorse. I Compendium nuovi usano i nomi dell'app (Pergamene o
+ * Scrolls, Armarium), scritti in vault.json; quelli creati prima restano con documents/ e resources/
+ * (spostarli romperebbe la storia delle versioni).
+ */
+export interface VaultDirs {
+  docs: string;
+  res: string;
+}
+
+export const LEGACY_DIRS: VaultDirs = { docs: 'documents', res: 'resources' };
+
+/** Nomi delle cartelle di un Compendium nuovo, nella lingua dell'interfaccia. */
+export function namedDirs(lang: string): VaultDirs {
+  return { docs: lang === 'it' ? 'Pergamene' : 'Scrolls', res: 'Armarium' };
+}
+
+let current: VaultDirs = LEGACY_DIRS;
+
+/** Cartelle del Compendium aperto (le imposta l'apertura del Compendium). */
+export function setVaultDirs(d: VaultDirs) {
+  current = d;
+}
+
+export function vaultDirs(): VaultDirs {
+  return current;
+}
+
+export function docsDir(): string {
+  return current.docs;
+}
+
+export function resDir(): string {
+  return current.res;
+}
+
+/** Percorso di una pergamena del Compendium aperto (es. "Pergamene/Capitolo.md"). */
+export function isDocPath(path: string): boolean {
+  return path.startsWith(current.docs + '/') && /\.md$/i.test(path);
+}
+
 export const META_DIR = '.alexandria';
 export const CACHE_DIR = '.alexandria-cache';
 
@@ -15,8 +54,8 @@ export const INDEX_DB = `${CACHE_DIR}/index.sqlite`;
 
 /** Chiave stabile del documento per i file accanto: documents/a/b.md -> a~b */
 export function docKey(rel: string): string {
-  return rel
-    .replace(/^documents\//, '')
+  const prefix = current.docs + '/';
+  return (rel.startsWith(prefix) ? rel.slice(prefix.length) : rel)
     .replace(/\.md$/i, '')
     .replace(/\//g, '~');
 }

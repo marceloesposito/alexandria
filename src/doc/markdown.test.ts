@@ -35,6 +35,13 @@ const CANONICAL = [
   '<!-- toc -->\n',
   '| A | B |\n| :---: | ---: |\n| 1 | 2 |\n',
   'Testo <u>sottolineato</u>, <mark>evidenziato</mark>, H<sub>2</sub>O e x<sup>2</sup>.\n',
+  'Colori: <span data-color="red">rosso</span>, <mark data-color="green">verde</mark> e <span data-color="blue"><mark data-color="yellow">entrambi</mark></span>.\n',
+  'Due evidenziatori vicini: <mark data-color="pink">rosa</mark><mark data-color="blue">blu</mark>.\n',
+  '> [!NOTE] Da ricordare\n>\n> Il capitolo 2 va rivisto.\n',
+  '> [!WARNING]\n>\n> Primo paragrafo.\n>\n> - punto\n> - altro punto\n',
+  '> [!TIP] Titolo con \\*asterischi\\*\n>\n> Testo **forte**.\n',
+  'Figura 1: la pianta del tempio. <!-- style:caption -->\n',
+  'Didascalia a destra <!-- style:caption --> <!-- align:right -->\n',
   '<!-- bibliography:start -->\n\n## Bibliografia\n\nRossi, M. (2020). *Titolo*.\n\n<!-- bibliography:end -->\n',
   'Costa \\$5 e \\*non\\* enfasi, \\[parentesi\\].\n',
   '\\# non titolo\n',
@@ -55,6 +62,44 @@ describe('markdown round trip', () => {
     const a = parseMarkdown(md);
     const b = parseMarkdown(serializeMarkdown(a));
     expect(b).toEqual(a);
+  });
+});
+
+describe('blocchi evidenziati e didascalie', () => {
+  it('avviso con titolo e contenuto', () => {
+    const c = parseMarkdown('> [!IMPORTANT] Scadenza\n>\n> Consegna il 10.\n').content![0];
+    expect(c).toMatchObject({ type: 'callout', attrs: { kind: 'important', title: 'Scadenza' } });
+    expect(c.content![0].content![0].text).toBe('Consegna il 10.');
+  });
+
+  it('avvisi scritti altrove: titolo e testo sulla stessa citazione, tipo in minuscolo', () => {
+    const c = parseMarkdown('> [!tip]\n> Una riga sola.\n').content![0];
+    expect(c).toMatchObject({ type: 'callout', attrs: { kind: 'tip', title: '' } });
+    expect(JSON.stringify(c.content)).toContain('Una riga sola.');
+  });
+
+  it('una citazione normale e un tipo sconosciuto restano citazioni', () => {
+    expect(parseMarkdown('> Citazione.\n').content![0].type).toBe('blockquote');
+    expect(parseMarkdown('> [!FOO] x\n').content![0].type).toBe('blockquote');
+  });
+
+  it('didascalia: stile del paragrafo', () => {
+    const p = parseMarkdown('Figura 2. <!-- style:caption --> <!-- align:center -->\n').content![0];
+    expect(p.attrs).toEqual({ textStyle: 'caption', textAlign: 'center' });
+    expect(p.content![0].text).toBe('Figura 2.');
+  });
+});
+
+describe('colori', () => {
+  it('testo ed evidenziazione con colore diventano segni con attrs', () => {
+    const p = parseMarkdown('<span data-color="red">a</span> <mark data-color="green">b</mark> <mark>c</mark>\n').content![0];
+    const marks = (p.content ?? []).filter((n) => n.text?.trim()).map((n) => n.marks);
+    expect(marks).toEqual([[{ type: 'textColor', attrs: { color: 'red' } }], [{ type: 'highlight', attrs: { color: 'green' } }], [{ type: 'highlight' }]]);
+  });
+
+  it('colori fuori tavolozza e <span> qualsiasi restano testo, senza stili arbitrari', () => {
+    const p = parseMarkdown('<span data-color="#ff0000">x</span> <span class="a">y</span>\n').content![0];
+    expect((p.content ?? []).some((n) => n.marks?.some((m) => m.type === 'textColor'))).toBe(false);
   });
 });
 

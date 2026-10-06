@@ -174,6 +174,15 @@ export interface Platform {
   fetchUrl(url: string, accept?: string): Promise<FetchResult>;
   /** foto della pagina (PNG) da una webview fuori schermo; null se non disponibile */
   snapshotUrl(url: string): Promise<Uint8Array | null>;
+  /**
+   * Pagina letta nel motore web (per i siti che rifiutano lo scaricamento diretto, es. controlli
+   * anti-bot): indirizzo finale, HTML dopo gli script e foto; null se non si riesce.
+   */
+  renderPage(url: string, opts?: { interactive?: boolean }): Promise<{ url: string; html: string; png: Uint8Array | null } | null>;
+
+  // thesaurus offline (dati MyThes nelle risorse dell'app)
+  /** blocco grezzo del thesaurus per una parola (null: non c'e') */
+  thesaurus(lang: 'it' | 'en', word: string): Promise<string | null>;
 
   // impaginazione
   typst(source: string, files: TypstFile[], format: 'pdf' | 'svg'): Promise<TypstOutput>;

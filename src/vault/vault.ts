@@ -1,9 +1,12 @@
 // Operazioni sul vault: creazione, elenco dei documenti, lettura e scrittura con i file accanto.
-import { t } from '../i18n';
+import { t, getLang } from '../i18n';
 import { platform, joinPath, baseName } from '../platform';
 import {
-  DOCS_DIR,
-  RES_DIR,
+  LEGACY_DIRS,
+  namedDirs,
+  setVaultDirs,
+  docsDir,
+  type VaultDirs,
   META_DIR,
   CACHE_DIR,
   VAULT_FILE,
@@ -21,6 +24,16 @@ export interface VaultConfig {
   created: string;
   /** Ordine manuale dei documenti (percorsi relativi); quelli assenti vanno in coda per nome */
   order: string[];
+  /** lingua di scrittura del Compendium ('it', 'en', ...); assente = quella dell'interfaccia */
+  language?: string;
+  /** cartelle delle pergamene e delle risorse; assente = documents/ e resources/ (Compendium di prima) */
+  dirs?: VaultDirs;
+}
+
+/** Cartelle di un Compendium (quelle scritte in vault.json, o quelle di prima). */
+export function dirsOf(cfg: VaultConfig): VaultDirs {
+  const d = cfg.dirs;
+  return d && typeof d.docs === 'string' && typeof d.res === 'string' && d.docs && d.res ? d : LEGACY_DIRS;
 }
 
 export interface DocInfo {
@@ -48,14 +61,20 @@ export async function isVault(root: string): Promise<boolean> {
 }
 
 /** Crea (o completa) la struttura di un vault e il repository git, con un primo commit. */
-export async function ensureVault(root: string, name?: string): Promise<VaultConfig> {
-  for (const d of [DOCS_DIR, RES_DIR, META_DIR, CACHE_DIR]) await platform.mkdir(joinPath(root, d));
+export async function ensureVault(root: string, name?: string, withDirs?: VaultDirs): Promise<VaultConfig> {
   let cfg = await readJson<VaultConfig | null>(joinPath(root, VAULT_FILE), null);
   const fresh = !cfg;
   if (!cfg) {
-    cfg = { version: 1, name: name ?? baseName(root), created: new Date().toISOString(), order: [] };
+    // cartella nuova: i nomi dell'app; una cartella che ha gia' documents/ (vault di prima) li tiene
+    const legacy = await platform.exists(joinPath(root, LEGACY_DIRS.docs));
+    const dirs = withDirs ?? (legacy ? LEGACY_DIRS : namedDirs(getLang()));
+    cfg = { version: 1, name: name ?? baseName(root), created: new Date().toISOString(), order: [], dirs };
+    await platform.mkdir(joinPath(root, META_DIR));
     await writeJson(joinPath(root, VAULT_FILE), cfg);
   }
+  const dirs = dirsOf(cfg);
+  setVaultDirs(dirs);
+  for (const d of [dirs.docs, dirs.res, META_DIR, CACHE_DIR]) await platform.mkdir(joinPath(root, d));
   await platform.gitInit(root);
   const gi = joinPath(root, '.gitignore');
   if (!(await platform.exists(gi))) await platform.writeText(gi, `${CACHE_DIR}/\n*.alexandria-tmp\n.DS_Store\nThumbs.db\n`);
@@ -75,6 +94,7 @@ export async function saveVaultConfig(root: string, cfg: VaultConfig): Promise<v
 
 export async function listDocuments(root: string, cfg: VaultConfig): Promise<DocInfo[]> {
   const out: DocInfo[] = [];
+  const docs = dirsOf(cfg).docs;
   async function walk(dir: string, folder: string) {
     let entries;
     try {
@@ -86,12 +106,12 @@ export async function listDocuments(root: string, cfg: VaultConfig): Promise<Doc
       if (e.name.startsWith('.')) continue;
       if (e.isDir) await walk(e.path, folder ? `${folder}/${e.name}` : e.name);
       else if (/\.md$/i.test(e.name)) {
-        const rel = `${DOCS_DIR}/${folder ? folder + '/' : ''}${e.name}`;
+        const rel = `${docs}/${folder ? folder + '/' : ''}${e.name}`;
         out.push({ rel, title: titleFromRel(rel), folder, mtime: e.mtime });
       }
     }
   }
-  await walk(joinPath(root, DOCS_DIR), '');
+  await walk(joinPath(root, docs), '');
   const order = new Map(cfg.order.map((r, i) => [r, i]));
   out.sort((a, b) => {
     const oa = order.get(a.rel) ?? Infinity;
@@ -112,7 +132,7 @@ export async function writeDocument(root: string, rel: string, md: string): Prom
 }
 
 export async function createDocument(root: string, docs: DocInfo[], title: string, folder = '', body = ''): Promise<string> {
-  const dir = folder ? `${DOCS_DIR}/${folder}` : DOCS_DIR;
+  const dir = folder ? `${docsDir()}/${folder}` : docsDir();
   const taken = new Set(docs.filter((d) => d.folder === folder).map((d) => baseName(d.rel)));
   const name = uniqueName(safeFileName(title), taken, '.md');
   const rel = `${dir}/${name}`;

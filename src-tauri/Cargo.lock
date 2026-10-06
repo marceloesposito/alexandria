@@ -24,6 +24,7 @@ dependencies = [
  "base64 0.23.1",
  "block2",
  "chrono",
+ "flate2",
  "git2",
  "keyring",
  "objc2",

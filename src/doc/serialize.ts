@@ -1,5 +1,7 @@
 // Albero del documento -> Markdown (Pandoc/GFM). Deve fare il giro completo con parse.ts:
 // parse(serialize(doc)) == doc per ogni documento prodotto dall'editor.
+import { calloutMarker, isCalloutKind } from './callouts';
+import { markColor } from './colors';
 import type { PMNode, PMMark, MarkType, CitationItem } from './types';
 import { MARK_ORDER } from './types';
 import { formatCitation } from './citeSyntax';
@@ -30,7 +32,9 @@ function blocks(nodes: PMNode[], st: State, tight: boolean): string {
 
 function alignSuffix(n: PMNode): string {
   const a = n.attrs?.textAlign;
-  return a && a !== 'left' ? ` <!-- align:${a} -->` : '';
+  // stile del paragrafo (didascalia) e allineamento: commenti in coda al blocco
+  const style = n.attrs?.textStyle === 'caption' ? ' <!-- style:caption -->' : '';
+  return style + (a && a !== 'left' ? ` <!-- align:${a} -->` : '');
 }
 
 function block(n: PMNode, st: State): string {
@@ -43,6 +47,13 @@ function block(n: PMNode, st: State): string {
       const level = Number(n.attrs?.level ?? 1);
       const s = inline(n.content ?? [], st).replace(/\n/g, ' ');
       return '#'.repeat(level) + ' ' + s + alignSuffix(n);
+    }
+    case 'callout': {
+      // "> [!NOTE] Titolo", una riga vuota, poi il contenuto (sintassi degli avvisi di GitHub/Obsidian)
+      const kind = isCalloutKind(n.attrs?.kind) ? n.attrs.kind : 'note';
+      const head = calloutMarker(kind, escapeText(String(n.attrs?.title ?? '')));
+      const body = blocks(n.content ?? [], st, false);
+      return ['> ' + head, '>', ...body.split('\n').map((l) => (l ? '> ' + l : '>'))].join('\n');
     }
     case 'blockquote':
       return blocks(n.content ?? [], st, false)
@@ -148,6 +159,7 @@ function table(n: PMNode, st: State): string {
 
 function markKey(m: PMMark): string {
   if (m.type === 'insertion' || m.type === 'deletion') return `${m.type}:${m.attrs?.author ?? ''}:${m.attrs?.date ?? ''}`;
+  if (m.type === 'highlight' || m.type === 'textColor') return `${m.type}:${markColor(m) ?? ''}`;
   return m.type === 'link' ? `link:${m.attrs?.href}:${m.attrs?.title ?? ''}` : m.type;
 }
 
@@ -203,6 +215,10 @@ export function inline(nodes: PMNode[], st: State, excluded: Set<string> = new S
 
 function wrap(m: PMMark, inner: string): string {
   if (m.type === 'insertion' || m.type === 'deletion') return trackTag(m, inner);
+  // colori: <mark data-color="..."> e <span data-color="..."> (HTML standard dentro il Markdown)
+  const color = markColor(m);
+  if (m.type === 'textColor') return color ? `<span data-color="${color}">${inner}</span>` : inner;
+  if (m.type === 'highlight' && color) return `<mark data-color="${color}">${inner}</mark>`;
   // gli spazi ai bordi escono dai delimitatori, altrimenti CommonMark non chiude l'enfasi
   const lead = /^\s*/.exec(inner)![0];
   const trail = /\s*$/.exec(inner.slice(lead.length))![0];
@@ -225,6 +241,7 @@ const DELIMS: Record<MarkType, [string, string]> = {
   strike: ['~~', '~~'],
   underline: ['<u>', '</u>'],
   highlight: ['<mark>', '</mark>'],
+  textColor: ['', ''],
   subscript: ['<sub>', '</sub>'],
   superscript: ['<sup>', '</sup>'],
   code: ['`', '`'],

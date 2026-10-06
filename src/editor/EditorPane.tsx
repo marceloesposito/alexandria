@@ -8,12 +8,14 @@ import { TextSelection } from '@tiptap/pm/state';
 import { buildExtensions } from './extensions';
 import { setEditor, getEditor } from '../state/editorRef';
 import { useWorkspace } from '../state/workspace';
+import { getWritingLang, useWritingLang } from '../i18n/writing';
 import { useDoc, loadDocument, scheduleSave, flushSave, updateSelectionCounts, checkExternalChange } from './session';
 import { measureLines, setLines } from './lines';
 import { LineGutter } from './LineGutter';
 import { SourceView } from './SourceView';
 import { notifyCommandState } from '../commands/registry';
 import { useDocSettings, pageMetrics } from '../layout/docSettings';
+import { EDITOR_FONT, styleFont } from '../layout/model';
 import { HorizontalRuler, VerticalRuler, RULER_SPACE_PX } from './Rulers';
 import { useZen } from '../state/zen';
 import { DocHeader } from './DocHeader';
@@ -29,6 +31,7 @@ export function EditorPane({ overlay, pageRef: externalPageRef }: Props) {
   const activeDoc = useWorkspace((s) => s.activeDoc);
   const reloadToken = useWorkspace((s) => s.reloadToken);
   const prefs = useWorkspace((s) => s.app.prefs);
+  const writingLang = useWritingLang();
   const sourceMode = useDoc((s) => s.sourceMode);
   const layout = useDocSettings((s) => s.settings.layout);
   const localPageRef = useRef<HTMLDivElement>(null);
@@ -54,7 +57,7 @@ export function EditorPane({ overlay, pageRef: externalPageRef }: Props) {
   const editor = useEditor({
     extensions: buildExtensions(),
     editorProps: {
-      attributes: { class: 'doc-body', spellcheck: String(prefs.spellcheck) },
+      attributes: { class: 'doc-body', spellcheck: String(prefs.spellcheck), lang: getWritingLang() },
     },
     onUpdate: ({ editor }) => {
       scheduleSave(editor);
@@ -175,13 +178,20 @@ export function EditorPane({ overlay, pageRef: externalPageRef }: Props) {
     editor?.view.dom.setAttribute('spellcheck', String(prefs.spellcheck));
   }, [editor, prefs.spellcheck]);
 
+  // lingua del testo (controllo ortografico e sillabazione): quella del Compendium, non dell'interfaccia
+  useEffect(() => {
+    editor?.view.dom.setAttribute('lang', writingLang);
+  }, [editor, writingLang]);
+
   const m = pageMetrics(layout);
   const style = {
     '--page-width': `${m.textWidthMm}mm`,
     '--page-pad-x': borderless ? '17mm' : `${m.padXmm}mm`,
     '--page-font-size': `${layout.fontSizePt}pt`,
     '--page-leading': String(layout.leading),
-    '--page-font': layout.font === 'sans' ? 'var(--font-ui)' : 'var(--font-text)',
+    // carattere del corpo (stile "corpo", o quello del documento) e degli stili che ne hanno uno loro
+    '--page-font': EDITOR_FONT[styleFont(layout.styles.body, layout)],
+    ...Object.fromEntries((['h1', 'h2', 'h3', 'quote', 'caption'] as const).map((id) => [`--style-font-${id}`, layout.styles[id].font !== 'inherit' ? EDITOR_FONT[layout.styles[id].font as 'serif'] : 'var(--page-font)'])),
     zoom: prefs.zoom * fit,
   } as React.CSSProperties;
 

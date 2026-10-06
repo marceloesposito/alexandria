@@ -22,6 +22,21 @@ const content: RecensioContent = {
 };
 
 describe('copia per revisione (.recensio)', () => {
+  it('Compendium con le cartelle nuove: i percorsi tornano uguali, qualunque Compendium sia aperto', async () => {
+    const dirs = { docs: 'Pergamene', res: 'Armarium' };
+    const nuovo: RecensioContent = {
+      ...content,
+      manifest: { ...content.manifest, dirs, docs: [{ rel: 'Pergamene/Parte/Capitolo.md', title: 'Capitolo' }] },
+      texts: { 'Pergamene/Parte/Capitolo.md': 'Testo.' },
+      comments: { 'Pergamene/Parte/Capitolo.md': { version: 1, comments: [] } },
+    };
+    const back = await unpackRecensio(await packRecensio(nuovo));
+    expect(back.manifest.dirs).toEqual(dirs);
+    expect(back.manifest.docs.map((d) => d.rel)).toEqual(['Pergamene/Parte/Capitolo.md']);
+    expect(back.texts['Pergamene/Parte/Capitolo.md']).toBe('Testo.');
+    expect(back.comments['Pergamene/Parte/Capitolo.md']).toEqual({ version: 1, comments: [] });
+  });
+
   it('impacchetta e rilegge tutto', async () => {
     const back = await unpackRecensio(await packRecensio(content));
     expect(back.manifest.docs.map((d) => d.title)).toEqual(['Capitolo 1', 'Capitolo 2']);

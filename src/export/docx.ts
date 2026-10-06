@@ -1,5 +1,8 @@
 // Documento -> DOCX (Word) con la libreria docx: stili, note, immagini, tabelle, elenchi,
 // formato pagina e margini dalle impostazioni, intestazione e numeri di pagina.
+import { markColor, TEXT_HEX, HIGHLIGHT_WORD, type TextColor, type HighlightColor } from '../doc/colors';
+import { calloutHeading, CALLOUT_HEX } from '../doc/callouts';
+import { WORD_FONT, styleFont } from '../layout/model';
 import {
   CommentRangeStart,
   CommentRangeEnd,
@@ -25,14 +28,31 @@ import {
   PageNumber,
   TableOfContents,
   LevelFormat,
+  BorderStyle,
+  ShadingType,
   type IRunOptions,
   type ParagraphChild,
 } from 'docx';
 import type { PMNode, CitationItem } from '../doc/types';
 import { parseMarkdown } from '../doc/parse';
 import type { ExportContext } from './context';
+import { docTexts } from '../i18n/writing';
 
 const MM = 56.6929; // twip per millimetro
+
+/** Evidenziatore di Word per un nodo: il colore della tavolozza o il giallo. */
+function highlightOf(n: PMNode): string | null {
+  const m = n.marks?.find((x) => x.type === 'highlight');
+  if (!m) return null;
+  const c = markColor(m);
+  return c ? HIGHLIGHT_WORD[c as HighlightColor] : 'yellow';
+}
+
+function textColorOf(n: PMNode): string | undefined {
+  const m = n.marks?.find((x) => x.type === 'textColor');
+  const c = m && markColor(m);
+  return c ? TEXT_HEX[c as TextColor].slice(1) : undefined;
+}
 
 interface RunStyle {
   bold?: boolean;
@@ -41,7 +61,10 @@ interface RunStyle {
   strike?: boolean;
   superScript?: boolean;
   subScript?: boolean;
-  highlight?: boolean;
+  /** nome dell'evidenziatore di Word (null: niente) */
+  highlight?: string | null;
+  /** colore del testo, esadecimale senza # */
+  color?: string;
   code?: boolean;
 }
 
@@ -127,7 +150,8 @@ export async function toDocx(doc: PMNode, ctx: ExportContext): Promise<Uint8Arra
       superScript: s.superScript,
       subScript: s.subScript,
       ...(s.underline ? { underline: {} } : {}),
-      ...(s.highlight ? { highlight: 'yellow' } : {}),
+      ...(s.highlight ? { highlight: s.highlight as IRunOptions['highlight'] } : {}),
+      ...(s.color ? { color: s.color } : {}),
       ...(s.code ? { font: 'Consolas' } : {}),
     };
     return new TextRun(o);
@@ -157,7 +181,8 @@ export async function toDocx(doc: PMNode, ctx: ExportContext): Promise<Uint8Arra
         strike: marks.has('strike'),
         superScript: marks.has('superscript'),
         subScript: marks.has('subscript'),
-        highlight: marks.has('highlight'),
+        highlight: highlightOf(n),
+        color: textColorOf(n),
         code: marks.has('code'),
       };
       const link = n.marks?.find((m) => m.type === 'link');
@@ -219,8 +244,40 @@ export async function toDocx(doc: PMNode, ctx: ExportContext): Promise<Uint8Arra
     for (const b of nodes) {
       switch (b.type) {
         case 'paragraph':
+          if (b.attrs?.textStyle === 'caption') {
+            // stile "Didascalia" di Word, come le didascalie delle figure
+            out.push(new Paragraph({ style: 'Caption', alignment: align(b.attrs?.textAlign) ?? AlignmentType.CENTER, children: inline(b.content) }));
+            break;
+          }
           out.push(new Paragraph({ children: inline(b.content), alignment: align(b.attrs?.textAlign), ...(listRef ? { numbering: { reference: listRef, level } } : {}) }));
           break;
+        case 'callout': {
+          // riquadro evidenziato: una tabella a una cella, fondo chiaro e bordino nel colore del tipo
+          const { kind, heading } = calloutHeading(b.attrs?.kind, b.attrs?.title, docTexts(ctx.lang).callouts);
+          const c = CALLOUT_HEX[kind];
+          const line = { style: BorderStyle.SINGLE, size: 4, color: c.stroke.slice(1) };
+          out.push(
+            new Table({
+              width: { size: 100, type: WidthType.PERCENTAGE },
+              rows: [
+                new TableRow({
+                  children: [
+                    new TableCell({
+                      shading: { type: ShadingType.CLEAR, color: 'auto', fill: c.fill.slice(1) },
+                      borders: { top: line, bottom: line, left: line, right: line },
+                      margins: { top: 100, bottom: 100, left: 160, right: 160 },
+                      children: [
+                        new Paragraph({ children: [new TextRun({ text: heading.toUpperCase(), bold: true, size: 16, color: c.stroke.slice(1) })] }),
+                        ...(blocks(b.content ?? [], level).filter((x) => !(x instanceof TableOfContents)) as (Paragraph | Table)[]),
+                      ],
+                    }),
+                  ],
+                }),
+              ],
+            }),
+          );
+          break;
+        }
         case 'heading':
           out.push(new Paragraph({ heading: HEADINGS[Math.min(5, Number(b.attrs?.level ?? 1) - 1)], children: inline(b.content), alignment: align(b.attrs?.textAlign) }));
           break;
@@ -294,7 +351,7 @@ export async function toDocx(doc: PMNode, ctx: ExportContext): Promise<Uint8Arra
           out.push(new Paragraph({ children: [new PageBreak()] }));
           break;
         case 'toc':
-          out.push(new TableOfContents(ctx.lang === 'it' ? 'Indice' : 'Contents', { hyperlink: true, headingStyleRange: '1-3' }));
+          out.push(new TableOfContents(docTexts(ctx.lang).toc, { hyperlink: true, headingStyleRange: '1-3' }));
           break;
         case 'bibliography':
           for (const c of b.content ?? []) {
@@ -359,7 +416,11 @@ export async function toDocx(doc: PMNode, ctx: ExportContext): Promise<Uint8Arra
     features: { updateFields: true },
     styles: {
       default: {
-        document: { run: { font: L.font === 'sans' ? 'Calibri' : 'Libertinus Serif', size: fontSize }, paragraph: { spacing: { line: Math.round(L.leading * 240), after: Math.round(L.styles.body.spaceAfterPt * 20) } } },
+        document: { run: { font: WORD_FONT[styleFont(L.styles.body, L)], size: fontSize }, paragraph: { spacing: { line: Math.round(L.leading * 240), after: Math.round(L.styles.body.spaceAfterPt * 20) } } },
+        // titoli con un carattere loro (Layout > Stili di paragrafo)
+        ...(L.styles.h1.font !== 'inherit' ? { heading1: { run: { font: WORD_FONT[L.styles.h1.font] } } } : {}),
+        ...(L.styles.h2.font !== 'inherit' ? { heading2: { run: { font: WORD_FONT[L.styles.h2.font] } } } : {}),
+        ...(L.styles.h3.font !== 'inherit' ? { heading3: { run: { font: WORD_FONT[L.styles.h3.font] } } } : {}),
       },
     },
     numbering: {

@@ -41,7 +41,7 @@ const BEGINNER_TABS: RibbonTab[] = [
     groups: [
       { id: 'bg-ed-style', label: 'ribbon.group.style', items: ['insert.h1', 'insert.h2', 'insert.paragraph'] },
       { id: 'bg-ed-char', label: 'ribbon.group.character', items: ['fmt.bold', 'fmt.italic', 'fmt.highlight', 'insert.bulletList'] },
-      { id: 'bg-ed-add', label: 'ribbon.group.add', items: ['res.insert', 'cite.insert', 'comment.add'] },
+      { id: 'bg-ed-add', label: 'ribbon.group.add', items: ['res.insert', 'cite.insert', 'cite.bibliography', 'comment.add'] },
       { id: 'bg-ed-out', label: 'ribbon.group.output', items: ['view.zen', 'file.exportPdf'] },
     ],
   },

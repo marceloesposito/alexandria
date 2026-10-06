@@ -10,7 +10,7 @@ import { normalizePath } from '../vault/resolve';
 import { parseMarkdown } from '../doc/parse';
 import { embedsToLinks, type PMNode } from '../doc/types';
 import { normalizeDocSettings } from '../layout/model';
-import { getLang } from '../i18n';
+import { getWritingLang } from '../i18n/writing';
 import { allCodices, codexOrder, relinkAsChain, removeFromCodex, normalizeCodexSettings, type CodexSettings, type CodexInfo } from './model';
 import { prepareDoc, keysOfDoc, VAULT_SRC, type Prepared } from '../export/run';
 
@@ -111,6 +111,6 @@ export async function prepareCodex(root: string): Promise<Prepared | null> {
   if (!vault) return null;
   const s = await useCodexStore.getState().load(root);
   const doc = await codexDoc(root, s);
-  const settings = normalizeDocSettings(await readJson<unknown>(abs(vault, docSettingsFile(root)), null), getLang());
+  const settings = normalizeDocSettings(await readJson<unknown>(abs(vault, docSettingsFile(root)), null), getWritingLang());
   return prepareDoc(doc, settings, s.name, vault, root, keysOfDoc(doc));
 }

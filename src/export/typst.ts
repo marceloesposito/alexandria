@@ -2,11 +2,15 @@
 // carattere dell'utente puo' essere interpretato come markup; la formattazione e' fatta
 // con chiamate esplicite (#strong, #emph, #footnote...). Le impostazioni di pagina, gli stili
 // di paragrafo e le pagine mastro vengono dalle impostazioni del documento.
+import { calloutHeading, CALLOUT_HEX } from '../doc/callouts';
+import { markColor, TEXT_HEX, HIGHLIGHT_HEX, type TextColor, type HighlightColor } from '../doc/colors';
 import type { PMNode, PMMark, CitationItem } from '../doc/types';
 import { MARK_ORDER } from '../doc/types';
 import { parseMarkdown } from '../doc/parse';
 import type { ExportContext } from './context';
 import type { LayoutSettings, MasterId, MasterPage, ParaStyle } from '../layout/model';
+import { TYPST_FONT, styleFont } from '../layout/model';
+import { docTexts } from '../i18n/writing';
 
 /** Stringa Typst sicura. */
 export function str(s: string): string {
@@ -22,6 +26,7 @@ function n(x: number): string {
 // ---------------------------------------------------------------- in linea
 
 function markKey(m: PMMark): string {
+  if (m.type === 'highlight' || m.type === 'textColor') return `${m.type}:${markColor(m) ?? ''}`;
   return m.type === 'link' ? `link:${m.attrs?.href}` : m.type;
 }
 
@@ -71,6 +76,8 @@ export function inline(nodes: PMNode[], ctx: ExportContext, excluded: Set<string
     if (m.type === 'link') out += `#link(${str(String(m.attrs?.href ?? ''))})[${inner}]`;
     else if (m.type === 'insertion') out += `#text(fill: rgb("#3f7d4e"))[#underline[${inner}]]`;
     else if (m.type === 'deletion') out += `#text(fill: rgb("#a83a2c"))[#strike[${inner}]]`;
+    else if (m.type === 'textColor') out += markColor(m) ? `#text(fill: rgb("${TEXT_HEX[markColor(m) as TextColor]}"))[${inner}]` : inner;
+    else if (m.type === 'highlight' && markColor(m)) out += `#highlight(fill: rgb("${HIGHLIGHT_HEX[markColor(m) as HighlightColor]}"))[${inner}]`;
     else out += `#${WRAP[m.type] ?? 'box'}[${inner}]`;
     i = j;
   }
@@ -146,6 +153,12 @@ function block(b: PMNode, ctx: ExportContext, st: State): string {
     case 'paragraph': {
       const body = inline(b.content ?? [], ctx);
       if (!body) return '';
+      if (b.attrs?.textStyle === 'caption') {
+        // stile "didascalia" del layout (corpo, corsivo, allineamento)
+        const cs = ctx.settings.layout.styles.caption;
+        const a = alignName(b.attrs?.textAlign) ?? alignName(cs.align) ?? 'center';
+        return `#align(${a})[#text(size: ${cs.sizePt}pt${cs.italic ? ', style: "italic"' : ''}${fontArg(cs)})[${body}]]`;
+      }
       const a = alignName(b.attrs?.textAlign);
       return a ? `#align(${a})[${body}]` : body;
     }
@@ -157,6 +170,13 @@ function block(b: PMNode, ctx: ExportContext, st: State): string {
     }
     case 'blockquote':
       return `#quote(block: true)[${blocks(b.content ?? [], ctx, st)}]`;
+    case 'callout': {
+      // riquadro evidenziato: fondo chiaro, bordino, intestazione piccola nel colore del tipo
+      const { kind, heading } = calloutHeading(b.attrs?.kind, b.attrs?.title, docTexts(ctx.lang).callouts);
+      const c = CALLOUT_HEX[kind];
+      const head = `#text(size: 0.78em, weight: "bold", tracking: 0.04em, fill: rgb("${c.stroke}"))[#upper[${lit(heading)}]]`;
+      return `#block(width: 100%, inset: (x: 10pt, y: 8pt), radius: 3pt, fill: rgb("${c.fill}"), stroke: 0.6pt + rgb("${c.stroke}"))[${head}\n\n${blocks(b.content ?? [], ctx, st)}]`;
+    }
     case 'bulletList':
       return `#list(${listItems(b.content ?? [], ctx, st)})`;
     case 'orderedList':
@@ -210,7 +230,7 @@ function block(b: PMNode, ctx: ExportContext, st: State): string {
       return pageSetup(ctx, master, columns, st.section, reset);
     }
     case 'toc':
-      return `#outline(title: [${lit(ctx.lang === 'it' ? 'Indice' : 'Contents')}], indent: auto)`;
+      return `#outline(title: [${lit(docTexts(ctx.lang).toc)}], indent: auto)`;
     case 'bibliography': {
       const inner = (b.content ?? [])
         .map((c) =>
@@ -282,9 +302,15 @@ function pageSetup(ctx: ExportContext, master: MasterId, columns: number, sectio
     .join('\n');
 }
 
+/** ", font: (...)" per uno stile con un carattere suo (vuoto se usa quello del documento). */
+function fontArg(s: ParaStyle): string {
+  return s.font && s.font !== 'inherit' ? `, font: ${TYPST_FONT[s.font]}` : '';
+}
+
 function styleRules(selector: string, s: ParaStyle, L: LayoutSettings): string[] {
   const out: string[] = [];
   const text = [`size: ${n(s.sizePt)}pt`];
+  if (s.font && s.font !== 'inherit') text.push(`font: ${TYPST_FONT[s.font]}`);
   if (s.weight === 'bold') text.push('weight: "bold"');
   else text.push('weight: "regular"');
   if (s.italic) text.push('style: "italic"');
@@ -304,7 +330,8 @@ export function preamble(ctx: ExportContext, hasLeadingSection: boolean): string
   const margin = L.facingPages
     ? `(top: ${n(L.marginTopMm)}mm, bottom: ${n(L.marginBottomMm)}mm, inside: ${n(L.marginInnerMm)}mm, outside: ${n(L.marginOuterMm)}mm)`
     : `(top: ${n(L.marginTopMm)}mm, bottom: ${n(L.marginBottomMm)}mm, left: ${n(L.marginInnerMm)}mm, right: ${n(L.marginOuterMm)}mm)`;
-  const font = L.font === 'sans' ? '("New Computer Modern Sans", "DejaVu Sans")' : '("Libertinus Serif", "New Computer Modern")';
+  // carattere del corpo: quello dello stile "corpo" se scelto, altrimenti quello del documento
+  const font = TYPST_FONT[styleFont(body, L)];
   const lines = [
     `// Generato da Alexandria`,
     `#set document(title: ${str(ctx.title)}${s.author ? `, author: (${str(s.author)},)` : ''})`,
@@ -320,8 +347,8 @@ export function preamble(ctx: ExportContext, hasLeadingSection: boolean): string
     ...styleRules('heading.where(level: 2)', L.styles.h2, L),
     ...styleRules('heading.where(level: 3)', L.styles.h3, L),
     ...styleRules('quote.where(block: true)', L.styles.quote, L),
-    `#show figure.caption: set text(size: ${n(L.styles.caption.sizePt)}pt${L.styles.caption.italic ? ', style: "italic"' : ''})`,
-    `#show footnote.entry: set text(size: ${n(L.styles.footnote.sizePt)}pt)`,
+    `#show figure.caption: set text(size: ${n(L.styles.caption.sizePt)}pt${L.styles.caption.italic ? ', style: "italic"' : ''}${fontArg(L.styles.caption)})`,
+    `#show footnote.entry: set text(size: ${n(L.styles.footnote.sizePt)}pt${fontArg(L.styles.footnote)})`,
     '#show link: underline',
   ];
   if (!hasLeadingSection) lines.push(pageSetup(ctx, 'body', L.columns, 0, false));

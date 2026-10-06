@@ -72,7 +72,7 @@ export function journalTemplate(lang: 'it' | 'en', today = new Date()): Compendi
           : [
               '# Your journal',
               '',
-              'One new scroll a day: **Today\'s entry** (File menu or Ctrl/Cmd+Alt+J) creates it in the Journal folder, dated, and links it to the previous entry.',
+              'One new Scroll a day: **Today\'s entry** (File menu or Ctrl/Cmd+Alt+J) creates it in the Journal folder, dated, and links it to the previous entry.',
               '',
               'Linked entries form a **Codex**: in the left column, under Codices, you can read them in sequence like a book, reorder them or export them to PDF.',
               '',

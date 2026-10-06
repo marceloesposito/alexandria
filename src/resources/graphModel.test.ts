@@ -46,4 +46,10 @@ describe('grafo', () => {
     );
     expect(g.nodes.find((n) => n.id === 'r2')!.degree).toBe(3);
   });
+
+  it('i collegamenti della Tabula fra fonti e pergamene entrano nel grafo', () => {
+    const docs = [{ rel: 'documents/Cap1.md', title: 'Cap1', md: 'Niente citazioni.' }];
+    const g = buildGraph(docs, [res('r1', {})], [{ id: 'k', from: 'r1', to: 'doc:documents/Cap1.md' }]);
+    expect(g.edges).toEqual([{ source: 'r1', target: 'doc:documents/Cap1.md', kind: 'link' }]);
+  });
 });

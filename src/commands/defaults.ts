@@ -3,6 +3,8 @@ import type { RibbonConfig } from './ribbonModel';
 
 export const DEFAULT_RIBBON: RibbonConfig = {
   version: 1,
+  // rev 2: citazioni e bibliografia anche in Home; rev 3: lingua di scrittura
+  rev: 3,
   tabs: [
     // ----- editor
     {
@@ -15,8 +17,11 @@ export const DEFAULT_RIBBON: RibbonConfig = {
         {
           id: 'ed-home-char',
           label: 'ribbon.group.character',
-          items: ['fmt.bold', 'fmt.italic', 'fmt.underline', 'fmt.strike', 'fmt.highlight', 'fmt.superscript', 'fmt.subscript', 'fmt.code', 'fmt.clear'],
+          items: ['fmt.bold', 'fmt.italic', 'fmt.underline', 'fmt.strike', 'fmt.textColor', 'fmt.highlightColor', 'fmt.superscript', 'fmt.subscript', 'fmt.code', 'fmt.clear'],
         },
+        // subito dopo il carattere: visibile anche su schermi normali, senza scorrere la barra
+        { id: 'ed-home-cite', label: 'ribbon.group.citations', items: ['cite.insert', 'cite.bibliography'], since: 2 },
+        { id: 'ed-home-lang', label: 'ribbon.group.writingLang', items: ['doc.writingLang'], since: 3 },
         {
           id: 'ed-home-para',
           label: 'ribbon.group.paragraph',
@@ -30,7 +35,7 @@ export const DEFAULT_RIBBON: RibbonConfig = {
       view: 'editor',
       label: 'ribbon.tab.insert',
       groups: [
-        { id: 'ed-ins-blocks', label: 'ribbon.group.blocks', items: ['insert.quote', 'insert.codeBlock', 'insert.hr', 'insert.table', 'table.addRow', 'table.addColumn', 'table.deleteRow', 'table.deleteColumn'] },
+        { id: 'ed-ins-blocks', label: 'ribbon.group.blocks', items: ['insert.quote', 'insert.callout', 'insert.codeBlock', 'insert.hr', 'insert.table', 'table.addRow', 'table.addColumn', 'table.deleteRow', 'table.deleteColumn'] },
         { id: 'ed-ins-media', label: 'ribbon.group.media', items: ['insert.image', 'res.insert', 'res.insertSnippet', 'insert.math', 'insert.mathInline'] },
         { id: 'ed-ins-links', label: 'ribbon.group.links', items: ['insert.link', 'insert.wikilink', 'comment.add'] },
         { id: 'ed-ins-pages', label: 'ribbon.group.pages', items: ['insert.pageBreak', 'insert.sectionBreak', 'insert.toc'] },
@@ -87,7 +92,7 @@ export const DEFAULT_RIBBON: RibbonConfig = {
         { id: 'res-add', label: 'ribbon.group.add', items: ['res.add', 'res.newSnippet', 'res.importBib'] },
         { id: 'res-views', label: 'ribbon.group.views', items: ['res.view.whiteboard', 'res.view.graph', 'res.view.layers'] },
         { id: 'res-org', label: 'ribbon.group.organize', items: ['res.newLayer', 'res.newFilter', 'res.tags', 'res.suggest', 'res.remove'] },
-        { id: 'res-tools', label: 'ribbon.group.whiteboard', items: ['wb.select', 'wb.pan', 'wb.note', 'wb.frame', 'wb.activeDoc', 'wb.pickDocs', 'wb.connect', 'wb.fit'] },
+        { id: 'res-tools', label: 'ribbon.group.whiteboard', items: ['wb.select', 'wb.pan', 'wb.note', 'wb.frame', 'wb.activeDoc', 'wb.connect', 'wb.fit'] },
         { id: 'res-search', label: 'ribbon.group.find', items: ['res.search'] },
       ],
     },
@@ -188,6 +193,7 @@ export const MENUS: MenuDef[] = [
       c('res.insert'),
       c('res.insertSnippet'),
       c('insert.quote'),
+      c('insert.callout'),
       c('insert.codeBlock'),
       c('insert.math'),
       c('insert.mathInline'),
@@ -219,6 +225,7 @@ export const MENUS: MenuDef[] = [
       c('fmt.subscript'),
       c('fmt.code'),
       sep,
+      c('fmt.caption'),
       { label: 'menu.format.align', submenu: [c('fmt.alignLeft'), c('fmt.alignCenter'), c('fmt.alignRight'), c('fmt.alignJustify')] },
       c('fmt.indent'),
       c('fmt.outdent'),
@@ -248,7 +255,7 @@ export const MENUS: MenuDef[] = [
       c('view.lineNumbers'),
       c('view.focus'),
       c('view.zen'),
-      { label: 'menu.view.editorLayout', submenu: [c('view.layoutPage'), c('view.layoutBorderless'), sep, c('view.rulers'), c('view.docHeader')] },
+      { label: 'menu.view.editorLayout', submenu: [c('view.layoutPage'), c('view.layoutBorderless'), sep, c('view.rulers'), c('view.docHeader'), c('view.formatBar')] },
       sep,
       c('view.zoomIn'),
       c('view.zoomOut'),

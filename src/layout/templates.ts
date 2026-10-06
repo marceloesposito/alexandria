@@ -2,6 +2,7 @@
 // stili, master page, stile di citazione). Predefiniti nel codice; quelli dell'utente sono file JSON
 // nella cartella dell'app, comuni a tutti i Compendium.
 import { defaultDocSettings, normalizeDocSettings, withPaper, type DocSettings } from './model';
+import { CITATION_LOCALE, docTexts, starterLang, type WritingLang } from '../i18n/writing';
 
 export interface Template {
   version: 1;
@@ -111,8 +112,12 @@ export function templateFromDoc(id: string, name: string, description: string, m
 }
 
 /** Contenuto e impostazioni di una pergamena nuova dal template (il titolo va nelle impostazioni). */
-export function instantiate(tpl: Template, title: string, lang: Lang): { markdown: string; settings: DocSettings } {
-  return { markdown: tpl.markdown, settings: { ...normalizeDocSettings(tpl.settings, lang), title } };
+export function instantiate(tpl: Template, title: string, lang: WritingLang): { markdown: string; settings: DocSettings } {
+  // i predefiniti prendono testo e lingua delle citazioni dalla lingua di scrittura del Compendium;
+  // quelli dell'utente restano come sono stati salvati
+  const src = tpl.builtIn ? (builtInTemplates(starterLang(lang)).find((x) => x.id === tpl.id) ?? tpl) : tpl;
+  const own = tpl.builtIn ? { citationLocale: CITATION_LOCALE[lang], bibliographyTitle: docTexts(lang).bibliography } : {};
+  return { markdown: src.markdown, settings: { ...normalizeDocSettings(src.settings, lang), ...own, title } };
 }
 
 /** Un template letto da disco: valido solo se ha nome, testo e impostazioni. */

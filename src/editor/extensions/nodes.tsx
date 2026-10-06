@@ -1,9 +1,9 @@
 // Nodi di Alexandria oltre a quelli di StarterKit. I nomi e gli attributi coincidono con
 // il modello di src/doc (parse/serialize), cosi' il JSON dell'editor e' gia' il documento.
-import { Node, mergeAttributes } from '@tiptap/core';
+import { Node, Extension, mergeAttributes } from '@tiptap/core';
 import { ReactNodeViewRenderer, NodeViewWrapper, type NodeViewProps } from '@tiptap/react';
 import { embedView } from '../slots';
-import { FigureView, MathBlockView, MathInlineView, FootnoteView, CitationView, WikilinkView, SectionBreakView, TocView, BibliographyView } from './views';
+import { FigureView, MathBlockView, MathInlineView, FootnoteView, CitationView, WikilinkView, SectionBreakView, TocView, BibliographyView, CalloutView } from './views';
 
 declare module '@tiptap/core' {
   interface Commands<ReturnType> {
@@ -342,5 +342,48 @@ export const Bibliography = Node.create({
   },
   addNodeView() {
     return ReactNodeViewRenderer(BibliographyView);
+  },
+});
+
+/** Blocco evidenziato (callout): nel Markdown "> [!NOTE] Titolo" e il contenuto. */
+export const Callout = Node.create({
+  name: 'callout',
+  group: 'block',
+  content: 'block+',
+  defining: true,
+  draggable: true,
+  addAttributes() {
+    return {
+      kind: { default: 'note', parseHTML: (el) => el.getAttribute('data-kind') ?? 'note', renderHTML: (a) => ({ 'data-kind': a.kind }) },
+      title: { default: '', parseHTML: (el) => el.getAttribute('data-title') ?? '', renderHTML: (a) => (a.title ? { 'data-title': a.title } : {}) },
+    };
+  },
+  parseHTML() {
+    return [{ tag: 'aside[data-type="callout"]' }];
+  },
+  renderHTML({ HTMLAttributes }) {
+    return ['aside', { 'data-type': 'callout', ...HTMLAttributes }, 0];
+  },
+  addNodeView() {
+    return ReactNodeViewRenderer(CalloutView);
+  },
+});
+
+/** Stile del paragrafo: per ora la didascalia (nel Markdown "<!-- style:caption -->" in coda). */
+export const ParagraphStyle = Extension.create({
+  name: 'paragraphStyle',
+  addGlobalAttributes() {
+    return [
+      {
+        types: ['paragraph'],
+        attributes: {
+          textStyle: {
+            default: null,
+            parseHTML: (el) => (el.getAttribute('data-style') === 'caption' ? 'caption' : null),
+            renderHTML: (a) => (a.textStyle ? { 'data-style': a.textStyle } : {}),
+          },
+        },
+      },
+    ];
   },
 });

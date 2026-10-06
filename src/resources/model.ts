@@ -94,6 +94,8 @@ export interface Resource {
     videoId?: string;
     ocr?: boolean;
     archived?: boolean;
+    /** il sito non ha lasciato leggere la pagina (es. controllo anti-bot): c'e' solo il link */
+    blocked?: boolean;
   };
   pins: Pin[];
   /** tipo di oggetto e proprietà (Personaggio, Luogo, Intervista...) */

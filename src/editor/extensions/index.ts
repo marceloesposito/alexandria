@@ -2,7 +2,7 @@
 import StarterKit from '@tiptap/starter-kit';
 import { Table, TableRow, TableHeader, TableCell } from '@tiptap/extension-table';
 import TextAlign from '@tiptap/extension-text-align';
-import Highlight from '@tiptap/extension-highlight';
+import { ColorHighlight, TextColorMark } from './colors';
 import Subscript from '@tiptap/extension-subscript';
 import Superscript from '@tiptap/extension-superscript';
 import Placeholder from '@tiptap/extension-placeholder';
@@ -21,6 +21,8 @@ import {
   SectionBreak,
   Toc,
   Bibliography,
+  Callout,
+  ParagraphStyle,
 } from './nodes';
 import { SlashCommands } from '../slash';
 import { DropHandler } from './drop';
@@ -28,6 +30,9 @@ import { SearchHighlight } from '../search';
 import { CommentAnchors } from '../../comments/plugin';
 import { MarkdownShortcuts } from './inputRules';
 import { Insertion, Deletion, TrackChanges } from './track';
+import { FocusBlock } from './focusBlock';
+import { BlockReorder } from './blockReorder';
+import { ThesaurusMenu } from '../../thesaurus/ui';
 
 /** Tabella con l'allineamento delle colonne del Markdown (GFM). */
 const AlignedTable = Table.extend({
@@ -52,7 +57,8 @@ export function buildExtensions() {
     TableHeader,
     TableCell,
     TextAlign.configure({ types: ['heading', 'paragraph'] }),
-    Highlight,
+    ColorHighlight,
+    TextColorMark,
     Subscript.extend({ addKeyboardShortcuts: () => ({}) }),
     Superscript,
     TaskList,
@@ -61,6 +67,9 @@ export function buildExtensions() {
       placeholder: ({ node }) => (node.type.name === 'heading' ? t('editor.placeholder.heading') : t('editor.placeholder.paragraph')),
       showOnlyCurrent: true,
     }),
+    FocusBlock,
+    BlockReorder,
+    ThesaurusMenu,
     Figure,
     Embed,
     MathBlock,
@@ -72,6 +81,8 @@ export function buildExtensions() {
     SectionBreak,
     Toc,
     Bibliography,
+    Callout,
+    ParagraphStyle,
     SlashCommands,
     DropHandler,
     SearchHighlight,

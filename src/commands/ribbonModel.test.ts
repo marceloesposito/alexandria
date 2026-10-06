@@ -35,6 +35,18 @@ describe('gruppi del ribbon', () => {
     expect(r.tabs[0].groups[1].compact).toBe(true);
   });
 
+  it('un gruppo predefinito nuovo compare anche nelle barre salvate, una volta sola', () => {
+    const v2: RibbonConfig = { ...cfg(), rev: 2 };
+    v2.tabs[0] = { ...v2.tabs[0], groups: [...v2.tabs[0].groups] };
+    v2.tabs[0].groups.splice(1, 0, { id: 'n', label: 'n', items: ['x'], since: 2 });
+    const old = removeGroup(cfg(), 'c'); // barra salvata prima della revisione 2
+    const r = reconcile(old, v2, new Set(['x', 'y', 'z']));
+    expect(order(r)).toBe('anb'); // al suo posto; il gruppo tolto prima resta tolto
+    expect(r.rev).toBe(2);
+    // l'utente lo toglie: alla riconciliazione successiva non torna
+    expect(order(reconcile(removeGroup(r, 'n'), v2, new Set(['x', 'y', 'z'])))).toBe('ab');
+  });
+
   it('un gruppo tolto nel cestino si puo rimettere', () => {
     const defaults = cfg();
     const c = removeGroup(cfg(), 'b');

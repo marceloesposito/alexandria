@@ -3,6 +3,7 @@ import { useEffect, useRef, useState } from 'react';
 import { NodeViewWrapper, NodeViewContent, type NodeViewProps } from '@tiptap/react';
 import katex from 'katex';
 import { t } from '../../i18n';
+import { docTexts, useWritingLang } from '../../i18n/writing';
 import { Popover } from '../../components/Popover';
 import { useWorkspace } from '../../state/workspace';
 import { assetUrl } from '../../vault/resolve';
@@ -15,6 +16,8 @@ import { masterLabel } from '../../layout/TemplatesView';
 import { HoverCard, useHoverCard } from '../../components/HoverCard';
 import { DocPreview } from '../../shell/DocPreview';
 import { citationPreview } from '../slots';
+import { Info, Lightbulb, Star, TriangleAlert, OctagonAlert } from 'lucide-react';
+import { CALLOUT_KINDS, isCalloutKind, type CalloutKind } from '../../doc/callouts';
 
 function Katex({ latex, display }: { latex: string; display: boolean }) {
   const ref = useRef<HTMLSpanElement>(null);
@@ -293,6 +296,7 @@ export function SectionBreakView(props: NodeViewProps) {
 }
 
 export function TocView(props: NodeViewProps) {
+  const writingLang = useWritingLang();
   const headings: { level: number; text: string }[] = [];
   props.editor.state.doc.descendants((n) => {
     if (n.type.name === 'heading') headings.push({ level: n.attrs.level, text: n.textContent });
@@ -300,7 +304,7 @@ export function TocView(props: NodeViewProps) {
   });
   return (
     <NodeViewWrapper className={`nv-toc ${props.selected ? 'is-selected' : ''}`} data-drag-handle>
-      <div className="nv-toc__title">{t('editor.toc.title')}</div>
+      <div className="nv-toc__title">{docTexts(writingLang).toc}</div>
       {headings.length === 0 && <div className="hint">{t('editor.toc.empty')}</div>}
       {headings.map((h, i) => (
         <div key={i} className={`nv-toc__item level-${h.level}`}>
@@ -321,6 +325,45 @@ export function BibliographyView(props: NodeViewProps) {
         </button>
       </div>
       <NodeViewContent className="nv-bibliography__content" />
+    </NodeViewWrapper>
+  );
+}
+
+const CALLOUT_ICONS: Record<CalloutKind, typeof Info> = { note: Info, tip: Lightbulb, important: Star, warning: TriangleAlert, caution: OctagonAlert };
+
+/** Blocco evidenziato: icona e intestazione in stile didascalia (titolo libero, tipo a scelta), poi il contenuto. */
+export function CalloutView(props: NodeViewProps) {
+  const kind: CalloutKind = isCalloutKind(props.node.attrs.kind) ? props.node.attrs.kind : 'note';
+  const Icon = CALLOUT_ICONS[kind];
+  return (
+    <NodeViewWrapper className={`nv-callout is-${kind} ${props.selected ? 'is-selected' : ''}`} data-kind={kind}>
+      <div className="nv-callout__head" contentEditable={false}>
+        <Icon size={14} strokeWidth={2} />
+        <input
+          className="nv-callout__title"
+          value={props.node.attrs.title ?? ''}
+          placeholder={t(`callout.${kind}`)}
+          aria-label={t('callout.title')}
+          onChange={(e) => props.updateAttributes({ title: e.target.value })}
+          onKeyDown={(e) => {
+            e.stopPropagation();
+            // Invio: si passa al contenuto del riquadro
+            if (e.key === 'Enter') {
+              e.preventDefault();
+              const pos = props.getPos();
+              if (typeof pos === 'number') props.editor.chain().focus(pos + 2).run();
+            }
+          }}
+        />
+        <select className="nv-callout__kind" value={kind} title={t('callout.kind')} onChange={(e) => props.updateAttributes({ kind: e.target.value })}>
+          {CALLOUT_KINDS.map((k) => (
+            <option key={k} value={k}>
+              {t(`callout.${k}`)}
+            </option>
+          ))}
+        </select>
+      </div>
+      <NodeViewContent className="nv-callout__body" />
     </NodeViewWrapper>
   );
 }

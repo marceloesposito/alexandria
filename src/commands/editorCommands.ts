@@ -31,6 +31,10 @@ import {
   Strikethrough,
   Code,
   Highlighter,
+  Baseline,
+  BookA,
+  Captions,
+  MessageSquareWarning,
   Subscript,
   Superscript,
   RemoveFormatting,
@@ -56,6 +60,7 @@ import { t } from '../i18n';
 import { promptDialog } from '../components/confirm';
 import { getSourceView } from '../editor/SourceView';
 import { undo as cmUndo, redo as cmRedo } from '@codemirror/commands';
+import { lookupSelection } from '../thesaurus/ui';
 
 const E = () => getEditor();
 const inEditor = () => !!E() && !useDoc.getState().sourceMode && ws().app.view === 'editor';
@@ -215,6 +220,34 @@ export function registerEditorCommands() {
     { id: 'fmt.strike', label: 'cmd.fmt.strike', icon: Strikethrough, shortcut: 'Mod+Shift+X', editorShortcut: true, category: 'format', views: ['editor'], isActive: active('strike'), run: () => chain().toggleStrike().run() },
     { id: 'fmt.code', label: 'cmd.fmt.code', icon: Code, shortcut: 'Mod+E', editorShortcut: true, category: 'format', views: ['editor'], isActive: active('code'), run: () => chain().toggleCode().run() },
     { id: 'fmt.highlight', label: 'cmd.fmt.highlight', icon: Highlighter, shortcut: 'Mod+Shift+H', editorShortcut: true, category: 'format', views: ['editor'], isActive: active('highlight'), run: () => chain().toggleHighlight().run() },
+    // didascalia (stile del paragrafo) e blocco evidenziato
+    {
+      id: 'fmt.caption',
+      label: 'cmd.fmt.caption',
+      icon: Captions,
+      category: 'format',
+      views: ['editor'],
+      isActive: () => !!E()?.isActive('paragraph', { textStyle: 'caption' }),
+      run: () => {
+        const on = E()?.isActive('paragraph', { textStyle: 'caption' });
+        chain().setParagraph().updateAttributes('paragraph', { textStyle: on ? null : 'caption' }).run();
+      },
+    },
+    {
+      id: 'insert.callout',
+      label: 'cmd.insert.callout',
+      icon: MessageSquareWarning,
+      category: 'insert',
+      views: ['editor'],
+      isActive: () => !!E()?.isActive('callout'),
+      // la selezione (o il paragrafo corrente) finisce dentro il riquadro
+      run: () => chain().wrapIn('callout', { kind: 'note', title: '' }).run(),
+    },
+    // thesaurus offline (italiano e inglese, lingua di scrittura del Compendium)
+    { id: 'tools.thesaurus', label: 'cmd.tools.thesaurus', icon: BookA, shortcut: 'Shift+F7', category: 'format', views: ['editor'], run: () => void lookupSelection() },
+    // colori: dalla tavolozza (la scelta si fa nel controllo del ribbon o nella barra flottante)
+    { id: 'fmt.textColor', label: 'fmt.textColor', icon: Baseline, category: 'format', views: ['editor'], widget: 'textColor', isActive: active('textColor'), run: () => chain().unsetTextColor().run() },
+    { id: 'fmt.highlightColor', label: 'fmt.highlightColor', icon: Highlighter, category: 'format', views: ['editor'], widget: 'highlightColor', isActive: active('highlight'), run: () => chain().toggleHighlight().run() },
     { id: 'fmt.subscript', label: 'cmd.fmt.subscript', icon: Subscript, category: 'format', views: ['editor'], isActive: active('subscript'), run: () => chain().toggleSubscript().run() },
     { id: 'fmt.superscript', label: 'cmd.fmt.superscript', icon: Superscript, shortcut: 'Mod+.', editorShortcut: true, category: 'format', views: ['editor'], isActive: active('superscript'), run: () => chain().toggleSuperscript().run() },
     { id: 'fmt.clear', label: 'cmd.fmt.clear', icon: RemoveFormatting, shortcut: 'Mod+\\', category: 'format', views: ['editor'], run: () => chain().unsetAllMarks().clearNodes().run() },
