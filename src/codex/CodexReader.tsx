@@ -13,6 +13,8 @@ export function CodexReader({ root }: { root: string }) {
   useLang();
   useResources((s) => s.links);
   const docs = useWorkspace((s) => s.docs);
+  // la pergamena aperta resta leggibile; le altre del Codex sono attenuate
+  const active = useWorkspace((s) => s.activeDoc);
   const settings = useCodexStore((s) => s.settings[root]);
   const members = membersOf(root);
   const close = () => useCodexStore.getState().read(null);
@@ -46,7 +48,7 @@ export function CodexReader({ root }: { root: string }) {
       <div className="codex-reader__scroll">
         <article className="codex-reader__page">
           {members.map((rel, i) => (
-            <section key={rel} className="codex-reader__part">
+            <section key={rel} className={`codex-reader__part ${active && rel !== active ? 'is-other' : ''}`}>
               <div className="codex-reader__part-head" onClick={() => edit(rel)} title={t('codex.editPart')}>
                 <span className="codex-reader__num">{i + 1}</span>
                 <span className="codex-reader__title">{docs.find((d) => d.rel === rel)?.title ?? rel}</span>

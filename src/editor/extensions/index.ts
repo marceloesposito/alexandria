@@ -29,6 +29,7 @@ import { CommentAnchors } from '../../comments/plugin';
 import { MarkdownShortcuts } from './inputRules';
 import { Insertion, Deletion, TrackChanges } from './track';
 import { FocusBlock } from './focusBlock';
+import { BlockReorder } from './blockReorder';
 
 /** Tabella con l'allineamento delle colonne del Markdown (GFM). */
 const AlignedTable = Table.extend({
@@ -64,6 +65,7 @@ export function buildExtensions() {
       showOnlyCurrent: true,
     }),
     FocusBlock,
+    BlockReorder,
     Figure,
     Embed,
     MathBlock,

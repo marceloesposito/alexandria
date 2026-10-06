@@ -1,4 +1,4 @@
-// Modalita' focus: il blocco di primo livello dove sta il cursore riceve la classe "has-focus"
+// Modalita' Zen (scrittura minimale): il blocco di primo livello dove sta il cursore riceve "has-focus"
 // (gli altri restano attenuati dal CSS). Prima nessuno la metteva e il testo era tutto grigio.
 import { Extension } from '@tiptap/core';
 import { Plugin, PluginKey } from '@tiptap/pm/state';

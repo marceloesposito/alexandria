@@ -686,14 +686,25 @@
 }
 
 /* ---------------------------------------------------------------- modalita' focus */
-.editor-scroll.is-focus .doc-body > * {
+/* righe attenuate tranne quella in cui si scrive: solo nella modalita' Zen (scrittura minimale);
+   altrove tutta la pergamena resta leggibile */
+.app--zen .doc-body > * {
   opacity: 0.35;
   transition: opacity 0.2s;
 }
 
-.editor-scroll.is-focus .doc-body > .has-focus,
-.editor-scroll.is-focus .doc-body > *:focus-within {
+.app--zen .doc-body > .has-focus {
   opacity: 1;
+}
+
+/* lettura continua: attenuato solo il testo delle altre pergamene del Codex */
+.codex-reader__part.is-other > :not(.codex-reader__part-head) {
+  opacity: 0.4;
+  transition: opacity 0.2s;
+}
+
+.codex-reader__part.is-other:hover > :not(.codex-reader__part-head) {
+  opacity: 0.75;
 }
 
 /* ---------------------------------------------------------------- colonna sinistra: risorse / indice */
@@ -1329,4 +1340,19 @@
   overflow: hidden;
   text-overflow: ellipsis;
   white-space: nowrap;
+}
+
+/* spostamento dei blocchi: gli altri scorrono per fare posto, come in Notion */
+.doc-body.is-reordering > .is-reorder-moving {
+  transition: transform 0.16s ease;
+}
+
+.doc-body.is-reordering > .is-reorder-source {
+  /* il blocco segue il puntatore (immagine del trascinamento): al suo posto resta solo il vuoto */
+  opacity: 0;
+}
+
+/* la linea di rilascio non serve: il posto si vede dal vuoto */
+.editor-scroll:has(.is-reordering) .prosemirror-dropcursor-block {
+  display: none;
 }

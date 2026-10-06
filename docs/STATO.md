@@ -59,8 +59,16 @@ Aggiornato: 7 ottobre 2026 (M11).
   stili, grassetto/corsivo/sottolineato/barrato, colore, evidenziatore, elenchi, link, cancella formato;
   si riduce a una pillola, si nasconde da Visualizza > Aspetto dello Scriptorium (`prefs.formatBar`). Non
   compare nella scrittura minimale ne' nella vista sorgente; con la barra aperta il contatore sale sopra.
-- **Modalita' focus**: il blocco col cursore riceve `has-focus` (`src/editor/extensions/focusBlock.ts`);
-  prima non lo metteva nessuno e con la modalita' focus attiva tutto il testo restava attenuato.
+- **Silentium** (era "scrittura minimale" / Zen; nome nel glossario): solo il testo, a schermo intero, e
+  qui soltanto le righe diverse da quella in cui si scrive sono attenuate (il blocco col cursore riceve
+  `has-focus`, `src/editor/extensions/focusBlock.ts`). Nella vista normale e nella modalita' focus tutta
+  la pergamena resta leggibile.
+- **Lettura continua del Codex**: la pergamena aperta resta leggibile, il testo delle altre pergamene
+  collegate e' attenuato (piu' chiaro al passaggio del mouse).
+- **Spostamento dei blocchi come in Notion** (`src/editor/extensions/blockReorder.ts`): mentre si trascina
+  uno o piu' blocchi dalla maniglia, gli altri scorrono per aprire il vuoto dove andranno; al rilascio lo
+  spostamento lo fa il plugin, nel posto esatto del vuoto. Il disegno passa da decorazioni (ProseMirror
+  ridisegna i blocchi toccati direttamente nel DOM).
 - **Snippet di codice**: nuovo tipo di risorsa (file `snippet.<ext>`), creato da Aggiungi risorse,
   modificabile nel visualizzatore, inseribile nel testo dal menu / o trascinandolo.
 - **Rimozione delle risorse**: ribbon, menu Risorse, clic destro, Canc nella tabella, visualizzatore.
@@ -211,6 +219,11 @@ Aggiornato: 7 ottobre 2026 (M11).
   (o colori) per pergamena, ancore per editor e salvataggio/checkpoint per ciascuna.
 
 ## Prossimi passi possibili
+
+- **Thesaurus offline** (richiesta del committente, da fare in futuro): parola selezionata, clic destro >
+  "Cerca sinonimi", solo italiano e inglese, senza rete. Dati possibili: i thesaurus di LibreOffice
+  (formato MyThes, `th_it_IT` e `th_en_US`, licenze libere LGPL/BSD), qualche MB ciascuno, letti nel Rust
+  o in un indice SQLite; la lingua e' quella di scrittura del Compendium.
 
 - Firma degli installer e aggiornamenti automatici (oggi assenti per scelta: niente rete).
 - Corrispondenza esatta righe editor/PDF calcolando le righe con Typst in background.

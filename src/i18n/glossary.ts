@@ -24,6 +24,7 @@ export const GLOSSARY: Record<string, GlossaryTerm> = {
   Strata: { pattern: /\bStrata\b/, avoid: [] },
   Bibliotheca: { pattern: /\bBibliotheca\b/, avoid: [/\blibreria\b/i, /\bbiblioteca\b/i] },
   Codex: { pattern: /\bCodex\b/, avoid: [/\bLibrum\b/] },
+  Silentium: { pattern: /\bSilentium\b/, avoid: [/\bzen\b/i, /scrittura minimale/i, /minimal writing/i] },
 };
 
 /** Chiavi in cui `text` (nella lingua `lang`) non rispetta il glossario rispetto all'inglese `ref`. */
