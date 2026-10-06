@@ -81,6 +81,9 @@ export const tauriPlatform: Platform = {
   forgeSetToken: (kind, host, token) => invoke('forge_set_token', { kind, host, token }),
   forgeDeviceStart: (clientId) => invoke('forge_device_start', { clientId }),
   forgeDevicePoll: (clientId, deviceCode) => invoke('forge_device_poll', { clientId, deviceCode }),
+  forgeListRepos: (host) => invoke('forge_list_repos', { host }),
+  gitClone: (url, dest) => invoke('git_clone', { url, dest }),
+  onCloneProgress: async (cb) => (await import('@tauri-apps/api/event')).listen<[number, number]>('clone-progress', (e) => cb(e.payload[0], e.payload[1])),
   forgeCreateRepo: (host, name, priv, description) => invoke('forge_create_repo', { host, name, private: priv, description: description ?? null }),
   gitPull: (repo) => invoke('git_pull', { repo }),
 

@@ -1,7 +1,7 @@
 // Schermata iniziale (stile VS Code / Adobe Home): si sceglie quale Compendium aprire o se crearne
 // uno nuovo. A sinistra le azioni e "riprendi l'ultimo", a destra i Compendium recenti.
 import { useEffect, useMemo, useState } from 'react';
-import { FolderOpen, FolderPlus, Landmark, ArrowRight, Search, X, CircleAlert, Feather, Settings, Usb, NotebookPen, ScrollText } from 'lucide-react';
+import { FolderOpen, FolderPlus, Landmark, ArrowRight, Search, X, CircleAlert, Feather, Settings, Usb, NotebookPen, ScrollText, CloudDownload } from 'lucide-react';
 import { useWorkspace, getPortableRoot } from '../state/workspace';
 import { runCommand } from '../commands/registry';
 import { platform, baseName } from '../platform';
@@ -103,6 +103,13 @@ export function StartScreen() {
             <span>
               <strong>{t('cmd.file.openVault')}</strong>
               <small>{t('start.openHint')}</small>
+            </span>
+          </button>
+          <button className="start__action" onClick={() => ws.openDialog('openRemote')} disabled={busy}>
+            <CloudDownload size={18} />
+            <span>
+              <strong>{t('remote.title')}</strong>
+              <small>{t('remote.startHint')}</small>
             </span>
           </button>
         </nav>
