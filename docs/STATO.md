@@ -71,6 +71,10 @@ Aggiornato: 7 ottobre 2026 (M11).
   collegabile alle fonti e alle altre pergamene; i collegamenti entrano anche nel Grafo, che con
   almeno una pergamena non e' mai vuoto. "Vai alla pergamena aperta" la porta in vista.
   Rinomina ed eliminazione aggiornano nodi e legami.
+- **Navigatore della Tabula** (in basso a destra): miniature dei nodi (pergamene in blu, fonti col colore
+  del gruppo e l'immagine di anteprima se c'e', note in giallo, cornici tratteggiate), sempre leggibile.
+  Era vuoto perche' i nodi controllati non riportavano le misure di React Flow: ora le modifiche
+  'dimensions' tornano nei nodi come `measured`.
 - **Collegamenti nella Tabula**: quattro punti di aggancio per nodo (sopra, sotto, destra, sinistra),
   14 px con un'area cliccabile piu' larga; ognuno puo' iniziare o ricevere un collegamento
   (`ConnectionMode.Loose`). Le frecce si attaccano ai lati che si guardano e li seguono quando i nodi

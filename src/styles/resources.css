@@ -386,16 +386,70 @@
   border-radius: var(--radius);
 }
 
-/* minimappa e controlli della Tabula: semitrasparenti, pieni solo al passaggio del mouse */
-.wb-minimap,
+/* controlli della Tabula: semitrasparenti, pieni solo al passaggio del mouse */
 .wb-controls {
   opacity: 0.35;
   transition: opacity 0.15s ease;
 }
 
-.wb-minimap:hover,
 .wb-controls:hover {
   opacity: 1;
+}
+
+/* navigatore: sempre leggibile, con le miniature dei nodi */
+.wb-minimap {
+  opacity: 0.92;
+  box-shadow: var(--shadow);
+  transition: opacity 0.15s ease;
+}
+
+.wb-minimap:hover {
+  opacity: 1;
+}
+
+.mm__card {
+  fill: var(--paper);
+  stroke: var(--line-strong);
+  stroke-width: 3;
+}
+
+.mm__band {
+  fill: color-mix(in srgb, var(--series-1) 30%, var(--paper));
+}
+
+.mm__line {
+  fill: var(--line-strong);
+}
+
+.mm-doc .mm__card {
+  fill: color-mix(in srgb, var(--series-2) 12%, var(--paper));
+  stroke: var(--series-2);
+}
+
+.mm-doc .mm__band {
+  fill: var(--series-2);
+}
+
+.mm-note .mm__card {
+  fill: var(--mark);
+  stroke: color-mix(in srgb, var(--mark) 60%, var(--ink));
+}
+
+.mm-note .mm__band {
+  fill: color-mix(in srgb, var(--mark) 70%, var(--ink));
+}
+
+.mm-frame {
+  fill: color-mix(in srgb, var(--accent) 5%, transparent);
+  stroke: var(--line-strong);
+  stroke-width: 3;
+  stroke-dasharray: 12 8;
+}
+
+.mm.is-selected .mm__card,
+.mm-frame.is-selected {
+  stroke: var(--accent);
+  stroke-width: 8;
 }
 
 /* ---------------------------------------------------------------- grafo */

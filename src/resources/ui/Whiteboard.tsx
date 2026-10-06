@@ -27,11 +27,12 @@ import {
   useInternalNode,
   type EdgeProps,
   type InternalNode,
+  type MiniMapNodeProps,
 } from '@xyflow/react';
 import '@xyflow/react/dist/style.css';
 import { useResources } from '../store';
 import { isVisible, isLocked, colorOf, type Resource } from '../model';
-import { ResourceCard } from './common';
+import { ResourceCard, thumbUrl } from './common';
 import { removeWithConfirm } from './remove';
 import { t } from '../../i18n';
 import { openContextMenu } from '../../components/ContextMenu';
@@ -84,6 +85,31 @@ function FloatingEdge({ id, source, target, markerEnd, label, style }: EdgeProps
 }
 
 const edgeTypes = { floating: FloatingEdge };
+
+/**
+ * Miniatura di un nodo nel navigatore: una schedina col colore del suo tipo (pergamena, fonte col
+ * colore del gruppo, nota, cornice) e, per le fonti che ce l'hanno, l'immagine di anteprima.
+ */
+function MiniNode({ id, x, y, width, height, className, color, selected }: MiniMapNodeProps) {
+  const r = useResources((s) => (className === 'mm-res' ? s.resources.find((x) => x.id === id) ?? s.libraryItems.find((x) => x.id === id) : undefined));
+  const thumb = r ? thumbUrl(r) : null;
+  const cls = `mm ${className} ${selected ? 'is-selected' : ''}`;
+  if (className === 'mm-frame') return <rect className={cls} x={x} y={y} width={width} height={height} rx={8} />;
+  const band = Math.min(height * 0.28, 40);
+  return (
+    <g className={cls}>
+      <rect className="mm__card" x={x} y={y} width={width} height={height} rx={10} style={color ? { stroke: color } : undefined} />
+      {thumb ? (
+        <image href={thumb} x={x + 4} y={y + 4} width={width - 8} height={height * 0.62} preserveAspectRatio="xMidYMid slice" />
+      ) : (
+        <rect className="mm__band" x={x} y={y} width={width} height={band} rx={10} style={color ? { fill: color } : undefined} />
+      )}
+      {/* righe di testo stilizzate */}
+      <rect className="mm__line" x={x + width * 0.12} y={y + height * 0.72} width={width * 0.7} height={Math.max(4, height * 0.06)} rx={2} />
+      <rect className="mm__line" x={x + width * 0.12} y={y + height * 0.84} width={width * 0.45} height={Math.max(4, height * 0.06)} rx={2} />
+    </g>
+  );
+}
 
 /** Una pergamena del Compendium: nodo fisso (sempre presente), si collega come le risorse, doppio clic per aprirla. */
 function DocNode({ data, selected }: NodeProps<Node<DocNodeData>>) {
@@ -179,6 +205,8 @@ function Board() {
     [wb.nodes],
   );
 
+  // misure dei nodi (le manda React Flow con le modifiche 'dimensions')
+  const [sizes, setSizes] = useState<Record<string, { width: number; height: number }>>({});
   const docPos = useMemo(() => placeDocNodes(docs.map((d) => d.rel), wb.nodes), [docs, wb.nodes]);
 
   // le pergamene appena comparse si fissano dove sono state messe: spostarne una non fa saltare le altre
@@ -232,8 +260,9 @@ function Board() {
             selected: selected.includes(docNodeId(d.rel)),
           }))
         : [];
-    return [...frames, ...res, ...notes, ...docNodes];
-  }, [visible, wb, layers, selected, pos, resources, scope, docs, activeDoc, links, docPos]);
+    // le misure prese da React Flow tornano nei nodi: senza, il navigatore non sa disegnarli
+    return [...frames, ...res, ...notes, ...docNodes].map((n) => (sizes[n.id] ? { ...n, measured: sizes[n.id] } : n));
+  }, [visible, wb, layers, selected, pos, resources, scope, docs, activeDoc, links, docPos, sizes]);
 
   const ids = new Set(nodes.map((n) => n.id));
   const edges: Edge[] = links
@@ -250,6 +279,19 @@ function Board() {
   const onNodesChange = useCallback(
     (changes: NodeChange[]) => {
       const st = useResources.getState();
+      const dims = changes.filter((c) => c.type === 'dimensions' && c.dimensions);
+      if (dims.length)
+        setSizes((prev) => {
+          let next = prev;
+          for (const c of dims) {
+            if (c.type !== 'dimensions' || !c.dimensions) continue;
+            const old = prev[c.id];
+            if (old && old.width === c.dimensions.width && old.height === c.dimensions.height) continue;
+            if (next === prev) next = { ...prev };
+            next[c.id] = c.dimensions;
+          }
+          return next;
+        });
       const sel = changes.filter((c) => c.type === 'select');
       if (sel.length) {
         const cur = new Set(st.selected);
@@ -397,7 +439,15 @@ function Board() {
         fitView={!wb.viewport}
       >
         <Background variant={BackgroundVariant.Dots} gap={22} size={1.2} />
-        <MiniMap pannable zoomable className="wb-minimap" />
+        <MiniMap
+          pannable
+          zoomable
+          className="wb-minimap"
+          style={{ width: 240, height: 170 }}
+          nodeComponent={MiniNode}
+          nodeClassName={(n) => `mm-${n.type ?? 'res'}`}
+          nodeColor={(n) => (n.type === 'res' ? ((n.data as ResNodeData).color ?? '') : '')}
+        />
         <Controls showInteractive={false} className="wb-controls" />
       </ReactFlow>
       {picker?.mode === 'link' && (
