@@ -24,7 +24,7 @@ Aggiornato: 7 ottobre 2026 (M11).
 
 ## Decisioni prese durante il lavoro
 
-- **Colonna sinistra dell'editor**: selettore Risorse | Indice (richiesta del committente,
+- **Colonna sinistra dell'editor**: selettore Risorse | Index (richiesta del committente,
   5/10). L'indice mostra H1–H3, si aggiorna mentre si scrive, evidenzia la sezione corrente.
 - **Righe del PDF e dell'editor**: stesso carattere (Libertinus Serif), stessa misura e
   stesso corpo; la corrispondenza riga per riga e' molto vicina ma non garantita al 100%
@@ -124,7 +124,10 @@ Aggiornato: 7 ottobre 2026 (M11).
   eccezione voluta: in italiano lo Scroll e' la pergamena. Bookmarks -> Excerpta (singolare Excerptum:
   i passaggi estratti dalle fonti); "Indices" e' stato scartato perche' si confondeva con l'indice dei
   contenuti e con un eventuale indice analitico.
-- **Indice dei contenuti nell'export**: opzione per pergamena (`layout.tocInExport`, nel dialogo
+- **Index**: l'indice dei contenuti si chiama Index in tutte le lingue (scheda della colonna sinistra,
+  blocco da inserire, menu /, opzione dell'export). Resta nella lingua del documento solo il titolo
+  stampato dentro il testo e nel PDF ("Indice"/"Contents": `DOCUMENT_TEXT_KEYS` nel glossario).
+- **Index nell'export**: opzione per pergamena (`layout.tocInExport`, nel dialogo
   Esporta per tutti i formati tranne Markdown); se la pergamena non ha gia' un blocco indice se ne
   mette uno in testa al documento esportato (`src/export/toc.ts`), il .md non cambia. Vale anche per i Codex.
 - **Bibliografia in un clic**: "Genera bibliografia" (prima solo "Bibliografia" in Riferimenti) e' anche

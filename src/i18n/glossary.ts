@@ -19,18 +19,22 @@ export const GLOSSARY: Record<string, GlossaryTerm> = {
   Palimpsestus: { pattern: /\bPalimpsestus\b/, avoid: [/\bstoria\b/i, /\bcronologia\b/i, /\bhistory\b/] },
   Marginalia: { pattern: /\bMarginalia\b/, avoid: [] },
   Tabula: { pattern: /\bTabula\b/, avoid: [/\blavagn/i, /whiteboard/i, /\bboard\b/] },
-  Excerpta: { pattern: /\bExcerpt(um|a)\b/, avoid: [/bookmark/i, /segnalibr/i, /\bInd(ex|ices)\b/] },
+  Excerpta: { pattern: /\bExcerpt(um|a)\b/, avoid: [/bookmark/i, /segnalibr/i, /\bIndices\b/] },
+  Index: { pattern: /\bIndex\b/, avoid: [/\bindice\b/i, /\bsommario\b/i, /\boutline\b/i, /table of contents/i] },
   Strata: { pattern: /\bStrata\b/, avoid: [] },
   Bibliotheca: { pattern: /\bBibliotheca\b/, avoid: [/\blibreria\b/i, /\bbiblioteca\b/i] },
   Codex: { pattern: /\bCodex\b/, avoid: [/\bLibrum\b/] },
 };
+
+/** Testi che finiscono dentro il documento (e nell'export): restano nella lingua del documento. */
+export const DOCUMENT_TEXT_KEYS = new Set(['editor.toc.title']);
 
 /** Chiavi in cui `text` (nella lingua `lang`) non rispetta il glossario rispetto all'inglese `ref`. */
 export function glossaryViolations(ref: Record<string, string>, text: Record<string, string>, lang = 'en'): string[] {
   const out: string[] = [];
   for (const [key, value] of Object.entries(text)) {
     const base = ref[key];
-    if (base === undefined) continue;
+    if (base === undefined || DOCUMENT_TEXT_KEYS.has(key)) continue;
     for (const [name, term] of Object.entries(GLOSSARY)) {
       const local = term.local?.[lang];
       if (term.pattern.test(base) && !(local ?? term.pattern).test(value)) out.push(`${key}: manca ${name}`);
