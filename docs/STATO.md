@@ -58,8 +58,13 @@ Aggiornato: 7 ottobre 2026 (M11).
 - **Nomi tematici** (scelti dal committente, solo nelle stringhe di `src/i18n/`, uguali in IT ed EN):
   documento -> Scroll (in italiano Pergamena), gestore risorse -> Armarium (era Bookshelf), schermata Editor -> Scriptorium, Versioni ->
   Palimpsestus (era History), commenti a margine -> Marginalia, whiteboard -> Tabula, pin -> Excerpta (un Excerptum; era Bookmarks), layer -> Strata. Le pergamene collegate in sequenza formano un Codex.
-  Restano Library e Bibliografia; vault -> Compendium (la cartella creata al primo avvio si chiama "Il mio Compendium"; quelle esistenti non cambiano nome). Identificatori, cartelle
-  (`documents/`, `resources/`) e file su disco non cambiano.
+  Restano Library e Bibliografia; vault -> Compendium. Identificatori interni invariati.
+- **Cartelle con i nomi dell'app**: un Compendium nuovo si chiama "Compendium" e contiene `Pergamene/`
+  (`Scrolls/` con l'interfaccia in inglese) e `Armarium/`; i nomi stanno in `vault.json` (`dirs`) e tutto il
+  codice li legge da li' (`docsDir()`, `resDir()`, `isDocPath()` in `src/vault/paths.ts`). I Compendium di
+  prima (e le cartelle che hanno gia' `documents/`) restano con `documents/` e `resources/`: spostarli
+  romperebbe la storia delle versioni. La copia per revisione porta con se' le cartelle d'origine.
+  Una pergamena senza titolo si chiama "Pergamena Senza Titolo" / "Untitled Scroll".
 - **Navbar**: Armarium · Scriptorium · Palimpsestus | Library (Cmd/Ctrl+1..4). La Library e' una tab a
   parte (stessa schermata dell'Armarium sulla raccolta comune); il selettore Vault/Library e' sparito.
 - **Barra degli strumenti**: ogni gruppo si trascina dalla maniglia in basso a destra (anche nel

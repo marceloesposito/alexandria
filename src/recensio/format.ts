@@ -4,10 +4,22 @@
 //   comments/<chiave>.json   i Marginalia di ciascuna
 //   armarium/<id>/meta.json  le fonti citate (metadati, Bookmark), con miniatura e, a scelta, il file
 import JSZip from 'jszip';
-import { docKey } from '../vault/paths';
+import { LEGACY_DIRS, type VaultDirs } from '../vault/paths';
 
 export const RECENSIO_EXT = 'recensio';
 export const RECENSIO_FORMAT = 'alexandria-recensio';
+
+/** Cartelle del Compendium d'origine di una copia (quelle di prima se il manifest non le dice). */
+export function recensioDirs(m: { dirs?: VaultDirs }): VaultDirs {
+  const d = m.dirs;
+  return d && typeof d.docs === 'string' && typeof d.res === 'string' && d.docs && d.res && !d.docs.includes('..') && !d.res.includes('..') ? d : LEGACY_DIRS;
+}
+
+/** Nome del file di una pergamena dentro lo zip: indipendente dal Compendium aperto. */
+function zipKey(rel: string, dirs: VaultDirs): string {
+  const prefix = dirs.docs + '/';
+  return (rel.startsWith(prefix) ? rel.slice(prefix.length) : rel).replace(/\.md$/i, '').replace(/\//g, '~');
+}
 
 export interface RecensioDoc {
   rel: string;
@@ -24,6 +36,8 @@ export interface RecensioManifest {
   /** versione del Palimpsestus da cui è partita la copia */
   baseSha: string | null;
   docs: RecensioDoc[];
+  /** cartelle del Compendium d'origine (assente = documents/ e resources/, copie di prima) */
+  dirs?: VaultDirs;
   reviewer?: { name: string };
   /** data in cui il revisore l'ha restituita */
   returned?: string;
@@ -43,8 +57,8 @@ export async function packRecensio(c: RecensioContent): Promise<Uint8Array> {
   const zip = new JSZip();
   zip.file('manifest.json', JSON.stringify(c.manifest, null, 2));
   for (const d of c.manifest.docs) {
-    zip.file(`documents/${docKey(d.rel)}.md`, c.texts[d.rel] ?? '');
-    if (c.comments[d.rel]) zip.file(`comments/${docKey(d.rel)}.json`, JSON.stringify(c.comments[d.rel], null, 2));
+    zip.file(`documents/${zipKey(d.rel, recensioDirs(c.manifest))}.md`, c.texts[d.rel] ?? '');
+    if (c.comments[d.rel]) zip.file(`comments/${zipKey(d.rel, recensioDirs(c.manifest))}.json`, JSON.stringify(c.comments[d.rel], null, 2));
   }
   for (const [id, s] of Object.entries(c.sources)) {
     zip.file(`armarium/${id}/meta.json`, JSON.stringify(s.meta, null, 2));
@@ -61,13 +75,15 @@ export async function unpackRecensio(data: Uint8Array): Promise<RecensioContent>
   if (!raw) throw new Error('manifest');
   const manifest = JSON.parse(raw) as RecensioManifest;
   if (manifest.format !== RECENSIO_FORMAT || !Array.isArray(manifest.docs)) throw new Error('format');
-  // solo percorsi dentro documents/, senza risalite
-  manifest.docs = manifest.docs.filter((d) => typeof d.rel === 'string' && d.rel.startsWith('documents/') && !d.rel.split('/').includes('..'));
+  // solo percorsi dentro la cartella delle pergamene, senza risalite
+  const dirs = recensioDirs(manifest);
+  manifest.dirs = dirs;
+  manifest.docs = manifest.docs.filter((d) => typeof d.rel === 'string' && d.rel.startsWith(dirs.docs + '/') && !d.rel.split('/').includes('..'));
   const texts: Record<string, string> = {};
   const comments: Record<string, unknown> = {};
   for (const d of manifest.docs) {
-    texts[d.rel] = (await zip.file(`documents/${docKey(d.rel)}.md`)?.async('string')) ?? '';
-    const cj = await zip.file(`comments/${docKey(d.rel)}.json`)?.async('string');
+    texts[d.rel] = (await zip.file(`documents/${zipKey(d.rel, dirs)}.md`)?.async('string')) ?? '';
+    const cj = await zip.file(`comments/${zipKey(d.rel, dirs)}.json`)?.async('string');
     if (cj) comments[d.rel] = JSON.parse(cj);
   }
   const sources: RecensioContent['sources'] = {};

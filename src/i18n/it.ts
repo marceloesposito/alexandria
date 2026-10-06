@@ -14,13 +14,13 @@ export const it: Record<string, string> = {
   'about.text': "Uno studio di scrittura offline per paper, articoli e saggi. I tuoi file restano nel tuo Compendium, sul tuo disco.",
   'about.licenses': 'Licenza MIT. Font Libertinus, Inter e JetBrains Mono (OFL). Stili CSL (CC BY-SA 3.0). Typst, libgit2, SQLite, KaTeX, TipTap.',
 
-  'vault.defaultName': "Il mio Compendium",
+  'vault.defaultName': "Compendium",
   'vault.openError': "Impossibile aprire il Compendium: {error}",
   'vault.pickNew': "Scegli una cartella vuota per il nuovo Compendium",
   'vault.pickOpen': "Scegli la cartella del Compendium",
   'vault.converted': "La cartella è diventata un Compendium di Alexandria.",
 
-  'doc.untitled': 'Senza titolo',
+  'doc.untitled': "Pergamena Senza Titolo",
   'doc.copySuffix': '(copia)',
   'doc.confirmDelete': 'Eliminare «{title}»?',
   'doc.confirmDeleteHint': "Il file viene rimosso dal Compendium. Resta recuperabile dal Palimpsestus, se era in un commit.",
@@ -358,7 +358,7 @@ export const it: Record<string, string> = {
   'help.export.title': 'Esportare',
   'help.export.text': "L'anteprima di stampa mostra le pagine reali. Il PDF è impaginato con Typst; puoi esportare anche in DOCX, HTML, Markdown, testo e LaTeX con BibTeX.",
   'help.vault.title': "Il Compendium",
-  'help.vault.text': "Le pergamene sono file .md in documents/, le risorse dell'Armarium in resources/, i Marginalia e le impostazioni in .alexandria/. La Bibliotheca è una raccolta comune a tutti i Compendium, fuori dal version control.",
+  'help.vault.text': "Le pergamene sono file .md nella cartella Pergamene, le risorse nella cartella Armarium, i Marginalia e le impostazioni in .alexandria/ (nei Compendium creati prima le cartelle si chiamano documents/ e resources/). La Bibliotheca è una raccolta comune a tutti i Compendium, fuori dal version control.",
 
   'prefs.tab.general': 'Generali',
   'prefs.tab.editor': "Scriptorium",

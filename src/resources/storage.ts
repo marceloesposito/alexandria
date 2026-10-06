@@ -3,7 +3,7 @@
 import { normalizeObject } from '../types/model';
 import { platform, joinPath } from '../platform';
 import { readJson, writeJson } from '../vault/vault';
-import { RES_DIR, CACHE_DIR, LAYERS_FILE, LINKS_FILE, WHITEBOARD_FILE, INDEX_DB } from '../vault/paths';
+import { resDir, CACHE_DIR, LAYERS_FILE, LINKS_FILE, WHITEBOARD_FILE, INDEX_DB } from '../vault/paths';
 import type { Resource, LayersFile } from './model';
 import type { Block } from './html';
 import { authorsOf, yearOf } from './model';
@@ -15,7 +15,7 @@ export interface Scope {
 
 /** Cartella degli elementi: resources/ nel vault, items/ nella Library. */
 export function itemsDir(s: Scope): string {
-  return joinPath(s.root, s.kind === 'vault' ? RES_DIR : 'items');
+  return joinPath(s.root, s.kind === 'vault' ? resDir() : 'items');
 }
 
 export function itemDir(s: Scope, id: string): string {

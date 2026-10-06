@@ -14,13 +14,13 @@ export const en: Record<string, string> = {
   'about.text': "An offline writing studio for papers, articles and essays. Your files stay in your Compendium, on your disk.",
   'about.licenses': 'MIT license. Libertinus, Inter and JetBrains Mono fonts (OFL). CSL styles (CC BY-SA 3.0). Typst, libgit2, SQLite, KaTeX, TipTap.',
 
-  'vault.defaultName': "My Compendium",
+  'vault.defaultName': "Compendium",
   'vault.openError': "Could not open the Compendium: {error}",
   'vault.pickNew': "Choose an empty folder for the new Compendium",
   'vault.pickOpen': "Choose the Compendium folder",
   'vault.converted': "The folder is now an Alexandria Compendium.",
 
-  'doc.untitled': 'Untitled',
+  'doc.untitled': "Untitled Scroll",
   'doc.copySuffix': '(copy)',
   'doc.confirmDelete': 'Delete “{title}”?',
   'doc.confirmDeleteHint': "The file is removed from the Compendium. It can still be recovered from the Palimpsestus if it was committed.",
@@ -358,7 +358,7 @@ export const en: Record<string, string> = {
   'help.export.title': 'Exporting',
   'help.export.text': 'The print preview shows the real pages. The PDF is typeset with Typst; you can also export to DOCX, HTML, Markdown, plain text and LaTeX with BibTeX.',
   'help.vault.title': "The Compendium",
-  'help.vault.text': "Scrolls are .md files in documents/, Armarium resources in resources/, Marginalia and settings in .alexandria/. The Bibliotheca is a collection shared by all Compendia, outside version control.",
+  'help.vault.text': "Scrolls are .md files in the Scrolls folder, Armarium resources in the Armarium folder, Marginalia and settings in .alexandria/ (in Compendia created earlier the folders are documents/ and resources/). The Bibliotheca is a collection shared by all Compendia, outside version control.",
 
   'prefs.tab.general': 'General',
   'prefs.tab.editor': "Scriptorium",

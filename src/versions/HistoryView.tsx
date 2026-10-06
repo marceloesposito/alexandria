@@ -17,7 +17,7 @@ import { commit, restoreVersion, saveAll, switchBranch, workingChanges } from '.
 import { confirmDialog } from '../components/confirm';
 import { openContextMenu } from '../components/ContextMenu';
 import { runCommand } from '../commands/registry';
-import { abs } from '../vault/paths';
+import { abs, isDocPath } from '../vault/paths';
 
 /** "5 minuti fa", "ieri", "3 giorni fa"... */
 function ago(sec: number): string {
@@ -95,7 +95,7 @@ function CommitBox({ onDoc }: { onDoc: (rel: string) => void }) {
     };
   }, [log, suggest]);
 
-  const docs = (changes ?? []).filter((c) => c.path.startsWith('documents/') && c.path.endsWith('.md'));
+  const docs = (changes ?? []).filter((c) => isDocPath(c.path));
   const others = (changes ?? []).length - docs.length;
   const save = async () => {
     if (!title.trim()) return;
