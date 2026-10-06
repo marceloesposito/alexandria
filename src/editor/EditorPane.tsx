@@ -19,6 +19,7 @@ import { EDITOR_FONT, styleFont } from '../layout/model';
 import { HorizontalRuler, VerticalRuler, RULER_SPACE_PX } from './Rulers';
 import { useZen } from '../state/zen';
 import { DocHeader } from './DocHeader';
+import { setPageGeometry, MM, onPaginate } from './pagination';
 
 interface Props {
   /** sovrapposizioni allineate alla pagina (evidenziazione righe dei commenti, connettori) */
@@ -50,7 +51,7 @@ export function EditorPane({ overlay, pageRef: externalPageRef }: Props) {
     measureRaf.current = requestAnimationFrame(() => {
       const page = pageRef.current;
       const pm = page?.querySelector('.ProseMirror') as HTMLElement | null;
-      if (page && pm) setLines(measureLines(pm, page));
+      if (page && pm) setLines(measureLines(pm, page), page.offsetWidth ? page.getBoundingClientRect().width / page.offsetWidth : 1);
     });
   };
 
@@ -143,6 +144,10 @@ export function EditorPane({ overlay, pageRef: externalPageRef }: Props) {
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [prefs.zoom, lineNumbers, layout, fit, borderless]);
 
+  // i fogli nuovi spostano le righe: si rimisurano
+  // eslint-disable-next-line react-hooks/exhaustive-deps
+  useEffect(() => onPaginate(scheduleMeasure), []);
+
   // la pagina si riduce per stare nella colonna quando lo spazio non basta
   useEffect(() => {
     const sc = scrollRef.current;
@@ -184,9 +189,16 @@ export function EditorPane({ overlay, pageRef: externalPageRef }: Props) {
   }, [editor, writingLang]);
 
   const m = pageMetrics(layout);
+  // vista pagina: fogli del formato del Layout, con i suoi margini e le interruzioni di pagina
+  const paged = !borderless && !sourceMode;
+  useEffect(() => {
+    setPageGeometry({ enabled: paged, textHeight: m.textHeightMm * MM, padTop: layout.marginTopMm * MM, padBottom: layout.marginBottomMm * MM });
+  }, [paged, m.textHeightMm, layout.marginTopMm, layout.marginBottomMm]);
   const style = {
     '--page-width': `${m.textWidthMm}mm`,
     '--page-pad-x': borderless ? '17mm' : `${m.padXmm}mm`,
+    '--page-pad-top': `${layout.marginTopMm}mm`,
+    '--page-pad-bottom': `${layout.marginBottomMm}mm`,
     '--page-font-size': `${layout.fontSizePt}pt`,
     '--page-leading': String(layout.leading),
     // carattere del corpo (stile "corpo", o quello del documento) e degli stili che ne hanno uno loro

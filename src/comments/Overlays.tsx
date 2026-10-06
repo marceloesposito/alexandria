@@ -6,6 +6,7 @@ import { useCommentUi } from './ui';
 import { useComments } from './store';
 import { getEditor } from '../state/editorRef';
 import type { PageProps } from '../editor/slots';
+import { pageZoom } from '../editor/lines';
 
 export function LineHighlight(_props: PageProps) {
   const line = useCommentUi((s) => s.hoverLine);
@@ -13,7 +14,9 @@ export function LineHighlight(_props: PageProps) {
   const top = draft ? draft.y : line?.top;
   const height = draft ? (line && line.top === draft.y ? line.bottom - line.top : 24) : line ? line.bottom - line.top : 0;
   if (top === undefined) return null;
-  return <div className={`line-hover ${draft ? 'is-draft' : ''}`} style={{ top, height }} />;
+  // dentro la pagina (con lo zoom) le misure dello schermo si dividono per lo zoom
+  const z = pageZoom();
+  return <div className={`line-hover ${draft ? 'is-draft' : ''}`} style={{ top: top / z, height: height / z }} />;
 }
 
 interface Path {
