@@ -83,10 +83,22 @@ export function lineAt(lines: VisualLine[], y: number): VisualLine | null {
 
 // --- store delle righe correnti (gutter, commenti, "vai a riga")
 let current: VisualLine[] = [];
+let zoom = 1;
 const listeners = new Set<() => void>();
 
-export function setLines(lines: VisualLine[]) {
+/**
+ * Le righe sono in pixel dello schermo (servono anche alla colonna dei Marginalia, fuori dalla
+ * pagina); dentro la pagina, che ha lo zoom, vanno divise per `pageZoom()`.
+ */
+export function pageZoom(): number {
+  return zoom;
+}
+
+export function setLines(lines: VisualLine[], pageScale = 1) {
+  const zoomChanged = Math.abs(pageScale - zoom) > 0.001;
+  zoom = pageScale;
   const same =
+    !zoomChanged &&
     lines.length === current.length &&
     lines.every((l, i) => Math.abs(l.top - current[i].top) < 0.5 && Math.abs(l.bottom - current[i].bottom) < 0.5);
   if (same) return;

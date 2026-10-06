@@ -33,6 +33,7 @@ import { Insertion, Deletion, TrackChanges } from './track';
 import { FocusBlock } from './focusBlock';
 import { BlockReorder } from './blockReorder';
 import { ThesaurusMenu } from '../../thesaurus/ui';
+import { PageView } from '../pagination';
 
 /** Tabella con l'allineamento delle colonne del Markdown (GFM). */
 const AlignedTable = Table.extend({
@@ -91,12 +92,13 @@ export function buildExtensions() {
     Insertion,
     Deletion,
     TrackChanges,
+    PageView,
   ];
 }
 
 /** Estensioni per un editor in sola lettura (lettura del Codex, riquadri accanto): senza i plugin
  * legati all'editor principale (rilascio file, ricerca, commenti, comandi /). */
 export function buildReadOnlyExtensions() {
-  const skip = new Set(['alexandriaDrop', 'alexandriaSearch', 'commentAnchors', 'markdownShortcuts', 'slashCommands', 'placeholder', 'trackChanges']);
+  const skip = new Set(['alexandriaDrop', 'alexandriaSearch', 'commentAnchors', 'markdownShortcuts', 'slashCommands', 'placeholder', 'trackChanges', 'pageView']);
   return buildExtensions().filter((e) => !skip.has(e.name));
 }
