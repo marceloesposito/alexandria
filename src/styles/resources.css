@@ -284,18 +284,52 @@
   outline: 2px solid var(--accent);
 }
 
+/* punti di aggancio: piu' grandi, con un'area cliccabile piu' larga del pallino */
 .wb-handle {
-  width: 9px !important;
-  height: 9px !important;
+  width: 14px !important;
+  height: 14px !important;
   background: var(--accent) !important;
   border: 2px solid var(--paper) !important;
+  box-shadow: 0 0 0 1px color-mix(in srgb, var(--accent) 40%, transparent);
   opacity: 0;
-  transition: opacity 0.12s;
+  transition:
+    opacity 0.12s,
+    transform 0.12s;
+}
+
+.wb-handle::after {
+  content: '';
+  position: absolute;
+  inset: -10px;
+  border-radius: 50%;
 }
 
 .react-flow__node:hover .wb-handle,
-.react-flow__node.selected .wb-handle {
+.react-flow__node.selected .wb-handle,
+.wb-handle.connectingto,
+.wb-handle.connectingfrom {
   opacity: 1;
+}
+
+/* le posizioni di React Flow usano gia' translate: lo scale va combinato per ogni lato */
+.wb-handle--top:hover,
+.wb-handle--top.connectingto {
+  transform: translate(-50%, -50%) scale(1.3);
+}
+
+.wb-handle--bottom:hover,
+.wb-handle--bottom.connectingto {
+  transform: translate(-50%, 50%) scale(1.3);
+}
+
+.wb-handle--left:hover,
+.wb-handle--left.connectingto {
+  transform: translate(-50%, -50%) scale(1.3);
+}
+
+.wb-handle--right:hover,
+.wb-handle--right.connectingto {
+  transform: translate(50%, -50%) scale(1.3);
 }
 
 .wb-note {

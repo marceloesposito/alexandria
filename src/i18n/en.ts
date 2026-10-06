@@ -1047,7 +1047,7 @@ export const en: Record<string, string> = {
   'wb.doc.addAction': "Put on the Tabula",
   'wb.doc.linkTitle': "Link “{name}” to…",
   'wb.doc.linkAction': "Link",
-  'cmd.wb.activeDoc': "Open Scroll",
+  'cmd.wb.activeDoc': "Go to the open Scroll",
   'cmd.wb.pickDocs': "Add Scrolls…",
   'docpick.search': "Search Scrolls…",
   'docpick.none': "No Scroll to suggest",

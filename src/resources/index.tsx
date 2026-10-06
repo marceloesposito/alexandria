@@ -27,7 +27,6 @@ import {
   Trash2,
   Landmark,
   ScrollText,
-  Files,
 } from 'lucide-react';
 import { registerCommands, notifyCommandState } from '../commands/registry';
 import { viewComponents, globalComponents } from '../shell/views';
@@ -260,7 +259,6 @@ export function registerResources() {
     { id: 'wb.frame', label: 'cmd.wb.frame', icon: Frame, category: 'whiteboard', views: ['resources'], run: () => (st().setView('whiteboard'), setTimeout(() => void wbApi.addFrame?.(), 50)) },
     { id: 'wb.connect', label: 'cmd.wb.connect', icon: Spline, category: 'whiteboard', views: ['resources'], run: () => ws().toast(t('wb.connectHint'), 'info') },
     { id: 'wb.activeDoc', label: 'cmd.wb.activeDoc', icon: ScrollText, category: 'whiteboard', views: ['resources'], isEnabled: () => !!ws().activeDoc, run: () => (st().setView('whiteboard'), setTimeout(() => wbApi.addActiveDoc?.(), 50)) },
-    { id: 'wb.pickDocs', label: 'cmd.wb.pickDocs', icon: Files, category: 'whiteboard', views: ['resources'], run: () => (st().setView('whiteboard'), setTimeout(() => wbApi.pickDocs?.(), 50)) },
     { id: 'wb.fit', label: 'cmd.wb.fit', icon: Maximize, category: 'whiteboard', views: ['resources'], run: () => wbApi.fit?.() },
 
     // ----- citazioni

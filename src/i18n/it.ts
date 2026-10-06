@@ -1047,7 +1047,7 @@ export const it: Record<string, string> = {
   'wb.doc.addAction': "Metti sulla Tabula",
   'wb.doc.linkTitle': "Collega «{name}» a…",
   'wb.doc.linkAction': "Collega",
-  'cmd.wb.activeDoc': "Pergamena aperta",
+  'cmd.wb.activeDoc': "Vai alla pergamena aperta",
   'cmd.wb.pickDocs': "Aggiungi pergamene…",
   'docpick.search': "Cerca tra le pergamene…",
   'docpick.none': "Nessuna pergamena da proporre",

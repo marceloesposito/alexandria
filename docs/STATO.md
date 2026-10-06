@@ -66,8 +66,15 @@ Aggiornato: 7 ottobre 2026 (M11).
   `<appData>/templates/*.json`, comuni a tutti i Compendium; un template e' testo di partenza +
   impostazioni. Le master page non sono piu' tre fisse: si creano, rinominano, duplicano ed eliminano
   (il corpo resta; una sezione con una master eliminata usa il corpo). "Nuova pergamena" resta vuota.
-- **Pergamene nella Tabula**: nodi proxy delle pergamene (la aperta o scelte dall'elenco), collegabili
-  fra loro e con le risorse; rinomina ed eliminazione aggiornano nodi e legami. Nella vista senza bordi
+- **Pergamene nella Tabula**: ogni pergamena del Compendium e' un nodo fisso (sempre presente, si sposta
+  ma non si toglie; la prima volta in colonna a sinistra delle risorse, poi la posizione resta salvata),
+  collegabile alle fonti e alle altre pergamene; i collegamenti entrano anche nel Grafo, che con
+  almeno una pergamena non e' mai vuoto. "Vai alla pergamena aperta" la porta in vista.
+  Rinomina ed eliminazione aggiornano nodi e legami.
+- **Collegamenti nella Tabula**: quattro punti di aggancio per nodo (sopra, sotto, destra, sinistra),
+  14 px con un'area cliccabile piu' larga; ognuno puo' iniziare o ricevere un collegamento
+  (`ConnectionMode.Loose`). Le frecce si attaccano ai lati che si guardano e li seguono quando i nodi
+  si spostano (`facingSides` in `src/resources/tabula.ts`). Nella vista senza bordi
   una barra di una riga mostra le pergamene collegate (clic per aprirle); non compare in Pagina, nella
   scrittura minimale ne' nell'export.
 - **Incolla nell'Armarium**: Cmd/Ctrl+V fuori dai campi crea la risorsa del tipo giusto; un link
