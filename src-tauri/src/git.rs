@@ -478,7 +478,13 @@ pub fn git_remote(repo: String) -> CmdResult<Option<String>> {
 
 fn callbacks(url: String) -> RemoteCallbacks<'static> {
     let mut cb = RemoteCallbacks::new();
+    let mut tries = 0;
     cb.credentials(move |_u, username, allowed| {
+        // un token rifiutato non va riprovato all'infinito
+        tries += 1;
+        if tries > 2 {
+            return Err(git2::Error::from_str("Accesso negato: controlla il token dell'account"));
+        }
         if allowed.contains(git2::CredentialType::USER_PASS_PLAINTEXT) {
             if let Some(t) = token_entry(&url).and_then(|e| e.get_password().ok()) {
                 return Cred::userpass_plaintext(username.unwrap_or("x-access-token"), &t);
@@ -491,6 +497,35 @@ fn callbacks(url: String) -> RemoteCallbacks<'static> {
         Cred::default()
     });
     cb
+}
+
+/// Scarica una repository remota in una cartella nuova (o vuota): "Apri Compendium remoto".
+#[tauri::command]
+pub async fn git_clone(app: tauri::AppHandle, url: String, dest: String) -> CmdResult<()> {
+    tauri::async_runtime::spawn_blocking(move || {
+        let p = Path::new(&dest);
+        if p.exists() && std::fs::read_dir(p).map(|mut d| d.next().is_some()).unwrap_or(false) {
+            return Err("La cartella di destinazione non e' vuota".to_string());
+        }
+        let mut cb = callbacks(url.clone());
+        let mut last = std::time::Instant::now();
+        cb.transfer_progress(move |s| {
+            if last.elapsed().as_millis() > 150 {
+                last = std::time::Instant::now();
+                use tauri::Emitter;
+                let _ = app.emit("clone-progress", (s.received_objects(), s.total_objects()));
+            }
+            true
+        });
+        let mut fo = FetchOptions::new();
+        fo.remote_callbacks(cb);
+        git2::build::RepoBuilder::new().fetch_options(fo).clone(&url, p).map_err(err)?;
+        // stesse impostazioni dei Compendium aperti (a capo e permessi invariati)
+        open(&dest)?;
+        Ok(())
+    })
+    .await
+    .map_err(err)?
 }
 
 #[tauri::command]
@@ -637,4 +672,22 @@ mod tests {
         assert_eq!(cmp.len(), 1);
         assert_eq!(cmp[0].after.as_deref(), Some("1\n"));
     }
+
+    #[test]
+    fn clone_da_una_cartella() {
+        let src = std::env::temp_dir().join(format!("alx-clone-src-{}", std::process::id()));
+        let dst = std::env::temp_dir().join(format!("alx-clone-dst-{}", std::process::id()));
+        let _ = std::fs::remove_dir_all(&src);
+        let _ = std::fs::remove_dir_all(&dst);
+        let repo = src.to_string_lossy().to_string();
+        git_init(repo.clone()).unwrap();
+        std::fs::write(src.join("a.md"), "ciao").unwrap();
+        git_commit(repo.clone(), "primo".into(), false).unwrap();
+        let r = git2::build::RepoBuilder::new().clone(&repo, &dst).unwrap();
+        assert!(dst.join("a.md").exists());
+        assert_eq!(r.head().unwrap().peel_to_commit().unwrap().message().unwrap(), "primo");
+        let _ = std::fs::remove_dir_all(&src);
+        let _ = std::fs::remove_dir_all(&dst);
+    }
+
 }

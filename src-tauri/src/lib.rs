@@ -139,6 +139,8 @@ pub fn run() {
             forge::forge_device_start,
             forge::forge_device_poll,
             forge::forge_create_repo,
+            forge::forge_list_repos,
+            git::git_clone,
             git::git_push,
             git::git_pull,
             index::index_upsert,

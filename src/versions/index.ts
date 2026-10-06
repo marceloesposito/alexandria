@@ -6,6 +6,7 @@ import { registerDialog } from '../shell/DialogHost';
 import { HistoryView } from './HistoryView';
 import { CommitDialog, NewBranchDialog, SwitchBranchDialog, MergeDialog } from './dialogs';
 import { RemoteDialog } from './RemoteDialog';
+import { OpenRemoteDialog } from './OpenRemoteDialog';
 import { useWorkspace, ws } from '../state/workspace';
 import { useVersions } from './store';
 import { checkpoint, push, pull, restoreVersion, startAutoCheckpoints, noteEdit } from './actions';
@@ -21,6 +22,7 @@ export function registerVersions() {
   registerDialog('switchBranch', SwitchBranchDialog);
   registerDialog('merge', MergeDialog);
   registerDialog('remote', RemoteDialog);
+  registerDialog('openRemote', OpenRemoteDialog);
 
   const hasRepo = () => !!useVersions.getState().log;
   registerCommands([

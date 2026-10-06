@@ -525,6 +525,15 @@ export function createMemoryPlatform(opts: { persist?: boolean } = {}): Platform
     async forgeDevicePoll() {
       return 'pending';
     },
+    async forgeListRepos() {
+      return [];
+    },
+    async gitClone() {
+      throw new Error('Remoto non disponibile nella versione browser');
+    },
+    async onCloneProgress() {
+      return () => undefined;
+    },
     async forgeCreateRepo() {
       throw new Error('Account non disponibili nella versione browser');
     },

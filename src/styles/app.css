@@ -2875,3 +2875,45 @@ table.kv td:last-child {
 .editor-center.has-footer:has(.fbar:not(.fbar--pill)) .counts-badge {
   bottom: 90px;
 }
+
+/* ---------------------------------------------------------------- apri Compendium remoto */
+.remote-list {
+  margin: 0;
+  padding: 0;
+  list-style: none;
+  max-height: 220px;
+  overflow-y: auto;
+  border: 1px solid var(--line);
+  border-radius: var(--radius-small);
+}
+
+.remote-list li {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  padding: 6px 10px;
+  cursor: pointer;
+}
+
+.remote-list li:hover {
+  background: var(--chrome-2);
+}
+
+.remote-list li.is-active {
+  background: var(--accent-soft);
+}
+
+.remote-list__name {
+  flex: 1;
+  min-width: 0;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.forge__section .search-field {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  color: var(--muted);
+}

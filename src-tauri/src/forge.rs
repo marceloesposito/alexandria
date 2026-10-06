@@ -192,6 +192,51 @@ pub async fn forge_device_poll(client_id: String, device_code: String) -> CmdRes
     }
 }
 
+#[derive(Serialize)]
+pub struct RepoInfo {
+    name: String,
+    full_name: String,
+    clone_url: String,
+    private: bool,
+    updated: String,
+    description: String,
+}
+
+/** Repository dell'account collegato per l'host, dalle piu' recenti. */
+#[tauri::command]
+pub async fn forge_list_repos(host: String) -> CmdResult<Vec<RepoInfo>> {
+    let s = entry(&host).ok_or("Portachiavi non disponibile")?.get_password().map_err(|_| "Nessun account collegato".to_string())?;
+    let a: Account = serde_json::from_str(&s).map_err(err)?;
+    let base = api_base(&a.kind, &a.host);
+    let url = match a.kind.as_str() {
+        "gitlab" => format!("{base}/projects?membership=true&order_by=last_activity_at&per_page=100"),
+        "gitea" => format!("{base}/user/repos?limit=100"),
+        _ => format!("{base}/user/repos?per_page=100&sort=updated"),
+    };
+    let (h, v) = auth(&a.kind, &a.token);
+    let (status, body) = send_json(client()?.get(url).header(h, v).header("Accept", "application/json")).await?;
+    if status >= 300 {
+        return Err(api_error(status, &body));
+    }
+    let s = |x: &Value, k: &str| x.get(k).and_then(|y| y.as_str()).unwrap_or("").to_string();
+    Ok(body
+        .as_array()
+        .map(|list| {
+            list.iter()
+                .map(|r| RepoInfo {
+                    name: s(r, "name"),
+                    full_name: { let f = s(r, "full_name"); if f.is_empty() { s(r, "path_with_namespace") } else { f } },
+                    clone_url: { let c = s(r, "clone_url"); if c.is_empty() { s(r, "http_url_to_repo") } else { c } },
+                    private: r.get("private").and_then(|x| x.as_bool()).unwrap_or_else(|| s(r, "visibility") == "private"),
+                    updated: { let u = s(r, "updated_at"); if u.is_empty() { s(r, "last_activity_at") } else { u } },
+                    description: s(r, "description"),
+                })
+                .filter(|r| !r.clone_url.is_empty())
+                .collect()
+        })
+        .unwrap_or_default())
+}
+
 /** Crea una repository vuota sull'account e ne restituisce l'indirizzo https per git. */
 #[tauri::command]
 pub async fn forge_create_repo(host: String, name: String, private: bool, description: Option<String>) -> CmdResult<String> {
