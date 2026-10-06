@@ -1,5 +1,6 @@
 // Documento -> pagina HTML autonoma (stili inclusi, immagini e formule incorporate, note in fondo).
 // Si scrive in un file: tutto il testo dell'utente passa da escapeHtml.
+import { markColor, TEXT_HEX, HIGHLIGHT_HEX, type TextColor, type HighlightColor } from '../doc/colors';
 import type { PMNode, PMMark, CitationItem } from '../doc/types';
 import { MARK_ORDER } from '../doc/types';
 import { parseMarkdown } from '../doc/parse';
@@ -58,14 +59,22 @@ export function toHtml(doc: PMNode, ctx: ExportContext): string {
         i++;
         continue;
       }
-      const key = m.type === 'link' ? `link:${m.attrs?.href}` : m.type;
+      const keyOf = (x: PMMark) => (x.type === 'link' ? `link:${x.attrs?.href}` : x.type === 'highlight' || x.type === 'textColor' ? `${x.type}:${markColor(x) ?? ''}` : x.type);
+      const key = keyOf(m);
       let j = i;
-      while (j < nodes.length && (nodes[j].marks ?? []).some((x) => (x.type === 'link' ? `link:${x.attrs?.href}` : x.type) === key)) j++;
+      while (j < nodes.length && (nodes[j].marks ?? []).some((x) => keyOf(x) === key)) j++;
       const inner = inline(nodes.slice(i, j), new Set([...excluded, m.type]));
+      const color = markColor(m);
       out +=
         m.type === 'link'
           ? `<a href="${escapeHtml(safeHref(String(m.attrs?.href ?? '')))}" rel="noreferrer">${inner}</a>`
-          : `<${TAGS[m.type]}>${inner}</${TAGS[m.type]}>`;
+          : m.type === 'textColor'
+            ? color
+              ? `<span style="color: ${TEXT_HEX[color as TextColor]}">${inner}</span>`
+              : inner
+            : m.type === 'highlight' && color
+              ? `<mark style="background: ${HIGHLIGHT_HEX[color as HighlightColor]}">${inner}</mark>`
+              : `<${TAGS[m.type]}>${inner}</${TAGS[m.type]}>`;
       i = j;
     }
     return out;

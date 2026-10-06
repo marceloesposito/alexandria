@@ -2713,3 +2713,165 @@ table.kv td:last-child {
   gap: 8px;
   margin-top: 12px;
 }
+
+/* ---------------------------------------------------------------- barra flottante di formattazione */
+.fbar {
+  position: absolute;
+  left: 50%;
+  bottom: 14px;
+  transform: translateX(-50%);
+  z-index: 31;
+  display: flex;
+  align-items: center;
+  gap: 2px;
+  padding: 3px 4px;
+  max-width: calc(100% - 300px);
+  background: color-mix(in srgb, var(--chrome) 92%, transparent);
+  backdrop-filter: blur(6px);
+  border: 1px solid var(--line);
+  border-radius: 999px;
+  box-shadow: var(--shadow);
+  color: var(--ink);
+}
+
+.editor-center.has-footer .fbar {
+  bottom: 44px;
+}
+
+.fbar__group {
+  display: flex;
+  align-items: center;
+  gap: 1px;
+  padding: 0 3px;
+}
+
+.fbar__group + .fbar__group {
+  border-left: 1px solid var(--line);
+}
+
+.fbar__btn {
+  position: relative;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 4px;
+  min-width: 28px;
+  height: 28px;
+  padding: 0 4px;
+  border: 0;
+  border-radius: 999px;
+  background: transparent;
+  color: var(--ink);
+  cursor: pointer;
+}
+
+.fbar__btn:hover {
+  background: var(--line-hover);
+}
+
+.fbar__btn.is-active {
+  background: var(--accent-soft);
+  color: var(--accent);
+}
+
+.fbar__collapse {
+  color: var(--muted);
+}
+
+.fbar--pill {
+  gap: 4px;
+  padding: 6px 12px;
+  border-radius: 999px;
+  color: var(--muted);
+  cursor: pointer;
+  opacity: 0.85;
+}
+
+.fbar--pill:hover {
+  opacity: 1;
+  color: var(--ink);
+}
+
+/* tavolozza dei colori (barra flottante e ribbon) */
+.color-picker {
+  position: relative;
+  display: inline-flex;
+}
+
+.color-picker__btn {
+  flex-direction: column;
+  gap: 1px;
+}
+
+.color-picker__bar {
+  display: block;
+  width: 16px;
+  height: 3px;
+  border-radius: 2px;
+  background: var(--line-strong);
+}
+
+.color-picker__bar.is-text[class*="swatch--tc-"] {
+  background: currentColor;
+}
+
+.color-picker__menu {
+  position: absolute;
+  bottom: calc(100% + 8px);
+  left: 50%;
+  transform: translateX(-50%);
+  z-index: 40;
+  width: 168px;
+  padding: 10px;
+  background: var(--paper);
+  border: 1px solid var(--line);
+  border-radius: var(--radius);
+  box-shadow: var(--shadow);
+}
+
+.ribbon .color-picker__menu {
+  top: calc(100% + 6px);
+  bottom: auto;
+}
+
+.color-picker__title {
+  margin-bottom: 8px;
+  font-size: var(--fs-ui-small);
+  color: var(--muted);
+}
+
+.color-picker__grid {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: 6px;
+}
+
+.color-picker__swatch {
+  height: 30px;
+  border: 1px solid var(--line);
+  border-radius: 6px;
+  background: var(--paper);
+  font-family: var(--font-text);
+  font-size: 16px;
+  font-weight: 600;
+  cursor: pointer;
+}
+
+.color-picker__swatch.is-current {
+  outline: 2px solid var(--accent);
+  outline-offset: 1px;
+}
+
+.color-picker__none {
+  width: 100%;
+  margin-top: 8px;
+}
+
+/* con la barra aperta il contatore sale sopra di lei, cosi' non si coprono */
+.editor-center:has(.fbar:not(.fbar--pill)) .counts-badge {
+  bottom: 60px;
+}
+
+.editor-center.has-footer:has(.fbar:not(.fbar--pill)) .counts-badge {
+  bottom: 90px;
+}

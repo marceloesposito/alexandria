@@ -2,6 +2,7 @@
 // carattere dell'utente puo' essere interpretato come markup; la formattazione e' fatta
 // con chiamate esplicite (#strong, #emph, #footnote...). Le impostazioni di pagina, gli stili
 // di paragrafo e le pagine mastro vengono dalle impostazioni del documento.
+import { markColor, TEXT_HEX, HIGHLIGHT_HEX, type TextColor, type HighlightColor } from '../doc/colors';
 import type { PMNode, PMMark, CitationItem } from '../doc/types';
 import { MARK_ORDER } from '../doc/types';
 import { parseMarkdown } from '../doc/parse';
@@ -23,6 +24,7 @@ function n(x: number): string {
 // ---------------------------------------------------------------- in linea
 
 function markKey(m: PMMark): string {
+  if (m.type === 'highlight' || m.type === 'textColor') return `${m.type}:${markColor(m) ?? ''}`;
   return m.type === 'link' ? `link:${m.attrs?.href}` : m.type;
 }
 
@@ -72,6 +74,8 @@ export function inline(nodes: PMNode[], ctx: ExportContext, excluded: Set<string
     if (m.type === 'link') out += `#link(${str(String(m.attrs?.href ?? ''))})[${inner}]`;
     else if (m.type === 'insertion') out += `#text(fill: rgb("#3f7d4e"))[#underline[${inner}]]`;
     else if (m.type === 'deletion') out += `#text(fill: rgb("#a83a2c"))[#strike[${inner}]]`;
+    else if (m.type === 'textColor') out += markColor(m) ? `#text(fill: rgb("${TEXT_HEX[markColor(m) as TextColor]}"))[${inner}]` : inner;
+    else if (m.type === 'highlight' && markColor(m)) out += `#highlight(fill: rgb("${HIGHLIGHT_HEX[markColor(m) as HighlightColor]}"))[${inner}]`;
     else out += `#${WRAP[m.type] ?? 'box'}[${inner}]`;
     i = j;
   }

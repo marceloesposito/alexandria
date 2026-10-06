@@ -1,5 +1,6 @@
 // Documento -> DOCX (Word) con la libreria docx: stili, note, immagini, tabelle, elenchi,
 // formato pagina e margini dalle impostazioni, intestazione e numeri di pagina.
+import { markColor, TEXT_HEX, HIGHLIGHT_WORD, type TextColor, type HighlightColor } from '../doc/colors';
 import {
   CommentRangeStart,
   CommentRangeEnd,
@@ -35,6 +36,20 @@ import { docTexts } from '../i18n/writing';
 
 const MM = 56.6929; // twip per millimetro
 
+/** Evidenziatore di Word per un nodo: il colore della tavolozza o il giallo. */
+function highlightOf(n: PMNode): string | null {
+  const m = n.marks?.find((x) => x.type === 'highlight');
+  if (!m) return null;
+  const c = markColor(m);
+  return c ? HIGHLIGHT_WORD[c as HighlightColor] : 'yellow';
+}
+
+function textColorOf(n: PMNode): string | undefined {
+  const m = n.marks?.find((x) => x.type === 'textColor');
+  const c = m && markColor(m);
+  return c ? TEXT_HEX[c as TextColor].slice(1) : undefined;
+}
+
 interface RunStyle {
   bold?: boolean;
   italics?: boolean;
@@ -42,7 +57,10 @@ interface RunStyle {
   strike?: boolean;
   superScript?: boolean;
   subScript?: boolean;
-  highlight?: boolean;
+  /** nome dell'evidenziatore di Word (null: niente) */
+  highlight?: string | null;
+  /** colore del testo, esadecimale senza # */
+  color?: string;
   code?: boolean;
 }
 
@@ -128,7 +146,8 @@ export async function toDocx(doc: PMNode, ctx: ExportContext): Promise<Uint8Arra
       superScript: s.superScript,
       subScript: s.subScript,
       ...(s.underline ? { underline: {} } : {}),
-      ...(s.highlight ? { highlight: 'yellow' } : {}),
+      ...(s.highlight ? { highlight: s.highlight as IRunOptions['highlight'] } : {}),
+      ...(s.color ? { color: s.color } : {}),
       ...(s.code ? { font: 'Consolas' } : {}),
     };
     return new TextRun(o);
@@ -158,7 +177,8 @@ export async function toDocx(doc: PMNode, ctx: ExportContext): Promise<Uint8Arra
         strike: marks.has('strike'),
         superScript: marks.has('superscript'),
         subScript: marks.has('subscript'),
-        highlight: marks.has('highlight'),
+        highlight: highlightOf(n),
+        color: textColorOf(n),
         code: marks.has('code'),
       };
       const link = n.marks?.find((m) => m.type === 'link');

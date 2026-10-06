@@ -17,7 +17,7 @@ export const DEFAULT_RIBBON: RibbonConfig = {
         {
           id: 'ed-home-char',
           label: 'ribbon.group.character',
-          items: ['fmt.bold', 'fmt.italic', 'fmt.underline', 'fmt.strike', 'fmt.highlight', 'fmt.superscript', 'fmt.subscript', 'fmt.code', 'fmt.clear'],
+          items: ['fmt.bold', 'fmt.italic', 'fmt.underline', 'fmt.strike', 'fmt.textColor', 'fmt.highlightColor', 'fmt.superscript', 'fmt.subscript', 'fmt.code', 'fmt.clear'],
         },
         // subito dopo il carattere: visibile anche su schermi normali, senza scorrere la barra
         { id: 'ed-home-cite', label: 'ribbon.group.citations', items: ['cite.insert', 'cite.bibliography'], since: 2 },
@@ -253,7 +253,7 @@ export const MENUS: MenuDef[] = [
       c('view.lineNumbers'),
       c('view.focus'),
       c('view.zen'),
-      { label: 'menu.view.editorLayout', submenu: [c('view.layoutPage'), c('view.layoutBorderless'), sep, c('view.rulers'), c('view.docHeader')] },
+      { label: 'menu.view.editorLayout', submenu: [c('view.layoutPage'), c('view.layoutBorderless'), sep, c('view.rulers'), c('view.docHeader'), c('view.formatBar')] },
       sep,
       c('view.zoomIn'),
       c('view.zoomOut'),

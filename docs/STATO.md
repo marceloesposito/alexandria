@@ -49,6 +49,16 @@ Aggiornato: 7 ottobre 2026 (M11).
   "Verifica il sito" (nel messaggio e nell'ispettore) apre una finestra normale: l'utente supera il
   controllo e la risorsa si completa al suo posto. Le finestre di lettura tengono i cookie del controllo
   superato (quelle della sola foto restano senza cookie). Autotest: `ALEXANDRIA_RENDER_TEST="<url>|<file>"`.
+- **Colore del testo ed evidenziatore**: tavolozza con nomi (`src/doc/colors.ts`: rosso, arancio, verde, blu,
+  viola, grigio; evidenziatori giallo, verde, blu, rosa, arancio, viola). Nel Markdown
+  `<span data-color="red">` e `<mark data-color="green">` (il giallo resta `<mark>`); colori fuori
+  tavolozza o `<span>` qualsiasi restano testo. Nell'editor i token del tema, negli export i colori di
+  stampa (PDF, HTML, Word; in LaTeX e testo semplice resta il testo). Nel gruppo Carattere della Home e
+  nella barra flottante.
+- **Barra flottante di formattazione** in basso al centro dello Scriptorium (`src/editor/FormatBar.tsx`):
+  stili, grassetto/corsivo/sottolineato/barrato, colore, evidenziatore, elenchi, link, cancella formato;
+  si riduce a una pillola, si nasconde da Visualizza > Aspetto dello Scriptorium (`prefs.formatBar`). Non
+  compare nella scrittura minimale ne' nella vista sorgente; con la barra aperta il contatore sale sopra.
 - **Modalita' focus**: il blocco col cursore riceve `has-focus` (`src/editor/extensions/focusBlock.ts`);
   prima non lo metteva nessuno e con la modalita' focus attiva tutto il testo restava attenuato.
 - **Snippet di codice**: nuovo tipo di risorsa (file `snippet.<ext>`), creato da Aggiungi risorse,

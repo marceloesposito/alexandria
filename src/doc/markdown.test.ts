@@ -35,6 +35,8 @@ const CANONICAL = [
   '<!-- toc -->\n',
   '| A | B |\n| :---: | ---: |\n| 1 | 2 |\n',
   'Testo <u>sottolineato</u>, <mark>evidenziato</mark>, H<sub>2</sub>O e x<sup>2</sup>.\n',
+  'Colori: <span data-color="red">rosso</span>, <mark data-color="green">verde</mark> e <span data-color="blue"><mark data-color="yellow">entrambi</mark></span>.\n',
+  'Due evidenziatori vicini: <mark data-color="pink">rosa</mark><mark data-color="blue">blu</mark>.\n',
   '<!-- bibliography:start -->\n\n## Bibliografia\n\nRossi, M. (2020). *Titolo*.\n\n<!-- bibliography:end -->\n',
   'Costa \\$5 e \\*non\\* enfasi, \\[parentesi\\].\n',
   '\\# non titolo\n',
@@ -55,6 +57,19 @@ describe('markdown round trip', () => {
     const a = parseMarkdown(md);
     const b = parseMarkdown(serializeMarkdown(a));
     expect(b).toEqual(a);
+  });
+});
+
+describe('colori', () => {
+  it('testo ed evidenziazione con colore diventano segni con attrs', () => {
+    const p = parseMarkdown('<span data-color="red">a</span> <mark data-color="green">b</mark> <mark>c</mark>\n').content![0];
+    const marks = (p.content ?? []).filter((n) => n.text?.trim()).map((n) => n.marks);
+    expect(marks).toEqual([[{ type: 'textColor', attrs: { color: 'red' } }], [{ type: 'highlight', attrs: { color: 'green' } }], [{ type: 'highlight' }]]);
+  });
+
+  it('colori fuori tavolozza e <span> qualsiasi restano testo, senza stili arbitrari', () => {
+    const p = parseMarkdown('<span data-color="#ff0000">x</span> <span class="a">y</span>\n').content![0];
+    expect((p.content ?? []).some((n) => n.marks?.some((m) => m.type === 'textColor'))).toBe(false);
   });
 });
 

@@ -1,5 +1,6 @@
 // Albero del documento -> Markdown (Pandoc/GFM). Deve fare il giro completo con parse.ts:
 // parse(serialize(doc)) == doc per ogni documento prodotto dall'editor.
+import { markColor } from './colors';
 import type { PMNode, PMMark, MarkType, CitationItem } from './types';
 import { MARK_ORDER } from './types';
 import { formatCitation } from './citeSyntax';
@@ -148,6 +149,7 @@ function table(n: PMNode, st: State): string {
 
 function markKey(m: PMMark): string {
   if (m.type === 'insertion' || m.type === 'deletion') return `${m.type}:${m.attrs?.author ?? ''}:${m.attrs?.date ?? ''}`;
+  if (m.type === 'highlight' || m.type === 'textColor') return `${m.type}:${markColor(m) ?? ''}`;
   return m.type === 'link' ? `link:${m.attrs?.href}:${m.attrs?.title ?? ''}` : m.type;
 }
 
@@ -203,6 +205,10 @@ export function inline(nodes: PMNode[], st: State, excluded: Set<string> = new S
 
 function wrap(m: PMMark, inner: string): string {
   if (m.type === 'insertion' || m.type === 'deletion') return trackTag(m, inner);
+  // colori: <mark data-color="..."> e <span data-color="..."> (HTML standard dentro il Markdown)
+  const color = markColor(m);
+  if (m.type === 'textColor') return color ? `<span data-color="${color}">${inner}</span>` : inner;
+  if (m.type === 'highlight' && color) return `<mark data-color="${color}">${inner}</mark>`;
   // gli spazi ai bordi escono dai delimitatori, altrimenti CommonMark non chiude l'enfasi
   const lead = /^\s*/.exec(inner)![0];
   const trail = /\s*$/.exec(inner.slice(lead.length))![0];
@@ -225,6 +231,7 @@ const DELIMS: Record<MarkType, [string, string]> = {
   strike: ['~~', '~~'],
   underline: ['<u>', '</u>'],
   highlight: ['<mark>', '</mark>'],
+  textColor: ['', ''],
   subscript: ['<sub>', '</sub>'],
   superscript: ['<sup>', '</sup>'],
   code: ['`', '`'],

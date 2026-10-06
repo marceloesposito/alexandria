@@ -290,6 +290,57 @@
   padding: 0 0.05em;
 }
 
+/* evidenziazione e testo a colori: tavolozza con nomi, dai token del tema (chiaro e scuro) */
+.doc-body mark[data-color='yellow'],
+.swatch--hl-yellow {
+  background: var(--mark);
+}
+.doc-body mark[data-color='green'],
+.swatch--hl-green {
+  background: color-mix(in srgb, var(--series-3) 30%, transparent);
+}
+.doc-body mark[data-color='blue'],
+.swatch--hl-blue {
+  background: color-mix(in srgb, var(--series-2) 30%, transparent);
+}
+.doc-body mark[data-color='pink'],
+.swatch--hl-pink {
+  background: color-mix(in srgb, var(--series-7) 25%, transparent);
+}
+.doc-body mark[data-color='orange'],
+.swatch--hl-orange {
+  background: color-mix(in srgb, var(--series-5) 30%, transparent);
+}
+.doc-body mark[data-color='purple'],
+.swatch--hl-purple {
+  background: color-mix(in srgb, var(--series-4) 28%, transparent);
+}
+
+.doc-body .tc[data-color='red'],
+.swatch--tc-red {
+  color: var(--series-7);
+}
+.doc-body .tc[data-color='orange'],
+.swatch--tc-orange {
+  color: var(--series-5);
+}
+.doc-body .tc[data-color='green'],
+.swatch--tc-green {
+  color: var(--series-3);
+}
+.doc-body .tc[data-color='blue'],
+.swatch--tc-blue {
+  color: var(--series-2);
+}
+.doc-body .tc[data-color='purple'],
+.swatch--tc-purple {
+  color: var(--series-4);
+}
+.doc-body .tc[data-color='grey'],
+.swatch--tc-grey {
+  color: var(--series-8);
+}
+
 .doc-body table {
   border-collapse: collapse;
   width: 100%;

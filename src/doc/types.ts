@@ -21,6 +21,8 @@ export type MarkType =
   | 'strike'
   | 'underline'
   | 'highlight'
+  /** colore del testo (attrs: color, uno di TEXT_COLORS) */
+  | 'textColor'
   | 'subscript'
   | 'superscript'
   | 'code'
@@ -37,6 +39,7 @@ export const MARK_ORDER: MarkType[] = [
   'italic',
   'strike',
   'underline',
+  'textColor',
   'highlight',
   'subscript',
   'superscript',

@@ -1,6 +1,7 @@
 // Markdown -> albero del documento. Markdown di Pandoc/GFM con le estensioni di Alexandria:
 // citazioni [@chiave], [[wikilink]], note [^n], formule $...$, figure ![..](..){attr},
 // e commenti HTML per interruzioni di pagina, sezioni, sommario e bibliografia.
+import { isHighlightColor, isTextColor } from './colors';
 import { unified } from 'unified';
 import remarkParse from 'remark-parse';
 import remarkGfm from 'remark-gfm';
@@ -278,12 +279,17 @@ function inlines(nodes: M.PhrasingContent[], ctx: Ctx, marks: PMMark[] = []): PM
       }
       case 'html': {
         const v = n.value.trim();
-        const tag = /^<(\/?)(u|mark|sub|sup)>$/i.exec(v);
+        const tag = /^<(\/?)(u|mark|sub|sup)(\s[^>]*)?>$/i.exec(v);
+        const span = /^<(\/?)span(\s[^>]*)?>$/i.exec(v);
         const track = /^<(\/?)(ins|del)(\s[^>]*)?>$/i.exec(v);
         const align = /^<!--\s*align:(left|center|right|justify)\s*-->$/.exec(v);
         if (tag) {
           const type = HTML_MARKS[tag[2].toLowerCase()];
-          active = tag[1] ? active.filter((m) => m.type !== type) : addMark(active, { type });
+          const color = type === 'highlight' ? htmlAttr(tag[3], 'data-color') : null;
+          active = tag[1] ? active.filter((m) => m.type !== type) : addMark(active, isHighlightColor(color) ? { type, attrs: { color } } : { type });
+        } else if (span && (span[1] ? active.some((m) => m.type === 'textColor') : isTextColor(htmlAttr(span[2], 'data-color')))) {
+          // colore del testo: <span data-color="red">...</span>; gli altri <span> restano testo
+          active = span[1] ? active.filter((m) => m.type !== 'textColor') : addMark(active, { type: 'textColor', attrs: { color: htmlAttr(span[2], 'data-color') } });
         } else if (track) {
           const type: MarkType = track[2].toLowerCase() === 'ins' ? 'insertion' : 'deletion';
           active = track[1] ? active.filter((m) => m.type !== type) : addMark(active, { type, attrs: { author: htmlAttr(track[3], 'data-author'), date: htmlAttr(track[3], 'data-date') } });

@@ -13,6 +13,7 @@ import { registerRevision } from './revision';
 import { RecensioDialog } from './recensio/ui';
 import { ReviewDialog } from './review/ReviewDialog';
 import { registerWritingLang } from './shell/WritingLang';
+import { registerColorWidgets } from './editor/FormatBar';
 
 let done = false;
 
@@ -21,6 +22,7 @@ export function registerAll() {
   done = true;
   registerAppCommands();
   registerWritingLang();
+  registerColorWidgets();
   registerEditorCommands();
   registerComments();
   registerRevision();

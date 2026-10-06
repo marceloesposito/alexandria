@@ -67,3 +67,28 @@ describe('LaTeX', () => {
     expect(escapeTex('a\\b')).toBe('a\\textbackslash{}b');
   });
 });
+
+describe('colori negli export', () => {
+  const md = 'Testo <span data-color="red">rosso</span> e <mark data-color="green">verde</mark> e <mark>giallo</mark>.\n';
+
+  it('HTML: colori di stampa, niente tag sconosciuti', () => {
+    const h = toHtml(parseMarkdown(md), ctx());
+    expect(h).toContain('<span style="color: #a83a2c">rosso</span>');
+    expect(h).toContain('<mark style="background: #cfe5c8">verde</mark>');
+    expect(h).toContain('<mark>giallo</mark>');
+    expect(h).not.toContain('undefined');
+  });
+
+  it('Typst: #text(fill) e #highlight(fill)', async () => {
+    const { toTypst } = await import('./typst');
+    const src = toTypst(parseMarkdown(md), ctx());
+    expect(src).toContain('#text(fill: rgb("#a83a2c"))[#"rosso"]');
+    expect(src).toContain('#highlight(fill: rgb("#cfe5c8"))[#"verde"]');
+    expect(src).toContain('#highlight[#"giallo"]');
+  });
+
+  it('LaTeX e testo semplice: il testo resta', () => {
+    expect(toPlainText(parseMarkdown(md), ctx())).toContain('Testo rosso e verde e giallo.');
+    expect(toLatex(parseMarkdown(md), ctx(), 'b.bib').tex).toContain('rosso');
+  });
+});

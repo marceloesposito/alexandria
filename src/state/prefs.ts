@@ -47,6 +47,8 @@ export interface Prefs {
   paneWidth: number;
   /** revisioni tracciate nell'export: testo pulito o evidenziate */
   exportRevisions: 'clean' | 'marked';
+  /** barra flottante di formattazione nello Scriptorium */
+  formatBar: 'open' | 'collapsed' | 'hidden';
 }
 
 export const DEFAULT_PREFS: Prefs = {
@@ -80,6 +82,7 @@ export const DEFAULT_PREFS: Prefs = {
   previewWidth: 440,
   paneWidth: 460,
   exportRevisions: 'clean',
+  formatBar: 'open',
 };
 
 export interface DocCursor {

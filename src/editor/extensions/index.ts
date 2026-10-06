@@ -2,7 +2,7 @@
 import StarterKit from '@tiptap/starter-kit';
 import { Table, TableRow, TableHeader, TableCell } from '@tiptap/extension-table';
 import TextAlign from '@tiptap/extension-text-align';
-import Highlight from '@tiptap/extension-highlight';
+import { ColorHighlight, TextColorMark } from './colors';
 import Subscript from '@tiptap/extension-subscript';
 import Superscript from '@tiptap/extension-superscript';
 import Placeholder from '@tiptap/extension-placeholder';
@@ -53,7 +53,8 @@ export function buildExtensions() {
     TableHeader,
     TableCell,
     TextAlign.configure({ types: ['heading', 'paragraph'] }),
-    Highlight,
+    ColorHighlight,
+    TextColorMark,
     Subscript.extend({ addKeyboardShortcuts: () => ({}) }),
     Superscript,
     TaskList,
