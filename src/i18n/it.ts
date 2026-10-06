@@ -1439,4 +1439,9 @@ export const it: Record<string, string> = {
   'style.caption': "Didascalia",
   'slash.callout': "Riquadro: {kind}",
   'slash.caption': "Didascalia",
+  'pstyle.font': "Carattere",
+  'pstyle.font.inherit': "Come il documento",
+  'pstyle.font.serif': "Serif",
+  'pstyle.font.sans': "Sans",
+  'pstyle.font.mono': "Monospace",
 };

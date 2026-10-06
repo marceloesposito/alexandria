@@ -69,6 +69,11 @@ Aggiornato: 7 ottobre 2026 (M11).
   `src/doc/callouts.ts`). Da Inserisci > Riquadro evidenziato, dal menu / (uno per tipo) e dal gruppo
   Blocchi; negli export riquadro colorato (Typst, HTML, Word come tabella a una cella), in LaTeX una
   citazione con intestazione. L'intestazione senza titolo e' nella lingua di scrittura (`docTexts`).
+- **Carattere per stile** (Layout > Stili di paragrafo > Carattere): "Come il documento", Serif, Sans o
+  Monospace per corpo, H1-H3, citazione, didascalia e nota (`ParaStyle.font`; gli stili salvati prima valgono
+  "come il documento"). Nell'editor Libertinus Serif, Inter e JetBrains Mono (variabili `--style-font-*`), nel
+  PDF Libertinus Serif, New Computer Modern Sans e DejaVu Sans Mono, in HTML le stesse famiglie con i ripieghi
+  di sistema, in Word Libertinus Serif, Calibri e Consolas (corpo e titoli 1-3).
 - **Stile di paragrafo "Didascalia"**: nel menu degli stili, in Formato e nel menu /; nel Markdown
   `<!-- style:caption -->` in coda al paragrafo (accanto a `<!-- align:... -->`); negli export lo stile
   "caption" del layout (Typst), `p.caption` (HTML), lo stile Caption di Word.
@@ -241,8 +246,7 @@ Aggiornato: 7 ottobre 2026 (M11).
 - **Personalizzazione dei singoli stili di testo** (richiesta del committente, da fare): oggi Layout > Stili
   di paragrafo regola, per pergamena, corpo, peso, corsivo, allineamento, spazi, rientro, interlinea e
   maiuscoletto di sette stili (corpo, H1-H3, citazione, didascalia, nota) e vale soprattutto per l'export.
-  Mancano: carattere per stile, a scelta fra Serif, Sans e Monospace (i tre gia' inclusi nell'app:
-  Libertinus Serif, Inter, JetBrains Mono; oggi il carattere e' uno per tutto il documento), colore per stile, H4-H6 e l'intestazione dei riquadri, la resa identica
+  Il carattere per stile c'e' gia' (sotto). Mancano: colore per stile, H4-H6 e l'intestazione dei riquadri, la resa identica
   nell'editor, stili condivisi dal Compendium o dai template invece che per pergamena, stili nuovi creati
   dall'utente (applicabili come la Didascalia, `textStyle` del paragrafo).
 - Thesaurus: lemmatizzazione vera (oggi solo regole semplici per le forme base) e altre lingue.

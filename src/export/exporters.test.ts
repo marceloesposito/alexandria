@@ -94,6 +94,41 @@ describe('riquadri evidenziati e didascalie negli export', () => {
   });
 });
 
+describe('carattere per stile', () => {
+  const styled = (): ExportContext => {
+    const c = ctx();
+    const L = c.settings.layout;
+    return {
+      ...c,
+      settings: {
+        ...c.settings,
+        layout: { ...L, styles: { ...L.styles, body: { ...L.styles.body, font: 'sans' }, h1: { ...L.styles.h1, font: 'mono' }, caption: { ...L.styles.caption, font: 'serif' } } },
+      },
+    };
+  };
+  const md = '# Titolo\n\nTesto.\n\nFigura 1. <!-- style:caption -->\n';
+
+  it('PDF: corpo Sans per tutto il testo, titolo 1 Monospace, didascalia Serif', async () => {
+    const { toTypst } = await import('./typst');
+    const src = toTypst(parseMarkdown(md), styled());
+    expect(src).toContain('font: ("New Computer Modern Sans", "DejaVu Sans")');
+    expect(src).toMatch(/#show heading\.where\(level: 1\): set text\(size: [\d.]+pt, font: \("DejaVu Sans Mono",\)/);
+    expect(src).toContain('font: ("Libertinus Serif", "New Computer Modern"))[#"Figura 1."]');
+  });
+
+  it('HTML: famiglie con i ripieghi di sistema', () => {
+    const h = toHtml(parseMarkdown(md), styled());
+    expect(h).toContain('body { font-family: Inter, "Helvetica Neue", Arial, sans-serif;');
+    expect(h).toContain('h1 { font-family: "JetBrains Mono", Menlo, Consolas, monospace; }');
+    expect(h).toContain('figcaption, p.caption { font-family: "Libertinus Serif", Georgia, serif; }');
+  });
+
+  it('di serie gli stili usano il carattere del documento', async () => {
+    const { toTypst } = await import('./typst');
+    expect(toTypst(parseMarkdown(md), ctx())).not.toContain('DejaVu Sans Mono');
+  });
+});
+
 describe('colori negli export', () => {
   const md = 'Testo <span data-color="red">rosso</span> e <mark data-color="green">verde</mark> e <mark>giallo</mark>.\n';
 

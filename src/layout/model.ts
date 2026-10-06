@@ -21,7 +21,40 @@ export interface MasterPage {
   firstPagePlain: boolean;
 }
 
+/** Carattere di uno stile: quello del documento o una delle tre famiglie incluse nell'app. */
+export type StyleFont = 'inherit' | 'serif' | 'sans' | 'mono';
+export const STYLE_FONTS: StyleFont[] = ['inherit', 'serif', 'sans', 'mono'];
+
+/** Famiglie nell'editor (variabili dei token: Libertinus Serif, Inter, JetBrains Mono). */
+export const EDITOR_FONT: Record<Exclude<StyleFont, 'inherit'>, string> = {
+  serif: 'var(--font-text)',
+  sans: 'var(--font-ui)',
+  mono: 'var(--font-mono)',
+};
+
+/** Famiglie per il PDF (font inclusi in Typst). */
+export const TYPST_FONT: Record<Exclude<StyleFont, 'inherit'>, string> = {
+  serif: '("Libertinus Serif", "New Computer Modern")',
+  sans: '("New Computer Modern Sans", "DejaVu Sans")',
+  mono: '("DejaVu Sans Mono",)',
+};
+
+/** Famiglie per HTML e Word (con i ripieghi di sistema). */
+export const WEB_FONT: Record<Exclude<StyleFont, 'inherit'>, string> = {
+  serif: '"Libertinus Serif", Georgia, serif',
+  sans: 'Inter, "Helvetica Neue", Arial, sans-serif',
+  mono: '"JetBrains Mono", Menlo, Consolas, monospace',
+};
+export const WORD_FONT: Record<Exclude<StyleFont, 'inherit'>, string> = { serif: 'Libertinus Serif', sans: 'Calibri', mono: 'Consolas' };
+
+/** Carattere effettivo di uno stile: il suo, o quello del documento. */
+export function styleFont(s: ParaStyle, layout: { font: 'serif' | 'sans' }): Exclude<StyleFont, 'inherit'> {
+  return s.font && s.font !== 'inherit' ? s.font : layout.font;
+}
+
 export interface ParaStyle {
+  /** carattere: quello del documento ('inherit') o serif, sans, monospace */
+  font: StyleFont;
   sizePt: number;
   weight: 'regular' | 'bold';
   italic: boolean;
@@ -83,6 +116,7 @@ export const PAPERS: Record<Exclude<Paper, 'custom'>, [number, number]> = {
 };
 
 const style = (p: Partial<ParaStyle>): ParaStyle => ({
+  font: 'inherit',
   sizePt: 12,
   weight: 'regular',
   italic: false,

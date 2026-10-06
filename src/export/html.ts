@@ -1,6 +1,7 @@
 // Documento -> pagina HTML autonoma (stili inclusi, immagini e formule incorporate, note in fondo).
 // Si scrive in un file: tutto il testo dell'utente passa da escapeHtml.
 import { calloutHeading, CALLOUT_HEX } from '../doc/callouts';
+import { WEB_FONT, styleFont } from '../layout/model';
 import { docTexts } from '../i18n/writing';
 import { markColor, TEXT_HEX, HIGHLIGHT_HEX, type TextColor, type HighlightColor } from '../doc/colors';
 import type { PMNode, PMMark, CitationItem } from '../doc/types';
@@ -184,7 +185,20 @@ export function toHtml(doc: PMNode, ctx: ExportContext): string {
   const fn = notes.length
     ? `<section class="footnotes"><hr><ol>${notes.map((n, i) => `<li id="fn${i + 1}">${n} <a href="#fnref${i + 1}">↩</a></li>`).join('')}</ol></section>`
     : '';
-  const font = L.font === 'sans' ? 'system-ui, sans-serif' : "'Libertinus Serif', Georgia, 'Times New Roman', serif";
+  const font = WEB_FONT[styleFont(L.styles.body, L)];
+  // stili con un carattere loro (Layout > Stili di paragrafo)
+  const styleCss = (
+    [
+      ['h1', 'h1'],
+      ['h2', 'h2'],
+      ['h3', 'h3'],
+      ['quote', 'blockquote'],
+      ['caption', 'figcaption, p.caption'],
+    ] as const
+  )
+    .filter(([id]) => L.styles[id].font !== 'inherit')
+    .map(([id, sel]) => `${sel} { font-family: ${WEB_FONT[L.styles[id].font as 'serif']}; }`)
+    .join(' ');
   return `<!doctype html>
 <html lang="${ctx.lang}">
 <head>
@@ -195,6 +209,7 @@ export function toHtml(doc: PMNode, ctx: ExportContext): string {
 <style>
 body { font-family: ${font}; font-size: ${L.fontSizePt}pt; line-height: ${L.leading}; max-width: ${Math.round(L.widthMm - L.marginInnerMm - L.marginOuterMm)}mm; margin: 2em auto; padding: 0 1em; color: #1f1c17; background: #fffdf8; ${L.justify ? 'text-align: justify; hyphens: auto;' : ''} }
 h1, h2, h3 { line-height: 1.25; text-align: left; }
+${styleCss}
 blockquote { margin: 1em 0; padding-left: 1.2em; border-left: 2px solid #c4bba9; color: #4a453c; }
 figure { margin: 1.5em 0; text-align: center; } figure img { max-width: 100%; } figcaption, p.caption { font-style: italic; font-size: .9em; } p.caption { text-align: center; }
 .callout-title { margin: 0 0 .3em; font-size: .75em; font-weight: 600; letter-spacing: .05em; text-transform: uppercase; } .callout > :last-child { margin-bottom: 0; }

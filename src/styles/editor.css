@@ -1559,3 +1559,24 @@
   /* centrata come nell'export; un allineamento scelto a mano (style del paragrafo) prevale */
   text-align: center;
 }
+
+/* carattere per stile (Layout > Stili di paragrafo): se non scelto, quello della pagina */
+.doc-body h1 {
+  font-family: var(--style-font-h1, inherit);
+}
+
+.doc-body h2 {
+  font-family: var(--style-font-h2, inherit);
+}
+
+.doc-body h3 {
+  font-family: var(--style-font-h3, inherit);
+}
+
+.doc-body blockquote {
+  font-family: var(--style-font-quote, inherit);
+}
+
+.doc-body p[data-style="caption"] {
+  font-family: var(--style-font-caption, inherit);
+}

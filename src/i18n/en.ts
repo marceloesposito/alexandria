@@ -1439,4 +1439,9 @@ export const en: Record<string, string> = {
   'style.caption': "Caption",
   'slash.callout': "Box: {kind}",
   'slash.caption': "Caption",
+  'pstyle.font': "Typeface",
+  'pstyle.font.inherit': "Same as the document",
+  'pstyle.font.serif': "Serif",
+  'pstyle.font.sans': "Sans",
+  'pstyle.font.mono': "Monospace",
 };

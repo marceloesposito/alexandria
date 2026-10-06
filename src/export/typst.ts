@@ -9,6 +9,7 @@ import { MARK_ORDER } from '../doc/types';
 import { parseMarkdown } from '../doc/parse';
 import type { ExportContext } from './context';
 import type { LayoutSettings, MasterId, MasterPage, ParaStyle } from '../layout/model';
+import { TYPST_FONT, styleFont } from '../layout/model';
 import { docTexts } from '../i18n/writing';
 
 /** Stringa Typst sicura. */
@@ -156,7 +157,7 @@ function block(b: PMNode, ctx: ExportContext, st: State): string {
         // stile "didascalia" del layout (corpo, corsivo, allineamento)
         const cs = ctx.settings.layout.styles.caption;
         const a = alignName(b.attrs?.textAlign) ?? alignName(cs.align) ?? 'center';
-        return `#align(${a})[#text(size: ${cs.sizePt}pt${cs.italic ? ', style: "italic"' : ''})[${body}]]`;
+        return `#align(${a})[#text(size: ${cs.sizePt}pt${cs.italic ? ', style: "italic"' : ''}${fontArg(cs)})[${body}]]`;
       }
       const a = alignName(b.attrs?.textAlign);
       return a ? `#align(${a})[${body}]` : body;
@@ -301,9 +302,15 @@ function pageSetup(ctx: ExportContext, master: MasterId, columns: number, sectio
     .join('\n');
 }
 
+/** ", font: (...)" per uno stile con un carattere suo (vuoto se usa quello del documento). */
+function fontArg(s: ParaStyle): string {
+  return s.font && s.font !== 'inherit' ? `, font: ${TYPST_FONT[s.font]}` : '';
+}
+
 function styleRules(selector: string, s: ParaStyle, L: LayoutSettings): string[] {
   const out: string[] = [];
   const text = [`size: ${n(s.sizePt)}pt`];
+  if (s.font && s.font !== 'inherit') text.push(`font: ${TYPST_FONT[s.font]}`);
   if (s.weight === 'bold') text.push('weight: "bold"');
   else text.push('weight: "regular"');
   if (s.italic) text.push('style: "italic"');
@@ -323,7 +330,8 @@ export function preamble(ctx: ExportContext, hasLeadingSection: boolean): string
   const margin = L.facingPages
     ? `(top: ${n(L.marginTopMm)}mm, bottom: ${n(L.marginBottomMm)}mm, inside: ${n(L.marginInnerMm)}mm, outside: ${n(L.marginOuterMm)}mm)`
     : `(top: ${n(L.marginTopMm)}mm, bottom: ${n(L.marginBottomMm)}mm, left: ${n(L.marginInnerMm)}mm, right: ${n(L.marginOuterMm)}mm)`;
-  const font = L.font === 'sans' ? '("New Computer Modern Sans", "DejaVu Sans")' : '("Libertinus Serif", "New Computer Modern")';
+  // carattere del corpo: quello dello stile "corpo" se scelto, altrimenti quello del documento
+  const font = TYPST_FONT[styleFont(body, L)];
   const lines = [
     `// Generato da Alexandria`,
     `#set document(title: ${str(ctx.title)}${s.author ? `, author: (${str(s.author)},)` : ''})`,
@@ -339,8 +347,8 @@ export function preamble(ctx: ExportContext, hasLeadingSection: boolean): string
     ...styleRules('heading.where(level: 2)', L.styles.h2, L),
     ...styleRules('heading.where(level: 3)', L.styles.h3, L),
     ...styleRules('quote.where(block: true)', L.styles.quote, L),
-    `#show figure.caption: set text(size: ${n(L.styles.caption.sizePt)}pt${L.styles.caption.italic ? ', style: "italic"' : ''})`,
-    `#show footnote.entry: set text(size: ${n(L.styles.footnote.sizePt)}pt)`,
+    `#show figure.caption: set text(size: ${n(L.styles.caption.sizePt)}pt${L.styles.caption.italic ? ', style: "italic"' : ''}${fontArg(L.styles.caption)})`,
+    `#show footnote.entry: set text(size: ${n(L.styles.footnote.sizePt)}pt${fontArg(L.styles.footnote)})`,
     '#show link: underline',
   ];
   if (!hasLeadingSection) lines.push(pageSetup(ctx, 'body', L.columns, 0, false));

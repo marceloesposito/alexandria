@@ -1,6 +1,6 @@
 import { describe, expect, it } from 'vitest';
 import { builtInTemplates, templateFromDoc, instantiate, parseTemplate } from './templates';
-import { addMaster, removeMaster, renameMaster, resolveMaster, defaultLayout, defaultDocSettings, normalizeDocSettings } from './model';
+import { addMaster, removeMaster, renameMaster, resolveMaster, defaultLayout, defaultDocSettings, normalizeDocSettings, styleFont } from './model';
 
 describe('master page', () => {
   it('se ne creano di nuove copiando il corpo, con un nome', () => {
@@ -61,6 +61,15 @@ describe('template', () => {
     // quelli dell'utente restano come salvati
     const mine = templateFromDoc('t2', 'Mio', '', 'testo\n', defaultDocSettings('it'));
     expect(instantiate(mine, 'x', 'de').settings.citationLocale).toBe('it-IT');
+  });
+
+  it('stili salvati prima del carattere per stile: "come il documento"', () => {
+    const old = { layout: { font: 'sans', styles: { h1: { sizePt: 22, weight: 'bold' } } } };
+    const s = normalizeDocSettings(old, 'it');
+    expect(s.layout.styles.h1.font).toBe('inherit');
+    expect(s.layout.styles.h1.sizePt).toBe(22);
+    expect(styleFont(s.layout.styles.h1, s.layout)).toBe('sans');
+    expect(styleFont({ ...s.layout.styles.h1, font: 'mono' }, s.layout)).toBe('mono');
   });
 
   it('un file di template rovinato viene scartato', () => {
