@@ -57,3 +57,85 @@ Prima di ogni commit: `npm test`, `npm run build` e `npm run test:rust` verdi.
 - Su Windows `core.autocrlf` va tenuto spento nei vault (lo fa `git.rs`).
 - Script Python su Windows: mai `"\b"` o `'\$1'` in stringhe non raw; per le
   sostituzioni nei file .ts preferire l'Edit diretto.
+
+## Handover (aggiornato al 10 ottobre 2026, main dopo la PR #24)
+
+Se riprendi il progetto adesso leggi prima questa sezione, poi `docs/STATO.md` (tabella delle
+milestone e decisioni). Il lavoro si fa sia su Windows sia su un Mac del committente, con sessioni
+diverse: **prima di iniziare `git fetch` e controlla PR aperte e rami recenti** (`gh pr list`).
+
+### Dove siamo
+- Milestone M0-M12 su `main` (PR #1-#24), CI verde su Windows, macOS e frontend.
+- Nessuna release pubblicata, installer non firmati. Versione 0.1.0.
+- Sul PC Windows del committente Alexandria e' **installata** (per utente, in
+  `%LOCALAPPDATA%\Alexandria`); per aggiornarla si rilancia l'installer con `/S`.
+
+### Nomi tematici (glossario in `src/i18n/glossary.ts`, un test li controlla in ogni lingua)
+Compendium (vault), Scroll / **pergamena** in italiano (documento), Scriptorium (editor), Armarium
+(risorse, era Bookshelf), Palimpsestus (versioni, era History), Bibliotheca (raccolta comune, era
+Library), Marginalia (commenti), Tabula (whiteboard), Excerpta / Excerptum (pin, era Bookmarks),
+Strata (layer), Codex (pergamene collegate lette di seguito), Index (indice dei contenuti),
+Silentium (scrittura minimale), Recensio (copia per revisione `.recensio`). Gli identificatori
+interni non sono cambiati (`resources`, `versions`, `view === 'resources'`...). In inglese i nomi
+vanno con la maiuscola (`Scrolls`), altrimenti il test del glossario fallisce.
+
+### Mappa delle funzioni recenti (cartelle di `src/`)
+- `codex/` — catena di pergamene da `links.json` (`codexOrder`, `relinkAsChain`), pannello, lettura
+  continua (`ReadOnlyDoc`: TipTap in sola lettura con `buildReadOnlyExtensions`), export del Codex.
+- `editor/SidePane.tsx` + `paneStore.ts` — riquadri accanto (pergamene, Codex, risorse con
+  `resources/viewer/ResourceBody.tsx`).
+- `editor/pagination.ts` — vista pagina a fogli: `paginate()` puro + plugin che inserisce widget
+  `.page-gap` fra i blocchi. Le righe (`editor/lines.ts`) sono in pixel dello schermo: dentro la
+  pagina con lo zoom si dividono per `pageZoom()`.
+- `types/` — tipi di oggetto con proprieta' (`.alexandria/types.json`), header della pergamena
+  (`editor/DocHeader.tsx`, anche in pagina ed export), Strata come database (`LayerTable`).
+- `editor/extensions/track.ts` + `revision/` — revisioni tracciate (`<ins>/<del data-author
+  data-date>` nel Markdown), Suggerisci, accetta/rifiuta, andata e ritorno Word (`comments/word.ts`,
+  `export/comments.ts`).
+- `recensio/` — copia per revisione: zip, modalita' revisore (Compendium temporaneo, testo bloccato
+  con `filterTransaction`), ritorno su branch e merge; `review/` risposta ai revisori.
+- `vault/append.ts` — Aggiungi da un altro Compendium (`planAppend` puro).
+- `versions/forge.ts`, `src-tauri/src/forge.rs` — account sui server git (token nel portachiavi),
+  crea repository, elenco repository; `git_clone` + `versions/OpenRemoteDialog.tsx`.
+- `citations/fullNote.ts` — fonte per esteso nelle note a pie' di pagina (trascinare una fonte crea
+  una nota; Alt = citazione nel testo; preferenza `dropSource`).
+- `shell/QuickSwitcher.tsx` (Ctrl+O, `>` comandi), `components/HoverCard.tsx`,
+  `components/SideRail.tsx` (colonne richiuse), `shell/WindowControls.tsx` (barra del titolo
+  disegnata dall'app su Windows/Linux).
+- Cartelle dei Compendium: nuovi con `Pergamene/` (o `Scrolls/`) e `Armarium/` scritti in
+  `vault.json` (`dirs`); i vecchi restano `documents/` e `resources/`. Mai percorsi fissi: usare
+  `docsDir()`, `resDir()`, `itemDir()`, `docKeyIn()` per Compendium diversi da quello aperto.
+
+### Come si lavora (concordato con il committente)
+- Branch + PR per ogni lavoro, merge **solo a CI verde** (anche il job macOS, spesso in coda: se e'
+  "cancelled" si rilancia con `gh run rerun <id> --failed`). Le PR create dal Mac possono essere in
+  bozza: `gh pr ready <n>` prima del merge. Commit, push e merge senza chiedere conferma.
+- Ogni cambiamento d'interfaccia si prova **nell'app vera fuori schermo**:
+  `node scripts/app-test.mjs <exe> <script.mjs> <cartella-dati>` (CDP sul WebView2). Se l'app del
+  committente e' aperta: compilare in un'altra cartella (`CARGO_TARGET_DIR=<tmp> npx tauri build
+  --no-bundle`) e passare `WEBVIEW2_USER_DATA_FOLDER=<tmp>` alla prova, altrimenti il WebView2 si
+  aggancia all'istanza aperta. Argomenti all'avvio (es. un `.recensio`): `ALEXANDRIA_TEST_ARGS`.
+- Mai rubare il focus al committente (finestre fuori schermo); non chiudere la sua app senza dirlo.
+- Pacchetti: `npx tauri build` (installer NSIS in `src-tauri/target/release/bundle/nsis/`),
+  `node scripts/portable.mjs --win src-tauri/target/release/alexandria.exe` (cartella
+  `dist-portable/`, con `thesaurus/` accanto all'exe); lo zip per i tester va sul Desktop.
+
+### Insidie gia' trovate
+- `guard()` in `versions/actions.ts`: i comandi git senza risultato tornano `null`, che `guard` usava
+  per l'errore. Per i comandi "void" restituire `true` (`async () => (await f(), true)`).
+- Merge di conflitti in CSS/i18n "tenendo entrambe le parti": puo' perdere una graffa (build rotta).
+- Heredoc bash con `
+`, `\s`, `\p` su Windows: si corrompono; usare Edit o script Python con
+  stringhe raw. Controllo: `grep -rlP '' src`.
+- Le note dentro le note: le citazioni in una nota passano `inNote` a `ctx.cite` (fonte per esteso,
+  mai `#footnote` annidato).
+
+### Aperto / idee annotate (non iniziate)
+- Compendium nella Bibliotheca (istantanea in sola lettura, riuso e citazione del proprio lavoro).
+- Sincronizzazione senza GitHub (remoto git su chiavetta/NAS, `git bundle` per Dropbox/Syncthing).
+- "Accedi con GitHub" (Device Flow) attivo solo con il Client ID di un'OAuth App in
+  `src/versions/forge.ts` (oggi vuoto: si usa il token personale).
+- Piano di lancio open source (designer per la UI, test di usabilita', licenze: CPAL di citeproc,
+  CC BY-SA degli stili CSL, GPL-3 del thesaurus italiano distribuito come file separato).
+- In modalita' revisore non si creano paragrafi nuovi (Invio bloccato); la vista pagina non spezza
+  un paragrafo fra due fogli (il PDF si').
