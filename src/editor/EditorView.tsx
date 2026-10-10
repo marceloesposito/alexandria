@@ -13,13 +13,14 @@ import { ThesaurusPanel } from '../thesaurus/ui';
 import { useZen } from '../state/zen';
 import { borderlessFooter } from './slots';
 import { useDoc } from './session';
-import { Library, ListTree } from 'lucide-react';
+import { Library, ListTree, MessageSquare } from 'lucide-react';
 import { t, useLang } from '../i18n';
 import { CodexPanel } from '../codex/CodexPanel';
 import { SidePane } from './SidePane';
 import { useSidePane } from './paneStore';
 import { CodexReader } from '../codex/CodexReader';
 import { useCodexStore } from '../codex/store';
+import { SideRail } from '../components/SideRail';
 
 export function EditorView() {
   useLang();
@@ -68,8 +69,20 @@ export function EditorView() {
               </>
             )}
           </aside>
-          <Splitter onDrag={(dx) => set({ leftWidth: Math.max(200, Math.min(520, useWorkspace.getState().app.prefs.leftWidth + dx)) })} />
+          <Splitter
+            onDrag={(dx) => set({ leftWidth: Math.max(200, Math.min(520, useWorkspace.getState().app.prefs.leftWidth + dx)) })}
+            collapse={{ side: 'left', title: t('side.collapse'), onClick: () => set({ showLeft: false }) }}
+          />
         </>
+      )}
+      {!prefs.showLeft && !bare && (
+        <SideRail
+          side="left"
+          tabs={[
+            { id: 'resources', label: t('side.tab.resources'), icon: Library, onOpen: () => set({ showLeft: true, leftTab: 'resources' }) },
+            { id: 'outline', label: t('side.tab.outline'), icon: ListTree, onOpen: () => set({ showLeft: true, leftTab: 'outline' }) },
+          ]}
+        />
       )}
       <main className={`editor-center ${Footer ? 'has-footer' : ''}`}>
         {dialog === 'findReplace' && <FindReplace />}
@@ -104,11 +117,17 @@ export function EditorView() {
       )}
       {prefs.showRight && !bare && Right && (
         <>
-          <Splitter onDrag={(dx) => set({ rightWidth: Math.max(220, Math.min(520, useWorkspace.getState().app.prefs.rightWidth - dx)) })} />
+          <Splitter
+            onDrag={(dx) => set({ rightWidth: Math.max(220, Math.min(520, useWorkspace.getState().app.prefs.rightWidth - dx)) })}
+            collapse={{ side: 'right', title: t('side.collapse'), onClick: () => set({ showRight: false }) }}
+          />
           <aside className="side side--right" style={{ width: prefs.rightWidth }}>
             <Right pageRef={pageRef} />
           </aside>
         </>
+      )}
+      {!prefs.showRight && !bare && Right && (
+        <SideRail side="right" tabs={[{ id: 'marginalia', label: t('side.tab.marginalia'), icon: MessageSquare, onOpen: () => set({ showRight: true }) }]} />
       )}
     </div>
   );
