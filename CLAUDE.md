@@ -124,9 +124,8 @@ vanno con la maiuscola (`Scrolls`), altrimenti il test del glossario fallisce.
 - `guard()` in `versions/actions.ts`: i comandi git senza risultato tornano `null`, che `guard` usava
   per l'errore. Per i comandi "void" restituire `true` (`async () => (await f(), true)`).
 - Merge di conflitti in CSS/i18n "tenendo entrambe le parti": puo' perdere una graffa (build rotta).
-- Heredoc bash con `
-`, `\s`, `\p` su Windows: si corrompono; usare Edit o script Python con
-  stringhe raw. Controllo: `grep -rlP '' src`.
+- Heredoc bash e script Python con `\n`, `\s`, `\p`, `\t` su Windows: si corrompono (diventano a
+  capo, tabulazioni o backspace); usare Edit o stringhe raw. Controllo: `grep -rlP '\x08' src`.
 - Le note dentro le note: le citazioni in una nota passano `inNote` a `ctx.cite` (fonte per esteso,
   mai `#footnote` annidato).
 
