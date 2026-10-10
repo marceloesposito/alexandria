@@ -2927,3 +2927,91 @@ table.kv td:last-child {
 .append-list__members {
   padding-left: 22px;
 }
+
+/* ---------------------------------------------------------------- colonne richiudibili */
+.splitter {
+  position: relative;
+}
+
+.splitter__collapse {
+  position: absolute;
+  top: 6px;
+  left: 50%;
+  transform: translateX(-50%);
+  display: grid;
+  place-items: center;
+  width: 16px;
+  height: 22px;
+  padding: 0;
+  border: 1px solid var(--line);
+  border-radius: var(--radius-small);
+  background: var(--chrome);
+  color: var(--muted);
+  cursor: pointer;
+  opacity: 0.6;
+}
+
+.splitter__collapse:hover {
+  opacity: 1;
+  color: var(--accent);
+  border-color: var(--accent);
+}
+
+.side-rail {
+  flex: none;
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+  width: 26px;
+  padding: 8px 0;
+  background: var(--chrome);
+}
+
+.side-rail--left {
+  border-right: 1px solid var(--line);
+}
+
+.side-rail--right {
+  border-left: 1px solid var(--line);
+}
+
+.side-rail__tab {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  padding: 10px 0;
+  border: 1px solid var(--line);
+  background: var(--paper);
+  color: var(--ink-2);
+  cursor: pointer;
+  writing-mode: vertical-rl;
+  font-size: var(--fs-ui-small);
+  letter-spacing: 0.04em;
+}
+
+/* a sinistra la scritta sale dal basso (come le palette di AutoCAD), a destra scende */
+.side-rail--left .side-rail__tab {
+  transform: rotate(180deg);
+  border-radius: var(--radius-small) 0 0 var(--radius-small);
+  border-right: 0;
+  margin-left: 3px;
+}
+
+.side-rail--right .side-rail__tab {
+  border-radius: 0 var(--radius-small) var(--radius-small) 0;
+  border-left: 0;
+  margin-right: 3px;
+}
+
+.side-rail__tab:hover {
+  color: var(--accent);
+  border-color: var(--accent);
+}
+
+.side-rail__icon {
+  transform: rotate(90deg);
+}
+
+.side-rail--left .side-rail__icon {
+  transform: rotate(90deg);
+}

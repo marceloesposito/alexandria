@@ -1480,4 +1480,6 @@ export const it: Record<string, string> = {
   'append.go': "Aggiungi",
   'append.checkpoint': "aggiunte da «{name}»",
   'append.done': "Aggiunte {n} pergamene e {s} fonti",
+  'side.collapse': "Richiudi la colonna",
+  'side.tab.marginalia': "Marginalia",
 };

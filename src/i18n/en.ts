@@ -1480,4 +1480,6 @@ export const en: Record<string, string> = {
   'append.go': "Add",
   'append.checkpoint': "added from “{name}”",
   'append.done': "Added {n} Scrolls and {s} sources",
+  'side.collapse': "Collapse the column",
+  'side.tab.marginalia': "Marginalia",
 };
