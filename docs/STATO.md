@@ -22,6 +22,12 @@ Aggiornato: 7 ottobre 2026 (M11).
 | Stessa identita' in tutte le lingue (glossario con test, pergamena in italiano), Bookmarks -> Excerpta | fatto | #18 |
 | Indice dei contenuti nell'export, bibliografia in un clic visibile nello Scriptorium | fatto | #18 |
 | Index in tutte le lingue; lingua di scrittura per Compendium, separata dall'interfaccia | fatto | #18 |
+| Pacchetto portable Windows con il thesaurus accanto all'eseguibile | fatto | #19 |
+| Apri Compendium remoto (clone da GitHub/GitLab/Gitea) dalla schermata iniziale | fatto | #20 |
+| Fonte trascinata nel testo = apice numerato + nota a pie' di pagina con la fonte per esteso | fatto | #21 |
+| Vista pagina con fogli veri (formato e margini del Layout, interruzioni di pagina) | fatto | #22 |
+| Aggiungi da un altro Compendium (pergamene, Marginalia, fonti, tipi, Codex) | fatto | #23 |
+| Colonne laterali richiudibili con linguette sul bordo | fatto | #24 |
 
 ## Decisioni prese durante il lavoro
 
