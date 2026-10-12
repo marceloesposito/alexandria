@@ -1,5 +1,5 @@
 import { describe, it, expect } from 'vitest';
-import { paginate } from './pagination';
+import { paginate, samePagination } from './pagination';
 
 const blocks = (...h: number[]) => {
   let y = 0;
@@ -29,5 +29,18 @@ describe('impaginazione della vista pagina', () => {
   });
   it('documento vuoto', () => {
     expect(paginate([], 1000)).toEqual({ breaks: [], endRest: 1000, pages: 1 });
+  });
+});
+
+describe('samePagination', () => {
+  const p = paginate(blocks(400, 400, 400), 1000);
+  it('differenze sotto il pixel non contano (niente ridisegno che rincorre la misura)', () => {
+    const q = { ...p, breaks: p.breaks.map((b) => ({ ...b, rest: b.rest + 0.5 })), endRest: p.endRest - 0.5 };
+    expect(samePagination(p, q)).toBe(true);
+  });
+  it('un salto spostato o uno spazio diverso di un pixel si', () => {
+    expect(samePagination(p, paginate(blocks(400, 400, 500), 1000))).toBe(false);
+    expect(samePagination(p, { ...p, endRest: p.endRest + 1 })).toBe(false);
+    expect(samePagination(p, paginate(blocks(400, 700, 400), 1000))).toBe(false);
   });
 });

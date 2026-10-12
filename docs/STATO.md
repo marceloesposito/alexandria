@@ -104,6 +104,13 @@ Aggiornato: 7 ottobre 2026 (M11).
   verso il testo e, in basso, accanto al blocco sbagliato). La distanza dal testo e' un padding
   trasparente della maniglia (12 px, 52 px con i numeri di riga, che restano visibili): il mouse lo
   attraversa senza che la maniglia sparisca.
+- **Vista pagina senza oscillazioni** (`src/editor/pagination.ts`): gli spazi fra i fogli si sommano con
+  l'altezza vera (`offsetHeight` arrotondava di mezzo pixel) e si ridisegna solo se un salto cambia di
+  almeno un pixel (`samePagination`). Prima, in certe pergamene, misura e ridisegno si inseguivano
+  all'infinito (altezza dei fogli che oscilla di 1 px) e in WebKit lo scorrimento col trackpad si
+  trascinava dopo aver staccato le dita. Resta da sistemare: i margini dei blocchi non collassano
+  attraverso i widget `.page-gap`, quindi la stessa pergamena puo' arrivare a salti un po' diversi a
+  seconda della storia delle modifiche (es. dopo un annulla).
 - **Snippet di codice**: nuovo tipo di risorsa (file `snippet.<ext>`), creato da Aggiungi risorse,
   modificabile nel visualizzatore, inseribile nel testo dal menu / o trascinandolo.
 - **Rimozione delle risorse**: ribbon, menu Risorse, clic destro, Canc nella tabella, visualizzatore.
