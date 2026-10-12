@@ -124,41 +124,8 @@ export async function indexResource(s: Scope, r: Resource, text: string): Promis
 
 // ---------------------------------------------------------------- file del vault accanto
 
-export interface Link {
-  id: string;
-  from: string; // id risorsa, "doc:<rel>" o id di nota
-  to: string;
-  label?: string;
-}
-
-export interface WbNote {
-  id: string;
-  x: number;
-  y: number;
-  w: number;
-  h: number;
-  text: string;
-  color?: string;
-}
-
-export interface WbFrame {
-  id: string;
-  x: number;
-  y: number;
-  w: number;
-  h: number;
-  title: string;
-}
-
-export interface Whiteboard {
-  version: 1;
-  nodes: Record<string, { x: number; y: number; w?: number }>;
-  notes: WbNote[];
-  frames: WbFrame[];
-  /** pergamene messe sulla Tabula come nodi (percorsi relativi al Compendium) */
-  docs?: string[];
-  viewport?: { x: number; y: number; zoom: number };
-}
+export type { Link, WbNote, WbFrame, Whiteboard } from './boardModel';
+import type { Link, Whiteboard } from './boardModel';
 
 export async function loadLayers(root: string): Promise<LayersFile> {
   const f = await readJson<LayersFile | null>(joinPath(root, LAYERS_FILE), null);

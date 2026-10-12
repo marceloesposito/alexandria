@@ -1,7 +1,6 @@
 // Lingua di scrittura: quella del testo, per Compendium, separata dalla lingua dell'interfaccia.
 // Decide controllo ortografico e sillabazione nell'editor, lingua dell'export (Typst, LaTeX,
 // HTML, Word), lingua delle citazioni delle pergamene nuove e i testi che finiscono nel documento.
-import { useSyncExternalStore } from 'react';
 
 export type WritingLang = 'it' | 'en' | 'de' | 'fr' | 'es';
 
@@ -118,8 +117,4 @@ export function getWritingLang(): WritingLang {
 export function onWritingLang(cb: () => void): () => void {
   writingListeners.add(cb);
   return () => writingListeners.delete(cb);
-}
-
-export function useWritingLang(): WritingLang {
-  return useSyncExternalStore(onWritingLang, getWritingLang);
 }

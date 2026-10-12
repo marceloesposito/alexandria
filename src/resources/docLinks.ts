@@ -1,6 +1,6 @@
 // Pergamene nella Tabula: nodi "proxy" (id "doc:<percorso>") e collegamenti fra pergamene dello
 // stesso Compendium. I collegamenti stanno nello stesso file dei legami fra risorse.
-import type { Link, Whiteboard } from './storage';
+import type { Link, Whiteboard } from './boardModel';
 
 export const DOC_PREFIX = 'doc:';
 
