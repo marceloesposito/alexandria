@@ -1,6 +1,6 @@
 // Codex: pergamene collegate da legami direzionali (A -> B), lette di seguito nell'ordine dei legami.
 // Le pergamene restano file separati; il Codex è solo la catena dei legami. Funzioni pure.
-import type { Link } from '../resources/storage';
+import type { Link } from '../resources/boardModel';
 import { DOC_PREFIX, relOfNode, docNodeId } from '../resources/docLinks';
 
 /** Legami pergamena -> pergamena, nell'ordine in cui sono stati creati. */

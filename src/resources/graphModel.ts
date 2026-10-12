@@ -1,7 +1,7 @@
 // Grafo della conoscenza: documenti e risorse come nodi; archi da collegamenti disegnati,
 // citazioni nei documenti, [[wikilink]] fra documenti, link web e tag condivisi.
 import type { Resource } from './model';
-import type { Link } from './storage';
+import type { Link } from './boardModel';
 
 export interface GNode {
   id: string;
