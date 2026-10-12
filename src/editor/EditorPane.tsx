@@ -4,6 +4,7 @@ import { useEffect, useRef, useState, type ReactNode } from 'react';
 import { useEditor, EditorContent } from '@tiptap/react';
 import DragHandle from '@tiptap/extension-drag-handle-react';
 import { GripVertical } from 'lucide-react';
+import { handlePositionConfig } from './dragHandlePosition';
 import { TextSelection } from '@tiptap/pm/state';
 import { buildExtensions } from './extensions';
 import { setEditor, getEditor } from '../state/editorRef';
@@ -223,8 +224,10 @@ export function EditorPane({ overlay, pageRef: externalPageRef }: Props) {
           {lineNumbers && <LineGutter />}
           {overlay}
           {editor && (
-            <DragHandle editor={editor} className="drag-handle">
-              <GripVertical size={14} />
+            <DragHandle editor={editor} className={`drag-handle ${lineNumbers ? 'drag-handle--numbers' : ''}`} computePositionConfig={handlePositionConfig}>
+              <span className="drag-handle__grip">
+                <GripVertical size={14} />
+              </span>
             </DragHandle>
           )}
           <DocHeader borderless={borderless} />
