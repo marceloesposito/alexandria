@@ -260,6 +260,10 @@ Aggiornato: 7 ottobre 2026 (M11).
 - Firma degli installer e aggiornamenti automatici (oggi assenti per scelta: niente rete).
 - Corrispondenza esatta righe editor/PDF calcolando le righe con Typst in background.
 - Modelli di documento (tesi, articolo, saggio) come preset di impaginazione.
+- **Collaborazione in tempo reale senza server** (implementazione futura, non iniziata): piu' persone
+  sullo stesso Compendium, via LAN e internet, con invito tramite ticket. Trasporto P2P iroh in Rust,
+  fusione con Yjs di pergamene, Marginalia, Tabula, Strata e risorse; Markdown e git restano la fonte
+  di verita'. Piano in 5 PR: `docs/COLLABORAZIONE.md`.
 
 ## Verifica su Windows (5/10)
 
