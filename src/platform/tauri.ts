@@ -3,7 +3,7 @@ import { invoke, convertFileSrc } from '@tauri-apps/api/core';
 import { open, save } from '@tauri-apps/plugin-dialog';
 import { openUrl, openPath } from '@tauri-apps/plugin-opener';
 import type { Platform, FetchResult, TypstOutput } from './types';
-import { bytesToBase64, base64ToBytes } from '../lib/bytes';
+import { bytesToBase64, base64ToBytes } from 'logos/lib/bytes';
 
 interface RawFetch {
   status: number;

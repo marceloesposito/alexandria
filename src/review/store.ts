@@ -5,19 +5,19 @@ import { platform, joinPath } from '../platform';
 import { useWorkspace } from '../state/workspace';
 import { readJson, writeJson, readDocument } from '../vault/vault';
 import { abs, commentsFile, META_DIR } from '../vault/paths';
-import { normalizeCommentsFile } from '../comments/model';
+import { normalizeCommentsFile } from 'logos/comments/model';
 import { useVersions } from '../versions/store';
-import { docDiff } from '../versions/docDiff';
-import { parseMarkdown } from '../doc/parse';
-import { normalizeDocSettings } from '../layout/model';
+import { docDiff } from 'logos/versions/docDiff';
+import { parseMarkdown } from 'logos/doc/parse';
+import { normalizeDocSettings } from 'logos/layout/model';
 import { docSettingsFile } from '../vault/paths';
 import { prepareDoc, keysOfDoc, exportTo, type ExportFormat } from '../export/run';
 import { flushSave } from '../editor/session';
 import { getEditor } from '../state/editorRef';
 import { checkpoint } from '../versions/actions';
-import { normalizeRound, newItemId, changesMarkdown, responseLetter, splitLetter, type ReviewRound, type ReviewItem } from './model';
+import { normalizeRound, newItemId, changesMarkdown, responseLetter, splitLetter, type ReviewRound, type ReviewItem } from 'logos/review/model';
 import { t } from '../i18n';
-import { getWritingLang } from '../i18n/writing';
+import { getWritingLang } from 'logos/i18n/writing';
 
 const DIR = `${META_DIR}/reviews`;
 

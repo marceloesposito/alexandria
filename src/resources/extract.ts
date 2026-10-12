@@ -3,10 +3,10 @@
 // build legacy: la build moderna usa funzioni (es. iterazione dei ReadableStream) che WKWebView non ha
 import * as pdfjs from 'pdfjs-dist/legacy/build/pdf.mjs';
 import JSZip from 'jszip';
-import type { CslItem, ResourceKind } from './model';
-import { rtfToText } from './rtf';
-import { parsePage, parseName, parseDate, blocksToText, type Block } from './html';
-import { findDoi, findIsbn } from './detect';
+import type { CslItem, ResourceKind } from 'logos/resources/model';
+import { rtfToText } from 'logos/resources/rtf';
+import { parsePage, parseName, parseDate, blocksToText, type Block } from 'logos/resources/html';
+import { findDoi, findIsbn } from 'logos/resources/detect';
 
 // worker nostro: carica il polyfill dei ReadableStream prima di pdf.js (serve a WKWebView)
 pdfjs.GlobalWorkerOptions.workerPort = new Worker(new URL('./pdf.worker.ts', import.meta.url), { type: 'module' });

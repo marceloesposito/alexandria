@@ -8,7 +8,7 @@ import { LineHighlight, Connectors } from './Overlays';
 import { useComments } from './store';
 import { getEditor } from '../state/editorRef';
 import { flatText } from './plugin';
-import { makeAnchor } from './model';
+import { makeAnchor } from 'logos/comments/model';
 import { posTopInPage } from './geometry';
 import { ws } from '../state/workspace';
 import { t } from '../i18n';

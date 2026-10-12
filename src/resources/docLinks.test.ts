@@ -1,5 +1,5 @@
 import { describe, expect, it } from 'vitest';
-import { linkedDocs, renameDocRefs, dropDocRefs, docNodeId, relOfNode } from './docLinks';
+import { linkedDocs, renameDocRefs, dropDocRefs, docNodeId, relOfNode } from 'logos/resources/docLinks';
 import type { Link, Whiteboard } from './storage';
 
 const L = (from: string, to: string, id = `${from}>${to}`): Link => ({ id, from, to });

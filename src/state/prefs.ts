@@ -3,7 +3,7 @@ import type { Lang } from '../i18n';
 import type { RibbonConfig } from '../commands/ribbonModel';
 import type { FloatingPanel } from '../commands/floatModel';
 import type { WorkspaceLayout } from './workspaces';
-import { normalizeOverrides, type ShortcutOverrides } from '../commands/shortcuts';
+import { normalizeOverrides, type ShortcutOverrides } from 'logos/commands/shortcuts';
 
 export type ThemePref = 'light' | 'dark' | 'system';
 export type View = 'resources' | 'editor' | 'versions';

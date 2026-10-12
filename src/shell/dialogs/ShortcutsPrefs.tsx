@@ -13,7 +13,7 @@ import {
   shortcutFromEvent,
   validateShortcut,
   type ShortcutProblem,
-} from '../../commands/shortcuts';
+} from 'logos/commands/shortcuts';
 
 const MODIFIER_KEYS = ['Control', 'Meta', 'Alt', 'Shift', 'OS', 'CapsLock'];
 

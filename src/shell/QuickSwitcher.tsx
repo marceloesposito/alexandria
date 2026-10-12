@@ -5,7 +5,7 @@ import { createPortal } from 'react-dom';
 import { FileText, ChevronRight, type LucideIcon } from 'lucide-react';
 import { useWorkspace } from '../state/workspace';
 import { allCommands, runCommand, displayShortcut, shortcutOf } from '../commands/registry';
-import { fuzzyFilter } from '../lib/fuzzy';
+import { fuzzyFilter } from 'logos/lib/fuzzy';
 import { flushSave } from '../editor/session';
 import { getEditor } from '../state/editorRef';
 import { DocPreview } from './DocPreview';

@@ -5,7 +5,7 @@ import { TextLayer, type PDFDocumentProxy } from 'pdfjs-dist/legacy/build/pdf.mj
 import 'pdfjs-dist/web/pdf_viewer.css';
 import { openPdf } from '../extract';
 import { platform } from '../../platform';
-import type { Resource, Pin, PinRect } from '../model';
+import type { Resource, Pin, PinRect } from 'logos/resources/model';
 import { useSelectionIn, PinButton, shortLabel } from './PinBar';
 import { t } from '../../i18n';
 

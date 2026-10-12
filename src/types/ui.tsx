@@ -1,7 +1,7 @@
 // Pezzi d'interfaccia dei tipi: icona, scelta del tipo, campo di una proprietà.
 import { useEffect, useState } from 'react';
 import { FileText, BookOpen, Clapperboard, Newspaper, User, MapPin, Mic, Dices, NotebookPen, Lightbulb, Tag, type LucideIcon } from 'lucide-react';
-import { type ObjectType, type PropDef, type PropValue, type TypeTarget, typesFor, parsePropInput, formatProp } from './model';
+import { type ObjectType, type PropDef, type PropValue, type TypeTarget, typesFor, parsePropInput, formatProp } from 'logos/types/model';
 import { useTypes } from './store';
 import { t, getLang } from '../i18n';
 

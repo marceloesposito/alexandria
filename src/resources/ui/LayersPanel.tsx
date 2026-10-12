@@ -20,8 +20,8 @@ import {
   Inbox,
 } from 'lucide-react';
 import { useResources } from '../store';
-import { membersOf, LAYER_COLORS, type Layer, type FilterRule } from '../model';
-import { suggestGroups, type Suggestion } from '../suggest';
+import { membersOf, LAYER_COLORS, type Layer, type FilterRule } from 'logos/resources/model';
+import { suggestGroups, type Suggestion } from 'logos/resources/suggest';
 import { t, useLang } from '../../i18n';
 import { useWorkspace } from '../../state/workspace';
 import { openContextMenu } from '../../components/ContextMenu';
@@ -29,8 +29,8 @@ import { promptDialog, confirmDialog } from '../../components/confirm';
 import { FilterEditor } from './FilterEditor';
 import { KindIcon, subtitle } from './common';
 import { removeWithConfirm } from './remove';
-import { matchesQuery, sortResources, directMembers, ungrouped, layerHasMatch, RESOURCE_SORTS, type ResourceSort } from '../tree';
-import type { Resource } from '../model';
+import { matchesQuery, sortResources, directMembers, ungrouped, layerHasMatch, RESOURCE_SORTS, type ResourceSort } from 'logos/resources/tree';
+import type { Resource } from 'logos/resources/model';
 
 const MIME = 'application/x-alexandria-resources';
 

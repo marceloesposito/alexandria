@@ -12,7 +12,7 @@ import { Inspector } from './Inspector';
 import { platform } from '../../platform';
 import { indexDbPath } from '../storage';
 import { importFiles, importUrls } from '../importer';
-import { splitLinks } from '../detect';
+import { splitLinks } from 'logos/resources/detect';
 import { t, useLang } from '../../i18n';
 
 function useSearch(query: string): Set<string> | null {

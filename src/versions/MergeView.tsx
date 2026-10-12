@@ -3,7 +3,7 @@
 import { useMemo, useState } from 'react';
 import { GitMerge, X, Check } from 'lucide-react';
 import type { MergeResult } from '../platform';
-import { mergeText, resolveText, conflictsLeft, mergeJsonText, withMarkers, type MergeChunk, type Choice } from './merge';
+import { mergeText, resolveText, conflictsLeft, mergeJsonText, withMarkers, type MergeChunk, type Choice } from 'logos/versions/merge';
 import { completeMerge, abortMerge } from './actions';
 import { t } from '../i18n';
 import { docTitle } from './diffSummary';

@@ -3,8 +3,8 @@
 import { Extension, InputRule } from '@tiptap/core';
 import { Plugin, PluginKey } from '@tiptap/pm/state';
 import { Slice, Fragment } from '@tiptap/pm/model';
-import { parseCitation } from '../../doc/citeSyntax';
-import { parseMarkdown } from '../../doc/parse';
+import { parseCitation } from 'logos/doc/citeSyntax';
+import { parseMarkdown } from 'logos/doc/parse';
 
 /** Testo incollato che sembra Markdown (titoli, enfasi, elenchi, citazioni, formule, tabelle). */
 export function looksLikeMarkdown(text: string): boolean {

@@ -3,13 +3,13 @@
 import { useRef, useState } from 'react';
 import { Settings2, ArrowLeft, ArrowRight, Link2 } from 'lucide-react';
 import { useResources } from '../resources/store';
-import { neighbours } from '../codex/model';
+import { neighbours } from 'logos/codex/model';
 import { appendToCodex } from '../codex/store';
 import { DocPicker } from '../resources/ui/DocPicker';
 import { useDocSettings } from '../layout/docSettings';
 import { useTypes } from '../types/store';
 import { TypeIcon, TypeSelect, PropField } from '../types/ui';
-import { type HeaderSettings, type PropValue, typeById } from '../types/model';
+import { type HeaderSettings, type PropValue, typeById } from 'logos/types/model';
 import { Popover } from '../components/Popover';
 import { useTrack } from './extensions/track';
 import { useWorkspace } from '../state/workspace';

@@ -113,6 +113,11 @@ Aggiornato: 7 ottobre 2026 (M11).
   verso il testo e, in basso, accanto al blocco sbagliato). La distanza dal testo e' un padding
   trasparente della maniglia (12 px, 52 px con i numeri di riga, che restano visibili): il mouse lo
   attraversa senza che la maniglia sparisca.
+- **Nucleo condiviso `logos`** (fase P0 del piano Simposium, ottobre 2026): 45 moduli puri (Markdown,
+  citazioni, export, ancore dei commenti, revisioni, Tabula, impaginazione, confronto dei testi,
+  scorciatoie) e i loro 209 test sono passati nel repo `marceloesposito/logos` (MIT), usato come
+  dipendenza git con tag (`v0.1.0`). Qui restano i moduli con React, store e I/O; i percorsi
+  `src/doc/...`, `src/export/...` citati sotto sono ora in `logos`.
 - **Scorciatoie personalizzabili** (Preferenze > Scorciatoie, `src/shell/dialogs/ShortcutsPrefs.tsx`):
   ogni comando del registro, con ricerca per nome o tasto; Cambia cattura il tasto (Esc annulla, Backspace
   toglie), rifiuta quelle senza modificatore (salvo i tasti F) e quelle del sistema, e in caso di

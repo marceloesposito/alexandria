@@ -1,12 +1,12 @@
 // Impostazioni del documento aperto, caricate e salvate accanto al .md.
 import { create } from 'zustand';
-import { type DocSettings, defaultDocSettings, normalizeDocSettings, retargetLanguage } from './model';
+import { type DocSettings, defaultDocSettings, normalizeDocSettings, retargetLanguage } from 'logos/layout/model';
 import { readJson, writeJson } from '../vault/vault';
 import { abs, docSettingsFile } from '../vault/paths';
 import { useWorkspace } from '../state/workspace';
-import { getWritingLang, type WritingLang } from '../i18n/writing';
+import { getWritingLang, type WritingLang } from 'logos/i18n/writing';
 
-export { pageMetrics } from './model';
+export { pageMetrics } from 'logos/layout/model';
 
 interface S {
   rel: string | null;

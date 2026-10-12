@@ -7,7 +7,7 @@ import { useWorkspace } from '../../state/workspace';
 import { useResources } from '../store';
 import { classifyTransfer, readTransfer } from '../insert';
 import { importAndInsert, importPathsAndInsert, insertResources } from '../insertActions';
-import { splitLinks } from '../detect';
+import { splitLinks } from 'logos/resources/detect';
 import { KindIcon, subtitle } from './common';
 import { platform } from '../../platform';
 import { t } from '../../i18n';

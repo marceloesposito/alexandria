@@ -4,7 +4,7 @@ import { useState } from 'react';
 import { ScrollText, Link2, Plus } from 'lucide-react';
 import { useResources } from '../store';
 import { useWorkspace } from '../../state/workspace';
-import { linkedDocs, docNodeId } from '../docLinks';
+import { linkedDocs, docNodeId } from 'logos/resources/docLinks';
 import { DocPicker } from './DocPicker';
 import { t, useLang } from '../../i18n';
 

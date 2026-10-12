@@ -11,7 +11,7 @@ import {
   normalizeCommentsFile,
   statusFields,
   type CommentStatus,
-} from './model';
+} from 'logos/comments/model';
 import { commentsKey, flatText, setAnchorsListener, type LiveAnchor } from './plugin';
 import { readJson, writeJson } from '../vault/vault';
 import { abs, commentsFile } from '../vault/paths';

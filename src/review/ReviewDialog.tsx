@@ -5,7 +5,7 @@ import { Plus, Trash2, ClipboardPaste, MessageSquare, FileOutput, GitCompare, Gi
 import { Modal } from '../components/Modal';
 import { useWorkspace } from '../state/workspace';
 import { useRounds, newRound, itemsFromMarginalia, itemsFromLetter, exportLetter, exportChanges } from './store';
-import type { ReviewRound, ReviewItem, ItemStatus } from './model';
+import type { ReviewRound, ReviewItem, ItemStatus } from 'logos/review/model';
 import { CommitPicker, CommitChip } from '../comments/CommentsColumn';
 import { openContextMenu } from '../components/ContextMenu';
 import { promptDialog, confirmDialog } from '../components/confirm';

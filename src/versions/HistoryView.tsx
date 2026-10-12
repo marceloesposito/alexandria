@@ -7,7 +7,7 @@ import { GitBranch, ChevronDown, Save, RotateCcw, X, ScrollText, CloudUpload, Cl
 import { useVersions } from './store';
 import { MergeView } from './MergeView';
 import { DocView, DocCompare } from './DocCompare';
-import { docDiff, diffCounts } from './docDiff';
+import { docDiff, diffCounts } from 'logos/versions/docDiff';
 import { platform, type FileChange, type GitCommit } from '../platform';
 import { useWorkspace } from '../state/workspace';
 import { summarize, suggestCommitMessage, docTitle, lineStats } from './diffSummary';

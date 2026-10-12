@@ -3,7 +3,7 @@
 import { useEffect, useState } from 'react';
 import { useEditor, EditorContent } from '@tiptap/react';
 import { buildReadOnlyExtensions } from '../editor/extensions';
-import { parseMarkdown } from '../doc/parse';
+import { parseMarkdown } from 'logos/doc/parse';
 import { readDocument } from '../vault/vault';
 import { useWorkspace } from '../state/workspace';
 import { t } from '../i18n';

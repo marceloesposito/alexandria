@@ -2,7 +2,7 @@
 // data-color (il CSS lo traduce nei token del tema), nel Markdown lo stesso attributo in HTML.
 import { Mark, mergeAttributes } from '@tiptap/core';
 import Highlight from '@tiptap/extension-highlight';
-import { isHighlightColor, isTextColor, type TextColor } from '../../doc/colors';
+import { isHighlightColor, isTextColor, type TextColor } from 'logos/doc/colors';
 
 declare module '@tiptap/core' {
   interface Commands<ReturnType> {

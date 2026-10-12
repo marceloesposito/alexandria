@@ -4,30 +4,30 @@ import { platform, joinPath, stripExt, baseName, dirName } from '../platform';
 import { useWorkspace } from '../state/workspace';
 import { getEditor } from '../state/editorRef';
 import { flushSave, currentMarkdown } from '../editor/session';
-import { parseMarkdown } from '../doc/parse';
-import { serializeMarkdown } from '../doc/serialize';
-import { embedsToLinks, type PMNode, type CitationItem } from '../doc/types';
+import { parseMarkdown } from 'logos/doc/parse';
+import { serializeMarkdown } from 'logos/doc/serialize';
+import { embedsToLinks, type PMNode, type CitationItem } from 'logos/doc/types';
 import { useDocSettings } from '../layout/docSettings';
 import { useCitations, keysInDoc } from '../citations/store';
 import { useResources } from '../resources/store';
-import { toBibtex } from '../citations/bib';
+import { toBibtex } from 'logos/citations/bib';
 import { resolveDocPath } from '../vault/resolve';
-import { collectAssets, mathKey, type ExportContext, type ImageAsset, type MathAsset } from './context';
-import { toTypst } from './typst';
-import { toPlainText } from './plain';
-import { toHtml } from './html';
-import { toLatex } from './latex';
-import { toUtf8 } from '../lib/bytes';
-import { fullNote } from '../citations/fullNote';
+import { collectAssets, mathKey, type ExportContext, type ImageAsset, type MathAsset } from 'logos/export/context';
+import { toTypst } from 'logos/export/typst';
+import { toPlainText } from 'logos/export/plain';
+import { toHtml } from 'logos/export/html';
+import { toLatex } from 'logos/export/latex';
+import { toUtf8 } from 'logos/lib/bytes';
+import { fullNote } from 'logos/citations/fullNote';
 import { useComments } from '../comments/store';
-import { injectCommentMarks, type ExportComment } from './comments';
+import { injectCommentMarks, type ExportComment } from 'logos/export/comments';
 import { getLang, t } from '../i18n';
 import { useTypes } from '../types/store';
 import { useCalloutTypes } from '../callouts/store';
-import type { DocSettings } from '../layout/model';
-import { headerRows, typeById } from '../types/model';
-import { withToc } from './toc';
-import { getWritingLang } from '../i18n/writing';
+import type { DocSettings } from 'logos/layout/model';
+import { headerRows, typeById } from 'logos/types/model';
+import { withToc } from 'logos/export/toc';
+import { getWritingLang } from 'logos/i18n/writing';
 
 /** Immagine con percorso dalla radice del vault (usato quando si uniscono pergamene di cartelle diverse). */
 export const VAULT_SRC = 'vault:';
@@ -146,7 +146,7 @@ export async function prepareDoc(doc: PMNode, settings: DocSettings, title: stri
   // formule
   const math = new Map<string, MathAsset>();
   if (assets.math.length) {
-    const { texToSvg } = await import('./math');
+    const { texToSvg } = await import('logos/export/math');
     let k = 0;
     for (const m of assets.math) {
       const s = await texToSvg(m.latex, m.display);
@@ -234,7 +234,7 @@ export async function exportTo(format: ExportFormat, target?: string, prepared?:
         await platform.writeBytes(path, await renderPdf(p));
         break;
       case 'docx': {
-        const { toDocx } = await import('./docx');
+        const { toDocx } = await import('logos/export/docx');
         await platform.writeBytes(path, await toDocx(p.doc, p.ctx));
         break;
       }

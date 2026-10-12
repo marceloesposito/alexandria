@@ -1,8 +1,8 @@
 // Immagini (pin a ritaglio), video e audio locali e YouTube (pin al minuto).
 import { useEffect, useRef, useState } from 'react';
 import { Pin as PinIcon, Play } from 'lucide-react';
-import type { Resource, Pin, PinRect } from '../model';
-import { timeLocator } from '../model';
+import type { Resource, Pin, PinRect } from 'logos/resources/model';
+import { timeLocator } from 'logos/resources/model';
 import { t } from '../../i18n';
 
 export function ImageViewer({ r, url, focusPin, cropMode, onPin }: { r: Resource; url: string; focusPin?: Pin; cropMode: boolean; onPin: (p: Omit<Pin, 'id' | 'created'>) => void }) {

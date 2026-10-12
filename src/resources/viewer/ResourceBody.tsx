@@ -9,8 +9,8 @@ import { ImageViewer, MediaViewer, YoutubeViewer } from './MediaViewers';
 import { SnippetViewer } from './SnippetViewer';
 import { thumbUrl, subtitle } from '../ui/common';
 import { platform } from '../../platform';
-import type { Block } from '../html';
-import type { Pin, Resource } from '../model';
+import type { Block } from 'logos/resources/html';
+import type { Pin, Resource } from 'logos/resources/model';
 import { t } from '../../i18n';
 import { useWorkspace } from '../../state/workspace';
 

@@ -1,9 +1,9 @@
 // Risorse inserite nel testo: file o link trascinati da altre finestre, incollati o scelti.
 // Riconosce da solo se arriva un file o un link, importa nel vault e mette nel documento
 // una figura (immagini) o una scheda embed (pagine web, video, snippet, altri file).
-import { splitLinks, detectUrl } from './detect';
+import { splitLinks, detectUrl } from 'logos/resources/detect';
 import { relativeFromDoc } from '../vault/resolve';
-import type { Resource } from './model';
+import type { Resource } from 'logos/resources/model';
 import type { EmbedAttrs } from '../editor/extensions/nodes';
 
 export interface TransferLike {

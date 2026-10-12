@@ -1,6 +1,6 @@
 import { describe, expect, it } from 'vitest';
 import { classifyTransfer, embedAttrsFor, nodeFor } from './insert';
-import type { Resource } from './model';
+import type { Resource } from 'logos/resources/model';
 
 const tr = (p: Partial<Parameters<typeof classifyTransfer>[0]>) => classifyTransfer({ types: [], fileCount: 0, uriList: '', plain: '', ...p });
 

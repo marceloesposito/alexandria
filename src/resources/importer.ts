@@ -1,18 +1,18 @@
 // Importazione: file trascinati (anche in blocco), link, video, DOI, bibliografie.
 // Riconosce il formato, estrae testo e metadati, crea una scheda uniforme per ogni risorsa.
 import { platform, baseName, joinPath } from '../platform';
-import { sha256Hex } from '../lib/bytes';
+import { sha256Hex } from 'logos/lib/bytes';
 import { useResources } from './store';
 import { useWorkspace } from '../state/workspace';
-import { detectFile, detectUrl, extOf, MIME_OF } from './detect';
+import { detectFile, detectUrl, extOf, MIME_OF } from 'logos/resources/detect';
 import { extract } from './extract';
-import { parsePage, blocksToText } from './html';
+import { parsePage, blocksToText } from 'logos/resources/html';
 import { writeItemFile, writeText, writeArchive, indexResource, itemDir, type Scope } from './storage';
-import { newResourceId, type Resource, type CslItem } from './model';
-import { parseBibliography } from '../citations/bib';
-import { makeCiteKey } from '../doc/citeSyntax';
+import { newResourceId, type Resource, type CslItem } from 'logos/resources/model';
+import { parseBibliography } from 'logos/citations/bib';
+import { makeCiteKey } from 'logos/doc/citeSyntax';
 import { safeFileName } from '../vault/paths';
-import { titleFromUrl, siteOf } from './urlTitle';
+import { titleFromUrl, siteOf } from 'logos/resources/urlTitle';
 import { t } from '../i18n';
 
 export interface InFile {
@@ -292,7 +292,7 @@ export async function lookupIsbn(isbn: string): Promise<CslItem | null> {
     const j = JSON.parse(new TextDecoder().decode(res.body)) as Record<string, { title?: string; authors?: { name: string }[]; publish_date?: string; publishers?: { name: string }[]; number_of_pages?: number }>;
     const b = j[`ISBN:${isbn}`];
     if (!b) return null;
-    const { parseName, parseDate } = await import('./html');
+    const { parseName, parseDate } = await import('logos/resources/html');
     return {
       type: 'book',
       title: b.title,

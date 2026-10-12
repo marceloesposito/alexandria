@@ -1,6 +1,6 @@
 // Tipi di oggetto del Compendium aperto: .alexandria/types.json (senza file, quelli di partenza).
 import { create } from 'zustand';
-import { type ObjectType, normalizeTypes } from './model';
+import { type ObjectType, normalizeTypes } from 'logos/types/model';
 import { readJson, writeJson } from '../vault/vault';
 import { joinPath } from '../platform';
 import { TYPES_FILE } from '../vault/paths';

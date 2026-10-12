@@ -4,16 +4,16 @@ import { useEffect, useState } from 'react';
 import { PanelRight, X, BookOpen, ExternalLink, Trash2, Search, Library, Copy, Pin as PinIcon, Quote } from 'lucide-react';
 import { removeWithConfirm } from './remove';
 import { useResources } from '../store';
-import { type Resource, type CslItem, authorsOf, yearOf } from '../model';
+import { type Resource, type CslItem, authorsOf, yearOf } from 'logos/resources/model';
 import { KindIcon, kindLabel, thumbUrl } from './common';
 import { t, useLang } from '../../i18n';
 import { platform } from '../../platform';
 import { lookupDoi, lookupIsbn, addFromLibrary, sendToLibrary, verifyBlocked } from '../importer';
-import { parseName } from '../html';
+import { parseName } from 'logos/resources/html';
 import { useWorkspace } from '../../state/workspace';
 import { useSidePane } from '../../editor/paneStore';
 import { TypeSelect, PropField, TypeIcon, useType } from '../../types/ui';
-import { emptyObject } from '../../types/model';
+import { emptyObject } from 'logos/types/model';
 
 const CSL_TYPES = ['book', 'article', 'chapter', 'article-journal', 'article-magazine', 'article-newspaper', 'paper-conference', 'thesis', 'report', 'webpage', 'post-weblog', 'motion_picture', 'graphic', 'document', 'entry-encyclopedia', 'manuscript', 'interview', 'legislation'];
 

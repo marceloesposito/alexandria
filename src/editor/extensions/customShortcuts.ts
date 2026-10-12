@@ -4,7 +4,7 @@
 import { Extension } from '@tiptap/core';
 import { Plugin, PluginKey } from '@tiptap/pm/state';
 import { allCommands, commandForKey, eventShortcut, getShortcutOverrides, isMac, runCommand, shortcutAllowed } from '../../commands/registry';
-import { editorManagedKeys, type ShortcutOverrides } from '../../commands/shortcuts';
+import { editorManagedKeys, type ShortcutOverrides } from 'logos/commands/shortcuts';
 
 let cache: { overrides: ShortcutOverrides; count: number; keys: Set<string> } | null = null;
 

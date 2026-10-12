@@ -1,10 +1,10 @@
 // Voce di diario di oggi: la apre se c'è, altrimenti la crea (tipo "Voce di diario", data di oggi)
 // e la collega in coda alla voce precedente, così il diario si legge di seguito come un Codex.
 import { useWorkspace } from '../state/workspace';
-import { defaultDocSettings } from '../layout/model';
+import { defaultDocSettings } from 'logos/layout/model';
 import { isoDay, journalFolder, journalEntryMarkdown, journalObject } from './compendiumTemplates';
 import { appendToCodex, membersOf } from '../codex/store';
-import { codexRoot } from '../codex/model';
+import { codexRoot } from 'logos/codex/model';
 import { useResources } from '../resources/store';
 import { flushSave } from '../editor/session';
 import { getEditor } from '../state/editorRef';

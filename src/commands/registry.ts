@@ -1,7 +1,7 @@
 // Registro dei comandi: menu, ribbon, menu contestuali e scorciatoie usano gli stessi id.
 import type { ComponentType } from 'react';
 import type { View } from '../state/prefs';
-import { effectiveShortcut, eventToShortcut, normalizeFor, type ShortcutOverrides } from './shortcuts';
+import { effectiveShortcut, eventToShortcut, normalizeFor, type ShortcutOverrides } from 'logos/commands/shortcuts';
 
 export interface IconProps {
   size?: number;

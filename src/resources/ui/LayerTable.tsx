@@ -3,7 +3,7 @@
 import { Fragment, useMemo, useRef, useState } from 'react';
 import { ArrowUp, ArrowDown, Columns3 } from 'lucide-react';
 import { useResources } from '../store';
-import { isVisible, layersOf, yearOf, authorsOf, type Resource, type Layer } from '../model';
+import { isVisible, layersOf, yearOf, authorsOf, type Resource, type Layer } from 'logos/resources/model';
 import { KindIcon, kindLabel } from './common';
 import { t } from '../../i18n';
 import { RESOURCES_MIME } from './LayersPanel';
@@ -12,7 +12,7 @@ import { removeWithConfirm } from './remove';
 import { useWorkspace } from '../../state/workspace';
 import { useSidePane } from '../../editor/paneStore';
 import { useTypes } from '../../types/store';
-import { typesFor, typeById, sortValue, type ObjectType, type PropDef } from '../../types/model';
+import { typesFor, typeById, sortValue, type ObjectType, type PropDef } from 'logos/types/model';
 import { TypeIcon, propText } from '../../types/ui';
 import { Popover } from '../../components/Popover';
 

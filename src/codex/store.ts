@@ -7,11 +7,11 @@ import { readDocument, readJson, writeJson } from '../vault/vault';
 import { abs, docKey, docSettingsFile, META_DIR } from '../vault/paths';
 import { joinPath } from '../platform';
 import { normalizePath } from '../vault/resolve';
-import { parseMarkdown } from '../doc/parse';
-import { embedsToLinks, type PMNode } from '../doc/types';
-import { normalizeDocSettings } from '../layout/model';
-import { getWritingLang } from '../i18n/writing';
-import { allCodices, codexOrder, relinkAsChain, removeFromCodex, normalizeCodexSettings, type CodexSettings, type CodexInfo } from './model';
+import { parseMarkdown } from 'logos/doc/parse';
+import { embedsToLinks, type PMNode } from 'logos/doc/types';
+import { normalizeDocSettings } from 'logos/layout/model';
+import { getWritingLang } from 'logos/i18n/writing';
+import { allCodices, codexOrder, relinkAsChain, removeFromCodex, normalizeCodexSettings, type CodexSettings, type CodexInfo } from 'logos/codex/model';
 import { prepareDoc, keysOfDoc, VAULT_SRC, type Prepared } from '../export/run';
 
 const codexFile = (root: string) => `${META_DIR}/codices/${docKey(root)}.json`;

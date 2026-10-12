@@ -5,7 +5,7 @@ import { Modal } from '../../components/Modal';
 import { useWorkspace } from '../../state/workspace';
 import { useResources } from '../store';
 import { importFiles, importUrls, importPaths, importBibliography, createSnippet, SNIPPET_LANGUAGES } from '../importer';
-import { splitLinks } from '../detect';
+import { splitLinks } from 'logos/resources/detect';
 import { platform } from '../../platform';
 import { t } from '../../i18n';
 

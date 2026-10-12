@@ -1,7 +1,7 @@
 // Stato del gestore risorse: risorse del vault e della Library, layer, collegamenti, whiteboard.
 import { create } from 'zustand';
 import { useWorkspace } from '../state/workspace';
-import { makeCiteKey } from '../doc/citeSyntax';
+import { makeCiteKey } from 'logos/doc/citeSyntax';
 import {
   type Resource,
   type Layer,
@@ -12,7 +12,7 @@ import {
   newLayerId,
   newPinId,
   LAYER_COLORS,
-} from './model';
+} from 'logos/resources/model';
 import {
   type Scope,
   type Link,

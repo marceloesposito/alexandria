@@ -2,7 +2,7 @@
 import { useEffect, useState } from 'react';
 import { useResources } from '../store';
 import { saveSnippet, SNIPPET_LANGUAGES } from '../importer';
-import type { Resource } from '../model';
+import type { Resource } from 'logos/resources/model';
 import { useWorkspace } from '../../state/workspace';
 import { t } from '../../i18n';
 
