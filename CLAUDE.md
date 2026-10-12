@@ -10,6 +10,10 @@ decisioni prese con il committente: `docs/SPEC.md`. Stato e prossimi passi:
   nessuna analytics, font inclusi nel pacchetto. La rete si usa solo su azione
   esplicita dell'utente: import di un link, "cerca metadati", push/pull del
   remoto, riproduzione di un video. La CSP sta in `src-tauri/tauri.conf.json`.
+- **Dentro l'app nessun servizio americano** (decisione del committente, 12/10/2026): l'unico
+  server git remoto e' **Codeberg** (oltre alle cartelle locali: chiavetta, NAS). Niente GitHub o
+  GitLab nell'app; `remote_allowed` in `git.rs` e `remoteAllowed` in `versions/forge.ts` lo
+  impongono. Lo *sviluppo* invece resta su GitHub (repo, PR, CI).
 - **Il Rust fa solo I/O**: file system, git (libgit2), indice SQLite FTS5, rete,
   Typst. Tutta la logica di dominio sta in **funzioni pure testate** con vitest
   (conversione Markdown, conteggi, ancore dei commenti, sommari dei diff, filtri
@@ -102,8 +106,8 @@ vanno con la maiuscola (`Scrolls`), altrimenti il test del glossario fallisce.
 - `recensio/` — copia per revisione: zip, modalita' revisore (Compendium temporaneo, testo bloccato
   con `filterTransaction`), ritorno su branch e merge; `review/` risposta ai revisori.
 - `vault/append.ts` — Aggiungi da un altro Compendium (`planAppend` puro).
-- `versions/forge.ts`, `src-tauri/src/forge.rs` — account sui server git (token nel portachiavi),
-  crea repository, elenco repository; `git_clone` + `versions/OpenRemoteDialog.tsx`.
+- `versions/forge.ts`, `src-tauri/src/forge.rs` — account Codeberg (token nel portachiavi), crea
+  repository, elenco repository; `git_clone` + `versions/OpenRemoteDialog.tsx`. Solo Codeberg.
 - `citations/fullNote.ts` — fonte per esteso nelle note a pie' di pagina (trascinare una fonte crea
   una nota; Alt = citazione nel testo; preferenza `dropSource`).
 - `shell/QuickSwitcher.tsx` (Ctrl+O, `>` comandi), `components/HoverCard.tsx`,
@@ -138,11 +142,10 @@ vanno con la maiuscola (`Scrolls`), altrimenti il test del glossario fallisce.
 
 ### Aperto / idee annotate (non iniziate)
 - Compendium nella Bibliotheca (istantanea in sola lettura, riuso e citazione del proprio lavoro).
-- Sincronizzazione senza GitHub (remoto git su chiavetta/NAS, `git bundle` per Dropbox/Syncthing).
+- Sincronizzazione senza server (remoto git su chiavetta/NAS gia' ammesso; `git bundle` per
+  Nextcloud/Syncthing).
 - Collaborazione in tempo reale senza server su tutto il Compendium (iroh P2P in Rust, Yjs gia' fra
   le dipendenze ma inutilizzato): piano completo in `docs/COLLABORAZIONE.md`.
-- "Accedi con GitHub" (Device Flow) attivo solo con il Client ID di un'OAuth App in
-  `src/versions/forge.ts` (oggi vuoto: si usa il token personale).
 - Piano di lancio open source (designer per la UI, test di usabilita', licenze: CPAL di citeproc,
   CC BY-SA degli stili CSL, GPL-3 del thesaurus italiano distribuito come file separato).
 - In modalita' revisore non si creano paragrafi nuovi (Invio bloccato); la vista pagina non spezza

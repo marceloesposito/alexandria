@@ -23,7 +23,7 @@ Aggiornato: 7 ottobre 2026 (M11).
 | Indice dei contenuti nell'export, bibliografia in un clic visibile nello Scriptorium | fatto | #18 |
 | Index in tutte le lingue; lingua di scrittura per Compendium, separata dall'interfaccia | fatto | #18 |
 | Pacchetto portable Windows con il thesaurus accanto all'eseguibile | fatto | #19 |
-| Apri Compendium remoto (clone da GitHub/GitLab/Gitea) dalla schermata iniziale | fatto | #20 |
+| Apri Compendium remoto (clone, oggi solo da Codeberg) dalla schermata iniziale | fatto | #20 |
 | Fonte trascinata nel testo = apice numerato + nota a pie' di pagina con la fonte per esteso | fatto | #21 |
 | Vista pagina con fogli veri (formato e margini del Layout, interruzioni di pagina) | fatto | #22 |
 | Aggiungi da un altro Compendium (pergamene, Marginalia, fonti, tipi, Codex) | fatto | #23 |
@@ -113,6 +113,12 @@ Aggiornato: 7 ottobre 2026 (M11).
   verso il testo e, in basso, accanto al blocco sbagliato). La distanza dal testo e' un padding
   trasparente della maniglia (12 px, 52 px con i numeri di riga, che restano visibili): il mouse lo
   attraversa senza che la maniglia sparisca.
+- **Solo Codeberg dentro l'app** (decisione del committente, 12/10/2026): nessun servizio americano
+  nell'app. Il server git remoto e' solo Codeberg (token personale), oltre alle cartelle locali
+  (chiavetta, NAS); tolti GitHub, GitLab e l'accesso con GitHub (Device Flow). Clone, collegamento,
+  push e pull rifiutano altri indirizzi (`remote_allowed` in `git.rs`, `remoteAllowed` in
+  `versions/forge.ts`). Chi aveva gia' un remoto su GitHub vede l'errore e lo ricollega a Codeberg.
+  Lo sviluppo del progetto resta su GitHub.
 - **Nucleo condiviso `logos`** (fase P0 del piano Simposium, ottobre 2026): 45 moduli puri (Markdown,
   citazioni, export, ancore dei commenti, revisioni, Tabula, impaginazione, confronto dei testi,
   scorciatoie) e i loro 209 test sono passati nel repo `marceloesposito/logos` (MIT), usato come

@@ -447,12 +447,35 @@ pub fn git_abort_merge(repo: String) -> CmdResult<()> {
     r.cleanup_state().map_err(err)
 }
 
+/**
+ * Remoti ammessi: un repository su Codeberg (https) o una cartella locale (chiavetta, NAS).
+ * Scelta del committente: dentro l'app nessun servizio americano.
+ */
+pub fn remote_allowed(url: &str) -> bool {
+    let u = url.trim();
+    if let Some(rest) = u.strip_prefix("https://codeberg.org/") {
+        let parts: Vec<&str> = rest.trim_end_matches('/').split('/').collect();
+        return parts.len() == 2 && parts.iter().all(|p| !p.is_empty() && !p.contains(char::is_whitespace));
+    }
+    let b = u.as_bytes();
+    u.starts_with('/') || u.starts_with("\\\\") || u.starts_with("file://") || (b.len() > 2 && b[0].is_ascii_alphabetic() && b[1] == b':' && (b[2] == b'\\' || b[2] == b'/'))
+}
+
+fn check_remote(url: &str) -> CmdResult<()> {
+    if remote_allowed(url) {
+        Ok(())
+    } else {
+        Err("Alexandria usa solo Codeberg (https://codeberg.org/...) o una cartella locale come remoto".into())
+    }
+}
+
 fn token_entry(url: &str) -> Option<keyring::Entry> {
     keyring::Entry::new(KEYRING_SERVICE, url).ok()
 }
 
 #[tauri::command]
 pub fn git_set_remote(repo: String, url: String, token: Option<String>) -> CmdResult<()> {
+    check_remote(&url)?;
     let r = open(&repo)?;
     if r.find_remote("origin").is_ok() {
         r.remote_set_url("origin", &url).map_err(err)?;
@@ -489,7 +512,7 @@ fn callbacks(url: String) -> RemoteCallbacks<'static> {
             if let Some(t) = token_entry(&url).and_then(|e| e.get_password().ok()) {
                 return Cred::userpass_plaintext(username.unwrap_or("x-access-token"), &t);
             }
-            // altrimenti l'account collegato per quell'host (Accedi con GitHub / token personale)
+            // altrimenti l'account Codeberg collegato (token personale)
             if let Some((user, t)) = crate::forge::account_for_url(&url) {
                 return Cred::userpass_plaintext(&user, &t);
             }
@@ -502,6 +525,7 @@ fn callbacks(url: String) -> RemoteCallbacks<'static> {
 /// Scarica una repository remota in una cartella nuova (o vuota): "Apri Compendium remoto".
 #[tauri::command]
 pub async fn git_clone(app: tauri::AppHandle, url: String, dest: String) -> CmdResult<()> {
+    check_remote(&url)?;
     tauri::async_runtime::spawn_blocking(move || {
         let p = Path::new(&dest);
         if p.exists() && std::fs::read_dir(p).map(|mut d| d.next().is_some()).unwrap_or(false) {
@@ -535,6 +559,7 @@ pub async fn git_push(repo: String) -> CmdResult<String> {
         let branch = current_branch(&r).ok_or("Nessun branch attivo")?;
         let mut remote = r.find_remote("origin").map_err(|_| "Remoto non configurato".to_string())?;
         let url = remote.url().unwrap_or("").to_string();
+        check_remote(&url)?;
         let mut po = PushOptions::new();
         po.remote_callbacks(callbacks(url));
         let spec = format!("refs/heads/{0}:refs/heads/{0}", branch);
@@ -552,6 +577,7 @@ pub async fn git_pull(repo: String) -> CmdResult<MergeResult> {
         let branch = current_branch(&r).ok_or("Nessun branch attivo")?;
         let mut remote = r.find_remote("origin").map_err(|_| "Remoto non configurato".to_string())?;
         let url = remote.url().unwrap_or("").to_string();
+        check_remote(&url)?;
         let mut fo = FetchOptions::new();
         fo.remote_callbacks(callbacks(url));
         remote.fetch(&[branch.as_str()], Some(&mut fo), None).map_err(err)?;
@@ -571,6 +597,23 @@ pub async fn git_pull(repo: String) -> CmdResult<MergeResult> {
 mod tests {
     use super::*;
     use std::fs;
+
+    #[test]
+    fn remoti_ammessi_solo_codeberg_o_cartelle_locali() {
+        assert!(remote_allowed("https://codeberg.org/marceloesposito/tesi.git"));
+        assert!(remote_allowed("https://codeberg.org/marceloesposito/tesi"));
+        assert!(!remote_allowed("https://github.com/marceloesposito/tesi.git"));
+        assert!(!remote_allowed("https://gitlab.com/x/y.git"));
+        assert!(!remote_allowed("git@github.com:x/y.git"));
+        assert!(!remote_allowed("http://codeberg.org/x/y.git"));
+        assert!(!remote_allowed("https://codeberg.org.evil.com/x/y.git"));
+        assert!(!remote_allowed("https://codeberg.org/x"));
+        assert!(remote_allowed("/Volumes/Chiavetta/tesi.git"));
+        assert!(remote_allowed("D:\\backup\\tesi.git"));
+        assert!(remote_allowed("\\\\nas\\condivisa\\tesi.git"));
+        assert!(remote_allowed("file:///srv/tesi.git"));
+        assert!(!remote_allowed(""));
+    }
 
     fn setup() -> (tempfile::TempDir, String) {
         let dir = tempfile::tempdir().unwrap();

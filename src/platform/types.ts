@@ -18,7 +18,8 @@ export interface GitCommit {
   refs: string[]; // branch che puntano qui
 }
 
-export type ForgeKind = 'github' | 'gitlab' | 'gitea';
+/** Server git remoto: solo Codeberg (Forgejo). */
+export type ForgeKind = 'gitea';
 export interface ForgeAccount {
   kind: ForgeKind;
   host: string;
@@ -31,13 +32,6 @@ export interface RemoteRepo {
   private: boolean;
   updated: string;
   description: string;
-}
-export interface DeviceCode {
-  device_code: string;
-  user_code: string;
-  verification_uri: string;
-  interval: number;
-  expires_in: number;
 }
 
 export interface GitLog {
@@ -168,9 +162,7 @@ export interface Platform {
   /** account sul server git (token nel portachiavi, mai restituito) */
   forgeAccount(host: string): Promise<ForgeAccount | null>;
   forgeLogout(host: string): Promise<void>;
-  forgeSetToken(kind: ForgeKind, host: string, token: string): Promise<string>;
-  forgeDeviceStart(clientId: string): Promise<DeviceCode>;
-  forgeDevicePoll(clientId: string, deviceCode: string): Promise<string>;
+  forgeSetToken(host: string, token: string): Promise<string>;
   forgeCreateRepo(host: string, name: string, priv: boolean, description?: string): Promise<string>;
   forgeListRepos(host: string): Promise<RemoteRepo[]>;
   /** scarica una repository remota in una cartella nuova o vuota */

@@ -1,12 +1,12 @@
-// "Apri Compendium remoto": sceglie una repository dall'account (o da un indirizzo), la scarica in
-// Documenti/Alexandria e la apre. Login e token come in "Account e repository remota".
+// "Apri Compendium remoto": sceglie una repository Codeberg dall'account (o da un indirizzo), la
+// scarica in Documenti/Alexandria e la apre. Login e token come in "Account e repository remota".
 import { useEffect, useMemo, useState } from 'react';
 import { Download, ExternalLink, FolderOpen, Lock, Globe, Search } from 'lucide-react';
 import { Modal } from '../components/Modal';
 import { useWorkspace } from '../state/workspace';
 import { platform, joinPath } from '../platform';
-import type { ForgeAccount, ForgeKind, RemoteRepo } from '../platform/types';
-import { defaultHost, tokenPage, repoSlug } from './forge';
+import type { ForgeAccount, RemoteRepo } from '../platform/types';
+import { FORGE_HOST, TOKEN_PAGE, remoteAllowed, repoSlug } from './forge';
 import { fuzzyFilter } from 'logos/lib/fuzzy';
 import { t, useLang } from '../i18n';
 
@@ -25,8 +25,7 @@ const nameFromUrl = (u: string) => repoSlug(u.replace(/\.git\/?$/, '').split(/[/
 export function OpenRemoteDialog() {
   useLang();
   const close = () => useWorkspace.getState().closeDialog();
-  const [kind, setKind] = useState<ForgeKind>('github');
-  const [host, setHost] = useState(defaultHost('github'));
+  const host = FORGE_HOST;
   const [account, setAccount] = useState<ForgeAccount | null>(null);
   const [token, setToken] = useState('');
   const [repos, setRepos] = useState<RemoteRepo[] | null>(null);
@@ -39,7 +38,7 @@ export function OpenRemoteDialog() {
   useEffect(() => {
     let alive = true;
     setRepos(null);
-    void platform.forgeAccount(host.trim()).then((a) => alive && setAccount(a));
+    void platform.forgeAccount(host).then((a) => alive && setAccount(a));
     return () => {
       alive = false;
     };
@@ -72,8 +71,8 @@ export function OpenRemoteDialog() {
   const connect = async () => {
     setBusy(true);
     try {
-      const login = await platform.forgeSetToken(kind, host.trim(), token);
-      setAccount({ kind, host: host.trim(), login });
+      const login = await platform.forgeSetToken(host, token);
+      setAccount({ kind: 'gitea', host, login });
       setToken('');
     } catch (e) {
       toast(String(e), 'error');
@@ -83,6 +82,7 @@ export function OpenRemoteDialog() {
   };
 
   const download = async () => {
+    if (!remoteAllowed(url)) return toast(t('forge.onlyCodeberg'), 'error');
     if (!url.trim() || !dest.trim()) return;
     setBusy(true);
     setProgress([0, 0]);
@@ -126,23 +126,7 @@ export function OpenRemoteDialog() {
       <p className="hint">{t('remote.intro')}</p>
 
       <section className="forge__section">
-        <h4>{t('forge.server')}</h4>
-        <div className="forge__row">
-          <select
-            className="select"
-            value={kind}
-            onChange={(e) => {
-              const k = e.target.value as ForgeKind;
-              setKind(k);
-              setHost(defaultHost(k));
-            }}
-          >
-            <option value="github">GitHub</option>
-            <option value="gitlab">GitLab</option>
-            <option value="gitea">Gitea / Forgejo</option>
-          </select>
-          <input className="input" value={host} onChange={(e) => setHost(e.target.value)} aria-label={t('forge.host')} />
-        </div>
+        <h4>Codeberg</h4>
         {account ? (
           <p className="hint">{t('forge.connectedAs', { login: account.login || '—', host: account.host })}</p>
         ) : (
@@ -156,7 +140,7 @@ export function OpenRemoteDialog() {
             </div>
             <p className="hint">
               {t('remote.tokenHint')}{' '}
-              <button className="link-btn" onClick={() => void platform.openExternal(tokenPage(kind, host.trim()))}>
+              <button className="link-btn" onClick={() => void platform.openExternal(TOKEN_PAGE)}>
                 <ExternalLink size={11} /> {t('forge.tokenCreate')}
               </button>
             </p>
@@ -187,7 +171,7 @@ export function OpenRemoteDialog() {
 
       <section className="forge__section">
         <label className="field-label">{t('remote.url')}</label>
-        <input className="input" value={url} placeholder="https://github.com/utente/tesi.git" onChange={(e) => setUrl(e.target.value)} />
+        <input className="input" value={url} placeholder="https://codeberg.org/utente/tesi.git" onChange={(e) => setUrl(e.target.value)} />
         <label className="field-label">{t('remote.dest')}</label>
         <div className="forge__row">
           <input
