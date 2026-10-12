@@ -356,6 +356,9 @@ export const Callout = Node.create({
     return {
       kind: { default: 'note', parseHTML: (el) => el.getAttribute('data-kind') ?? 'note', renderHTML: (a) => ({ 'data-kind': a.kind }) },
       title: { default: '', parseHTML: (el) => el.getAttribute('data-title') ?? '', renderHTML: (a) => (a.title ? { 'data-title': a.title } : {}) },
+      // colore e icona scelti per questo riquadro ('' = quelli del tipo)
+      color: { default: '', parseHTML: (el) => el.getAttribute('data-color') ?? '', renderHTML: (a) => (a.color ? { 'data-color': a.color } : {}) },
+      icon: { default: '', parseHTML: (el) => el.getAttribute('data-icon') ?? '', renderHTML: (a) => (a.icon ? { 'data-icon': a.icon } : {}) },
     };
   },
   parseHTML() {

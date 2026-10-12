@@ -1,6 +1,6 @@
 // Albero del documento -> Markdown (Pandoc/GFM). Deve fare il giro completo con parse.ts:
 // parse(serialize(doc)) == doc per ogni documento prodotto dall'editor.
-import { calloutMarker, isCalloutKind } from './callouts';
+import { calloutMarker, calloutKindOf } from './callouts';
 import { markColor } from './colors';
 import type { PMNode, PMMark, MarkType, CitationItem } from './types';
 import { MARK_ORDER } from './types';
@@ -50,8 +50,7 @@ function block(n: PMNode, st: State): string {
     }
     case 'callout': {
       // "> [!NOTE] Titolo", una riga vuota, poi il contenuto (sintassi degli avvisi di GitHub/Obsidian)
-      const kind = isCalloutKind(n.attrs?.kind) ? n.attrs.kind : 'note';
-      const head = calloutMarker(kind, escapeText(String(n.attrs?.title ?? '')));
+      const head = calloutMarker(calloutKindOf(n.attrs?.kind), escapeText(String(n.attrs?.title ?? '')), String(n.attrs?.color ?? ''), String(n.attrs?.icon ?? ''));
       const body = blocks(n.content ?? [], st, false);
       return ['> ' + head, '>', ...body.split('\n').map((l) => (l ? '> ' + l : '>'))].join('\n');
     }

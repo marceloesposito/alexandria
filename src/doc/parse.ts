@@ -141,7 +141,7 @@ function asCallout(content: PMNode[]): PMNode | null {
   if (!m) return null;
   const rest = (nl < 0 ? nodes.slice(1) : [{ ...t0, text: t0.text.slice(nl + 1) }, ...nodes.slice(1)]).filter((x) => x.type !== 'text' || x.text);
   const body = [...(rest.length ? [{ ...first, content: rest }] : []), ...content.slice(1)];
-  return { type: 'callout', attrs: { kind: m.kind, title: m.title }, content: nonEmpty(body) };
+  return { type: 'callout', attrs: { kind: m.kind, title: m.title, color: m.color, icon: m.icon }, content: nonEmpty(body) };
 }
 
 function withAlign(node: PMNode): PMNode {

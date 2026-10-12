@@ -70,11 +70,20 @@ Aggiornato: 7 ottobre 2026 (M11).
   `has-focus`, `src/editor/extensions/focusBlock.ts`). Nella vista normale e nella modalita' focus tutta
   la pergamena resta leggibile.
 - **Riquadri evidenziati (callout)**: fondo molto chiaro, bordino, icona e intestazione in stile didascalia
-  (titolo libero o il nome del tipo); cinque tipi: nota, suggerimento, importante, attenzione, pericolo. Nel
+  (titolo libero o il nome del tipo). Nel
   Markdown la sintassi degli avvisi di GitHub/Obsidian (`> [!WARNING] Titolo`, riga vuota, contenuto;
   `src/doc/callouts.ts`). Da Inserisci > Riquadro evidenziato, dal menu / (uno per tipo) e dal gruppo
   Blocchi; negli export riquadro colorato (Typst, HTML, Word come tabella a una cella), in LaTeX una
   citazione con intestazione. L'intestazione senza titolo e' nella lingua di scrittura (`docTexts`).
+  **Aspetto a scelta** (richiesta del committente, ottobre 2026): predefiniti proposti solo nota,
+  importante e pericolo (suggerimento e attenzione si leggono ancora dal Markdown, non si propongono).
+  Ogni riquadro ha un pannello (pulsante col nome del tipo nell'intestazione, `editor/CalloutPicker.tsx`):
+  tipo, colore dalla tavolozza del tema (`--series-1..8`, si adatta a chiaro e scuro; in stampa i colori
+  del tema chiaro) e una di 24 icone. Nel Markdown i metadati alla Obsidian:
+  `> [!NOTE|color=series-3 icon=book-open] Titolo`. "Salva tipo" crea un tipo proprio del Compendium
+  (nome, colore, icona) in `.alexandria/callouts.json` (`callouts/store.ts`), scritto `> [!definizione]`
+  e proposto nel pannello e nel menu /. Un tipo sconosciuto (es. `[!quote]` di Obsidian) e' un riquadro
+  con l'aspetto della nota. Non fatto: "Aggiungi da un altro Compendium" non copia i tipi propri.
 - **Carattere per stile** (Layout > Stili di paragrafo > Carattere): "Come il documento", Serif, Sans o
   Monospace per corpo, H1-H3, citazione, didascalia e nota (`ParaStyle.font`; gli stili salvati prima valgono
   "come il documento"). Nell'editor Libertinus Serif, Inter e JetBrains Mono (variabili `--style-font-*`), nel

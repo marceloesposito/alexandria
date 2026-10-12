@@ -1,5 +1,5 @@
 // Documento -> LaTeX con biblatex (le citazioni restano chiavi, la bibliografia va nel .bib).
-import { calloutHeading } from '../doc/callouts';
+import { resolveCallout } from '../doc/callouts';
 import { docTexts } from '../i18n/writing';
 import type { PMNode, PMMark, CitationItem } from '../doc/types';
 import { MARK_ORDER } from '../doc/types';
@@ -148,7 +148,7 @@ export function toLatex(doc: PMNode, ctx: ExportContext, bibFile: string): Latex
       case 'blockquote':
         return `\\begin{quote}\n${blocks(b.content)}\n\\end{quote}`;
       case 'callout': {
-        const { heading } = calloutHeading(b.attrs?.kind, b.attrs?.title, docTexts(ctx.lang).callouts);
+        const { heading } = resolveCallout(b.attrs, ctx.calloutTypes ?? [], docTexts(ctx.lang).callouts);
         return `\\begin{quote}\n\\textbf{\\textsc{${escapeTex(heading)}}}\\par\n${blocks(b.content)}\n\\end{quote}`;
       }
       case 'bulletList':
