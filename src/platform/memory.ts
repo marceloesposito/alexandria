@@ -519,12 +519,6 @@ export function createMemoryPlatform(opts: { persist?: boolean } = {}): Platform
     async forgeSetToken() {
       throw new Error('Account non disponibili nella versione browser');
     },
-    async forgeDeviceStart() {
-      throw new Error('Account non disponibili nella versione browser');
-    },
-    async forgeDevicePoll() {
-      return 'pending';
-    },
     async forgeListRepos() {
       return [];
     },

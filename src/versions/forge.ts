@@ -1,21 +1,21 @@
-// Server git (GitHub, GitLab, Gitea/Forgejo): indirizzi e nomi. Funzioni pure.
-import type { ForgeKind } from '../platform/types';
+// Server git remoto: solo Codeberg (Forgejo, no-profit tedesco). Scelta del committente: dentro
+// l'app nessun servizio americano (niente GitHub o GitLab). Funzioni pure.
+
+export const FORGE_HOST = 'codeberg.org';
+
+/** Pagina di Codeberg in cui creare un token d'accesso (permessi: repository in lettura e scrittura). */
+export const TOKEN_PAGE = `https://${FORGE_HOST}/user/settings/applications`;
 
 /**
- * Client ID dell'OAuth App di Alexandria su GitHub (pubblico, serve al Device Flow).
- * Vuoto = il pulsante "Accedi con GitHub" non compare e resta la via del token personale.
+ * Indirizzo remoto ammesso: un repository su Codeberg (https) oppure una cartella locale
+ * (chiavetta, NAS, cartella sincronizzata), che non e' un servizio di terzi.
  */
-export const GITHUB_CLIENT_ID = '';
-
-export function defaultHost(kind: ForgeKind): string {
-  return kind === 'github' ? 'github.com' : kind === 'gitlab' ? 'gitlab.com' : 'codeberg.org';
-}
-
-/** Pagina del server in cui creare un token con i permessi giusti (repo / api). */
-export function tokenPage(kind: ForgeKind, host: string): string {
-  if (kind === 'github') return `https://${host}/settings/tokens/new?scopes=repo&description=Alexandria`;
-  if (kind === 'gitlab') return `https://${host}/-/user_settings/personal_access_tokens?name=Alexandria&scopes=api,write_repository`;
-  return `https://${host}/user/settings/applications`;
+export function remoteAllowed(url: string): boolean {
+  const u = url.trim();
+  if (!u) return false;
+  if (/^https:\/\/codeberg\.org\/[^/\s]+\/[^/\s]+?(\.git)?\/?$/i.test(u)) return true;
+  // percorsi locali: assoluti (Unix, Windows, UNC) o file://
+  return /^(\/|[A-Za-z]:[\\/]|\\\\|file:\/\/)/.test(u);
 }
 
 /** Nome di repository valido a partire dal nome del Compendium. */

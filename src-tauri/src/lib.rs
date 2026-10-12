@@ -136,8 +136,6 @@ pub fn run() {
             forge::forge_account,
             forge::forge_logout,
             forge::forge_set_token,
-            forge::forge_device_start,
-            forge::forge_device_poll,
             forge::forge_create_repo,
             forge::forge_list_repos,
             git::git_clone,
