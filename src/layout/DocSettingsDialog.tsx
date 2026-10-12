@@ -1,12 +1,12 @@
 // Impostazioni documento: dati, citazioni, pagina, testo, stili di paragrafo, pagine mastro.
-import { CITATION_LOCALES } from '../i18n/writing';
+import { CITATION_LOCALES } from 'logos/i18n/writing';
 import { useEffect, useState } from 'react';
 import { FileUp } from 'lucide-react';
 import { Modal } from '../components/Modal';
 import { useWorkspace } from '../state/workspace';
 import { useDocSettings } from './docSettings';
 import { masterLabel } from './TemplatesView';
-import { PAPERS, withPaper, STYLE_FONTS, EDITOR_FONT, type LayoutSettings, type MasterId, type ParaStyleId, type ParaStyle, type MasterPage, type Paper, type StyleFont } from './model';
+import { PAPERS, withPaper, STYLE_FONTS, EDITOR_FONT, type LayoutSettings, type MasterId, type ParaStyleId, type ParaStyle, type MasterPage, type Paper, type StyleFont } from 'logos/layout/model';
 import { BUNDLED_STYLES, listCustomStyles, type StyleInfo } from '../citations/store';
 import { runCommand } from '../commands/registry';
 import { t, useLang } from '../i18n';

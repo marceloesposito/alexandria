@@ -27,7 +27,7 @@ import {
   SquareCode,
   Captions,
 } from 'lucide-react';
-import { CALLOUT_OFFERED, CALLOUT_BUILTIN } from '../doc/callouts';
+import { CALLOUT_OFFERED, CALLOUT_BUILTIN } from 'logos/doc/callouts';
 import { useCalloutTypes } from '../callouts/store';
 import { CALLOUT_ICON_COMPONENTS } from './calloutIcons';
 

@@ -1,6 +1,6 @@
 import { describe, it, expect } from 'vitest';
 import { lineStats, summarize, plainLine, suggestCommitMessage } from './diffSummary';
-import { mergeText, resolveText, conflictsLeft, mergeJson, mergeJsonText } from './merge';
+import { mergeText, resolveText, conflictsLeft, mergeJson, mergeJsonText } from 'logos/versions/merge';
 import { layoutGraph } from './graph';
 import type { GitLog } from '../platform/types';
 import { setLang } from '../i18n';

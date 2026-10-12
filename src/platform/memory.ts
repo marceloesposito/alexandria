@@ -10,7 +10,7 @@ import type {
   IndexDoc,
   SearchHit,
 } from './types';
-import { utf8, toUtf8, bytesToBase64, base64ToBytes } from '../lib/bytes';
+import { utf8, toUtf8, bytesToBase64, base64ToBytes } from 'logos/lib/bytes';
 import { findBlock } from '../thesaurus/model';
 
 type FileData = Uint8Array;

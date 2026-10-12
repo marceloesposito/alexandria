@@ -2,7 +2,7 @@
 // ordine di comparsa per gli stili numerici, bibliografia generata e modificabile.
 import { create } from 'zustand';
 import type { Editor } from '@tiptap/core';
-import { CitationEngine } from './engine';
+import { CitationEngine } from 'logos/citations/engine';
 import { setCitationRenderer, citationRenderer } from './renderer';
 import { useResources } from '../resources/store';
 import { useDocSettings } from '../layout/docSettings';
@@ -10,11 +10,11 @@ import { useWorkspace } from '../state/workspace';
 import { platform, joinPath } from '../platform';
 import { META_DIR } from '../vault/paths';
 import { getEditor, onEditor } from '../state/editorRef';
-import type { CitationItem, PMNode } from '../doc/types';
-import type { CslItem } from '../resources/model';
-import { cslHtmlToInline } from './html';
+import type { CitationItem, PMNode } from 'logos/doc/types';
+import type { CslItem } from 'logos/resources/model';
+import { cslHtmlToInline } from 'logos/citations/html';
 import { t } from '../i18n';
-import { CITATION_LOCALES, docTexts, getWritingLang } from '../i18n/writing';
+import { CITATION_LOCALES, docTexts, getWritingLang } from 'logos/i18n/writing';
 
 export interface StyleInfo {
   id: string;

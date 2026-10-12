@@ -1,5 +1,5 @@
 import { describe, it, expect } from 'vitest';
-import { codexOrder, codexRoot, allCodices, neighbours, relinkAsChain, removeFromCodex, normalizeCodexSettings } from './model';
+import { codexOrder, codexRoot, allCodices, neighbours, relinkAsChain, removeFromCodex, normalizeCodexSettings } from 'logos/codex/model';
 import type { Link } from '../resources/storage';
 
 const d = (n: string) => `documents/${n}.md`;

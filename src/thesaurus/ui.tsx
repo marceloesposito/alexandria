@@ -11,7 +11,7 @@ import { getEditor } from '../state/editorRef';
 import { useWorkspace } from '../state/workspace';
 import { runCommand } from '../commands/registry';
 import { openContextMenu } from '../components/ContextMenu';
-import { getWritingLang } from '../i18n/writing';
+import { getWritingLang } from 'logos/i18n/writing';
 import { t, useLang } from '../i18n';
 import { parseEntry, lookupWord, matchCase, thesaurusLang, baseForms, inflectLike, type Entry } from './model';
 

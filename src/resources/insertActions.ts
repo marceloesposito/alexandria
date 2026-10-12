@@ -3,9 +3,9 @@ import { getEditor } from '../state/editorRef';
 import { ws } from '../state/workspace';
 import { useResources } from './store';
 import { importFiles, importUrls, importPaths } from './importer';
-import { detectUrl } from './detect';
+import { detectUrl } from 'logos/resources/detect';
 import { nodeFor, type Classified } from './insert';
-import type { Resource } from './model';
+import type { Resource } from 'logos/resources/model';
 
 /** Mette nel documento una figura o una scheda per ogni risorsa, come blocchi dopo `pos` (o dopo il cursore). */
 export function insertResources(list: Resource[], pos?: number) {

@@ -1,8 +1,8 @@
 // Chiave di citazione disponibile subito (anche durante un trascinamento): se la risorsa non e'
 // ancora una fonte, la diventa e la chiave si salva in background.
 import { useResources } from './store';
-import { makeCiteKey } from '../doc/citeSyntax';
-import { firstAuthorFamily, yearOf, type Resource } from './model';
+import { makeCiteKey } from 'logos/doc/citeSyntax';
+import { firstAuthorFamily, yearOf, type Resource } from 'logos/resources/model';
 
 export function ensureCiteKey(r: Resource): string {
   if (r.citeKey) {

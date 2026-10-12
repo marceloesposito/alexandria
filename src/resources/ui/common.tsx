@@ -15,8 +15,8 @@ import {
   Library,
   SquareCode,
 } from 'lucide-react';
-import type { Resource, ResourceKind } from '../model';
-import { displayAuthorYear, domainOf } from '../model';
+import type { Resource, ResourceKind } from 'logos/resources/model';
+import { displayAuthorYear, domainOf } from 'logos/resources/model';
 import { fileOf } from '../store';
 import { platform } from '../../platform';
 import { t } from '../../i18n';

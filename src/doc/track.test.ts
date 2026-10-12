@@ -1,6 +1,6 @@
 import { describe, it, expect } from 'vitest';
-import { parseMarkdown } from './parse';
-import { serializeMarkdown } from './serialize';
+import { parseMarkdown } from 'logos/doc/parse';
+import { serializeMarkdown } from 'logos/doc/serialize';
 
 describe('revisioni tracciate in Markdown', () => {
   it('<ins> e <del> diventano segni con autore e data, e tornano identici', () => {

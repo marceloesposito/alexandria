@@ -9,7 +9,7 @@ import { CITE_MIME } from '../../editor/extensions/drop';
 import { FIGURE_MIME, LINK_MIME, EMBED_MIME } from '../../editor/extensions/drop';
 import { embedAttrsFor } from '../insert';
 import { relativeFromDoc } from '../../vault/resolve';
-import { displayAuthorYear, type Resource, type Layer } from '../model';
+import { displayAuthorYear, type Resource, type Layer } from 'logos/resources/model';
 import { t, useLang } from '../../i18n';
 import { ensureCiteKey } from '../citeKeys';
 import { useSidePane } from '../../editor/paneStore';

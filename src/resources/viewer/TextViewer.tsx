@@ -1,7 +1,7 @@
 // Testi, documenti e pagine web archiviate: paragrafi selezionabili, pin con "par. N".
 import { useEffect, useRef, useState } from 'react';
-import type { Resource, Pin } from '../model';
-import type { Block } from '../html';
+import type { Resource, Pin } from 'logos/resources/model';
+import type { Block } from 'logos/resources/html';
 import { useSelectionIn, PinButton, shortLabel } from './PinBar';
 import { t } from '../../i18n';
 

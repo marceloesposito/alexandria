@@ -3,7 +3,7 @@
 import { Extension } from '@tiptap/core';
 import { Plugin, PluginKey } from '@tiptap/pm/state';
 import type { EditorView } from '@tiptap/pm/view';
-import { formatCitation } from '../../doc/citeSyntax';
+import { formatCitation } from 'logos/doc/citeSyntax';
 import { useWorkspace } from '../../state/workspace';
 
 export const CITE_MIME = 'application/x-alexandria-cite';

@@ -6,8 +6,8 @@ import { getEditor } from '../state/editorRef';
 import { useWorkspace } from '../state/workspace';
 import { useComments } from '../comments/store';
 import { flatText } from '../comments/plugin';
-import { makeAnchor, newCommentId, statusFields, type Comment } from '../comments/model';
-import { parseWordReview, planReview, type WordReview } from '../comments/word';
+import { makeAnchor, newCommentId, statusFields, type Comment } from 'logos/comments/model';
+import { parseWordReview, planReview, type WordReview } from 'logos/comments/word';
 import { checkpoint } from '../versions/actions';
 import { t } from '../i18n';
 

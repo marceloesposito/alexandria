@@ -1,12 +1,12 @@
 // Dove vivono le risorse: resources/<id>/ nel vault (versionate) oppure items/<id>/ nella Library
 // (globale, fuori dal version control). Il testo estratto sta in una cache ricostruibile.
-import { normalizeObject } from '../types/model';
+import { normalizeObject } from 'logos/types/model';
 import { platform, joinPath } from '../platform';
 import { readJson, writeJson } from '../vault/vault';
 import { resDir, CACHE_DIR, LAYERS_FILE, LINKS_FILE, WHITEBOARD_FILE, INDEX_DB } from '../vault/paths';
-import type { Resource, LayersFile } from './model';
-import type { Block } from './html';
-import { authorsOf, yearOf } from './model';
+import type { Resource, LayersFile } from 'logos/resources/model';
+import type { Block } from 'logos/resources/html';
+import { authorsOf, yearOf } from 'logos/resources/model';
 
 export interface Scope {
   kind: 'vault' | 'library';
@@ -124,8 +124,8 @@ export async function indexResource(s: Scope, r: Resource, text: string): Promis
 
 // ---------------------------------------------------------------- file del vault accanto
 
-export type { Link, WbNote, WbFrame, Whiteboard } from './boardModel';
-import type { Link, Whiteboard } from './boardModel';
+export type { Link, WbNote, WbFrame, Whiteboard } from 'logos/resources/boardModel';
+import type { Link, Whiteboard } from 'logos/resources/boardModel';
 
 export async function loadLayers(root: string): Promise<LayersFile> {
   const f = await readJson<LayersFile | null>(joinPath(root, LAYERS_FILE), null);

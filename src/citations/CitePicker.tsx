@@ -4,12 +4,12 @@ import { Quote, Pin as PinIcon } from 'lucide-react';
 import { Modal } from '../components/Modal';
 import { useWorkspace } from '../state/workspace';
 import { useResources } from '../resources/store';
-import { displayAuthorYear, authorsOf } from '../resources/model';
+import { displayAuthorYear, authorsOf } from 'logos/resources/model';
 import { KindIcon } from '../resources/ui/common';
 import { getEditor } from '../state/editorRef';
 import { citationRenderer } from './renderer';
 import { t } from '../i18n';
-import type { CitationItem } from '../doc/types';
+import type { CitationItem } from 'logos/doc/types';
 
 export function CitePicker() {
   const close = () => useWorkspace.getState().closeDialog();

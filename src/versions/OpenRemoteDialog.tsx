@@ -7,7 +7,7 @@ import { useWorkspace } from '../state/workspace';
 import { platform, joinPath } from '../platform';
 import type { ForgeAccount, ForgeKind, RemoteRepo } from '../platform/types';
 import { defaultHost, tokenPage, repoSlug } from './forge';
-import { fuzzyFilter } from '../lib/fuzzy';
+import { fuzzyFilter } from 'logos/lib/fuzzy';
 import { t, useLang } from '../i18n';
 
 const toast = (m: string, k: 'ok' | 'error' | 'info' = 'info') => useWorkspace.getState().toast(m, k);

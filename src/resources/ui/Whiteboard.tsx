@@ -31,7 +31,7 @@ import {
 } from '@xyflow/react';
 import '@xyflow/react/dist/style.css';
 import { useResources } from '../store';
-import { isVisible, isLocked, colorOf, type Resource } from '../model';
+import { isVisible, isLocked, colorOf, type Resource } from 'logos/resources/model';
 import { ResourceCard, thumbUrl } from './common';
 import { removeWithConfirm } from './remove';
 import { t } from '../../i18n';
@@ -40,8 +40,8 @@ import { promptDialog } from '../../components/confirm';
 import type { WbNote, WbFrame } from '../storage';
 import { RESOURCES_MIME } from './LayersPanel';
 import { DocPicker } from './DocPicker';
-import { docNodeId, relOfNode, linkedDocs } from '../docLinks';
-import { placeDocNodes, facingSides, type Side, type Rect } from '../tabula';
+import { docNodeId, relOfNode, linkedDocs } from 'logos/resources/docLinks';
+import { placeDocNodes, facingSides, type Side, type Rect } from 'logos/resources/tabula';
 import { useWorkspace } from '../../state/workspace';
 import type { DocInfo } from '../../vault/vault';
 

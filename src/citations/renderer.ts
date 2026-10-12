@@ -1,7 +1,7 @@
 // Ponte fra editor e motore delle citazioni: l'editor chiede l'etichetta di una citazione,
 // il motore (citations/engine.ts) la fornisce secondo lo stile del documento.
 import { useSyncExternalStore } from 'react';
-import type { CitationItem } from '../doc/types';
+import type { CitationItem } from 'logos/doc/types';
 
 export interface CitationRenderer {
   /** Testo della citazione nel corpo, es. "(Rossi, 2020, p. 12)" oppure "[3]" */

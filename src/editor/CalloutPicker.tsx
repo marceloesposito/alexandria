@@ -14,7 +14,7 @@ import {
   type CalloutColor,
   type CalloutIcon,
   type ResolvedCallout,
-} from '../doc/callouts';
+} from 'logos/doc/callouts';
 import { useCalloutTypes } from '../callouts/store';
 import { CALLOUT_ICON_COMPONENTS } from './calloutIcons';
 

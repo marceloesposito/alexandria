@@ -59,7 +59,7 @@ import { relativeFromDoc } from '../vault/resolve';
 import { classifyTransfer, readTransfer } from './insert';
 import { InsertResourceDialog } from './ui/InsertResourceDialog';
 import { onGlobalPaste, onGlobalKeydown } from './pasteToBookshelf';
-import { renameDocRefs, dropDocRefs } from './docLinks';
+import { renameDocRefs, dropDocRefs } from 'logos/resources/docLinks';
 import { docHooks } from '../state/workspace';
 import { EmbedView } from './ui/EmbedView';
 import { removeWithConfirm, removalTargets } from './ui/remove';

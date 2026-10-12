@@ -6,9 +6,9 @@ import { readJson, writeJson, listDocuments, dirsOf, type DocInfo, type VaultCon
 import { META_DIR, VAULT_FILE, LINKS_FILE, TYPES_FILE, CACHE_DIR, safeFileName, uniqueName, type VaultDirs } from './paths';
 import type { Link } from '../resources/storage';
 import { normalizeResource } from '../resources/storage';
-import { newResourceId, type Resource } from '../resources/model';
-import { relOfNode, docNodeId } from '../resources/docLinks';
-import { normalizeTypes, type ObjectType } from '../types/model';
+import { newResourceId, type Resource } from 'logos/resources/model';
+import { relOfNode, docNodeId } from 'logos/resources/docLinks';
+import { normalizeTypes, type ObjectType } from 'logos/types/model';
 
 export interface OtherCompendium {
   root: string;

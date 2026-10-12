@@ -11,9 +11,9 @@ import { useSidePane } from '../editor/paneStore';
 import { exportTo, renderPdf, type ExportFormat } from '../export/run';
 import { platform, joinPath } from '../platform';
 import { useResources } from '../resources/store';
-import { docNodeId } from '../resources/docLinks';
+import { docNodeId } from 'logos/resources/docLinks';
 import { t, useLang } from '../i18n';
-import type { CodexSettings } from './model';
+import type { CodexSettings } from 'logos/codex/model';
 
 const MIME = 'application/x-alexandria-codex';
 

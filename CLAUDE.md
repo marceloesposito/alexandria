@@ -11,11 +11,13 @@ decisioni prese con il committente: `docs/SPEC.md`. Stato e prossimi passi:
   esplicita dell'utente: import di un link, "cerca metadati", push/pull del
   remoto, riproduzione di un video. La CSP sta in `src-tauri/tauri.conf.json`.
 - **Il Rust fa solo I/O**: file system, git (libgit2), indice SQLite FTS5, rete,
-  Typst. Tutta la logica di dominio sta in `src/` in **funzioni pure testate**
-  con vitest (conversione Markdown, conteggi, ancore dei commenti, sommari dei
-  diff, filtri dei layer, suggerimenti, citazioni, export).
+  Typst. Tutta la logica di dominio sta in **funzioni pure testate** con vitest
+  (conversione Markdown, conteggi, ancore dei commenti, sommari dei diff, filtri
+  dei layer, suggerimenti, citazioni, export). Quelle condivise con Simposium
+  stanno nel nucleo **`logos`** (repo `marceloesposito/logos`, MIT), importato
+  come `logos/doc/parse` ecc. dalla dipendenza git con tag.
 - **Il Markdown e' la fonte di verita'** del testo: `parse(serialize(doc)) ==
-  doc` (test in `src/doc/markdown.test.ts`). Commenti, pin, layer e whiteboard
+  doc` (test in `logos`, `src/doc/markdown.test.ts`). Commenti, pin, layer e whiteboard
   vivono in file JSON accanto (`.alexandria/`), mai dentro il .md.
 - **Git vero ma nascosto**: il vault e' un repository; l'utente vede commit,
   branch, timeline e merge, mai la riga di comando.
@@ -38,7 +40,12 @@ Prima di ogni commit: `npm test`, `npm run build` e `npm run test:rust` verdi.
 - `src/platform/` — contratto `Platform` con due implementazioni: `tauri.ts`
   (comandi Rust) e `memory.ts` (file system e git simulati, per il browser e i
   test). Nessun componente chiama `invoke` direttamente.
-- `src/doc/` — modello del documento (JSON di ProseMirror) e Markdown.
+- `logos` (in `node_modules/logos/src/`) — nucleo puro condiviso: `doc/`
+  (Markdown), `citations/`, `export/`, `comments/model`, `resources/model` e
+  Tabula, `layout/model`, `types/model`, `versions/merge`, `commands/shortcuts`.
+  Per cambiarlo: PR su `logos`, nuovo tag, poi `npm install
+  logos@github:marceloesposito/logos#vX.Y.Z` qui. In locale si puo' provare
+  con `npm link ../logos`.
 - `src/commands/` — registro dei comandi: menu, ribbon e scorciatoie usano gli
   stessi id. Il ribbon e' personalizzabile e salvato nello stato dell'app.
 - `src/state/` — stato dell'app (`<appData>/state.json`) e del vault.

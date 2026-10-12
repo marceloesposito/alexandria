@@ -3,10 +3,10 @@
 import { createDocument, ensureVault, writeJson } from './vault';
 import { abs, docSettingsFile, LINKS_FILE } from './paths';
 import { joinPath, platform } from '../platform';
-import { defaultDocSettings } from '../layout/model';
-import type { ObjectData } from '../types/model';
+import { defaultDocSettings } from 'logos/layout/model';
+import type { ObjectData } from 'logos/types/model';
 import type { Link } from '../resources/storage';
-import { docNodeId } from '../resources/docLinks';
+import { docNodeId } from 'logos/resources/docLinks';
 
 export interface TemplateDoc {
   title: string;

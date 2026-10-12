@@ -5,7 +5,7 @@ import { Modal } from '../components/Modal';
 import { useVersions } from '../versions/store';
 import { useComments, saveNow } from './store';
 import { useCommentUi } from './ui';
-import { layoutBubbles, matchesQuery, makeAnchor, type Comment } from './model';
+import { layoutBubbles, matchesQuery, makeAnchor, type Comment } from 'logos/comments/model';
 import { lineAt, useLines, getLines } from '../editor/lines';
 import { lineRange, posTopInPage, scrollEl, pageEl, dropTarget, revealAnchor } from './geometry';
 import { getEditor } from '../state/editorRef';

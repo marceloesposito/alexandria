@@ -1,7 +1,7 @@
 import { describe, it, expect } from 'vitest';
 import { planAppend, docKeyIn } from './append';
-import type { Resource } from '../resources/model';
-import { builtInTypes } from '../types/model';
+import type { Resource } from 'logos/resources/model';
+import { builtInTypes } from 'logos/types/model';
 
 const res = (id: string, citeKey: string | null, sha?: string, type?: string): Resource => ({
   id,

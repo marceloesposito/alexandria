@@ -8,7 +8,7 @@ import { previewPanel } from '../editor/slots';
 import { Modal } from '../components/Modal';
 import { useWorkspace, ws } from '../state/workspace';
 import { useDocSettings } from '../layout/docSettings';
-import { PAPERS, withPaper, type Paper } from '../layout/model';
+import { PAPERS, withPaper, type Paper } from 'logos/layout/model';
 import { PreviewPanel } from './PreviewPanel';
 import { exportTo, printDocument, type ExportFormat } from './run';
 import { platform } from '../platform';

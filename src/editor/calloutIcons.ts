@@ -3,7 +3,7 @@ import {
   Info, Lightbulb, Star, TriangleAlert, OctagonAlert, BookOpen, Bookmark, Pencil, Quote, Flag, CircleCheck, CircleHelp,
   Target, FlaskConical, GraduationCap, List, Link, Calendar, User, MessageSquare, Eye, Key, Heart, Sparkles,
 } from 'lucide-react';
-import type { CalloutIcon } from '../doc/callouts';
+import type { CalloutIcon } from 'logos/doc/callouts';
 
 export const CALLOUT_ICON_COMPONENTS: Record<CalloutIcon, typeof Info> = {
   info: Info,

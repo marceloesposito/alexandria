@@ -8,7 +8,7 @@ import { getCommand, runCommand, displayShortcut, shortcutOf } from '../commands
 import { useCommandTick } from '../shell/useCommands';
 import { useWorkspace } from '../state/workspace';
 import { t, useLang } from '../i18n';
-import { TEXT_COLORS, HIGHLIGHT_COLORS, type TextColor, type HighlightColor } from '../doc/colors';
+import { TEXT_COLORS, HIGHLIGHT_COLORS, type TextColor, type HighlightColor } from 'logos/doc/colors';
 import { registerWidget } from '../shell/RibbonWidgets';
 
 const GROUPS: string[][] = [

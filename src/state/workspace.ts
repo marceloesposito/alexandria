@@ -7,7 +7,7 @@ async function ensureDir(p: string): Promise<string> {
   return p;
 }
 import { setLang, getLang, t } from '../i18n';
-import { setWritingLang, writingLangOf, type WritingLang } from '../i18n/writing';
+import { setWritingLang, writingLangOf, type WritingLang } from 'logos/i18n/writing';
 import {
   type AppState,
   type Prefs,
@@ -34,7 +34,7 @@ import {
 } from '../vault/vault';
 import { abs, docSettingsFile } from '../vault/paths';
 import { mapPaths, toStored, fromStored } from './portablePaths';
-import type { ShortcutOverrides } from '../commands/shortcuts';
+import type { ShortcutOverrides } from 'logos/commands/shortcuts';
 
 export type DialogId =
   | 'templates'

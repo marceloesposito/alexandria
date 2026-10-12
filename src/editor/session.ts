@@ -2,10 +2,10 @@
 import { create } from 'zustand';
 import type { Editor } from '@tiptap/core';
 import { EditorState } from '@tiptap/pm/state';
-import { parseMarkdown } from '../doc/parse';
-import { serializeMarkdown } from '../doc/serialize';
-import { countDoc, countText, type Counts } from '../doc/counts';
-import type { PMNode } from '../doc/types';
+import { parseMarkdown } from 'logos/doc/parse';
+import { serializeMarkdown } from 'logos/doc/serialize';
+import { countDoc, countText, type Counts } from 'logos/doc/counts';
+import type { PMNode } from 'logos/doc/types';
 import { readDocument, writeDocument } from '../vault/vault';
 import { useWorkspace } from '../state/workspace';
 import { notifyCommandState } from '../commands/registry';

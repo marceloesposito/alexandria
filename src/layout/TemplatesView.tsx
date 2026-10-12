@@ -6,8 +6,8 @@ import { X, FilePlus2, Save, Copy, Trash2, Plus, Paintbrush, LayoutTemplate } fr
 import { useWorkspace } from '../state/workspace';
 import { useDocSettings } from './docSettings';
 import { useTemplates, newDocFromTemplate, saveCurrentAsTemplate, applyTemplateLayout } from './templateStore';
-import { addMaster, removeMaster, renameMaster, BUILTIN_MASTERS, type LayoutSettings, type MasterId, type MasterPage, type PageNumberPos } from './model';
-import { templateFromDoc, type Template } from './templates';
+import { addMaster, removeMaster, renameMaster, BUILTIN_MASTERS, type LayoutSettings, type MasterId, type MasterPage, type PageNumberPos } from 'logos/layout/model';
+import { templateFromDoc, type Template } from 'logos/layout/templates';
 import { promptDialog, confirmDialog } from '../components/confirm';
 import { t, useLang } from '../i18n';
 

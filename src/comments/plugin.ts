@@ -4,7 +4,7 @@ import { Extension } from '@tiptap/core';
 import { Plugin, PluginKey } from '@tiptap/pm/state';
 import { Decoration, DecorationSet } from '@tiptap/pm/view';
 import type { Node as PMNode } from '@tiptap/pm/model';
-import type { FlatText } from './model';
+import type { FlatText } from 'logos/comments/model';
 
 export interface LiveAnchor {
   from: number;

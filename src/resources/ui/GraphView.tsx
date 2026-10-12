@@ -4,8 +4,8 @@ import { useEffect, useMemo, useRef, useState } from 'react';
 import { forceSimulation, forceLink, forceManyBody, forceCenter, forceCollide, type SimulationNodeDatum, type SimulationLinkDatum } from 'd3-force';
 import { useResources } from '../store';
 import { useWorkspace } from '../../state/workspace';
-import { buildGraph, type GNode, type GEdge, type DocText } from '../graphModel';
-import { isVisible } from '../model';
+import { buildGraph, type GNode, type GEdge, type DocText } from 'logos/resources/graphModel';
+import { isVisible } from 'logos/resources/model';
 import { readDocument } from '../../vault/vault';
 import { t } from '../../i18n';
 

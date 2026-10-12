@@ -1,6 +1,6 @@
 // Tipi di riquadro creati nel Compendium aperto: .alexandria/callouts.json (senza file, nessuno).
 import { create } from 'zustand';
-import { type CalloutType, normalizeCalloutTypes } from '../doc/callouts';
+import { type CalloutType, normalizeCalloutTypes } from 'logos/doc/callouts';
 import { readJson, writeJson } from '../vault/vault';
 import { joinPath } from '../platform';
 import { CALLOUTS_FILE } from '../vault/paths';

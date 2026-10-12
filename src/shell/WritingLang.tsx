@@ -3,7 +3,7 @@
 import { Languages } from 'lucide-react';
 import { useWorkspace } from '../state/workspace';
 import { t, useLang } from '../i18n';
-import { WRITING_LANGS, getWritingLang, type WritingLang } from '../i18n/writing';
+import { WRITING_LANGS, getWritingLang, type WritingLang } from 'logos/i18n/writing';
 import { useWritingLang } from '../i18n/useWritingLang';
 import { retargetDocsLanguage } from '../layout/docSettings';
 import { Modal } from '../components/Modal';

@@ -4,7 +4,7 @@ import { Plus, Trash2, RotateCcw } from 'lucide-react';
 import { Modal } from '../components/Modal';
 import { useWorkspace } from '../state/workspace';
 import { useTypes } from './store';
-import { type ObjectType, type PropDef, type PropKind, TYPE_ICONS, PROP_KINDS, builtInTypes, propKey } from './model';
+import { type ObjectType, type PropDef, type PropKind, TYPE_ICONS, PROP_KINDS, builtInTypes, propKey } from 'logos/types/model';
 import { TypeIcon } from './ui';
 import { confirmDialog } from '../components/confirm';
 import { t, getLang, useLang } from '../i18n';

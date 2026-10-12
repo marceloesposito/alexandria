@@ -4,7 +4,7 @@ import { useWorkspace, ws } from '../state/workspace';
 import { useResources } from './store';
 import { importFiles, importUrls, importBibliography, importCslItems, lookupIsbn, createSnippet, importPaths } from './importer';
 import { platform } from '../platform';
-import { classifyClipboard, titleFromText } from './clipboard';
+import { classifyClipboard, titleFromText } from 'logos/resources/clipboard';
 import { t } from '../i18n';
 
 /** Dove arriva la risorsa: la Library se e' quella aperta, altrimenti il Compendium. */

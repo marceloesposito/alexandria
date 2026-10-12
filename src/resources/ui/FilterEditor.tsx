@@ -1,11 +1,11 @@
 // Editor dei filtri di proprieta' (come i filtri dei layer di AutoCAD): condizioni su tag, tipo,
 // anno, autore, titolo, sito, testo, fonte; tutte o almeno una.
 import { useTypes } from '../../types/store';
-import { typesFor, type ObjectType, type PropDef } from '../../types/model';
+import { typesFor, type ObjectType, type PropDef } from 'logos/types/model';
 import { useMemo, useState } from 'react';
 import { Plus, X } from 'lucide-react';
 import { Modal } from '../../components/Modal';
-import { type Condition, type FilterRule, type Layer, type FilterField, type FilterOp, matchRule } from '../model';
+import { type Condition, type FilterRule, type Layer, type FilterField, type FilterOp, matchRule } from 'logos/resources/model';
 import { useResources } from '../store';
 import { t } from '../../i18n';
 

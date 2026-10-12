@@ -2,7 +2,7 @@
 import { TextSelection } from '@tiptap/pm/state';
 import { getEditor } from '../state/editorRef';
 import { flatText } from './plugin';
-import { indexOfPos, wordAt } from './model';
+import { indexOfPos, wordAt } from 'logos/comments/model';
 import type { VisualLine } from '../editor/lines';
 
 export function pageEl(): HTMLElement | null {

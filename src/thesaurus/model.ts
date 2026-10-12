@@ -1,6 +1,6 @@
 // Thesaurus: interpretazione dei blocchi MyThes (i dati di LibreOffice), parola da cercare e
 // sostituzione che rispetta le maiuscole. Funzioni pure; i file li legge il Rust (src-tauri/src/thesaurus.rs).
-import type { WritingLang } from '../i18n/writing';
+import type { WritingLang } from 'logos/i18n/writing';
 
 export interface Meaning {
   /** parte del discorso come la scrive il file: "s.m.", "agg.", "noun", "verb"... */

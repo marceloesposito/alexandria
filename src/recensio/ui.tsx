@@ -4,7 +4,7 @@ import { Save, Send, X, MessageSquarePlus, ArrowDownToLine, ScrollText } from 'l
 import { Modal } from '../components/Modal';
 import { useWorkspace } from '../state/workspace';
 import { useResources } from '../resources/store';
-import { neighbours } from '../codex/model';
+import { neighbours } from 'logos/codex/model';
 import { useCodexStore } from '../codex/store';
 import { runCommand } from '../commands/registry';
 import { WindowControls, customTitleBar } from '../shell/WindowControls';

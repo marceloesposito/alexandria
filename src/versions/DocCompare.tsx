@@ -2,7 +2,7 @@
 // a sinistra quella scelta nella storia, a destra quella attuale, con i paragrafi allineati.
 import { diffWordsWithSpace } from 'diff';
 import { Image as ImageIcon, Link2 } from 'lucide-react';
-import { docBlocks, docDiff, type DocBlock, type DiffRow } from './docDiff';
+import { docBlocks, docDiff, type DocBlock, type DiffRow } from 'logos/versions/docDiff';
 import { t } from '../i18n';
 
 function Block({ b, other, side }: { b: DocBlock; other?: DocBlock; side?: 'before' | 'after' }) {
