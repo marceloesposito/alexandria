@@ -4,7 +4,7 @@ import { useEffect, useMemo, useRef, useState, type ComponentType, type ReactNod
 import { createPortal } from 'react-dom';
 import { FileText, ChevronRight, type LucideIcon } from 'lucide-react';
 import { useWorkspace } from '../state/workspace';
-import { allCommands, runCommand, displayShortcut } from '../commands/registry';
+import { allCommands, runCommand, displayShortcut, shortcutOf } from '../commands/registry';
 import { fuzzyFilter } from '../lib/fuzzy';
 import { flushSave } from '../editor/session';
 import { getEditor } from '../state/editorRef';
@@ -59,7 +59,7 @@ function commandItems(): SwitcherItem[] {
       label: t(c.label),
       sub: t(`category.${c.category}`),
       icon: c.icon,
-      hint: c.shortcut ? displayShortcut(c.shortcut) : undefined,
+      hint: shortcutOf(c) ? displayShortcut(shortcutOf(c)!) : undefined,
       run: () => void runCommand(c.id),
     }));
 }

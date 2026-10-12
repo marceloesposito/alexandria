@@ -29,6 +29,7 @@ import { DropHandler } from './drop';
 import { SearchHighlight } from '../search';
 import { CommentAnchors } from '../../comments/plugin';
 import { MarkdownShortcuts } from './inputRules';
+import { CustomShortcuts } from './customShortcuts';
 import { Insertion, Deletion, TrackChanges } from './track';
 import { FocusBlock } from './focusBlock';
 import { BlockReorder } from './blockReorder';
@@ -89,6 +90,7 @@ export function buildExtensions() {
     SearchHighlight,
     CommentAnchors,
     MarkdownShortcuts,
+    CustomShortcuts,
     Insertion,
     Deletion,
     TrackChanges,

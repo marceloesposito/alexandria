@@ -113,6 +113,15 @@ Aggiornato: 7 ottobre 2026 (M11).
   verso il testo e, in basso, accanto al blocco sbagliato). La distanza dal testo e' un padding
   trasparente della maniglia (12 px, 52 px con i numeri di riga, che restano visibili): il mouse lo
   attraversa senza che la maniglia sparisca.
+- **Scorciatoie personalizzabili** (Preferenze > Scorciatoie, `src/shell/dialogs/ShortcutsPrefs.tsx`):
+  ogni comando del registro, con ricerca per nome o tasto; Cambia cattura il tasto (Esc annulla, Backspace
+  toglie), rifiuta quelle senza modificatore (salvo i tasti F) e quelle del sistema, e in caso di
+  conflitto propone di sostituire. Si salvano solo le differenze, in forma portabile ("Mod"), in
+  `state.json` (`app.shortcuts`; modello puro in `src/commands/shortcuts.ts`). Menu, ribbon, barra
+  flottante, Ctrl+O e Aiuto > Scorciatoie (con "Personalizza...") mostrano quelle in uso (`shortcutOf`).
+  Nell'editor `extensions/customShortcuts.ts` esegue le nuove e ferma le predefinite tolte, che la keymap
+  di TipTap altrimenti eseguirebbe. Lettere e cifre si leggono dal tasto fisico quando Alt o Shift le
+  trasformano (prima Mod+Shift+9 non scattava: Shift+9 da' "(").
 - **Vista pagina senza oscillazioni** (`src/editor/pagination.ts`): gli spazi fra i fogli si sommano con
   l'altezza vera (`offsetHeight` arrotondava di mezzo pixel) e si ridisegna solo se un salto cambia di
   almeno un pixel (`samePagination`). Prima, in certe pergamene, misura e ridisegno si inseguivano

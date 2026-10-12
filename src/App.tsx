@@ -14,12 +14,17 @@ import { AskHost } from './components/confirm';
 import { EditorView } from './editor/EditorView';
 import { useWorkspace } from './state/workspace';
 import { useZen } from './state/zen';
-import { findByShortcut, runCommand } from './commands/registry';
+import { findByShortcut, runCommand, setShortcutGuard, shortcutAllowed } from './commands/registry';
 import { viewComponents, globalComponents } from './shell/views';
 import { useLang, t } from './i18n';
 import { useReview, openRecensioFile } from './recensio/session';
 import { ReviewBar } from './recensio/ui';
 import { platform } from './platform';
+
+// copia per revisione: niente scorciatoie per i comandi che cambiano il Compendium (anche nell'editor)
+setShortcutGuard(
+  (id) => !(useReview.getState().session && (/^(file|vc|res|insert|doc|cite|layout)\./.test(id) || ['view.versions', 'view.library'].includes(id))),
+);
 
 export default function App() {
   useLang();
@@ -55,8 +60,7 @@ export default function App() {
       const inField = !!target && /^(INPUT|TEXTAREA|SELECT)$/.test(target.tagName);
       const cmd = findByShortcut(e, inEditor);
       if (!cmd) return;
-      // copia per revisione: niente comandi che cambiano il Compendium
-      if (useReview.getState().session && (/^(file|vc|res|insert|doc|cite|layout)\./.test(cmd.id) || ['view.versions', 'view.library'].includes(cmd.id))) return;
+      if (!shortcutAllowed(cmd.id)) return;
       // nei campi di testo solo le scorciatoie con modificatori
       if (inField && !(e.ctrlKey || e.metaKey) && !/^F\d+$/.test(e.key)) return;
       if (inField && ['edit.undo', 'edit.redo', 'edit.selectAll', 'edit.cut', 'edit.copy', 'edit.paste'].includes(cmd.id)) return;
