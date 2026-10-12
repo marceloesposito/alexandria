@@ -3,6 +3,7 @@
 import { Extension } from '@tiptap/core';
 import { Plugin, PluginKey, NodeSelection } from '@tiptap/pm/state';
 import { Decoration, DecorationSet, type EditorView } from '@tiptap/pm/view';
+import { cssZoomOf } from '../dragHandlePosition';
 
 export interface Band {
   top: number;
@@ -71,18 +72,29 @@ function show(view: EditorView, look: Look | null) {
 function start(view: EditorView): Drag | null {
   const sel = view.state.selection;
   if (!view.dragging || sel.empty || sel.$from.depth !== 0 || sel.$to.depth !== 0) return null;
-  const els = Array.from(view.dom.children).filter((c): c is HTMLElement => c instanceof HTMLElement);
-  if (els.length !== view.state.doc.childCount) return null;
+  // un elemento per blocco dal nodo, non dai figli del DOM: fra i blocchi ci sono anche i widget
+  // della vista pagina (`.page-gap`)
+  const els: HTMLElement[] = [];
+  let pos = 0;
+  for (let i = 0; i < view.state.doc.childCount; i++) {
+    const el = view.nodeDOM(pos);
+    if (!(el instanceof HTMLElement)) return null;
+    els.push(el);
+    pos += view.state.doc.child(i).nodeSize;
+  }
   const from = sel.$from.index(0);
   const count = sel.$to.index(0) - from;
   if (count < 1) return null;
+  // bande in pixel dello schermo, come `clientY`
   const bands = els.map((el) => {
     const r = el.getBoundingClientRect();
     return { top: r.top, bottom: r.bottom };
   });
-  // altezza del vuoto: dal primo blocco al successivo all'ultimo (margini compresi)
+  // altezza del vuoto: dal primo blocco al successivo all'ultimo (margini compresi). Va in un
+  // `translateY` dentro la pagina, che ha lo zoom: si riporta in pixel della pagina
   const last = from + count - 1;
-  const gap = last + 1 < bands.length ? bands[last + 1].top - bands[from].top : bands[last].bottom - bands[from].top;
+  const gapOnScreen = last + 1 < bands.length ? bands[last + 1].top - bands[from].top : bands[last].bottom - bands[from].top;
+  const gap = gapOnScreen / cssZoomOf(view.dom);
   const scroller = view.dom.closest<HTMLElement>('.editor-scroll');
   return { from, count, bands, gap, to: from, scroller, scroll0: scroller?.scrollTop ?? 0 };
 }

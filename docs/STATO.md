@@ -97,7 +97,13 @@ Aggiornato: 7 ottobre 2026 (M11).
 - **Spostamento dei blocchi come in Notion** (`src/editor/extensions/blockReorder.ts`): mentre si trascina
   uno o piu' blocchi dalla maniglia, gli altri scorrono per aprire il vuoto dove andranno; al rilascio lo
   spostamento lo fa il plugin, nel posto esatto del vuoto. Il disegno passa da decorazioni (ProseMirror
-  ridisegna i blocchi toccati direttamente nel DOM).
+  ridisegna i blocchi toccati direttamente nel DOM). I blocchi si leggono con `view.nodeDOM` (nella vista
+  pagina fra i figli dell'editor ci sono i widget `.page-gap`) e lo scorrimento e' diviso per lo zoom.
+- **Maniglia dei blocchi** (`src/editor/dragHandlePosition.ts`): floating-ui misura in pixel dello schermo,
+  la pagina ha lo `zoom` CSS; la posizione si riporta in pixel della pagina (prima la maniglia scivolava
+  verso il testo e, in basso, accanto al blocco sbagliato). La distanza dal testo e' un padding
+  trasparente della maniglia (12 px, 52 px con i numeri di riga, che restano visibili): il mouse lo
+  attraversa senza che la maniglia sparisca.
 - **Snippet di codice**: nuovo tipo di risorsa (file `snippet.<ext>`), creato da Aggiungi risorse,
   modificabile nel visualizzatore, inseribile nel testo dal menu / o trascinandolo.
 - **Rimozione delle risorse**: ribbon, menu Risorse, clic destro, Canc nella tabella, visualizzatore.
