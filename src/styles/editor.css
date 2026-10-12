@@ -1594,6 +1594,12 @@
 }
 
 /* ---------------------------------------------------------------- vista pagina: fogli separati */
+/* niente margine: `.doc-body > * + *` lo darebbe anche allo spazio fra i fogli, che la misura
+   dell'impaginazione non conterebbe */
+.doc-body > .page-gap {
+  margin: 0;
+}
+
 .page-gap {
   position: relative;
   pointer-events: none;

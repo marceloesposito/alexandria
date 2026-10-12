@@ -61,6 +61,17 @@ export function samePagination(a: Pagination, b: Pagination, tol = 1): boolean {
   );
 }
 
+/**
+ * Spazio in piu' che un salto crea fra due blocchi: senza il salto il margine inferiore del primo
+ * (`below`) e quello superiore del secondo (`above`) si fondono (il piu' grande dei positivi piu' il
+ * piu' negativo dei negativi), con il salto in mezzo si sommano. Senza questa correzione la stessa
+ * pergamena arriva a salti diversi a seconda di dove cadevano prima (per esempio dopo un annulla).
+ */
+export function marginOverlap(below: number, above: number): number {
+  const collapsed = Math.max(below, above, 0) + Math.min(below, above, 0);
+  return below + above - collapsed;
+}
+
 export const MM = 96 / 25.4;
 
 // ---------------------------------------------------------------- plugin dell'editor
@@ -153,16 +164,25 @@ function measure(view: EditorView) {
   const scale = pr.width / page.offsetWidth || 1;
   const origin = pr.top + g.padTop * scale;
   const boxes: BlockBox[] = [];
+  // spazio aggiunto dai salti gia' disegnati, da togliere per avere le posizioni del testo continuo
   let gaps = 0;
+  let prevBottom: number | null = null;
+  let gap: DOMRect | null = null;
   for (const el of Array.from(view.dom.children) as HTMLElement[]) {
     if (el.classList.contains('page-gap')) {
-      // altezza vera, con i decimali: `offsetHeight` arrotonda e sposta i blocchi di mezzo pixel
-      if (!el.classList.contains('is-end')) gaps += el.getBoundingClientRect().height / scale;
+      if (!el.classList.contains('is-end')) gap = el.getBoundingClientRect();
       continue;
     }
     if (el.classList.contains('ProseMirror-widget') || el.classList.contains('ProseMirror-gapcursor')) continue;
     const r = el.getBoundingClientRect();
+    if (gap) {
+      // altezza vera, con i decimali (`offsetHeight` arrotonda), piu' i margini che il salto separa
+      gaps += gap.height / scale;
+      if (prevBottom !== null) gaps += marginOverlap((gap.top - prevBottom) / scale, (r.top - gap.bottom) / scale);
+      gap = null;
+    }
     boxes.push({ top: (r.top - origin) / scale - gaps, bottom: (r.bottom - origin) / scale - gaps });
+    prevBottom = r.bottom;
   }
   // i blocchi misurati devono corrispondere ai nodi del documento
   if (boxes.length !== view.state.doc.childCount) return;
