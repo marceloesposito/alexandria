@@ -1,6 +1,6 @@
 // Documento -> pagina HTML autonoma (stili inclusi, immagini e formule incorporate, note in fondo).
 // Si scrive in un file: tutto il testo dell'utente passa da escapeHtml.
-import { calloutHeading, CALLOUT_HEX } from '../doc/callouts';
+import { resolveCallout, calloutHex } from '../doc/callouts';
 import { WEB_FONT, styleFont } from '../layout/model';
 import { docTexts } from '../i18n/writing';
 import { markColor, TEXT_HEX, HIGHLIGHT_HEX, type TextColor, type HighlightColor } from '../doc/colors';
@@ -131,8 +131,8 @@ export function toHtml(doc: PMNode, ctx: ExportContext): string {
       case 'blockquote':
         return `<blockquote>${blocks(b.content)}</blockquote>`;
       case 'callout': {
-        const { kind, heading } = calloutHeading(b.attrs?.kind, b.attrs?.title, docTexts(ctx.lang).callouts);
-        const c = CALLOUT_HEX[kind];
+        const { kind, heading, color } = resolveCallout(b.attrs, ctx.calloutTypes ?? [], docTexts(ctx.lang).callouts);
+        const c = calloutHex(color);
         return `<aside class="callout callout-${kind}" style="background: ${c.fill}; border: 1px solid ${c.stroke}; border-radius: 4px; padding: .6em 1em; margin: 1em 0;"><p class="callout-title" style="color: ${c.stroke};">${escapeHtml(heading)}</p>${blocks(b.content)}</aside>`;
       }
       case 'bulletList':

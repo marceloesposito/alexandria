@@ -78,9 +78,9 @@ describe('blocchi evidenziati e didascalie', () => {
     expect(JSON.stringify(c.content)).toContain('Una riga sola.');
   });
 
-  it('una citazione normale e un tipo sconosciuto restano citazioni', () => {
+  it('una citazione normale resta citazione; un tipo sconosciuto e\' un riquadro (tipi propri, Obsidian)', () => {
     expect(parseMarkdown('> Citazione.\n').content![0].type).toBe('blockquote');
-    expect(parseMarkdown('> [!FOO] x\n').content![0].type).toBe('blockquote');
+    expect(parseMarkdown('> [!FOO] x\n').content![0]).toMatchObject({ type: 'callout', attrs: { kind: 'foo', title: 'x' } });
   });
 
   it('didascalia: stile del paragrafo', () => {

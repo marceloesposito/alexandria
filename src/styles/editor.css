@@ -1485,21 +1485,7 @@
   border-radius: 6px;
 }
 
-.nv-callout.is-tip {
-  --callout: var(--series-3);
-}
-
-.nv-callout.is-important {
-  --callout: var(--series-4);
-}
-
-.nv-callout.is-warning {
-  --callout: var(--series-5);
-}
-
-.nv-callout.is-caution {
-  --callout: var(--series-7);
-}
+/* il colore del riquadro arriva dal nodo (--callout: var(--series-N), dal tipo o scelto a mano) */
 
 .nv-callout.is-selected {
   outline: 2px solid var(--accent);
@@ -1539,20 +1525,130 @@
   opacity: 1;
 }
 
-.nv-callout__kind {
-  padding: 0 2px;
+.nv-callout__style {
+  display: inline-flex;
+  align-items: center;
+  gap: 4px;
+  padding: 1px 6px;
   border: 0;
+  border-radius: var(--radius-small);
   background: transparent;
   color: var(--muted);
-  font-size: 11px;
+  font: inherit;
+  font-weight: 500;
+  letter-spacing: 0;
+  text-transform: none;
+  cursor: pointer;
   opacity: 0;
   transition: opacity 0.15s;
 }
 
-.nv-callout:hover .nv-callout__kind,
-.nv-callout.is-selected .nv-callout__kind,
-.nv-callout__kind:focus {
+.nv-callout__style:hover,
+.nv-callout__style.is-open {
+  background: var(--chrome-2);
+  color: var(--ink);
+}
+
+.nv-callout:hover .nv-callout__style,
+.nv-callout.is-selected .nv-callout__style,
+.nv-callout__style.is-open,
+.nv-callout__style:focus-visible {
   opacity: 1;
+}
+
+/* pannello dell'aspetto: tipi, colori, icone, nuovo tipo */
+.callout-pick {
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+  width: 300px;
+}
+
+.callout-pick__label {
+  margin-top: 4px;
+  color: var(--muted);
+  font-size: var(--fs-ui-small);
+  font-weight: 600;
+}
+
+.callout-pick__types {
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+}
+
+.callout-pick__type {
+  display: flex;
+  align-items: center;
+  border-radius: var(--radius-small);
+}
+
+.callout-pick__type.is-on,
+.callout-pick__type:hover {
+  background: color-mix(in srgb, var(--callout) 10%, var(--paper));
+}
+
+.callout-pick__type-main {
+  flex: 1;
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  padding: 4px 6px;
+  border: 0;
+  background: transparent;
+  color: var(--ink);
+  font: inherit;
+  text-align: left;
+  cursor: pointer;
+}
+
+.callout-pick__type-main svg {
+  color: var(--callout);
+}
+
+.callout-pick__check {
+  margin-left: auto;
+}
+
+.callout-pick__swatches {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 6px;
+}
+
+.callout-pick__swatch {
+  width: 20px;
+  height: 20px;
+  padding: 0;
+  border: 2px solid var(--paper);
+  border-radius: 50%;
+  box-shadow: 0 0 0 1px var(--line);
+  cursor: pointer;
+}
+
+.callout-pick__swatch.is-on {
+  box-shadow: 0 0 0 2px var(--ink);
+}
+
+.callout-pick__icons {
+  display: grid;
+  grid-template-columns: repeat(8, 1fr);
+  gap: 2px;
+}
+
+.callout-pick__reset {
+  align-self: flex-start;
+}
+
+.callout-pick__new {
+  display: flex;
+  gap: 6px;
+}
+
+.callout-pick__new .input {
+  flex: 1;
+  min-width: 0;
 }
 
 .nv-callout__body > :first-child {

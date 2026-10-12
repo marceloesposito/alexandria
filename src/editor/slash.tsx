@@ -26,15 +26,11 @@ import {
   Paperclip,
   SquareCode,
   Captions,
-  Info,
-  Lightbulb,
-  Star,
-  TriangleAlert,
-  OctagonAlert,
 } from 'lucide-react';
-import { CALLOUT_KINDS, type CalloutKind } from '../doc/callouts';
+import { CALLOUT_OFFERED, CALLOUT_BUILTIN } from '../doc/callouts';
+import { useCalloutTypes } from '../callouts/store';
+import { CALLOUT_ICON_COMPONENTS } from './calloutIcons';
 
-const CALLOUT_SLASH_ICONS: Record<CalloutKind, typeof Info> = { note: Info, tip: Lightbulb, important: Star, warning: TriangleAlert, caution: OctagonAlert };
 import { t } from '../i18n';
 import { runCommand } from '../commands/registry';
 
@@ -58,12 +54,15 @@ function items(): SlashItem[] {
     { id: 'task', label: t('slash.task'), keywords: 'todo checklist attivita', icon: ListChecks, run: (e, r) => del(e, r).toggleTaskList().run() },
     { id: 'quote', label: t('slash.quote'), keywords: 'blockquote citazione', icon: Quote, run: (e, r) => del(e, r).toggleBlockquote().run() },
     // blocchi evidenziati: uno per tipo, con la sua icona
-    ...CALLOUT_KINDS.map((k) => ({
-      id: `callout-${k}`,
-      label: t('slash.callout', { kind: t(`callout.${k}`) }),
-      keywords: `callout alert avviso riquadro evidenziato highlight box ${k} ${t(`callout.${k}`)}`,
-      icon: CALLOUT_SLASH_ICONS[k],
-      run: (e: Editor, r: Range) => del(e, r).wrapIn('callout', { kind: k, title: '' }).run(),
+    ...[
+      ...CALLOUT_OFFERED.map((k) => ({ id: k as string, label: t(`callout.${k}`), icon: CALLOUT_BUILTIN[k].icon })),
+      ...useCalloutTypes.getState().types,
+    ].map((k) => ({
+      id: `callout-${k.id}`,
+      label: t('slash.callout', { kind: k.label }),
+      keywords: `callout alert avviso riquadro evidenziato highlight box ${k.id} ${k.label}`,
+      icon: CALLOUT_ICON_COMPONENTS[k.icon],
+      run: (e: Editor, r: Range) => del(e, r).wrapIn('callout', { kind: k.id, title: '' }).run(),
     })),
     { id: 'caption', label: t('slash.caption'), keywords: 'caption didascalia legenda', icon: Captions, run: (e, r) => del(e, r).setParagraph().updateAttributes('paragraph', { textStyle: 'caption' }).run() },
     { id: 'code', label: t('slash.code'), keywords: 'code codice', icon: Code2, run: (e, r) => del(e, r).toggleCodeBlock().run() },

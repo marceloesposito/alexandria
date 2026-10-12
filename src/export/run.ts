@@ -23,6 +23,7 @@ import { useComments } from '../comments/store';
 import { injectCommentMarks, type ExportComment } from './comments';
 import { getLang, t } from '../i18n';
 import { useTypes } from '../types/store';
+import { useCalloutTypes } from '../callouts/store';
 import type { DocSettings } from '../layout/model';
 import { headerRows, typeById } from '../types/model';
 import { withToc } from './toc';
@@ -183,6 +184,7 @@ export async function prepareDoc(doc: PMNode, settings: DocSettings, title: stri
     image: (src) => images.get(src) ?? null,
     math: (latex, display) => math.get(mathKey(latex, display)) ?? null,
     header: exportHeader(settings),
+    calloutTypes: useCalloutTypes.getState().types,
   };
   return { doc, ctx, images: [...images.values()], math: [...math.values()] };
 }

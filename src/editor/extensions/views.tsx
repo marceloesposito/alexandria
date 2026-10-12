@@ -16,8 +16,11 @@ import { masterLabel } from '../../layout/TemplatesView';
 import { HoverCard, useHoverCard } from '../../components/HoverCard';
 import { DocPreview } from '../../shell/DocPreview';
 import { citationPreview } from '../slots';
-import { Info, Lightbulb, Star, TriangleAlert, OctagonAlert } from 'lucide-react';
-import { CALLOUT_KINDS, isCalloutKind, type CalloutKind } from '../../doc/callouts';
+import { Palette } from 'lucide-react';
+import { CALLOUT_KINDS, resolveCallout, type CalloutKind } from '../../doc/callouts';
+import { useCalloutTypes } from '../../callouts/store';
+import { CALLOUT_ICON_COMPONENTS } from '../calloutIcons';
+import { CalloutPicker } from '../CalloutPicker';
 
 function Katex({ latex, display }: { latex: string; display: boolean }) {
   const ref = useRef<HTMLSpanElement>(null);
@@ -351,20 +354,28 @@ export function BibliographyView(props: NodeViewProps) {
   );
 }
 
-const CALLOUT_ICONS: Record<CalloutKind, typeof Info> = { note: Info, tip: Lightbulb, important: Star, warning: TriangleAlert, caution: OctagonAlert };
+/** Nomi dei tipi predefiniti nella lingua dell'interfaccia (l'export usa quella del documento). */
+const calloutLabels = () => Object.fromEntries(CALLOUT_KINDS.map((k) => [k, t(`callout.${k}`)])) as Record<CalloutKind, string>;
 
-/** Blocco evidenziato: icona e intestazione in stile didascalia (titolo libero, tipo a scelta), poi il contenuto. */
+/** Blocco evidenziato: icona e intestazione in stile didascalia (titolo libero, aspetto a scelta), poi il contenuto. */
 export function CalloutView(props: NodeViewProps) {
-  const kind: CalloutKind = isCalloutKind(props.node.attrs.kind) ? props.node.attrs.kind : 'note';
-  const Icon = CALLOUT_ICONS[kind];
+  const types = useCalloutTypes((s) => s.types);
+  const look = resolveCallout(props.node.attrs, types, calloutLabels());
+  const Icon = CALLOUT_ICON_COMPONENTS[look.icon];
+  const styleBtn = useRef<HTMLButtonElement>(null);
+  const [picking, setPicking] = useState(false);
   return (
-    <NodeViewWrapper className={`nv-callout is-${kind} ${props.selected ? 'is-selected' : ''}`} data-kind={kind}>
+    <NodeViewWrapper
+      className={`nv-callout ${props.selected ? 'is-selected' : ''}`}
+      data-kind={look.kind}
+      style={{ '--callout': `var(--${look.color})` } as React.CSSProperties}
+    >
       <div className="nv-callout__head" contentEditable={false}>
         <Icon size={14} strokeWidth={2} />
         <input
           className="nv-callout__title"
           value={props.node.attrs.title ?? ''}
-          placeholder={t(`callout.${kind}`)}
+          placeholder={look.label}
           aria-label={t('callout.title')}
           onChange={(e) => props.updateAttributes({ title: e.target.value })}
           onKeyDown={(e) => {
@@ -377,13 +388,24 @@ export function CalloutView(props: NodeViewProps) {
             }
           }}
         />
-        <select className="nv-callout__kind" value={kind} title={t('callout.kind')} onChange={(e) => props.updateAttributes({ kind: e.target.value })}>
-          {CALLOUT_KINDS.map((k) => (
-            <option key={k} value={k}>
-              {t(`callout.${k}`)}
-            </option>
-          ))}
-        </select>
+        <button
+          ref={styleBtn}
+          className={`nv-callout__style ${picking ? 'is-open' : ''}`}
+          title={t('callout.style')}
+          aria-label={t('callout.style')}
+          onMouseDown={(e) => e.preventDefault()}
+          onClick={() => setPicking((v) => !v)}
+        >
+          <Palette size={13} />
+          <span>{look.label}</span>
+        </button>
+        <Popover anchor={styleBtn.current} open={picking} onClose={() => setPicking(false)}>
+          <CalloutPicker
+            look={look}
+            attrs={{ kind: look.kind, color: String(props.node.attrs.color ?? ''), icon: String(props.node.attrs.icon ?? '') }}
+            onChange={(a) => props.updateAttributes(a)}
+          />
+        </Popover>
       </div>
       <NodeViewContent className="nv-callout__body" />
     </NodeViewWrapper>

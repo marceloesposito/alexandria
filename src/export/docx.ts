@@ -1,7 +1,7 @@
 // Documento -> DOCX (Word) con la libreria docx: stili, note, immagini, tabelle, elenchi,
 // formato pagina e margini dalle impostazioni, intestazione e numeri di pagina.
 import { markColor, TEXT_HEX, HIGHLIGHT_WORD, type TextColor, type HighlightColor } from '../doc/colors';
-import { calloutHeading, CALLOUT_HEX } from '../doc/callouts';
+import { resolveCallout, calloutHex } from '../doc/callouts';
 import { WORD_FONT, styleFont } from '../layout/model';
 import {
   CommentRangeStart,
@@ -257,8 +257,8 @@ export async function toDocx(doc: PMNode, ctx: ExportContext): Promise<Uint8Arra
           break;
         case 'callout': {
           // riquadro evidenziato: una tabella a una cella, fondo chiaro e bordino nel colore del tipo
-          const { kind, heading } = calloutHeading(b.attrs?.kind, b.attrs?.title, docTexts(ctx.lang).callouts);
-          const c = CALLOUT_HEX[kind];
+          const { heading, color } = resolveCallout(b.attrs, ctx.calloutTypes ?? [], docTexts(ctx.lang).callouts);
+          const c = calloutHex(color);
           const line = { style: BorderStyle.SINGLE, size: 4, color: c.stroke.slice(1) };
           out.push(
             new Table({

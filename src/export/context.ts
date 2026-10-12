@@ -3,6 +3,7 @@ import type { DocSettings } from '../layout/model';
 import type { CitationItem, PMNode } from '../doc/types';
 import type { ExportComment } from './comments';
 import type { WritingLang } from '../i18n/writing';
+import type { CalloutType } from '../doc/callouts';
 
 export interface CiteOut {
   /** testo nel corpo (stili autore-data e numerici) oppure testo della nota (stili a note) */
@@ -35,6 +36,8 @@ export interface ExportContext {
   math(latex: string, display: boolean): MathAsset | null;
   /** header con tipo e proprietà, se l'autore l'ha incluso nell'export */
   header?: ExportHeader;
+  /** tipi di riquadro creati nel Compendium (nome, colore, icona) */
+  calloutTypes?: CalloutType[];
   /** Marginalia da portare come commenti di Word (solo export .docx della pergamena aperta) */
   comments?: ExportComment[];
 }
