@@ -1,5 +1,5 @@
 import { describe, it, expect } from 'vitest';
-import { paginate, samePagination } from './pagination';
+import { paginate, samePagination, marginOverlap } from './pagination';
 
 const blocks = (...h: number[]) => {
   let y = 0;
@@ -42,5 +42,20 @@ describe('samePagination', () => {
     expect(samePagination(p, paginate(blocks(400, 400, 500), 1000))).toBe(false);
     expect(samePagination(p, { ...p, endRest: p.endRest + 1 })).toBe(false);
     expect(samePagination(p, paginate(blocks(400, 700, 400), 1000))).toBe(false);
+  });
+});
+
+describe('marginOverlap', () => {
+  it('margini positivi: il salto aggiunge il piu\' piccolo', () => {
+    expect(marginOverlap(6, 18)).toBe(6);
+    expect(marginOverlap(18, 6)).toBe(6);
+  });
+  it('un margine nullo non aggiunge niente', () => {
+    expect(marginOverlap(0, 18)).toBe(0);
+    expect(marginOverlap(0, 0)).toBe(0);
+  });
+  it('margini negativi', () => {
+    expect(marginOverlap(10, -4)).toBe(0);
+    expect(marginOverlap(-4, -6)).toBe(-4);
   });
 });
