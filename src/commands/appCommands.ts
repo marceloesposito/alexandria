@@ -45,7 +45,7 @@ import {
   PanelBottom,
 } from 'lucide-react';
 import { useDocSettings } from '../layout/docSettings';
-import { registerCommands, notifyCommandState } from './registry';
+import { registerCommands, notifyCommandState, setShortcutOverrides } from './registry';
 import { useZen } from '../state/zen';
 import { useWorkspace, ws } from '../state/workspace';
 import { flushSave, toggleSource, useDoc } from '../editor/session';
@@ -69,6 +69,11 @@ async function chooseVault(create: boolean) {
 }
 
 export function registerAppCommands() {
+  // scorciatoie cambiate dall'utente: dallo stato dell'app al registro (menu, ribbon, tasti)
+  setShortcutOverrides(useWorkspace.getState().app.shortcuts);
+  useWorkspace.subscribe((s, p) => {
+    if (s.app.shortcuts !== p.app.shortcuts) setShortcutOverrides(s.app.shortcuts);
+  });
   registerCommands([
     // ----- file
     {

@@ -4,7 +4,7 @@
 // Tasto destro: personalizza, icone piccole, comprimi, ripristina.
 import { useMemo, useRef, useState } from 'react';
 import { ChevronUp, ChevronDown, GripHorizontal, Trash2 } from 'lucide-react';
-import { getCommand, runCommand, displayShortcut, commandIds, type Command } from '../commands/registry';
+import { getCommand, runCommand, displayShortcut, shortcutOf, commandIds, type Command } from '../commands/registry';
 import { DEFAULT_RIBBON } from '../commands/defaults';
 import { reconcile, tabsForView, placeGroup, removeGroup, setGroupCompact, type RibbonConfig, type RibbonGroup } from '../commands/ribbonModel';
 import { detachGroup } from '../commands/floatModel';
@@ -33,7 +33,8 @@ export function CommandButton({ cmd, size, onRun }: { cmd: Command; size: Ribbon
   const enabled = cmd.isEnabled ? cmd.isEnabled() : true;
   const on = cmd.isActive?.() ?? false;
   const Icon = cmd.icon;
-  const tip = t(cmd.label) + (cmd.shortcut ? ` (${displayShortcut(cmd.shortcut)})` : '');
+  const sc = shortcutOf(cmd);
+  const tip = t(cmd.label) + (sc ? ` (${displayShortcut(sc)})` : '');
   return (
     <button
       className={`ribbon__btn ${on ? 'is-on' : ''}`}

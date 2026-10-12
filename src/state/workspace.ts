@@ -34,6 +34,7 @@ import {
 } from '../vault/vault';
 import { abs, docSettingsFile } from '../vault/paths';
 import { mapPaths, toStored, fromStored } from './portablePaths';
+import type { ShortcutOverrides } from '../commands/shortcuts';
 
 export type DialogId =
   | 'templates'
@@ -92,6 +93,7 @@ interface WorkspaceState {
   setView(v: View): void;
   setPrefs(p: Partial<Prefs>): void;
   setRibbon(r: RibbonConfig | null): void;
+  setShortcuts(s: ShortcutOverrides): void;
   /** barra e pannelli flottanti insieme (staccare o riagganciare un gruppo) */
   setRibbonAndFloating(r: RibbonConfig | null, floating: FloatingPanel[]): void;
   /** applica un workspace: Beginner, Studio, Pro o uno salvato */
@@ -215,6 +217,12 @@ export const useWorkspace = create<WorkspaceState>((set, get) => ({
 
   setRibbon(r) {
     const app = { ...get().app, ribbon: r };
+    set({ app });
+    persist(app);
+  },
+
+  setShortcuts(s) {
+    const app = { ...get().app, shortcuts: s };
     set({ app });
     persist(app);
   },

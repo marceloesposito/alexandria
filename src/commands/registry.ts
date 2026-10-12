@@ -1,6 +1,7 @@
 // Registro dei comandi: menu, ribbon, menu contestuali e scorciatoie usano gli stessi id.
 import type { ComponentType } from 'react';
 import type { View } from '../state/prefs';
+import { effectiveShortcut, eventToShortcut, normalizeFor, type ShortcutOverrides } from './shortcuts';
 
 export interface IconProps {
   size?: number;
@@ -85,48 +86,62 @@ export function commandStateTick(): number {
   return stateTick;
 }
 
-// --- scorciatoie
+// --- scorciatoie (predefinite nei comandi, modificabili dall'utente: `shortcuts.ts`)
 export const isMac = typeof navigator !== 'undefined' && /Mac|iPhone|iPad/.test(navigator.platform);
 
-export function normalizeShortcut(s: string): string {
-  return s
-    .split('+')
-    .map((p) => p.trim())
-    .map((p) => (p === 'Mod' ? (isMac ? 'Meta' : 'Ctrl') : p))
-    .map((p) => (p.length === 1 ? p.toUpperCase() : p))
-    .sort((a, b) => order(a) - order(b))
-    .join('+');
+let overrides: ShortcutOverrides = {};
+
+/** Modifiche dell'utente alle scorciatoie (dallo stato dell'app). */
+export function setShortcutOverrides(o: ShortcutOverrides) {
+  overrides = o;
+  version++;
+  listeners.forEach((l) => l());
 }
 
-function order(p: string): number {
-  return ['Ctrl', 'Meta', 'Alt', 'Shift'].indexOf(p) === -1 ? 9 : ['Ctrl', 'Meta', 'Alt', 'Shift'].indexOf(p);
+export function getShortcutOverrides(): ShortcutOverrides {
+  return overrides;
+}
+
+/** Scorciatoia in uso per un comando (quella scelta dall'utente o la predefinita). */
+export function shortcutOf(cmd: Command | undefined): string | undefined {
+  return cmd ? effectiveShortcut(cmd, overrides) : undefined;
+}
+
+export function normalizeShortcut(s: string): string {
+  return normalizeFor(s, isMac);
 }
 
 export function eventShortcut(e: KeyboardEvent): string {
-  const parts: string[] = [];
-  if (e.ctrlKey) parts.push('Ctrl');
-  if (e.metaKey) parts.push('Meta');
-  if (e.altKey) parts.push('Alt');
-  if (e.shiftKey) parts.push('Shift');
-  let k = e.key;
-  if (k === ' ') k = 'Space';
-  if (k.length === 1) k = k.toUpperCase();
-  if (!['Control', 'Meta', 'Alt', 'Shift'].includes(k)) parts.push(k);
-  return parts.join('+');
+  return eventToShortcut(e);
 }
 
 export function displayShortcut(s: string): string {
   const n = normalizeShortcut(s);
   if (!isMac) return n;
-  return n.replace('Meta', '⌘').replace('Ctrl', '⌃').replace('Alt', '⌥').replace('Shift', '⇧').replace(/\+/g, '');
+  return n.replace('Meta', '⌘').replace('Ctrl', '⌃').replace('Alt', '⌥').replace('Shift', '⇧').replace(/\+(?!$)/g, '');
+}
+
+/** Comando per un tasto (in forma di piattaforma), con le scorciatoie in uso. */
+export function commandForKey(key: string, skipEditorShortcuts = false): Command | undefined {
+  for (const c of commands.values()) {
+    const s = shortcutOf(c);
+    if (!s) continue;
+    // nell'editor le scorciatoie predefinite di formattazione le esegue TipTap
+    if (skipEditorShortcuts && c.editorShortcut && !Object.prototype.hasOwnProperty.call(overrides, c.id)) continue;
+    if (normalizeShortcut(s) === key) return c;
+  }
+  return undefined;
+}
+
+/** Filtro delle scorciatoie (es. la copia per revisione blocca i comandi che cambiano il Compendium). */
+let guard: (id: string) => boolean = () => true;
+export function setShortcutGuard(g: (id: string) => boolean) {
+  guard = g;
+}
+export function shortcutAllowed(id: string): boolean {
+  return guard(id);
 }
 
 export function findByShortcut(e: KeyboardEvent, inEditor: boolean): Command | undefined {
-  const key = eventShortcut(e);
-  for (const c of commands.values()) {
-    if (!c.shortcut) continue;
-    if (inEditor && c.editorShortcut) continue;
-    if (normalizeShortcut(c.shortcut) === key) return c;
-  }
-  return undefined;
+  return commandForKey(eventShortcut(e), inEditor);
 }

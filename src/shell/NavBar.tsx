@@ -1,7 +1,7 @@
 // Mini navbar: Bookshelf · Scriptorium · History | Library, piu' vault, branch e stato del salvataggio.
 import { Library, Landmark, PenLine, History, GitBranch, CircleCheck, CircleDot, LoaderCircle, CircleAlert } from 'lucide-react';
 import { useWorkspace } from '../state/workspace';
-import { runCommand, getCommand, displayShortcut } from '../commands/registry';
+import { runCommand, getCommand, displayShortcut, shortcutOf } from '../commands/registry';
 import { useCommandTick } from './useCommands';
 import { WorkspaceSwitcher } from './WorkspaceMenu';
 import { t, useLang } from '../i18n';
@@ -36,7 +36,7 @@ export function NavBar() {
             aria-selected={isActive(tab.cmd)}
             className={`navbar__tab ${isActive(tab.cmd) ? 'is-active' : ''} ${tab.apart ? 'navbar__tab--apart' : ''}`}
             onClick={() => runCommand(tab.cmd)}
-            title={getCommand(tab.cmd)?.shortcut ? `${tab.label} (${displayShortcut(getCommand(tab.cmd)!.shortcut!)})` : tab.label}
+            title={shortcutOf(getCommand(tab.cmd)) ? `${tab.label} (${displayShortcut(shortcutOf(getCommand(tab.cmd))!)})` : tab.label}
             style={{ '--section': tab.color } as React.CSSProperties}
           >
             <tab.icon size={20} strokeWidth={1.7} className="navbar__tab-icon" />

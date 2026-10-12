@@ -2,7 +2,7 @@
 import { useEffect, useRef, useState } from 'react';
 import { ChevronRight, Check } from 'lucide-react';
 import { MENUS, type MenuEntry } from '../commands/defaults';
-import { getCommand, runCommand, displayShortcut } from '../commands/registry';
+import { getCommand, runCommand, displayShortcut, shortcutOf } from '../commands/registry';
 import { useCommandTick } from './useCommands';
 import { t, useLang } from '../i18n';
 import { useWorkspace } from '../state/workspace';
@@ -111,7 +111,7 @@ function Entries({ items, onDone }: { items: MenuEntry[]; onDone: () => void }) 
           >
             <span className="menu-item__check">{activeState ? <Check size={14} /> : cmd.icon ? <cmd.icon size={14} /> : null}</span>
             <span className="menu-item__label">{t(cmd.label)}</span>
-            {cmd.shortcut && <span className="menu-item__hint">{displayShortcut(cmd.shortcut)}</span>}
+            {shortcutOf(cmd) && <span className="menu-item__hint">{displayShortcut(shortcutOf(cmd)!)}</span>}
           </button>
         );
       })}

@@ -3,6 +3,7 @@ import type { Lang } from '../i18n';
 import type { RibbonConfig } from '../commands/ribbonModel';
 import type { FloatingPanel } from '../commands/floatModel';
 import type { WorkspaceLayout } from './workspaces';
+import { normalizeOverrides, type ShortcutOverrides } from '../commands/shortcuts';
 
 export type ThemePref = 'light' | 'dark' | 'system';
 export type View = 'resources' | 'editor' | 'versions';
@@ -109,6 +110,8 @@ export interface AppState {
   /** gruppi della barra staccati in pannelli flottanti */
   floating: FloatingPanel[];
   view: View;
+  /** scorciatoie cambiate dall'utente (solo le differenze; null = nessuna scorciatoia) */
+  shortcuts: ShortcutOverrides;
 }
 
 export function defaultAppState(): AppState {
@@ -125,6 +128,7 @@ export function defaultAppState(): AppState {
     workspaces: [],
     floating: [],
     view: 'editor',
+    shortcuts: {},
   };
 }
 
@@ -145,6 +149,7 @@ export function normalizeAppState(raw: unknown): AppState {
     workspace: typeof r.workspace === 'string' ? r.workspace : 'studio',
     workspaces: Array.isArray(r.workspaces) ? r.workspaces : [],
     floating: Array.isArray(r.floating) ? r.floating : [],
+    shortcuts: normalizeOverrides(r.shortcuts),
   };
 }
 

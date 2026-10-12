@@ -3015,3 +3015,96 @@ table.kv td:last-child {
 .side-rail--left .side-rail__icon {
   transform: rotate(90deg);
 }
+
+/* ---------------------------------------------------------------- Preferenze > Scorciatoie */
+.shortcut-prefs {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+}
+
+.shortcut-prefs__bar {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+
+.shortcut-prefs__search {
+  flex: 1;
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  color: var(--muted);
+}
+
+.shortcut-prefs__search .input {
+  flex: 1;
+}
+
+.shortcut-prefs__list {
+  max-height: 52vh;
+  overflow-y: auto;
+  padding-right: 4px;
+}
+
+.shortcut-prefs__list h3 {
+  margin: 14px 0 4px;
+  font-size: var(--fs-ui);
+  font-weight: 600;
+}
+
+.shortcut-row {
+  display: grid;
+  grid-template-columns: 1fr auto auto auto;
+  align-items: center;
+  gap: 8px;
+  padding: 3px 4px;
+  border-radius: var(--radius-small);
+}
+
+.shortcut-row:hover,
+.shortcut-row.is-recording {
+  background: var(--chrome);
+}
+
+.shortcut-row__label {
+  min-width: 0;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.shortcut-row__keys {
+  display: flex;
+  align-items: center;
+  justify-content: flex-end;
+  gap: 6px;
+}
+
+.shortcut-row__rec {
+  color: var(--accent);
+  font-size: var(--fs-ui-small);
+}
+
+.shortcut-row__mod {
+  color: var(--accent);
+  font-size: var(--fs-ui-small);
+}
+
+.shortcut-row__conflict {
+  grid-column: 1 / -1;
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  padding: 4px 0 2px;
+  color: var(--ink-2);
+  font-size: var(--fs-ui-small);
+}
+
+.shortcut-row__conflict span {
+  flex: 1;
+}
+
+.shortcuts__customize {
+  float: right;
+}

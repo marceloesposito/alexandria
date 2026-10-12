@@ -4,7 +4,7 @@
 import { useEffect, useRef, useState } from 'react';
 import { Baseline, ChevronDown, ChevronUp, Highlighter, Type } from 'lucide-react';
 import { getEditor } from '../state/editorRef';
-import { getCommand, runCommand } from '../commands/registry';
+import { getCommand, runCommand, displayShortcut, shortcutOf } from '../commands/registry';
 import { useCommandTick } from '../shell/useCommands';
 import { useWorkspace } from '../state/workspace';
 import { t, useLang } from '../i18n';
@@ -25,7 +25,7 @@ function Btn({ id }: { id: string }) {
   return (
     <button
       className={`fbar__btn ${active ? 'is-active' : ''}`}
-      title={t(c.label) + (c.shortcut ? ` (${c.shortcut.replace('Mod', navigator.platform.includes('Mac') ? '⌘' : 'Ctrl')})` : '')}
+      title={t(c.label) + (shortcutOf(c) ? ` (${displayShortcut(shortcutOf(c)!)})` : '')}
       aria-pressed={active}
       onMouseDown={(e) => e.preventDefault()}
       onClick={() => void runCommand(id)}

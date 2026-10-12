@@ -6,7 +6,7 @@ import { useWorkspace } from '../../state/workspace';
 import { t, useLang } from '../../i18n';
 import { getLines } from '../../editor/lines';
 import { getEditor } from '../../state/editorRef';
-import { allCommands, displayShortcut } from '../../commands/registry';
+import { allCommands, displayShortcut, shortcutOf } from '../../commands/registry';
 import { flushSave } from '../../editor/session';
 
 export function RenameDocDialog() {
@@ -112,12 +112,15 @@ export function ShortcutsDialog() {
   useLang();
   const close = () => useWorkspace.getState().closeDialog();
   const list = allCommands()
-    .filter((c) => c.shortcut)
+    .filter((c) => shortcutOf(c))
     .sort((a, b) => a.category.localeCompare(b.category) || t(a.label).localeCompare(t(b.label)));
   const cats = [...new Set(list.map((c) => c.category))];
   return (
     <Modal title={t('cmd.help.shortcuts')} onClose={close} size="medium">
       <div className="shortcuts">
+        <button className="btn small shortcuts__customize" onClick={() => useWorkspace.getState().openDialog('preferences', 'shortcuts')}>
+          {t('shortcuts.customize')}
+        </button>
         {cats.map((cat) => (
           <section key={cat}>
             <h3>{t(`category.${cat}`)}</h3>
@@ -129,7 +132,7 @@ export function ShortcutsDialog() {
                     <tr key={c.id}>
                       <td>{t(c.label)}</td>
                       <td>
-                        <kbd>{displayShortcut(c.shortcut!)}</kbd>
+                        <kbd>{displayShortcut(shortcutOf(c)!)}</kbd>
                       </td>
                     </tr>
                   ))}
