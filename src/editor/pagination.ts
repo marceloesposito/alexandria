@@ -47,6 +47,20 @@ export function paginate(blocks: BlockBox[], textHeight: number): Pagination {
   return { breaks, endRest: Math.max(0, pageEnd - last), pages: breaks.length + 1 };
 }
 
+/**
+ * Due impaginazioni uguali a meno di `tol` pixel: stessi salti, spazi quasi uguali. Il plugin non
+ * ridisegna per differenze sotto il pixel, altrimenti misura e ridisegno si inseguono (l'altezza dei
+ * fogli oscilla di mezzo pixel all'infinito e in WebKit lo scorrimento si trascina).
+ */
+export function samePagination(a: Pagination, b: Pagination, tol = 1): boolean {
+  return (
+    a.pages === b.pages &&
+    a.breaks.length === b.breaks.length &&
+    a.breaks.every((x, i) => x.index === b.breaks[i].index && Math.abs(x.rest - b.breaks[i].rest) < tol) &&
+    Math.abs(a.endRest - b.endRest) < tol
+  );
+}
+
 export const MM = 96 / 25.4;
 
 // ---------------------------------------------------------------- plugin dell'editor
@@ -63,6 +77,8 @@ export function onPaginate(cb: () => void): () => void {
   return () => listeners.delete(cb);
 }
 const key = new PluginKey<{ deco: DecorationSet; sig: string }>('pagination');
+/** ultima impaginazione disegnata per ogni editor (per `samePagination`) */
+const drawn = new WeakMap<EditorView, { p: Pagination; geo: string }>();
 
 export function setPageGeometry(g: Partial<typeof pageGeometry>) {
   Object.assign(pageGeometry, g);
@@ -140,7 +156,8 @@ function measure(view: EditorView) {
   let gaps = 0;
   for (const el of Array.from(view.dom.children) as HTMLElement[]) {
     if (el.classList.contains('page-gap')) {
-      if (!el.classList.contains('is-end')) gaps += el.offsetHeight;
+      // altezza vera, con i decimali: `offsetHeight` arrotonda e sposta i blocchi di mezzo pixel
+      if (!el.classList.contains('is-end')) gaps += el.getBoundingClientRect().height / scale;
       continue;
     }
     if (el.classList.contains('ProseMirror-widget') || el.classList.contains('ProseMirror-gapcursor')) continue;
@@ -150,8 +167,11 @@ function measure(view: EditorView) {
   // i blocchi misurati devono corrispondere ai nodi del documento
   if (boxes.length !== view.state.doc.childCount) return;
   const p = paginate(boxes, g.textHeight);
-  const sig = `${p.breaks.map((b) => `${b.index}:${Math.round(b.rest)}`).join(',')}|${Math.round(p.endRest)}|${g.padTop}|${g.padBottom}`;
-  if (sig === st.sig) return;
+  const geo = `${g.padTop}|${g.padBottom}|${g.gap}`;
+  const prev = drawn.get(view);
+  if (st.sig !== '' && st.sig !== 'stale' && prev && prev.geo === geo && samePagination(prev.p, p)) return;
+  const sig = `${p.breaks.map((b) => `${b.index}:${Math.round(b.rest)}`).join(',')}|${Math.round(p.endRest)}|${geo}`;
+  drawn.set(view, { p, geo });
   view.dispatch(view.state.tr.setMeta(key, { deco: build(view.state, p), sig }).setMeta('addToHistory', false));
   listeners.forEach((cb) => cb());
 }
