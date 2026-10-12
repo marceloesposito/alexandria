@@ -132,6 +132,8 @@ vanno con la maiuscola (`Scrolls`), altrimenti il test del glossario fallisce.
 ### Aperto / idee annotate (non iniziate)
 - Compendium nella Bibliotheca (istantanea in sola lettura, riuso e citazione del proprio lavoro).
 - Sincronizzazione senza GitHub (remoto git su chiavetta/NAS, `git bundle` per Dropbox/Syncthing).
+- Collaborazione in tempo reale senza server su tutto il Compendium (iroh P2P in Rust, Yjs gia' fra
+  le dipendenze ma inutilizzato): piano completo in `docs/COLLABORAZIONE.md`.
 - "Accedi con GitHub" (Device Flow) attivo solo con il Client ID di un'OAuth App in
   `src/versions/forge.ts` (oggi vuoto: si usa il token personale).
 - Piano di lancio open source (designer per la UI, test di usabilita', licenze: CPAL di citeproc,
