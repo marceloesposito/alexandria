@@ -3,6 +3,7 @@ import type { Lang } from '../i18n';
 import type { RibbonConfig } from '../commands/ribbonModel';
 import type { FloatingPanel } from '../commands/floatModel';
 import type { WorkspaceLayout } from './workspaces';
+import type { SectionLayout } from '../editor/leftSections';
 import { DEFAULT_COUNTS_SHOWN, type CountKind } from '../shell/countsModel';
 import { normalizeOverrides, type ShortcutOverrides } from 'logos/commands/shortcuts';
 
@@ -57,6 +58,8 @@ export interface Prefs {
   countsShown: CountKind[];
   /** un H1 in cima alla pergamena ne diventa il nome al salvataggio */
   titleFromHeading: boolean;
+  /** sezioni della colonna sinistra dello Scriptorium: ordine e nascoste */
+  leftSections: SectionLayout;
 }
 
 export const DEFAULT_PREFS: Prefs = {
@@ -94,6 +97,7 @@ export const DEFAULT_PREFS: Prefs = {
   formatBar: 'open',
   countsShown: [...DEFAULT_COUNTS_SHOWN],
   titleFromHeading: true,
+  leftSections: { order: [], hidden: [] },
 };
 
 export interface DocCursor {

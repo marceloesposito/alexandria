@@ -1,11 +1,10 @@
 // Schermata Editor: tre colonne (risorse e pin | pagina | commenti), piu' l'anteprima opzionale.
 import { useRef } from 'react';
 import { EditorPane } from './EditorPane';
-import { DocumentsTree } from './DocumentsTree';
 import { useWorkspace } from '../state/workspace';
 import { FindReplace } from '../shell/dialogs/FindReplace';
 import { Splitter } from '../components/Splitter';
-import { leftPanelSections, rightPanel, centerOverlay, previewPanel } from './slots';
+import { rightPanel, centerOverlay, previewPanel } from './slots';
 import { OutlinePanel } from './OutlinePanel';
 import { CountsBadge } from '../shell/CountsBadge';
 import { FormatBar } from './FormatBar';
@@ -15,7 +14,7 @@ import { borderlessFooter } from './slots';
 import { useDoc } from './session';
 import { Library, ListTree, MessageSquare } from 'lucide-react';
 import { t, useLang } from '../i18n';
-import { CodexPanel } from '../codex/CodexPanel';
+import { LeftSections, SectionsButton } from './SidebarSections';
 import { SidePane } from './SidePane';
 import { useSidePane } from './paneStore';
 import { CodexReader } from '../codex/CodexReader';
@@ -56,16 +55,13 @@ export function EditorView() {
                   {tab === 'resources' ? <Library size={13} /> : <ListTree size={13} />} {t(`side.tab.${tab}`)}
                 </button>
               ))}
+              {prefs.leftTab === 'resources' && <SectionsButton />}
             </div>
             {prefs.leftTab === 'outline' ? (
               <OutlinePanel />
             ) : (
               <>
-                <DocumentsTree />
-                <CodexPanel />
-                {leftPanelSections.all().map((S, i) => (
-                  <S key={i} />
-                ))}
+                <LeftSections />
               </>
             )}
           </aside>

@@ -106,9 +106,9 @@ export function registerResources() {
   viewComponents.resources = ResourcesView;
   registerDialog('addResource', AddResourceModal);
   registerDialog('cite', CitePicker);
-  leftPanelSections.add(ResourceTreeSection);
-  leftPanelSections.add(PinnedSection);
-  leftPanelSections.add(BibliographySection);
+  leftPanelSections.add({ id: 'armarium', label: 'side.resources', component: ResourceTreeSection });
+  leftPanelSections.add({ id: 'excerpta', label: 'side.pinned', component: PinnedSection });
+  leftPanelSections.add({ id: 'bibliography', label: 'side.bibliography', component: BibliographySection });
   // il visualizzatore si apre da ogni vista (anche dai pin della colonna sinistra dell'editor)
   globalComponents.push(ResourceViewer);
   registerWidget('citeStyle', StyleWidget);

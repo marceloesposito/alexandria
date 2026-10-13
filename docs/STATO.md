@@ -1,6 +1,6 @@
 # Stato dei lavori
 
-Aggiornato: 13 ottobre 2026 (carattere e corpo nell'export).
+Aggiornato: 13 ottobre 2026 (sezioni della colonna sinistra).
 
 | Milestone | Stato | PR |
 | --- | --- | --- |
@@ -31,6 +31,12 @@ Aggiornato: 13 ottobre 2026 (carattere e corpo nell'export).
 | Apri documento: .docx, .doc, .odt, .rtf, .html, .epub, .txt, .md diventano pergamene | fatto | #35 |
 
 ## Decisioni prese durante il lavoro
+
+- **Sezioni della colonna sinistra** (scheda Armarium dello Scriptorium, richiesta del committente,
+  13/10/2026): Pergamene, Codex, Armarium, Excerpta e Bibliografia si riordinano (trascinando o con le
+  frecce) e si nascondono dal pulsante accanto alle schede (`editor/SidebarSections.tsx`, modello puro in
+  `editor/leftSections.ts`, `prefs.leftSections`). I moduli registrano le sezioni con un id stabile
+  (`leftPanelSections.add({ id, label, component })`); le sezioni nuove compaiono in fondo.
 
 - **Carattere e corpo nell'export** (richiesta del committente, 13/10/2026): in Esporta (PDF, Word, HTML;
   in LaTeX solo il corpo) e in Layout > Testo si sceglie fra i caratteri di Alexandria (Libertinus Serif,
