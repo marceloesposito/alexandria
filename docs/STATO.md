@@ -1,6 +1,6 @@
 # Stato dei lavori
 
-Aggiornato: 13 ottobre 2026 (sezioni della colonna sinistra).
+Aggiornato: 13 ottobre 2026 (spazio sopra il divisore negli export).
 
 | Milestone | Stato | PR |
 | --- | --- | --- |
@@ -31,6 +31,10 @@ Aggiornato: 13 ottobre 2026 (sezioni della colonna sinistra).
 | Apri documento: .docx, .doc, .odt, .rtf, .html, .epub, .txt, .md diventano pergamene | fatto | #35 |
 
 ## Decisioni prese durante il lavoro
+
+- **Divisore negli export** (richiesta del committente, 13/10/2026): una riga vuota sopra il `---` in PDF
+  (spazio alto una riga del corpo), Word, HTML, LaTeX e testo semplice (`logos` v0.2.1). Nello Scriptorium
+  e nel Markdown non cambia nulla.
 
 - **Sezioni della colonna sinistra** (scheda Armarium dello Scriptorium, richiesta del committente,
   13/10/2026): Pergamene, Codex, Armarium, Excerpta e Bibliografia si riordinano (trascinando o con le

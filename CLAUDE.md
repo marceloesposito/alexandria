@@ -69,17 +69,30 @@ Prima di ogni commit: `npm test`, `npm run build` e `npm run test:rust` verdi.
 - Script Python su Windows: mai `"\b"` o `'\$1'` in stringhe non raw; per le
   sostituzioni nei file .ts preferire l'Edit diretto.
 
-## Handover (aggiornato al 10 ottobre 2026, main dopo la PR #24)
+## Handover (aggiornato al 13 ottobre 2026, main dopo la PR #40, logos v0.2.1)
 
 Se riprendi il progetto adesso leggi prima questa sezione, poi `docs/STATO.md` (tabella delle
 milestone e decisioni). Il lavoro si fa sia su Windows sia su un Mac del committente, con sessioni
 diverse: **prima di iniziare `git fetch` e controlla PR aperte e rami recenti** (`gh pr list`).
 
 ### Dove siamo
-- Milestone M0-M12 su `main` (PR #1-#24), CI verde su Windows, macOS e frontend.
+- Milestone M0-M12 su `main` (PR #1-#24), poi PR #25-#40; CI verde su Windows, macOS e frontend.
 - Nessuna release pubblicata, installer non firmati. Versione 0.1.0.
 - Sul PC Windows del committente Alexandria e' **installata** (per utente, in
   `%LOCALAPPDATA%\Alexandria`); per aggiornarla si rilancia l'installer con `/S`.
+- Sul Mac del committente e' **installata** in `/Applications/Alexandria.app` (build del 13/10 con
+  tutto il lavoro qui sotto).
+- Lavoro del 13 ottobre 2026 (sessione Mac, decisioni in `docs/STATO.md`):
+  - #35 **Apri documento** (File > Apri documento…, "Apri con" da Finder): .docx, .doc, .odt, .rtf,
+    .html, .epub, .txt, .md -> pergamena nuova; immagini nell'Armarium; revisioni e commenti Word
+    riapplicati. I file aperti dal sistema vanno alla revisione solo se `.recensio`.
+  - #36 Etichetta dei conteggi: puntina per scegliere i conteggi sempre in vista, pulsanti zoom − / +.
+  - #37 Il primo H1 della pergamena ne diventa il nome al salvataggio (rinomina senza ricaricare).
+  - #38 + logos v0.2.0: carattere (Alexandria, classici dell'HTML come Times New Roman, generiche) e
+    corpo del testo in Esporta e Layout; Typst con Inter/JetBrains Mono inclusi e famiglie di sistema.
+  - #39 Sezioni della scheda Armarium (colonna sinistra) da riordinare e nascondere, salvate nel
+    layout del workspace.
+  - #40 + logos v0.2.1: una riga vuota sopra il divisore (`---`) in ogni export.
 
 ### Nomi tematici (glossario in `src/i18n/glossary.ts`, un test li controlla in ogni lingua)
 Compendium (vault), Scroll / **pergamena** in italiano (documento), Scriptorium (editor), Armarium
@@ -115,6 +128,14 @@ vanno con la maiuscola (`Scrolls`), altrimenti il test del glossario fallisce.
 - `shell/QuickSwitcher.tsx` (Ctrl+O, `>` comandi), `components/HoverCard.tsx`,
   `components/SideRail.tsx` (colonne richiuse), `shell/WindowControls.tsx` (barra del titolo
   disegnata dall'app su Windows/Linux).
+- `shell/CountsBadge.tsx` + `shell/countsModel.ts` — etichetta dei conteggi (`prefs.countsShown`) e zoom.
+- `editor/titleSync.ts` + `headingTitle.ts` — nome dal primo H1; `moveOpenDoc` in `editor/session.ts`
+  rinomina la pergamena aperta senza ricaricarla (salvataggi in attesa, poi al nuovo percorso).
+- `layout/FontControls.tsx` + `fontChoice.ts` — carattere e corpo (Esporta e Layout); elenco
+  `TEXT_FONTS` e `bodyFontStack` in `logos/layout/model`. `src-tauri/fonts/` (Inter, JetBrains Mono,
+  OFL) e `SYSTEM_FAMILIES` in `typeset.rs` (fontdb legge solo quelle famiglie dal sistema).
+- `editor/SidebarSections.tsx` + `leftSections.ts` — sezioni della colonna sinistra
+  (`leftPanelSections.add({ id, label, component })`, `prefs.leftSections` in `LAYOUT_KEYS`).
 - Cartelle dei Compendium: nuovi con `Pergamene/` (o `Scrolls/`) e `Armarium/` scritti in
   `vault.json` (`dirs`); i vecchi restano `documents/` e `resources/`. Mai percorsi fissi: usare
   `docsDir()`, `resDir()`, `itemDir()`, `docKeyIn()` per Compendium diversi da quello aperto.
@@ -129,6 +150,14 @@ vanno con la maiuscola (`Scrolls`), altrimenti il test del glossario fallisce.
   --no-bundle`) e passare `WEBVIEW2_USER_DATA_FOLDER=<tmp>` alla prova, altrimenti il WebView2 si
   aggancia all'istanza aperta. Argomenti all'avvio (es. un `.recensio`): `ALEXANDRIA_TEST_ARGS`.
 - Mai rubare il focus al committente (finestre fuori schermo); non chiudere la sua app senza dirlo.
+- **Sul Mac** (niente WebView2): interfaccia provata con `npx vite --port 1430 --strictPort` (la 1420
+  puo' essere occupata da un vite di un vecchio worktree) e
+  `CHROME="/Applications/Google Chrome.app/Contents/MacOS/Google Chrome" node scripts/cdp.mjs
+  http://localhost:1430 <script.mjs>`; negli script usare `window.__alexandria` (ws, platform,
+  comments...) e `window.__editor`. Build: `export PATH="$HOME/.cargo/bin:$PATH"
+  SDKROOT=/Library/Developer/CommandLineTools/SDKs/MacOSX26.5.sdk` poi `npx tauri build`.
+  Installazione ad app chiusa: `ditto` del `.app` in `/Applications` + `lsregister -f`; se il
+  committente chiede il .dmg, aprirlo e poi `hdiutil detach /Volumes/Alexandria` a copia finita.
 - Pacchetti: `npx tauri build` (installer NSIS in `src-tauri/target/release/bundle/nsis/`),
   `node scripts/portable.mjs --win src-tauri/target/release/alexandria.exe` (cartella
   `dist-portable/`, con `thesaurus/` accanto all'exe); lo zip per i tester va sul Desktop.
@@ -139,6 +168,17 @@ vanno con la maiuscola (`Scrolls`), altrimenti il test del glossario fallisce.
 - Merge di conflitti in CSS/i18n "tenendo entrambe le parti": puo' perdere una graffa (build rotta).
 - Heredoc bash e script Python con `\n`, `\s`, `\p`, `\t` su Windows: si corrompono (diventano a
   capo, tabulazioni o backspace); usare Edit o stringhe raw. Controllo: `grep -rlP '\x08' src`.
+- Associazioni di file: su Windows l'installer NSIS diventa il programma predefinito dei formati
+  dichiarati. Le associazioni ai documenti (.docx...) stanno solo in `tauri.macos.conf.json`
+  (rango Alternate); in `tauri.conf.json` resta solo `.recensio`.
+- macOS non distingue le maiuscole nei nomi di file: `leftSections.ts` e `LeftSections.tsx` nella
+  stessa cartella rompono tsc. Nomi diversi, non solo per maiuscole.
+- Vite in sviluppo: dopo un aggiornamento a caldo `import('/src/...')` da CDP restituisce un'altra
+  istanza degli store (URL con `?t=`); riavviare vite o usare `window.__alexandria`. Al primo avvio
+  con dipendenze nuove la pagina si ricarica da sola: rilanciare la prova.
+- mammoth: la versione per node (test) vuole `buffer`, quella per il browser `arrayBuffer`; si
+  passano entrambi. Nei test jsdom `import.meta.url` non e' un file: usare `__dirname`.
+- `logos`: aspettare la CI della PR anche per un commit che cambia solo la versione, poi merge e tag.
 - Le note dentro le note: le citazioni in una nota passano `inNote` a `ctx.cite` (fonte per esteso,
   mai `#footnote` annidato).
 
