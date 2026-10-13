@@ -36,7 +36,9 @@ Aggiornato: 13 ottobre 2026 (sezioni della colonna sinistra).
   13/10/2026): Pergamene, Codex, Armarium, Excerpta e Bibliografia si riordinano (trascinando o con le
   frecce) e si nascondono dal pulsante accanto alle schede (`editor/SidebarSections.tsx`, modello puro in
   `editor/leftSections.ts`, `prefs.leftSections`). I moduli registrano le sezioni con un id stabile
-  (`leftPanelSections.add({ id, label, component })`); le sezioni nuove compaiono in fondo.
+  (`leftPanelSections.add({ id, label, component })`); le sezioni nuove compaiono in fondo. La
+  disposizione fa parte del layout del workspace (`LAYOUT_KEYS`): si salva e si riapplica con il
+  selettore dei workspace in alto a destra; quelli predefiniti hanno l'ordine di serie.
 
 - **Carattere e corpo nell'export** (richiesta del committente, 13/10/2026): in Esporta (PDF, Word, HTML;
   in LaTeX solo il corpo) e in Layout > Testo si sceglie fra i caratteri di Alexandria (Libertinus Serif,

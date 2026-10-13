@@ -39,6 +39,19 @@ describe('workspace', () => {
     expect(normalizeWorkspace(JSON.parse(JSON.stringify(w)))?.prefs.showRight).toBe(false);
     expect(normalizeWorkspace({ name: 'x' })).toBeNull();
   });
+
+  it('le sezioni della colonna sinistra fanno parte del workspace', () => {
+    const leftSections = { order: ['bibliography', 'scrolls'], hidden: ['codex'] };
+    const w = captureWorkspace('u2', 'Ricerca', { ...DEFAULT_PREFS, leftSections }, null, []);
+    expect(applyWorkspace(w).prefs.leftSections).toEqual(leftSections);
+    // copia, non lo stesso oggetto delle preferenze
+    expect(w.prefs.leftSections).not.toBe(leftSections);
+    // workspace salvati prima: sezioni di serie
+    const old = JSON.parse(JSON.stringify(w));
+    delete old.prefs.leftSections;
+    expect(normalizeWorkspace(old)?.prefs.leftSections).toEqual({ order: [], hidden: [] });
+    expect(builtInWorkspace('pro', cfg()).prefs.leftSections).toEqual({ order: [], hidden: [] });
+  });
 });
 
 describe('pannelli flottanti', () => {
