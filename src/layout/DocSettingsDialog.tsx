@@ -10,6 +10,7 @@ import { PAPERS, withPaper, STYLE_FONTS, EDITOR_FONT, type LayoutSettings, type 
 import { BUNDLED_STYLES, listCustomStyles, type StyleInfo } from '../citations/store';
 import { runCommand } from '../commands/registry';
 import { t, useLang } from '../i18n';
+import { FontSelect, FontSizeInput } from './FontControls';
 
 type Tab = 'doc' | 'citations' | 'page' | 'text' | 'styles' | 'masters';
 
@@ -179,14 +180,11 @@ export function DocSettingsDialog() {
           <>
             <label className="form__row">
               <span>{t('docset.font')}</span>
-              <select className="select" value={L.font} onChange={(e) => setL({ font: e.target.value as LayoutSettings['font'] })}>
-                <option value="serif">Libertinus Serif</option>
-                <option value="sans">Sans (Inter / New Computer Modern Sans)</option>
-              </select>
+              <FontSelect />
             </label>
             <div className="form__row">
               <span>{t('docset.fontSize')}</span>
-              <Num value={L.fontSizePt} step={0.5} min={8} max={16} onChange={(v) => setL({ fontSizePt: v, styles: { ...L.styles, body: { ...L.styles.body, sizePt: v } } })} suffix="pt" />
+              <FontSizeInput />
             </div>
             <div className="form__row">
               <span>{t('docset.leading')}</span>

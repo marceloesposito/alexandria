@@ -1,5 +1,6 @@
 // Impaginazione con Typst integrato: un "mondo" in memoria con il sorgente generato
-// dall'interfaccia, i file allegati (immagini, formule SVG) e i font inclusi.
+// dall'interfaccia, i file allegati (immagini, formule SVG) e i font: quelli di Typst, Inter e
+// JetBrains Mono inclusi nell'app e i classici installati nel sistema (Times New Roman, Georgia...).
 use crate::fsops::{err, CmdResult};
 use base64::Engine;
 use serde::{Deserialize, Serialize};
@@ -36,19 +37,89 @@ struct Fonts {
     fonts: Vec<Font>,
 }
 
+/// Caratteri di Alexandria per il PDF (licenza OFL, accanto ai file in `fonts/`).
+const BUNDLED: [&[u8]; 8] = [
+    include_bytes!("../fonts/Inter-Regular.ttf"),
+    include_bytes!("../fonts/Inter-Bold.ttf"),
+    include_bytes!("../fonts/Inter-Italic.ttf"),
+    include_bytes!("../fonts/Inter-BoldItalic.ttf"),
+    include_bytes!("../fonts/JetBrainsMono-Regular.ttf"),
+    include_bytes!("../fonts/JetBrainsMono-Bold.ttf"),
+    include_bytes!("../fonts/JetBrainsMono-Italic.ttf"),
+    include_bytes!("../fonts/JetBrainsMono-BoldItalic.ttf"),
+];
+
+/// Famiglie del sistema che l'export puo' chiedere (TEXT_FONTS di logos): si leggono solo queste.
+pub const SYSTEM_FAMILIES: [&str; 14] = [
+    "Georgia",
+    "Times New Roman",
+    "Times",
+    "Palatino",
+    "Palatino Linotype",
+    "Book Antiqua",
+    "Helvetica Neue",
+    "Helvetica",
+    "Arial",
+    "Verdana",
+    "Geneva",
+    "Courier New",
+    "Courier",
+    "Consolas",
+];
+
+fn push_all(fonts: &mut Vec<Font>, bytes: Bytes) {
+    for i in 0.. {
+        match Font::new(bytes.clone(), i) {
+            Some(f) => fonts.push(f),
+            None => break,
+        }
+    }
+}
+
+/// Facce delle famiglie richieste fra i caratteri installati (file letti una volta sola).
+fn system_fonts(families: &[&str]) -> Vec<Font> {
+    let mut db = fontdb::Database::new();
+    db.load_system_fonts();
+    let mut files: HashMap<std::path::PathBuf, Bytes> = HashMap::new();
+    let mut out = Vec::new();
+    for face in db.faces() {
+        if !face.families.iter().any(|(name, _)| families.iter().any(|f| f.eq_ignore_ascii_case(name))) {
+            continue;
+        }
+        let path = match &face.source {
+            fontdb::Source::File(p) => p.clone(),
+            fontdb::Source::SharedFile(p, _) => p.clone(),
+            fontdb::Source::Binary(_) => continue,
+        };
+        let bytes = match files.get(&path) {
+            Some(b) => b.clone(),
+            None => match std::fs::read(&path) {
+                Ok(d) => {
+                    let b = Bytes::new(d);
+                    files.insert(path.clone(), b.clone());
+                    b
+                }
+                Err(_) => continue,
+            },
+        };
+        if let Some(f) = Font::new(bytes, face.index) {
+            out.push(f);
+        }
+    }
+    out
+}
+
 fn fonts() -> &'static Fonts {
     static FONTS: OnceLock<Fonts> = OnceLock::new();
     FONTS.get_or_init(|| {
         let mut fonts = Vec::new();
         for data in typst_assets::fonts() {
-            let bytes = Bytes::new(data);
-            for i in 0.. {
-                match Font::new(bytes.clone(), i) {
-                    Some(f) => fonts.push(f),
-                    None => break,
-                }
-            }
+            push_all(&mut fonts, Bytes::new(data));
         }
+        for data in BUNDLED {
+            push_all(&mut fonts, Bytes::new(data));
+        }
+        fonts.extend(system_fonts(&SYSTEM_FAMILIES));
         let book = LazyHash::new(FontBook::from_fonts(&fonts));
         Fonts { book, fonts }
     })
@@ -173,6 +244,32 @@ pub async fn typst_compile(source: String, files: Vec<InFile>, format: String) -
 #[cfg(test)]
 mod tests {
     use super::*;
+
+    #[test]
+    fn caratteri_inclusi_e_di_sistema() {
+        let book = &fonts().book;
+        assert!(book.select_family("inter").next().is_some());
+        assert!(book.select_family("jetbrains mono").next().is_some());
+        // su macOS e Windows Times New Roman e Georgia ci sono sempre
+        #[cfg(any(target_os = "macos", target_os = "windows"))]
+        {
+            assert!(book.select_family("times new roman").next().is_some());
+            assert!(book.select_family("georgia").next().is_some());
+        }
+    }
+
+    #[test]
+    fn pdf_con_carattere_di_sistema_e_incluso() {
+        let src = r#"#set text(font: ("Times New Roman", "Libertinus Serif"), size: 11pt)
+Testo in Times. #text(font: ("Inter",))[E in Inter.]
+"#;
+        let doc = compile(src.into(), vec![]).expect("compila");
+        let pdf = typst_pdf::pdf(&doc, &typst_pdf::PdfOptions::default()).unwrap();
+        let has = |name: &str| pdf.windows(name.len()).any(|w| w == name.as_bytes());
+        assert!(has("Inter"));
+        #[cfg(any(target_os = "macos", target_os = "windows"))]
+        assert!(has("TimesNewRoman"));
+    }
 
     #[test]
     fn compiles_pdf_with_line_numbers() {

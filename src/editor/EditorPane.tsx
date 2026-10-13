@@ -17,7 +17,7 @@ import { LineGutter } from './LineGutter';
 import { SourceView } from './SourceView';
 import { notifyCommandState } from '../commands/registry';
 import { useDocSettings, pageMetrics } from '../layout/docSettings';
-import { EDITOR_FONT, styleFont } from 'logos/layout/model';
+import { EDITOR_FONT, bodyFontStack } from 'logos/layout/model';
 import { HorizontalRuler, VerticalRuler, RULER_SPACE_PX } from './Rulers';
 import { useZen } from '../state/zen';
 import { DocHeader } from './DocHeader';
@@ -204,7 +204,7 @@ export function EditorPane({ overlay, pageRef: externalPageRef }: Props) {
     '--page-font-size': `${layout.fontSizePt}pt`,
     '--page-leading': String(layout.leading),
     // carattere del corpo (stile "corpo", o quello del documento) e degli stili che ne hanno uno loro
-    '--page-font': EDITOR_FONT[styleFont(layout.styles.body, layout)],
+    '--page-font': bodyFontStack(layout, 'web'),
     ...Object.fromEntries((['h1', 'h2', 'h3', 'quote', 'caption'] as const).map((id) => [`--style-font-${id}`, layout.styles[id].font !== 'inherit' ? EDITOR_FONT[layout.styles[id].font as 'serif'] : 'var(--page-font)'])),
     zoom: prefs.zoom * fit,
   } as React.CSSProperties;

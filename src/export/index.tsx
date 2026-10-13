@@ -10,6 +10,7 @@ import { useWorkspace, ws } from '../state/workspace';
 import { useDocSettings } from '../layout/docSettings';
 import { PAPERS, withPaper, type Paper } from 'logos/layout/model';
 import { PreviewPanel } from './PreviewPanel';
+import { FontSelect, FontSizeInput } from '../layout/FontControls';
 import { exportTo, printDocument, type ExportFormat } from './run';
 import { platform } from '../platform';
 import { t, useLang } from '../i18n';
@@ -65,6 +66,21 @@ function ExportDialog() {
           </button>
         ))}
       </div>
+      {(format === 'pdf' || format === 'docx' || format === 'html' || format === 'tex') && (
+        <div className="export-fonts">
+          {format !== 'tex' && (
+            <label className="form__row">
+              <span>{t('docset.font')}</span>
+              <FontSelect />
+            </label>
+          )}
+          <label className="form__row">
+            <span>{t('docset.fontSize')}</span>
+            <FontSizeInput />
+          </label>
+          <p className="hint">{t('export.fontsHint')}</p>
+        </div>
+      )}
       <div className="export-options">
         {format !== 'md' && (
           <label className="check">

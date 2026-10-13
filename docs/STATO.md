@@ -1,6 +1,6 @@
 # Stato dei lavori
 
-Aggiornato: 13 ottobre 2026 (nome della pergamena dal primo H1).
+Aggiornato: 13 ottobre 2026 (carattere e corpo nell'export).
 
 | Milestone | Stato | PR |
 | --- | --- | --- |
@@ -31,6 +31,15 @@ Aggiornato: 13 ottobre 2026 (nome della pergamena dal primo H1).
 | Apri documento: .docx, .doc, .odt, .rtf, .html, .epub, .txt, .md diventano pergamene | fatto | #35 |
 
 ## Decisioni prese durante il lavoro
+
+- **Carattere e corpo nell'export** (richiesta del committente, 13/10/2026): in Esporta (PDF, Word, HTML;
+  in LaTeX solo il corpo) e in Layout > Testo si sceglie fra i caratteri di Alexandria (Libertinus Serif,
+  Inter, JetBrains Mono), i classici dell'HTML (Georgia, Times New Roman, Palatino, Helvetica, Arial,
+  Verdana, Courier New) e le famiglie generiche (serif, sans-serif, monospace). Elenco e pile per web,
+  Typst e Word in `logos` (`TEXT_FONTS`, `LayoutSettings.fontFamily`, `bodyFontStack`, v0.2.0); la scelta
+  e' della pergamena e si vede anche nello Scriptorium. Per il PDF Typst ha Inter e JetBrains Mono inclusi
+  (`src-tauri/fonts/`, licenza OFL accanto) e legge dal sistema solo le famiglie classiche dell'elenco
+  (`SYSTEM_FAMILIES` in `typeset.rs`, con fontdb); se mancano, ripiega sui caratteri di Alexandria.
 
 - **Nome della pergamena dal primo H1** (richiesta del committente, 13/10/2026): se la pergamena comincia
   con un titolo di livello 1, al salvataggio il file prende quel nome (`editor/titleSync.ts`,
