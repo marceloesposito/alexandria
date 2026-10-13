@@ -781,7 +781,47 @@ input[type='range'] {
   opacity: 0.6;
 }
 
+.counts-badge__row {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 12px;
+}
+
+.counts-badge__pin {
+  border: 0;
+  background: none;
+  color: var(--muted);
+  opacity: 0.45;
+  padding: 2px;
+  border-radius: 6px;
+  display: inline-flex;
+  align-items: center;
+}
+
+.counts-badge__pin:hover {
+  opacity: 1;
+  background: var(--chrome-2);
+}
+
+.counts-badge__pin.is-on {
+  color: var(--accent);
+  opacity: 1;
+}
+
+.counts-badge__zoomgroup {
+  display: inline-flex;
+  align-items: center;
+  gap: 0;
+}
+
+.counts-badge__icon:disabled {
+  opacity: 0.35;
+  pointer-events: none;
+}
+
 .counts-badge__zoom,
+.counts-badge__icon,
 .counts-badge__toggle {
   border: 0;
   background: none;
@@ -794,6 +834,7 @@ input[type='range'] {
 }
 
 .counts-badge__zoom:hover,
+.counts-badge__icon:hover,
 .counts-badge__toggle:hover {
   background: var(--chrome-2);
   color: var(--ink);
