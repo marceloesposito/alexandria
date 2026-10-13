@@ -826,6 +826,19 @@
 }
 
 /* opzioni dell'export: una per riga */
+.export-fonts {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+  margin-top: 14px;
+  padding-top: 12px;
+  border-top: 1px solid var(--line);
+}
+
+.export-fonts .hint {
+  margin: 0;
+}
+
 .export-options {
   display: flex;
   flex-direction: column;

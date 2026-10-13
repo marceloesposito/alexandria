@@ -25,6 +25,7 @@ dependencies = [
  "block2",
  "chrono",
  "flate2",
+ "fontdb",
  "git2",
  "keyring",
  "objc2",

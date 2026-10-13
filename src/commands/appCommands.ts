@@ -55,6 +55,7 @@ import { platform, joinPath } from '../platform';
 import { t } from '../i18n';
 import { isVault } from '../vault/vault';
 import { confirmDialog } from '../components/confirm';
+import { syncTitleFromHeading } from '../editor/titleSync';
 
 const prefs = () => ws().app.prefs;
 
@@ -162,7 +163,7 @@ export function registerAppCommands() {
       run: async () => {
         await flushSave(getEditor());
         // Salva rinomina subito dal primo H1, anche col cursore ancora nel titolo
-        await (await import('../editor/titleSync')).syncTitleFromHeading(true);
+        await syncTitleFromHeading(true);
         ws().toast(t('doc.savedNow'), 'ok');
       },
     },
