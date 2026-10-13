@@ -106,6 +106,8 @@ vanno con la maiuscola (`Scrolls`), altrimenti il test del glossario fallisce.
 - `recensio/` — copia per revisione: zip, modalita' revisore (Compendium temporaneo, testo bloccato
   con `filterTransaction`), ritorno su branch e merge; `review/` risposta ai revisori.
 - `vault/append.ts` — Aggiungi da un altro Compendium (`planAppend` puro).
+- `doc/import/` + `vault/importDocument.ts` — Apri documento: .docx (mammoth), .doc (lettore binario
+  nostro), .odt, .rtf, .html, .epub, .txt, .md -> pergamena nuova; revisioni e commenti Word riapplicati.
 - `versions/forge.ts`, `src-tauri/src/forge.rs` — account Codeberg (token nel portachiavi), crea
   repository, elenco repository; `git_clone` + `versions/OpenRemoteDialog.tsx`. Solo Codeberg.
 - `citations/fullNote.ts` — fonte per esteso nelle note a pie' di pagina (trascinare una fonte crea

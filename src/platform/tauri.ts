@@ -44,8 +44,9 @@ export const tauriPlatform: Platform = {
     const r = await open({ directory: true, multiple: false, title });
     return typeof r === 'string' ? r.replace(/\\/g, '/') : null;
   },
-  pickFiles: async (title) => {
-    const r = await open({ directory: false, multiple: true, title });
+  pickFiles: async (title, extensions) => {
+    const filters = extensions?.length ? [{ name: title ?? extensions.join(', '), extensions }] : undefined;
+    const r = await open({ directory: false, multiple: true, title, filters });
     if (!r) return [];
     return (Array.isArray(r) ? r : [r]).map((p) => String(p).replace(/\\/g, '/'));
   },

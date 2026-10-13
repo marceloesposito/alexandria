@@ -91,7 +91,8 @@ export async function importCslItems(items: CslItem[], target: 'vault' | 'librar
   return out;
 }
 
-export async function importFiles(files: InFile[], target: 'vault' | 'library' = 'vault'): Promise<Resource[]> {
+/** `quiet`: niente avvisi di riepilogo (l'import fa parte di un'altra azione, es. Apri documento). */
+export async function importFiles(files: InFile[], target: 'vault' | 'library' = 'vault', opts: { quiet?: boolean } = {}): Promise<Resource[]> {
   const st = useResources.getState();
   const s = scope(target);
   if (!s) return [];
@@ -140,8 +141,8 @@ export async function importFiles(files: InFile[], target: 'vault' | 'library' =
     }
   }
   st.setBusy(null);
-  if (skipped) toast(t('import.duplicates', { n: skipped }), 'info');
-  if (out.length) toast(t('import.done', { n: out.length }), 'ok');
+  if (skipped && !opts.quiet) toast(t('import.duplicates', { n: skipped }), 'info');
+  if (out.length && !opts.quiet) toast(t('import.done', { n: out.length }), 'ok');
   if (ocrQueue.length) void runOcr(ocrQueue, target);
   return out;
 }
@@ -154,7 +155,7 @@ export async function runOcr(list: Resource[], target: 'vault' | 'library') {
   for (const r of list) {
     try {
       useResources.getState().setBusy({ label: t('import.ocr', { title: r.title }), done: 0, total: 1 });
-      const path = r.file ? `${s.root}/${s.kind === 'vault' ? 'resources' : 'items'}/${r.id}/${r.file}` : null;
+      const path = r.file ? joinPath(itemDir(s, r.id), r.file) : null;
       if (!path) continue;
       const bytes = await platform.readBytes(path);
       let text = '';

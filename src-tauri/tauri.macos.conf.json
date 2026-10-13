@@ -1,0 +1,21 @@
+{
+  "$schema": "../node_modules/@tauri-apps/cli/config.schema.json",
+  "bundle": {
+    "fileAssociations": [
+      {
+        "ext": ["recensio"],
+        "name": "Recensio",
+        "description": "Copia per revisione di Alexandria",
+        "role": "Editor",
+        "mimeType": "application/x-alexandria-recensio"
+      },
+      {
+        "ext": ["docx", "doc", "odt", "rtf"],
+        "name": "Documento di testo",
+        "description": "Documento di Word, LibreOffice o RTF, da aprire come pergamena",
+        "role": "Viewer",
+        "rank": "Alternate"
+      }
+    ]
+  }
+}

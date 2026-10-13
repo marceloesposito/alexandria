@@ -20,6 +20,16 @@ fn remember_open(path: String) {
     }
 }
 
+/// File che l'app sa aprire dal sistema: copie per revisione e documenti da importare.
+fn opened_file_ok(path: &str) -> bool {
+    const EXT: [&str; 18] = [
+        "recensio", "docx", "docm", "dotx", "doc", "dot", "odt", "ott", "fodt", "rtf", "html", "htm", "xhtml", "epub", "txt", "text", "md",
+        "markdown",
+    ];
+    let lower = path.to_lowercase();
+    lower.rsplit_once('.').map(|(_, e)| EXT.contains(&e)).unwrap_or(false)
+}
+
 #[tauri::command]
 fn startup_file() -> Option<String> {
     OPEN_FILE.lock().ok()?.take()
@@ -45,8 +55,9 @@ pub fn run() {
     if let Some(p) = portable::data_root() {
         std::env::set_var("WEBVIEW2_USER_DATA_FOLDER", p.join("webview"));
     }
-    // doppio clic su un .recensio (Windows/Linux: il percorso arriva come argomento)
-    if let Some(a) = std::env::args().skip(1).find(|a| a.to_lowercase().ends_with(".recensio")) {
+    // doppio clic su un .recensio o "Apri con" su un documento (Windows/Linux: il percorso arriva
+    // come argomento); il frontend sceglie fra revisione e import
+    if let Some(a) = std::env::args().skip(1).find(|a| opened_file_ok(a)) {
         remember_open(a);
     }
     tauri::Builder::default()
@@ -170,4 +181,18 @@ pub fn run() {
                 }
             }
         });
+}
+
+#[cfg(test)]
+mod tests {
+    use super::opened_file_ok;
+
+    #[test]
+    fn file_aperti_dal_sistema() {
+        assert!(opened_file_ok("C:/Tesi/capitolo.DOCX"));
+        assert!(opened_file_ok("/Users/a/rev.recensio"));
+        assert!(opened_file_ok("note.rtf"));
+        assert!(!opened_file_ok("--flag"));
+        assert!(!opened_file_ok("foto.png"));
+    }
 }

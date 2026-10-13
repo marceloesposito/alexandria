@@ -37,13 +37,18 @@ export default function App() {
     void useWorkspace.getState().init();
   }, []);
 
-  // doppio clic su un .recensio: si apre dopo l'avvio (e, su macOS, anche ad app aperta)
+  // file aperti dal sistema (doppio clic, "Apri con", trascinati sull'icona): dopo l'avvio e, su
+  // macOS, anche ad app aperta. Un .recensio e' una copia per revisione, gli altri documenti
+  // (Word, LibreOffice, RTF...) diventano pergamene del Compendium aperto.
   const reviewing = useReview((s) => !!s.session);
   useEffect(() => {
     if (!ready) return;
     const check = () =>
-      void platform.startupFile().then((p) => {
-        if (p) void openRecensioFile(p);
+      void platform.startupFile().then(async (p) => {
+        if (!p) return;
+        if (p.toLowerCase().endsWith('.recensio')) return void openRecensioFile(p);
+        const { importDocuments } = await import('./vault/importDocument');
+        await importDocuments([p]);
       });
     check();
     let off: (() => void) | undefined;

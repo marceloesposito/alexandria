@@ -3,6 +3,7 @@
 // una figura (immagini) o una scheda embed (pagine web, video, snippet, altri file).
 import { splitLinks, detectUrl } from 'logos/resources/detect';
 import { relativeFromDoc } from '../vault/resolve';
+import { resDir } from '../vault/paths';
 import type { Resource } from 'logos/resources/model';
 import type { EmbedAttrs } from '../editor/extensions/nodes';
 
@@ -45,7 +46,7 @@ export function readTransfer(dt: DataTransfer): TransferLike {
 
 /** Attributi della scheda embed per una risorsa, con i percorsi relativi al documento. */
 export function embedAttrsFor(r: Resource, docRel: string): EmbedAttrs {
-  const local = (f: string) => relativeFromDoc(docRel, `resources/${r.id}/${f}`);
+  const local = (f: string) => relativeFromDoc(docRel, `${resDir()}/${r.id}/${f}`);
   const preview = r.meta.screenshot ?? r.meta.thumb;
   const url = r.url ?? (r.file && !r.library ? local(r.file) : '');
   return { url, title: r.title, resource: r.id, image: preview && !r.library ? local(preview) : null };
@@ -54,7 +55,7 @@ export function embedAttrsFor(r: Resource, docRel: string): EmbedAttrs {
 /** Figura per le immagini del vault, scheda embed per tutto il resto. */
 export function nodeFor(r: Resource, docRel: string): { type: string; attrs: Record<string, unknown> } {
   if (r.kind === 'image' && r.file && !r.library) {
-    return { type: 'figure', attrs: { src: relativeFromDoc(docRel, `resources/${r.id}/${r.file}`), caption: r.title } };
+    return { type: 'figure', attrs: { src: relativeFromDoc(docRel, `${resDir()}/${r.id}/${r.file}`), caption: r.title } };
   }
   return { type: 'embed', attrs: { ...embedAttrsFor(r, docRel) } };
 }
