@@ -389,6 +389,8 @@ export const it: Record<string, string> = {
   'prefs.lineStep.5': 'Ogni 5 righe',
   'prefs.lineStep.10': 'Ogni 10 righe',
   'prefs.spellcheck': 'Controllo ortografico del sistema',
+  'prefs.titleFromHeading': "Un titolo H1 in cima dà il nome alla pergamena",
+  'prefs.titleFromHeadingHint': "Al salvataggio il file prende il testo del primo titolo, se la pergamena comincia con un H1. Mentre scrivi nel titolo si aspetta che tu passi al testo; Salva rinomina subito.",
   'prefs.zoom': 'Zoom della pagina',
   'prefs.checkpoint': 'Checkpoint automatici',
   'prefs.checkpoint.off': 'Disattivati',

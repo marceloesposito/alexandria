@@ -161,6 +161,8 @@ export function registerAppCommands() {
       category: 'file',
       run: async () => {
         await flushSave(getEditor());
+        // Salva rinomina subito dal primo H1, anche col cursore ancora nel titolo
+        await (await import('../editor/titleSync')).syncTitleFromHeading(true);
         ws().toast(t('doc.savedNow'), 'ok');
       },
     },

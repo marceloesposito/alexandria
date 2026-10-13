@@ -389,6 +389,8 @@ export const en: Record<string, string> = {
   'prefs.lineStep.5': 'Every 5 lines',
   'prefs.lineStep.10': 'Every 10 lines',
   'prefs.spellcheck': 'System spell checker',
+  'prefs.titleFromHeading': "An H1 at the top names the Scroll",
+  'prefs.titleFromHeadingHint': "When saving, the file takes the text of the first heading if the Scroll starts with an H1. While you type in the heading it waits until you move on to the text; Save renames right away.",
   'prefs.zoom': 'Page zoom',
   'prefs.checkpoint': 'Automatic checkpoints',
   'prefs.checkpoint.off': 'Off',

@@ -1,6 +1,6 @@
 # Stato dei lavori
 
-Aggiornato: 13 ottobre 2026 (Apri documento, conteggi e zoom nell'etichetta flottante).
+Aggiornato: 13 ottobre 2026 (nome della pergamena dal primo H1).
 
 | Milestone | Stato | PR |
 | --- | --- | --- |
@@ -31,6 +31,14 @@ Aggiornato: 13 ottobre 2026 (Apri documento, conteggi e zoom nell'etichetta flot
 | Apri documento: .docx, .doc, .odt, .rtf, .html, .epub, .txt, .md diventano pergamene | fatto | #35 |
 
 ## Decisioni prese durante il lavoro
+
+- **Nome della pergamena dal primo H1** (richiesta del committente, 13/10/2026): se la pergamena comincia
+  con un titolo di livello 1, al salvataggio il file prende quel nome (`editor/titleSync.ts`,
+  `headingTitle.ts`). Si aspetta finche' il cursore e' nel titolo (niente nomi a meta' parola); Salva
+  (Cmd/Ctrl+S) rinomina subito. La rinomina e' "sul posto" (`moveOpenDoc` in `editor/session.ts`): i
+  salvataggi restano in attesa e poi vanno al nuovo percorso, l'editor non ricarica (cursore, annulla e
+  Marginalia restano). Nome gia' preso: vale la regola della rinomina manuale ("Titolo 2"). Mai nella copia
+  per revisione. Si spegne da Preferenze > Editor (`prefs.titleFromHeading`, acceso di partenza).
 
 - **Apri documento** (File > Apri documento…, richiesta del committente, 13/10/2026): il file diventa una
   pergamena nuova del Compendium aperto; l'originale non si tocca. Tutto in TypeScript, senza programmi

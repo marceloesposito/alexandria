@@ -55,6 +55,8 @@ export interface Prefs {
   formatBar: 'open' | 'collapsed' | 'hidden';
   /** conteggi sempre in vista nell'etichetta flottante chiusa */
   countsShown: CountKind[];
+  /** un H1 in cima alla pergamena ne diventa il nome al salvataggio */
+  titleFromHeading: boolean;
 }
 
 export const DEFAULT_PREFS: Prefs = {
@@ -91,6 +93,7 @@ export const DEFAULT_PREFS: Prefs = {
   dropSource: 'footnote',
   formatBar: 'open',
   countsShown: [...DEFAULT_COUNTS_SHOWN],
+  titleFromHeading: true,
 };
 
 export interface DocCursor {
