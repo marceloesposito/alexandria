@@ -134,6 +134,7 @@ export const MENUS: MenuDef[] = [
     items: [
       c('file.newDoc'),
       c('tpl.newFrom'),
+      c('file.importDoc'),
       { label: 'menu.file.documents', submenu: [{ dynamic: 'documents' }] },
       sep,
       c('file.home'),

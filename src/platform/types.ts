@@ -130,7 +130,8 @@ export interface Platform {
   readClipboard(): Promise<{ text: string | null; files: string[]; image: Uint8Array | null } | null>;
   documentsDir(): Promise<string>;
   pickDirectory(title?: string): Promise<string | null>;
-  pickFiles(title?: string): Promise<string[]>;
+  /** scelta di file; con `extensions` la finestra propone solo quelli (resta possibile vedere tutto) */
+  pickFiles(title?: string, extensions?: string[]): Promise<string[]>;
   /** file da aprire all'avvio (doppio clic su un .recensio), una volta sola */
   startupFile(): Promise<string | null>;
   /** file aperti mentre l'app gira (macOS) */

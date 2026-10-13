@@ -1,6 +1,6 @@
 # Stato dei lavori
 
-Aggiornato: 7 ottobre 2026 (M11).
+Aggiornato: 13 ottobre 2026 (Apri documento).
 
 | Milestone | Stato | PR |
 | --- | --- | --- |
@@ -28,8 +28,23 @@ Aggiornato: 7 ottobre 2026 (M11).
 | Vista pagina con fogli veri (formato e margini del Layout, interruzioni di pagina) | fatto | #22 |
 | Aggiungi da un altro Compendium (pergamene, Marginalia, fonti, tipi, Codex) | fatto | #23 |
 | Colonne laterali richiudibili con linguette sul bordo | fatto | #24 |
+| Apri documento: .docx, .doc, .odt, .rtf, .html, .epub, .txt, .md diventano pergamene | fatto | #35 |
 
 ## Decisioni prese durante il lavoro
+
+- **Apri documento** (File > Apri documento…, richiesta del committente, 13/10/2026): il file diventa una
+  pergamena nuova del Compendium aperto; l'originale non si tocca. Tutto in TypeScript, senza programmi
+  esterni: .docx con mammoth (HTML -> `doc/import/html.ts`), .doc Word 97-2003 con un lettore nostro del
+  formato binario (`wordBinary.ts`: contenitore OLE, pezzi del testo, stili per i titoli, grassetto e
+  corsivo, note, tabelle, link, indice; niente immagini ne' numerazione automatica degli elenchi, che
+  diventano puntati), .odt/.fodt (`odt.ts`), .rtf (`rtf.ts`), HTML ed EPUB (`html.ts`), testo e Markdown.
+  Immagini nell'Armarium come figure. Un .docx con revisioni tracciate o commenti parte dal testo
+  originale e la revisione si riapplica con `applyWordReview` (revisioni da accettare e Marginalia),
+  dopo una versione di sicurezza. Pages (.pages) non si legge: il messaggio spiega come esportare in Word.
+  I file aperti dal sistema (doppio clic, "Apri con", trascinati sull'icona) vanno alla revisione se
+  `.recensio`, altrimenti all'import. Associazioni ai documenti **solo su macOS** e con rango
+  "Alternate" (`tauri.macos.conf.json`): su Windows l'installer NSIS diventerebbe il programma
+  predefinito dei .docx al posto di Word.
 
 - **Colonna sinistra dell'editor**: selettore Risorse | Index (richiesta del committente,
   5/10). L'indice mostra H1–H3, si aggiorna mentre si scrive, evidenzia la sezione corrente.
