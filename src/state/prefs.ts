@@ -3,6 +3,7 @@ import type { Lang } from '../i18n';
 import type { RibbonConfig } from '../commands/ribbonModel';
 import type { FloatingPanel } from '../commands/floatModel';
 import type { WorkspaceLayout } from './workspaces';
+import { DEFAULT_COUNTS_SHOWN, type CountKind } from '../shell/countsModel';
 import { normalizeOverrides, type ShortcutOverrides } from 'logos/commands/shortcuts';
 
 export type ThemePref = 'light' | 'dark' | 'system';
@@ -52,6 +53,8 @@ export interface Prefs {
   dropSource: 'footnote' | 'citation';
   /** barra flottante di formattazione nello Scriptorium */
   formatBar: 'open' | 'collapsed' | 'hidden';
+  /** conteggi sempre in vista nell'etichetta flottante chiusa */
+  countsShown: CountKind[];
 }
 
 export const DEFAULT_PREFS: Prefs = {
@@ -87,6 +90,7 @@ export const DEFAULT_PREFS: Prefs = {
   exportRevisions: 'clean',
   dropSource: 'footnote',
   formatBar: 'open',
+  countsShown: [...DEFAULT_COUNTS_SHOWN],
 };
 
 export interface DocCursor {

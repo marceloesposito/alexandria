@@ -1,6 +1,6 @@
 # Stato dei lavori
 
-Aggiornato: 13 ottobre 2026 (Apri documento).
+Aggiornato: 13 ottobre 2026 (Apri documento, conteggi e zoom nell'etichetta flottante).
 
 | Milestone | Stato | PR |
 | --- | --- | --- |
@@ -58,7 +58,10 @@ Aggiornato: 13 ottobre 2026 (Apri documento).
 - **Aspetto dell'editor** (Visualizza): Pagina, con righelli in cm e inizi di pagina stimati, oppure
   Senza bordi (stile Notion/Obsidian). La **scrittura minimale** (Cmd/Ctrl+Maiusc+D, Esc per uscire)
   nasconde tutto tranne il testo e mette la finestra a schermo intero; non si salva nello stato.
-- **Conteggi**: etichetta flottante in basso a destra al posto della barra di stato.
+- **Conteggi**: etichetta flottante in basso a destra al posto della barra di stato. Nella lista aperta
+  una puntina per ogni conteggio sceglie quali restano in vista a etichetta chiusa (anche nessuno;
+  `prefs.countsShown`, predefiniti parole e pagine; `shell/countsModel.ts`). Accanto alla percentuale
+  dello zoom i pulsanti riduci/ingrandisci (clic sulla percentuale = 100%), richiesta del committente 13/10/2026.
 - **Embed**: `[Titolo](url){embed resource=id image="..."}`. All'import di un link l'app fotografa la
   pagina con una webview fuori schermo, senza focus, senza cookie e senza capability (WKWebView su
   macOS, WebView2 su Windows); la foto e' ridotta a WebP o JPEG. Se non riesce resta og:image.
