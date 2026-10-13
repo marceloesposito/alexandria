@@ -8,7 +8,7 @@ import type { FloatingPanel } from '../commands/floatModel';
 export type BuiltInWorkspace = 'beginner' | 'studio' | 'pro';
 
 /** Preferenze che fanno parte della disposizione (le altre, come lingua e tema, restano dell'utente). */
-export const LAYOUT_KEYS = ['showLeft', 'showRight', 'showPreview', 'leftTab', 'lineNumbers', 'rulers', 'editorLayout', 'ribbonSize', 'ribbonCollapsed', 'focusMode'] as const;
+export const LAYOUT_KEYS = ['showLeft', 'showRight', 'showPreview', 'leftTab', 'lineNumbers', 'rulers', 'editorLayout', 'ribbonSize', 'ribbonCollapsed', 'focusMode', 'leftSections'] as const;
 export type LayoutKey = (typeof LAYOUT_KEYS)[number];
 export type LayoutPrefs = Pick<Prefs, LayoutKey>;
 
@@ -27,9 +27,9 @@ export const BUILT_IN: BuiltInWorkspace[] = ['beginner', 'studio', 'pro'];
 
 const PREFS: Record<BuiltInWorkspace, LayoutPrefs> = {
   // vicino alla modalita' focus: solo il testo e pochi strumenti
-  beginner: { showLeft: false, showRight: false, showPreview: false, leftTab: 'resources', lineNumbers: false, rulers: false, editorLayout: 'borderless', ribbonSize: 'large', ribbonCollapsed: false, focusMode: false },
-  studio: { showLeft: true, showRight: true, showPreview: false, leftTab: 'resources', lineNumbers: true, rulers: true, editorLayout: 'page', ribbonSize: 'large', ribbonCollapsed: false, focusMode: false },
-  pro: { showLeft: true, showRight: true, showPreview: true, leftTab: 'resources', lineNumbers: true, rulers: true, editorLayout: 'page', ribbonSize: 'small', ribbonCollapsed: false, focusMode: false },
+  beginner: { showLeft: false, showRight: false, showPreview: false, leftTab: 'resources', lineNumbers: false, rulers: false, editorLayout: 'borderless', ribbonSize: 'large', ribbonCollapsed: false, focusMode: false, leftSections: { order: [], hidden: [] } },
+  studio: { showLeft: true, showRight: true, showPreview: false, leftTab: 'resources', lineNumbers: true, rulers: true, editorLayout: 'page', ribbonSize: 'large', ribbonCollapsed: false, focusMode: false, leftSections: { order: [], hidden: [] } },
+  pro: { showLeft: true, showRight: true, showPreview: true, leftTab: 'resources', lineNumbers: true, rulers: true, editorLayout: 'page', ribbonSize: 'small', ribbonCollapsed: false, focusMode: false, leftSections: { order: [], hidden: [] } },
 };
 
 /** Gli strumenti essenziali di ogni ambiente per il workspace Beginner. */
@@ -78,13 +78,13 @@ export function builtInWorkspace(id: BuiltInWorkspace, defaults: RibbonConfig): 
 
 /** Fotografa la disposizione attuale (per "Salva workspace"). */
 export function captureWorkspace(id: string, name: string, prefs: Prefs, ribbon: RibbonConfig | null, floating: FloatingPanel[]): WorkspaceLayout {
-  const p = Object.fromEntries(LAYOUT_KEYS.map((k) => [k, prefs[k]])) as LayoutPrefs;
+  const p = structuredClone(Object.fromEntries(LAYOUT_KEYS.map((k) => [k, prefs[k]]))) as LayoutPrefs;
   return { id, name, prefs: p, ribbon: ribbon ? structuredClone(ribbon) : null, floating: structuredClone(floating) };
 }
 
 /** Cio' che cambia applicando un workspace: preferenze di disposizione, barra e pannelli. */
 export function applyWorkspace(w: WorkspaceLayout): { prefs: LayoutPrefs; ribbon: RibbonConfig | null; floating: FloatingPanel[] } {
-  return { prefs: { ...w.prefs }, ribbon: w.ribbon ? structuredClone(w.ribbon) : null, floating: structuredClone(w.floating) };
+  return { prefs: structuredClone(w.prefs), ribbon: w.ribbon ? structuredClone(w.ribbon) : null, floating: structuredClone(w.floating) };
 }
 
 /** Un workspace salvato letto da disco, completato con i valori di Studio se mancano campi. */

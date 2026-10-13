@@ -31,7 +31,13 @@ function many<T>() {
   };
 }
 
-export const leftPanelSections = many<ComponentType>();
+/** sezione della colonna sinistra (scheda Armarium): id stabile, nome (chiave i18n) e componente */
+export interface LeftSection {
+  id: string;
+  label: string;
+  component: ComponentType;
+}
+export const leftPanelSections = many<LeftSection>();
 export const rightPanel = single<ComponentType<PageProps>>();
 export const centerOverlay = single<ComponentType<PageProps>>();
 export const previewPanel = single<ComponentType>();
