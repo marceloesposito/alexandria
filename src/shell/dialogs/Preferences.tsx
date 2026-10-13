@@ -98,6 +98,11 @@ export function PreferencesDialog() {
               <input type="checkbox" checked={prefs.spellcheck} onChange={(e) => set({ spellcheck: e.target.checked })} />
               {t('prefs.spellcheck')}
             </label>
+            <label className="form__check">
+              <input type="checkbox" checked={prefs.titleFromHeading} onChange={(e) => set({ titleFromHeading: e.target.checked })} />
+              {t('prefs.titleFromHeading')}
+            </label>
+            <p className="hint">{t('prefs.titleFromHeadingHint')}</p>
             <label className="form__row">
               <span>{t('prefs.zoom')}</span>
               <input

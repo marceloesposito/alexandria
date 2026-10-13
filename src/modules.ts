@@ -15,6 +15,7 @@ import { ReviewDialog } from './review/ReviewDialog';
 import { registerWritingLang } from './shell/WritingLang';
 import { registerColorWidgets } from './editor/FormatBar';
 import { AppendDialog } from './vault/AppendDialog';
+import { registerTitleSync } from './editor/titleSync';
 
 let done = false;
 
@@ -29,6 +30,7 @@ export function registerAll() {
   registerRevision();
   registerVersions();
   registerResources();
+  registerTitleSync();
   registerExport();
   registerTemplates();
   registerDialog('docSettings', DocSettingsDialog);

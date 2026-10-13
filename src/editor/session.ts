@@ -42,6 +42,42 @@ let countTimer: ReturnType<typeof setTimeout> | null = null;
 let pending: { root: string; rel: string; md: string } | null = null;
 let lastSaved = new Map<string, string>();
 const afterSaveHooks = new Set<(rel: string) => void>();
+/** rinomina del documento aperto in corso: salvataggi e caricamenti aspettano che finisca */
+let renaming: Promise<void> | null = null;
+/** nuovo percorso del documento aperto, rinominato senza ricaricarlo nell'editor */
+let movedTo: string | null = null;
+/** scrittura su disco in corso (la rinomina aspetta che finisca) */
+let writing: Promise<unknown> | null = null;
+
+/**
+ * Rinomina il documento aperto senza ricaricarlo: `run` sposta il file (e apre il nuovo percorso);
+ * intanto i salvataggi restano in attesa, poi vanno al nuovo percorso. Cursore, cronologia di
+ * annulla e selezione restano quelli di prima.
+ */
+export async function moveOpenDoc(from: string, run: () => Promise<string>): Promise<string> {
+  let release!: () => void;
+  renaming = new Promise<void>((r) => (release = r));
+  try {
+    if (writing) await writing.catch(() => undefined);
+    const to = await run();
+    if (to !== from) {
+      for (const [k, v] of [...lastSaved]) {
+        if (!k.endsWith(`|${from}`)) continue;
+        lastSaved.delete(k);
+        lastSaved.set(k.slice(0, k.length - from.length) + to, v);
+      }
+      if (pending?.rel === from) pending.rel = to;
+      if (useDoc.getState().rel === from) {
+        useDoc.setState({ rel: to });
+        movedTo = to;
+      }
+    }
+    return to;
+  } finally {
+    renaming = null;
+    release();
+  }
+}
 const loadedHooks = new Set<(editor: Editor, root: string, rel: string) => void | Promise<void>>();
 
 /** Chiamato dopo il caricamento di un documento nell'editor (commenti, impostazioni...). */
@@ -63,6 +99,13 @@ export function currentMarkdown(editor: Editor | null): string {
 }
 
 export async function loadDocument(editor: Editor, root: string, rel: string): Promise<void> {
+  if (renaming) await renaming;
+  // stesso documento con un nome nuovo: niente da ricaricare
+  if (movedTo === rel && useDoc.getState().rel === rel) {
+    movedTo = null;
+    return;
+  }
+  movedTo = null;
   await flushSave();
   const md = await readDocument(root, rel);
   lastSaved.set(`${root}|${rel}`, md);
@@ -98,6 +141,7 @@ export function scheduleSave(editor: Editor) {
 
 /** Da chiamare prima di cambiare documento, vista o alla chiusura. */
 export async function flushSave(editor?: Editor | null): Promise<void> {
+  if (renaming) await renaming;
   if (saveTimer) {
     clearTimeout(saveTimer);
     saveTimer = null;
@@ -113,11 +157,14 @@ export async function flushSave(editor?: Editor | null): Promise<void> {
   }
   try {
     useWorkspace.getState().setSaveState('saving');
-    await writeDocument(p.root, p.rel, p.md);
+    writing = writeDocument(p.root, p.rel, p.md);
+    await writing;
+    writing = null;
     lastSaved.set(key, p.md);
     useWorkspace.getState().setSaveState('saved');
     afterSaveHooks.forEach((h) => h(p.rel));
   } catch (e) {
+    writing = null;
     useWorkspace.getState().setSaveState('error');
     useWorkspace.getState().toast(String(e), 'error');
   }
