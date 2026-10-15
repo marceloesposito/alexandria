@@ -10,10 +10,12 @@ decisioni prese con il committente: `docs/SPEC.md`. Stato e prossimi passi:
   nessuna analytics, font inclusi nel pacchetto. La rete si usa solo su azione
   esplicita dell'utente: import di un link, "cerca metadati", push/pull del
   remoto, riproduzione di un video. La CSP sta in `src-tauri/tauri.conf.json`.
-- **Dentro l'app nessun servizio americano** (decisione del committente, 12/10/2026): l'unico
-  server git remoto e' **Codeberg** (oltre alle cartelle locali: chiavetta, NAS). Niente GitHub o
-  GitLab nell'app; `remote_allowed` in `git.rs` e `remoteAllowed` in `versions/forge.ts` lo
-  impongono. Lo *sviluppo* invece resta su GitHub (repo, PR, CI).
+- **Dentro l'app nessun servizio americano** (decisione del committente, 12/10/2026) e, dal
+  15/10/2026, **nessun server git di terzi**: il remoto e' solo una cartella (chiavetta, NAS,
+  cartella sincronizzata). Codeberg e' stato tolto perche' i suoi termini non ammettono testi
+  personali privati e possono rimuoverli; le alternative sono in valutazione (`docs/STATO.md`).
+  `remote_allowed` in `git.rs` e `remoteAllowed` in `versions/remote.ts` lo impongono. Lo
+  *sviluppo* invece resta su GitHub (repo, PR, CI).
 - **Il Rust fa solo I/O**: file system, git (libgit2), indice SQLite FTS5, rete,
   Typst. Tutta la logica di dominio sta in **funzioni pure testate** con vitest
   (conversione Markdown, conteggi, ancore dei commenti, sommari dei diff, filtri
@@ -77,7 +79,7 @@ diverse: **prima di iniziare `git fetch` e controlla PR aperte e rami recenti** 
 
 ### Dove siamo
 - Milestone M0-M12 su `main` (PR #1-#24), poi PR #25-#40; CI verde su Windows, macOS e frontend.
-- Nessuna release pubblicata, installer non firmati. Versione 0.1.0.
+- Nessuna release pubblicata, installer non firmati. Versione 0.2.0 (tag `v0.2.0`); storia delle versioni in `CHANGELOG.md` (va aggiornata con ogni PR).
 - Sul PC Windows del committente Alexandria e' **installata** (per utente, in
   `%LOCALAPPDATA%\Alexandria`); per aggiornarla si rilancia l'installer con `/S`.
 - Sul Mac del committente e' **installata** in `/Applications/Alexandria.app` (build del 13/10 con
@@ -121,10 +123,9 @@ vanno con la maiuscola (`Scrolls`), altrimenti il test del glossario fallisce.
 - `vault/append.ts` — Aggiungi da un altro Compendium (`planAppend` puro).
 - `doc/import/` + `vault/importDocument.ts` — Apri documento: .docx (mammoth), .doc (lettore binario
   nostro), .odt, .rtf, .html, .epub, .txt, .md -> pergamena nuova; revisioni e commenti Word riapplicati.
-- `versions/forge.ts`, `src-tauri/src/forge.rs` — account Codeberg (token nel portachiavi), crea
-  repository, elenco repository; `git_clone` + `versions/OpenRemoteDialog.tsx`. Solo Codeberg.
-  "Accedi con Codeberg" (OAuth con PKCE, ritorno su 127.0.0.1, token rinnovato da `fresh`) in
-  `versions/ForgeLogin.tsx`; id dell'app OAuth registrata su Codeberg in `OAUTH_CLIENT_ID`.
+- `versions/remote.ts`, `versions/RemoteDialog.tsx` — remoto su cartella: alla prima scelta diventa
+  un repository bare (`prepare_folder_remote` in `git.rs`), il primo invio ne fissa HEAD;
+  `git_clone` + `versions/OpenRemoteDialog.tsx` aprono un Compendium da una copia.
 - `citations/fullNote.ts` — fonte per esteso nelle note a pie' di pagina (trascinare una fonte crea
   una nota; Alt = citazione nel testo; preferenza `dropSource`).
 - `shell/QuickSwitcher.tsx` (Ctrl+O, `>` comandi), `components/HoverCard.tsx`,

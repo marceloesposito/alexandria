@@ -1,6 +1,6 @@
 [package]
 name = "alexandria"
-version = "0.1.0"
+version = "0.2.0"
 description = "Alexandria - offline writing studio for papers and essays"
 authors = ["Marcelo Esposito"]
 edition = "2021"
@@ -35,11 +35,8 @@ typst-layout = "0.15"
 typst-assets = { version = "0.15", features = ["fonts"] }
 # caratteri installati nel sistema (Times New Roman, Georgia, Arial...) per il PDF
 fontdb = "0.23"
-keyring = { version = "3", features = ["windows-native", "apple-native"] }
 sha2 = "0.11"
 base64 = "0.23"
-# verificatore PKCE e stato del login OAuth
-getrandom = "0.3"
 chrono = { version = "0.4", features = ["serde"] }
 tokio = { version = "1", features = ["rt", "macros", "time", "sync"] }
 

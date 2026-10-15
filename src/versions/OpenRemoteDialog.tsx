@@ -1,14 +1,11 @@
-// "Apri Compendium remoto": sceglie una repository Codeberg dall'account (o da un indirizzo), la
-// scarica in Documenti/Alexandria e la apre. Login e token come in "Account e repository remota".
-import { useEffect, useMemo, useState } from 'react';
-import { Download, FolderOpen, Lock, Globe, Search } from 'lucide-react';
+// "Apri Compendium da una copia": sceglie la copia del Compendium (cartella .git su chiavetta, NAS o
+// cartella sincronizzata), la copia in Documenti/Alexandria e la apre.
+import { useEffect, useState } from 'react';
+import { Download, FolderOpen } from 'lucide-react';
 import { Modal } from '../components/Modal';
 import { useWorkspace } from '../state/workspace';
 import { platform, joinPath } from '../platform';
-import type { ForgeAccount, RemoteRepo } from '../platform/types';
-import { FORGE_HOST, remoteAllowed, repoSlug } from './forge';
-import { ForgeLogin } from './ForgeLogin';
-import { fuzzyFilter } from 'logos/lib/fuzzy';
+import { remoteAllowed, repoSlug } from './remote';
 import { t, useLang } from '../i18n';
 
 const toast = (m: string, k: 'ok' | 'error' | 'info' = 'info') => useWorkspace.getState().toast(m, k);
@@ -21,55 +18,25 @@ async function freeFolder(name: string): Promise<string> {
   return p;
 }
 
-const nameFromUrl = (u: string) => repoSlug(u.replace(/\.git\/?$/, '').split(/[/:]/).filter(Boolean).pop() ?? '') || 'Compendium';
+const nameFromUrl = (u: string) => repoSlug(u.replace(/\.git[\\/]?$/, '').split(/[/\\:]/).filter(Boolean).pop() ?? '') || 'Compendium';
 
 export function OpenRemoteDialog() {
   useLang();
   const close = () => useWorkspace.getState().closeDialog();
-  const host = FORGE_HOST;
-  const [account, setAccount] = useState<ForgeAccount | null>(null);
-  const [repos, setRepos] = useState<RemoteRepo[] | null>(null);
-  const [q, setQ] = useState('');
   const [url, setUrl] = useState('');
   const [dest, setDest] = useState('');
   const [busy, setBusy] = useState(false);
   const [progress, setProgress] = useState<[number, number] | null>(null);
 
-  useEffect(() => {
-    let alive = true;
-    setRepos(null);
-    void platform.forgeAccount(host).then((a) => alive && setAccount(a));
-    return () => {
-      alive = false;
-    };
-  }, [host]);
-
-  useEffect(() => {
-    if (!account) return;
-    let alive = true;
-    platform
-      .forgeListRepos(account.host)
-      .then((r) => alive && setRepos(r))
-      .catch((e) => {
-        if (alive) setRepos([]);
-        toast(String(e), 'error');
-      });
-    return () => {
-      alive = false;
-    };
-  }, [account]);
-
-  // la cartella di destinazione segue la repository scelta (finché non la si cambia a mano)
+  // la cartella di destinazione segue la copia scelta (finché non la si cambia a mano)
   const [destTouched, setDestTouched] = useState(false);
   useEffect(() => {
     if (destTouched || !url.trim()) return;
     void freeFolder(nameFromUrl(url.trim())).then(setDest);
   }, [url, destTouched]);
 
-  const shown = useMemo(() => fuzzyFilter(repos ?? [], q, (r) => `${r.full_name} ${r.description}`, 100), [repos, q]);
-
   const download = async () => {
-    if (!remoteAllowed(url)) return toast(t('forge.onlyCodeberg'), 'error');
+    if (!remoteAllowed(url)) return toast(t('vc.remote.onlyFolders'), 'error');
     if (!url.trim() || !dest.trim()) return;
     setBusy(true);
     setProgress([0, 0]);
@@ -113,38 +80,19 @@ export function OpenRemoteDialog() {
       <p className="hint">{t('remote.intro')}</p>
 
       <section className="forge__section">
-        <h4>Codeberg</h4>
-        {account ? (
-          <p className="hint">{t('forge.connectedAs', { login: account.login || '—', host: account.host })}</p>
-        ) : (
-          <ForgeLogin host={host} hint={t('remote.tokenHint')} onLogin={setAccount} />
-        )}
-      </section>
-
-      {account && (
-        <section className="forge__section">
-          <h4>{t('remote.repos')}</h4>
-          <label className="search-field">
-            <Search size={13} />
-            <input className="input" value={q} placeholder={t('remote.search')} onChange={(e) => setQ(e.target.value)} />
-          </label>
-          <ul className="remote-list">
-            {repos === null && <li className="hint">{t('common.loading')}</li>}
-            {repos !== null && !shown.length && <li className="hint">{t('remote.none')}</li>}
-            {shown.map((r) => (
-              <li key={r.clone_url} className={url === r.clone_url ? 'is-active' : ''} onClick={() => setUrl(r.clone_url)}>
-                {r.private ? <Lock size={12} /> : <Globe size={12} />}
-                <span className="remote-list__name">{r.full_name}</span>
-                {r.updated && <span className="hint">{new Date(r.updated).toLocaleDateString()}</span>}
-              </li>
-            ))}
-          </ul>
-        </section>
-      )}
-
-      <section className="forge__section">
         <label className="field-label">{t('remote.url')}</label>
-        <input className="input" value={url} placeholder="https://codeberg.org/utente/tesi.git" onChange={(e) => setUrl(e.target.value)} />
+        <div className="forge__row">
+          <input className="input" value={url} placeholder="/Volumes/USB/Tesi.git" onChange={(e) => setUrl(e.target.value)} />
+          <button
+            className="btn"
+            onClick={async () => {
+              const dir = await platform.pickDirectory(t('remote.pickSource'));
+              if (dir) setUrl(dir);
+            }}
+          >
+            <FolderOpen size={13} /> {t('remote.choose')}
+          </button>
+        </div>
         <label className="field-label">{t('remote.dest')}</label>
         <div className="forge__row">
           <input
