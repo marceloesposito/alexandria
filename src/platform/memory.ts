@@ -512,24 +512,11 @@ export function createMemoryPlatform(opts: { persist?: boolean } = {}): Platform
     async onOpenFile() {
       return () => undefined;
     },
-    async forgeAccount() {
-      return null;
-    },
-    async forgeLogout() {},
-    async forgeSetToken() {
-      throw new Error('Account non disponibili nella versione browser');
-    },
-    async forgeListRepos() {
-      return [];
-    },
     async gitClone() {
       throw new Error('Remoto non disponibile nella versione browser');
     },
     async onCloneProgress() {
       return () => undefined;
-    },
-    async forgeCreateRepo() {
-      throw new Error('Account non disponibili nella versione browser');
     },
 
     async indexUpsert(db, docs) {

@@ -1,7 +1,6 @@
 // Alexandria: guscio desktop. Il Rust fa solo I/O, git, indice, rete e impaginazione;
 // tutta la logica di dominio e' nel frontend (src/), in funzioni pure testate.
 mod fsops;
-mod forge;
 mod git;
 mod index;
 mod clipboard;
@@ -144,11 +143,6 @@ pub fn run() {
             git::git_abort_merge,
             git::git_set_remote,
             git::git_remote,
-            forge::forge_account,
-            forge::forge_logout,
-            forge::forge_set_token,
-            forge::forge_create_repo,
-            forge::forge_list_repos,
             git::git_clone,
             git::git_push,
             git::git_pull,

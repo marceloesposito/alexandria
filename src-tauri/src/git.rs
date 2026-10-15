@@ -2,14 +2,13 @@
 // L'intero vault e' il repository; .alexandria-cache/ resta fuori (gitignore).
 use crate::fsops::{err, write_atomic, CmdResult};
 use git2::{
-    build::CheckoutBuilder, BranchType, Commit, Cred, DiffOptions, FetchOptions, IndexAddOption, MergeAnalysis,
+    build::CheckoutBuilder, BranchType, Commit, DiffOptions, FetchOptions, IndexAddOption, MergeAnalysis,
     Oid, PushOptions, RemoteCallbacks, Repository, RepositoryInitOptions, Signature, Sort, Tree,
 };
 use serde::{Deserialize, Serialize};
 use std::collections::HashMap;
 use std::path::Path;
 
-const KEYRING_SERVICE: &str = "app.alexandria.desktop.git";
 
 #[derive(Serialize)]
 pub struct GitCommit {
@@ -448,15 +447,11 @@ pub fn git_abort_merge(repo: String) -> CmdResult<()> {
 }
 
 /**
- * Remoti ammessi: un repository su Codeberg (https) o una cartella locale (chiavetta, NAS).
- * Scelta del committente: dentro l'app nessun servizio americano.
+ * Remoti ammessi: solo cartelle locali (chiavetta, NAS, cartella sincronizzata). Nessun server git
+ * di terzi: i termini dei servizi gratuiti (Codeberg compreso) non ammettono testi personali privati.
  */
 pub fn remote_allowed(url: &str) -> bool {
     let u = url.trim();
-    if let Some(rest) = u.strip_prefix("https://codeberg.org/") {
-        let parts: Vec<&str> = rest.trim_end_matches('/').split('/').collect();
-        return parts.len() == 2 && parts.iter().all(|p| !p.is_empty() && !p.contains(char::is_whitespace));
-    }
     let b = u.as_bytes();
     u.starts_with('/') || u.starts_with("\\\\") || u.starts_with("file://") || (b.len() > 2 && b[0].is_ascii_alphabetic() && b[1] == b':' && (b[2] == b'\\' || b[2] == b'/'))
 }
@@ -465,29 +460,42 @@ fn check_remote(url: &str) -> CmdResult<()> {
     if remote_allowed(url) {
         Ok(())
     } else {
-        Err("Alexandria usa solo Codeberg (https://codeberg.org/...) o una cartella locale come remoto".into())
+        Err("Alexandria usa come remoto solo una cartella (chiavetta, NAS, cartella sincronizzata)".into())
     }
 }
 
-fn token_entry(url: &str) -> Option<keyring::Entry> {
-    keyring::Entry::new(KEYRING_SERVICE, url).ok()
+/** Percorso su disco di un remoto ammesso ("file:///x" -> "/x", "file:///C:/x" -> "C:/x"). */
+fn local_path(url: &str) -> std::path::PathBuf {
+    let u = url.trim();
+    let p = u.strip_prefix("file://").unwrap_or(u);
+    let b = p.as_bytes();
+    let p = if b.len() > 3 && b[0] == b'/' && b[1].is_ascii_alphabetic() && b[2] == b':' { &p[1..] } else { p };
+    std::path::PathBuf::from(p)
+}
+
+/** La cartella del remoto: se non c'e' o e' vuota diventa un repository "bare". */
+fn prepare_folder_remote(url: &str) -> CmdResult<()> {
+    let p = local_path(url);
+    if Repository::open(&p).is_ok() {
+        return Ok(());
+    }
+    if p.exists() && std::fs::read_dir(&p).map(|mut d| d.next().is_some()).unwrap_or(true) {
+        return Err("La cartella scelta non e' vuota e non contiene un Compendium".into());
+    }
+    std::fs::create_dir_all(&p).map_err(err)?;
+    Repository::init_bare(&p).map_err(err)?;
+    Ok(())
 }
 
 #[tauri::command]
-pub fn git_set_remote(repo: String, url: String, token: Option<String>) -> CmdResult<()> {
+pub fn git_set_remote(repo: String, url: String) -> CmdResult<()> {
     check_remote(&url)?;
+    prepare_folder_remote(&url)?;
     let r = open(&repo)?;
     if r.find_remote("origin").is_ok() {
         r.remote_set_url("origin", &url).map_err(err)?;
     } else {
         r.remote("origin", &url).map_err(err)?;
-    }
-    if let (Some(t), Some(e)) = (token, token_entry(&url)) {
-        if t.is_empty() {
-            let _ = e.delete_credential();
-        } else {
-            e.set_password(&t).map_err(err)?;
-        }
     }
     Ok(())
 }
@@ -499,29 +507,6 @@ pub fn git_remote(repo: String) -> CmdResult<Option<String>> {
     Ok(url)
 }
 
-fn callbacks(url: String) -> RemoteCallbacks<'static> {
-    let mut cb = RemoteCallbacks::new();
-    let mut tries = 0;
-    cb.credentials(move |_u, username, allowed| {
-        // un token rifiutato non va riprovato all'infinito
-        tries += 1;
-        if tries > 2 {
-            return Err(git2::Error::from_str("Accesso negato: controlla il token dell'account"));
-        }
-        if allowed.contains(git2::CredentialType::USER_PASS_PLAINTEXT) {
-            if let Some(t) = token_entry(&url).and_then(|e| e.get_password().ok()) {
-                return Cred::userpass_plaintext(username.unwrap_or("x-access-token"), &t);
-            }
-            // altrimenti l'account Codeberg collegato (token personale)
-            if let Some((user, t)) = crate::forge::account_for_url(&url) {
-                return Cred::userpass_plaintext(&user, &t);
-            }
-        }
-        Cred::default()
-    });
-    cb
-}
-
 /// Scarica una repository remota in una cartella nuova (o vuota): "Apri Compendium remoto".
 #[tauri::command]
 pub async fn git_clone(app: tauri::AppHandle, url: String, dest: String) -> CmdResult<()> {
@@ -531,7 +516,7 @@ pub async fn git_clone(app: tauri::AppHandle, url: String, dest: String) -> CmdR
         if p.exists() && std::fs::read_dir(p).map(|mut d| d.next().is_some()).unwrap_or(false) {
             return Err("La cartella di destinazione non e' vuota".to_string());
         }
-        let mut cb = callbacks(url.clone());
+        let mut cb = RemoteCallbacks::new();
         let mut last = std::time::Instant::now();
         cb.transfer_progress(move |s| {
             if last.elapsed().as_millis() > 150 {
@@ -561,9 +546,14 @@ pub async fn git_push(repo: String) -> CmdResult<String> {
         let url = remote.url().unwrap_or("").to_string();
         check_remote(&url)?;
         let mut po = PushOptions::new();
-        po.remote_callbacks(callbacks(url));
         let spec = format!("refs/heads/{0}:refs/heads/{0}", branch);
         remote.push(&[spec.as_str()], Some(&mut po)).map_err(err)?;
+        // primo invio in una cartella nuova: HEAD del remoto sul branch inviato, cosi' il clone lo apre
+        if let Ok(bare) = Repository::open(local_path(&url)) {
+            if bare.head().is_err() {
+                bare.set_head(&format!("refs/heads/{branch}")).map_err(err)?;
+            }
+        }
         Ok(branch)
     })
     .await
@@ -579,8 +569,7 @@ pub async fn git_pull(repo: String) -> CmdResult<MergeResult> {
         let url = remote.url().unwrap_or("").to_string();
         check_remote(&url)?;
         let mut fo = FetchOptions::new();
-        fo.remote_callbacks(callbacks(url));
-        remote.fetch(&[branch.as_str()], Some(&mut fo), None).map_err(err)?;
+                remote.fetch(&[branch.as_str()], Some(&mut fo), None).map_err(err)?;
         let oid = r
             .find_reference(&format!("refs/remotes/origin/{}", branch))
             .ok()
@@ -599,20 +588,41 @@ mod tests {
     use std::fs;
 
     #[test]
-    fn remoti_ammessi_solo_codeberg_o_cartelle_locali() {
-        assert!(remote_allowed("https://codeberg.org/marceloesposito/tesi.git"));
-        assert!(remote_allowed("https://codeberg.org/marceloesposito/tesi"));
+    fn remoti_ammessi_solo_cartelle_locali() {
+        assert!(!remote_allowed("https://codeberg.org/marceloesposito/tesi.git"));
         assert!(!remote_allowed("https://github.com/marceloesposito/tesi.git"));
-        assert!(!remote_allowed("https://gitlab.com/x/y.git"));
         assert!(!remote_allowed("git@github.com:x/y.git"));
-        assert!(!remote_allowed("http://codeberg.org/x/y.git"));
-        assert!(!remote_allowed("https://codeberg.org.evil.com/x/y.git"));
-        assert!(!remote_allowed("https://codeberg.org/x"));
         assert!(remote_allowed("/Volumes/Chiavetta/tesi.git"));
         assert!(remote_allowed("D:\\backup\\tesi.git"));
         assert!(remote_allowed("\\\\nas\\condivisa\\tesi.git"));
         assert!(remote_allowed("file:///srv/tesi.git"));
         assert!(!remote_allowed(""));
+        assert_eq!(local_path("file:///srv/tesi.git"), std::path::PathBuf::from("/srv/tesi.git"));
+        assert_eq!(local_path("file:///C:/b/tesi.git"), std::path::PathBuf::from("C:/b/tesi.git"));
+    }
+
+    #[test]
+    fn remoto_su_cartella_nuova_invio_e_clone() {
+        let (_d, repo) = setup();
+        write(&repo, "a.md", "testo");
+        git_commit(repo.clone(), "primo".into(), false).unwrap();
+        let usb = tempfile::tempdir().unwrap();
+        let remote = usb.path().join("Tesi.git").to_string_lossy().replace('\\', "/");
+        // cartella che non c'e' ancora: diventa un repository bare
+        git_set_remote(repo.clone(), remote.clone()).unwrap();
+        let branch = tauri::async_runtime::block_on(git_push(repo.clone())).unwrap();
+        let bare = Repository::open(&remote).unwrap();
+        assert!(bare.is_bare());
+        assert_eq!(bare.head().unwrap().shorthand().ok(), Some(branch.as_str()));
+        // da un altro computer: il clone apre il branch inviato
+        let other = tempfile::tempdir().unwrap();
+        let dest = other.path().join("Tesi");
+        git2::build::RepoBuilder::new().clone(&remote, &dest).unwrap();
+        assert_eq!(fs::read_to_string(dest.join("a.md")).unwrap(), "testo");
+        // cartella piena di altro: rifiutata
+        let full = tempfile::tempdir().unwrap();
+        fs::write(full.path().join("foto.jpg"), "x").unwrap();
+        assert!(git_set_remote(repo, full.path().to_string_lossy().into_owned()).is_err());
     }
 
     fn setup() -> (tempfile::TempDir, String) {

@@ -18,22 +18,6 @@ export interface GitCommit {
   refs: string[]; // branch che puntano qui
 }
 
-/** Server git remoto: solo Codeberg (Forgejo). */
-export type ForgeKind = 'gitea';
-export interface ForgeAccount {
-  kind: ForgeKind;
-  host: string;
-  login: string;
-}
-export interface RemoteRepo {
-  name: string;
-  full_name: string;
-  clone_url: string;
-  private: boolean;
-  updated: string;
-  description: string;
-}
-
 export interface GitLog {
   head: string | null; // sha
   branch: string | null; // branch corrente
@@ -156,17 +140,11 @@ export interface Platform {
   gitMerge(repo: string, branch: string): Promise<MergeResult>;
   gitCompleteMerge(repo: string, resolved: { path: string; content: string | null }[], message: string): Promise<string>;
   gitAbortMerge(repo: string): Promise<void>;
-  gitSetRemote(repo: string, url: string, token: string | null): Promise<void>;
+  gitSetRemote(repo: string, url: string): Promise<void>;
   gitRemote(repo: string): Promise<string | null>;
   gitPush(repo: string): Promise<string>;
   gitPull(repo: string): Promise<MergeResult>;
-  /** account sul server git (token nel portachiavi, mai restituito) */
-  forgeAccount(host: string): Promise<ForgeAccount | null>;
-  forgeLogout(host: string): Promise<void>;
-  forgeSetToken(host: string, token: string): Promise<string>;
-  forgeCreateRepo(host: string, name: string, priv: boolean, description?: string): Promise<string>;
-  forgeListRepos(host: string): Promise<RemoteRepo[]>;
-  /** scarica una repository remota in una cartella nuova o vuota */
+  /** copia un Compendium dalla sua copia (cartella) in una cartella nuova o vuota */
   gitClone(url: string, dest: string): Promise<void>;
   /** avanzamento dello scaricamento: oggetti ricevuti e totali */
   onCloneProgress(cb: (received: number, total: number) => void): Promise<() => void>;

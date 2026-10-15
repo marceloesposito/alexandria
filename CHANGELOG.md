@@ -14,10 +14,14 @@ serie completa (M10-M12 e richieste del committente); `0.2.x` = serie attuale.
 
 Prima versione con tag (`v0.2.0`).
 
-- **Accedi con Codeberg** (#41): OAuth 2 con PKCE nel browser di sistema, ritorno su
-  `127.0.0.1`, token nel portachiavi con refresh token e rinnovo automatico prima di elenco e
-  creazione dei repository, push, pull e clone. Il token personale resta come alternativa. App OAuth
-  "Alexandria" registrata su Codeberg (`OAUTH_CLIENT_ID` in `forge.rs`).
+- **Codeberg tolto dall'app** (#42): i termini di Codeberg ammettono repository privati solo per
+  progetti liberi e possono rimuovere i contenuti personali, come una tesi o un saggio. Il remoto
+  del Compendium e' ora solo una **cartella** (chiavetta, NAS, cartella sincronizzata con Nextcloud
+  o Syncthing): "Cartella remota…" crea la copia (`<Nome>.git`) nella cartella scelta e ci invia il
+  Compendium; "Apri Compendium da una copia" lo apre su un altro computer. Tolti account, token,
+  creazione ed elenco dei repository.
+- "Accedi con Codeberg" (OAuth con PKCE, #41) annullato prima della pubblicazione, insieme al resto
+  di Codeberg.
 - Storia delle versioni (questo file) e numero di versione portato a 0.2.0.
 
 ## 0.1.4 — 13 ottobre 2026
@@ -53,7 +57,7 @@ Lavoro della sessione Mac.
 - **Nucleo condiviso `logos`** (#32, #33): 45 moduli puri (Markdown, citazioni, export, ancore,
   revisioni, Tabula, impaginazione) spostati nel repo MIT `marceloesposito/logos` (v0.1.0).
 - **Solo Codeberg dentro l'app** (#34): tolti GitHub, GitLab e l'accesso con GitHub; il Rust rifiuta
-  altri remoti (oltre alle cartelle locali: chiavetta, NAS).
+  altri remoti (oltre alle cartelle locali: chiavetta, NAS). Codeberg e' stato poi tolto nella 0.2.0.
 - Collaborazione in tempo reale senza server annotata come lavoro futuro (`docs/COLLABORAZIONE.md`,
   #26).
 

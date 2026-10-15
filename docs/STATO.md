@@ -23,10 +23,11 @@ Aggiornato: 15 ottobre 2026 (versione 0.2.0, storia delle versioni in `CHANGELOG
 | Indice dei contenuti nell'export, bibliografia in un clic visibile nello Scriptorium | fatto | #18 |
 | Index in tutte le lingue; lingua di scrittura per Compendium, separata dall'interfaccia | fatto | #18 |
 | Pacchetto portable Windows con il thesaurus accanto all'eseguibile | fatto | #19 |
-| Apri Compendium remoto (clone, oggi solo da Codeberg) dalla schermata iniziale | fatto | #20 |
+| Apri Compendium da una copia (clone da una cartella) dalla schermata iniziale | fatto | #20, #42 |
 | Fonte trascinata nel testo = apice numerato + nota a pie' di pagina con la fonte per esteso | fatto | #21 |
 | Vista pagina con fogli veri (formato e margini del Layout, interruzioni di pagina) | fatto | #22 |
 | Aggiungi da un altro Compendium (pergamene, Marginalia, fonti, tipi, Codex) | fatto | #23 |
+| Remoto solo su cartella (chiavetta, NAS, cartella sincronizzata); Codeberg tolto | fatto | #42 |
 | Colonne laterali richiudibili con linguette sul bordo | fatto | #24 |
 | Apri documento: .docx, .doc, .odt, .rtf, .html, .epub, .txt, .md diventano pergamene | fatto | #35 |
 
@@ -160,12 +161,18 @@ Aggiornato: 15 ottobre 2026 (versione 0.2.0, storia delle versioni in `CHANGELOG
   verso il testo e, in basso, accanto al blocco sbagliato). La distanza dal testo e' un padding
   trasparente della maniglia (12 px, 52 px con i numeri di riga, che restano visibili): il mouse lo
   attraversa senza che la maniglia sparisca.
-- **Solo Codeberg dentro l'app** (decisione del committente, 12/10/2026): nessun servizio americano
-  nell'app. Il server git remoto e' solo Codeberg (token personale), oltre alle cartelle locali
-  (chiavetta, NAS); tolti GitHub, GitLab e l'accesso con GitHub (Device Flow). Clone, collegamento,
-  push e pull rifiutano altri indirizzi (`remote_allowed` in `git.rs`, `remoteAllowed` in
-  `versions/forge.ts`). Chi aveva gia' un remoto su GitHub vede l'errore e lo ricollega a Codeberg.
-  Lo sviluppo del progetto resta su GitHub.
+- **Nessun server git di terzi** (decisione del committente, 15/10/2026; prima, dal 12/10, solo
+  Codeberg): i termini di Codeberg ammettono repository privati solo per progetti liberi e piccole
+  note personali, e prevedono la rimozione immediata dei contenuti fuori regola; un Compendium con
+  una tesi o un saggio privato ne resterebbe fuori. Tolti account, token, creazione ed elenco dei
+  repository, "Accedi con Codeberg" (OAuth, PR #41, mai pubblicato) e la dipendenza `keyring`. Il
+  remoto e' solo una cartella (chiavetta, NAS, cartella sincronizzata con Nextcloud o Syncthing):
+  "Cartella remota…" sceglie la cartella e ci crea `<Nome>.git` (repository bare,
+  `prepare_folder_remote` in `git.rs`), poi invia; "Apri Compendium da una copia" la copia su un
+  altro computer. Clone, collegamento, push e pull rifiutano gli indirizzi di rete
+  (`remote_allowed` in `git.rs`, `remoteAllowed` in `versions/remote.ts`). Chi aveva gia' un remoto
+  su Codeberg vede l'errore e lo ricollega a una cartella. Alternative europee che ammettano
+  progetti personali privati: in valutazione. Lo sviluppo del progetto resta su GitHub.
 - **Nucleo condiviso `logos`** (fase P0 del piano Simposium, ottobre 2026): 45 moduli puri (Markdown,
   citazioni, export, ancore dei commenti, revisioni, Tabula, impaginazione, confronto dei testi,
   scorciatoie) e i loro 209 test sono passati nel repo `marceloesposito/logos` (MIT), usato come
