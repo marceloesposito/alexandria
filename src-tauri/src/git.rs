@@ -506,7 +506,7 @@ fn callbacks(url: String) -> RemoteCallbacks<'static> {
         // un token rifiutato non va riprovato all'infinito
         tries += 1;
         if tries > 2 {
-            return Err(git2::Error::from_str("Accesso negato: controlla il token dell'account"));
+            return Err(git2::Error::from_str("Accesso negato: ricollega l'account Codeberg"));
         }
         if allowed.contains(git2::CredentialType::USER_PASS_PLAINTEXT) {
             if let Some(t) = token_entry(&url).and_then(|e| e.get_password().ok()) {
@@ -526,6 +526,7 @@ fn callbacks(url: String) -> RemoteCallbacks<'static> {
 #[tauri::command]
 pub async fn git_clone(app: tauri::AppHandle, url: String, dest: String) -> CmdResult<()> {
     check_remote(&url)?;
+    crate::forge::refresh_for_url(&url).await;
     tauri::async_runtime::spawn_blocking(move || {
         let p = Path::new(&dest);
         if p.exists() && std::fs::read_dir(p).map(|mut d| d.next().is_some()).unwrap_or(false) {
@@ -554,6 +555,9 @@ pub async fn git_clone(app: tauri::AppHandle, url: String, dest: String) -> CmdR
 
 #[tauri::command]
 pub async fn git_push(repo: String) -> CmdResult<String> {
+    if let Ok(Some(u)) = git_remote(repo.clone()) {
+        crate::forge::refresh_for_url(&u).await;
+    }
     tauri::async_runtime::spawn_blocking(move || {
         let r = open(&repo)?;
         let branch = current_branch(&r).ok_or("Nessun branch attivo")?;
@@ -572,6 +576,9 @@ pub async fn git_push(repo: String) -> CmdResult<String> {
 
 #[tauri::command]
 pub async fn git_pull(repo: String) -> CmdResult<MergeResult> {
+    if let Ok(Some(u)) = git_remote(repo.clone()) {
+        crate::forge::refresh_for_url(&u).await;
+    }
     tauri::async_runtime::spawn_blocking(move || {
         let r = open(&repo)?;
         let branch = current_branch(&r).ok_or("Nessun branch attivo")?;

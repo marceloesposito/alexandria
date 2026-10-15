@@ -1,12 +1,13 @@
 // "Apri Compendium remoto": sceglie una repository Codeberg dall'account (o da un indirizzo), la
 // scarica in Documenti/Alexandria e la apre. Login e token come in "Account e repository remota".
 import { useEffect, useMemo, useState } from 'react';
-import { Download, ExternalLink, FolderOpen, Lock, Globe, Search } from 'lucide-react';
+import { Download, FolderOpen, Lock, Globe, Search } from 'lucide-react';
 import { Modal } from '../components/Modal';
 import { useWorkspace } from '../state/workspace';
 import { platform, joinPath } from '../platform';
 import type { ForgeAccount, RemoteRepo } from '../platform/types';
-import { FORGE_HOST, TOKEN_PAGE, remoteAllowed, repoSlug } from './forge';
+import { FORGE_HOST, remoteAllowed, repoSlug } from './forge';
+import { ForgeLogin } from './ForgeLogin';
 import { fuzzyFilter } from 'logos/lib/fuzzy';
 import { t, useLang } from '../i18n';
 
@@ -27,7 +28,6 @@ export function OpenRemoteDialog() {
   const close = () => useWorkspace.getState().closeDialog();
   const host = FORGE_HOST;
   const [account, setAccount] = useState<ForgeAccount | null>(null);
-  const [token, setToken] = useState('');
   const [repos, setRepos] = useState<RemoteRepo[] | null>(null);
   const [q, setQ] = useState('');
   const [url, setUrl] = useState('');
@@ -67,19 +67,6 @@ export function OpenRemoteDialog() {
   }, [url, destTouched]);
 
   const shown = useMemo(() => fuzzyFilter(repos ?? [], q, (r) => `${r.full_name} ${r.description}`, 100), [repos, q]);
-
-  const connect = async () => {
-    setBusy(true);
-    try {
-      const login = await platform.forgeSetToken(host, token);
-      setAccount({ kind: 'gitea', host, login });
-      setToken('');
-    } catch (e) {
-      toast(String(e), 'error');
-    } finally {
-      setBusy(false);
-    }
-  };
 
   const download = async () => {
     if (!remoteAllowed(url)) return toast(t('forge.onlyCodeberg'), 'error');
@@ -130,21 +117,7 @@ export function OpenRemoteDialog() {
         {account ? (
           <p className="hint">{t('forge.connectedAs', { login: account.login || '—', host: account.host })}</p>
         ) : (
-          <>
-            <label className="field-label">{t('forge.token')}</label>
-            <div className="forge__row">
-              <input className="input" type="password" autoComplete="off" value={token} onChange={(e) => setToken(e.target.value)} />
-              <button className="btn" disabled={busy || !token.trim()} onClick={() => void connect()}>
-                {t('forge.useToken')}
-              </button>
-            </div>
-            <p className="hint">
-              {t('remote.tokenHint')}{' '}
-              <button className="link-btn" onClick={() => void platform.openExternal(TOKEN_PAGE)}>
-                <ExternalLink size={11} /> {t('forge.tokenCreate')}
-              </button>
-            </p>
-          </>
+          <ForgeLogin host={host} hint={t('remote.tokenHint')} onLogin={setAccount} />
         )}
       </section>
 
