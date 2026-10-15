@@ -29,7 +29,6 @@ Aggiornato: 15 ottobre 2026 (versione 0.2.0, storia delle versioni in `CHANGELOG
 | Aggiungi da un altro Compendium (pergamene, Marginalia, fonti, tipi, Codex) | fatto | #23 |
 | Colonne laterali richiudibili con linguette sul bordo | fatto | #24 |
 | Apri documento: .docx, .doc, .odt, .rtf, .html, .epub, .txt, .md diventano pergamene | fatto | #35 |
-| Accedi con Codeberg (OAuth con PKCE nel browser, token che si rinnova); il token personale resta come alternativa | fatto | #41 |
 
 ## Decisioni prese durante il lavoro
 
@@ -167,16 +166,6 @@ Aggiornato: 15 ottobre 2026 (versione 0.2.0, storia delle versioni in `CHANGELOG
   push e pull rifiutano altri indirizzi (`remote_allowed` in `git.rs`, `remoteAllowed` in
   `versions/forge.ts`). Chi aveva gia' un remoto su GitHub vede l'errore e lo ricollega a Codeberg.
   Lo sviluppo del progetto resta su GitHub.
-- **Accedi con Codeberg** (15/10/2026): OAuth 2 con PKCE, client pubblico senza segreto. Il browser
-  di sistema apre `codeberg.org/login/oauth/authorize`, Codeberg rimanda a un server di un attimo su
-  `http://127.0.0.1:<porta>/callback` (Forgejo ignora la porta per gli indirizzi di loopback dei client
-  non riservati), il codice si scambia col token. Il token OAuth scade dopo un'ora: si rinnova col
-  refresh token prima di elenco/creazione repository e di push, pull e clone (`fresh` e
-  `refresh_for_url` in `forge.rs`). Il token personale resta come alternativa ("Usa un token
-  personale"). L'app OAuth "Alexandria" e' registrata su Codeberg dal committente (Impostazioni >
-  Applicazioni, client *non* riservato, ritorno `http://127.0.0.1/callback`); il suo id pubblico sta in
-  `OAUTH_CLIENT_ID` (`forge.rs`) e si puo' sostituire con `ALEXANDRIA_CODEBERG_CLIENT_ID` alla
-  compilazione. Senza id il pulsante non compare.
 - **Nucleo condiviso `logos`** (fase P0 del piano Simposium, ottobre 2026): 45 moduli puri (Markdown,
   citazioni, export, ancore dei commenti, revisioni, Tabula, impaginazione, confronto dei testi,
   scorciatoie) e i loro 209 test sono passati nel repo `marceloesposito/logos` (MIT), usato come

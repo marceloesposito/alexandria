@@ -24,8 +24,6 @@ export interface ForgeAccount {
   kind: ForgeKind;
   host: string;
   login: string;
-  /** collegato con "Accedi con Codeberg" (token che si rinnova) invece che con un token personale */
-  oauth?: boolean;
 }
 export interface RemoteRepo {
   name: string;
@@ -166,10 +164,6 @@ export interface Platform {
   forgeAccount(host: string): Promise<ForgeAccount | null>;
   forgeLogout(host: string): Promise<void>;
   forgeSetToken(host: string, token: string): Promise<string>;
-  /** Accesso OAuth: apre il browser su Codeberg e aspetta l'autorizzazione; restituisce il nome utente. */
-  forgeOAuthAvailable(): Promise<boolean>;
-  forgeOAuthLogin(host: string): Promise<string>;
-  forgeOAuthCancel(): Promise<void>;
   forgeCreateRepo(host: string, name: string, priv: boolean, description?: string): Promise<string>;
   forgeListRepos(host: string): Promise<RemoteRepo[]>;
   /** scarica una repository remota in una cartella nuova o vuota */
