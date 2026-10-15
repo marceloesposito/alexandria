@@ -123,6 +123,8 @@ vanno con la maiuscola (`Scrolls`), altrimenti il test del glossario fallisce.
   nostro), .odt, .rtf, .html, .epub, .txt, .md -> pergamena nuova; revisioni e commenti Word riapplicati.
 - `versions/forge.ts`, `src-tauri/src/forge.rs` — account Codeberg (token nel portachiavi), crea
   repository, elenco repository; `git_clone` + `versions/OpenRemoteDialog.tsx`. Solo Codeberg.
+  "Accedi con Codeberg" (OAuth con PKCE, ritorno su 127.0.0.1, token rinnovato da `fresh`) in
+  `versions/ForgeLogin.tsx`; id dell'app OAuth registrata su Codeberg in `OAUTH_CLIENT_ID`.
 - `citations/fullNote.ts` — fonte per esteso nelle note a pie' di pagina (trascinare una fonte crea
   una nota; Alt = citazione nel testo; preferenza `dropSource`).
 - `shell/QuickSwitcher.tsx` (Ctrl+O, `>` comandi), `components/HoverCard.tsx`,

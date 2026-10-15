@@ -1,13 +1,14 @@
-// Account e repository remota su Codeberg (unico server git ammesso dall'app): token personale,
+// Account e repository remota su Codeberg (unico server git ammesso dall'app): accesso OAuth o token,
 // creazione della repository con un clic e collegamento di una esistente (o di una cartella locale).
 import { useEffect, useState } from 'react';
-import { LogOut, Plus, Link2, ExternalLink } from 'lucide-react';
+import { LogOut, Plus, Link2 } from 'lucide-react';
 import { Modal } from '../components/Modal';
 import { useWorkspace } from '../state/workspace';
 import { platform } from '../platform';
 import type { ForgeAccount } from '../platform/types';
 import { push } from './actions';
-import { FORGE_HOST, TOKEN_PAGE, remoteAllowed, repoSlug } from './forge';
+import { FORGE_HOST, remoteAllowed, repoSlug } from './forge';
+import { ForgeLogin } from './ForgeLogin';
 import { t } from '../i18n';
 
 const close = () => useWorkspace.getState().closeDialog();
@@ -19,7 +20,6 @@ export function RemoteDialog() {
   const host = FORGE_HOST;
   const [account, setAccount] = useState<ForgeAccount | null>(null);
   const [remote, setRemote] = useState<string | null>(null);
-  const [token, setToken] = useState('');
   const [busy, setBusy] = useState(false);
   const [name, setName] = useState(repoSlug(vaultName));
   const [priv, setPriv] = useState(true);
@@ -49,12 +49,6 @@ export function RemoteDialog() {
     } finally {
       setBusy(false);
     }
-  };
-
-  const loggedIn = (login: string) => {
-    setAccount({ kind: 'gitea', host, login });
-    setToken('');
-    toast(t('forge.loggedIn', { login }), 'ok');
   };
 
   const createRepo = () =>
@@ -109,25 +103,7 @@ export function RemoteDialog() {
             </button>
           </div>
         ) : (
-          <>
-            <label className="field-label">{t('forge.token')}</label>
-            <div className="forge__row">
-              <input className="input" type="password" autoComplete="off" value={token} onChange={(e) => setToken(e.target.value)} />
-              <button
-                className="btn"
-                disabled={busy || !token.trim()}
-                onClick={() => void run(async () => loggedIn(await platform.forgeSetToken(host, token)))}
-              >
-                {t('forge.useToken')}
-              </button>
-            </div>
-            <p className="hint">
-              {t('forge.tokenHint')}{' '}
-              <button className="link-btn" onClick={() => void platform.openExternal(TOKEN_PAGE)}>
-                <ExternalLink size={11} /> {t('forge.tokenCreate')}
-              </button>
-            </p>
-          </>
+          <ForgeLogin host={host} hint={t('forge.tokenHint')} onLogin={setAccount} />
         )}
       </section>
 
