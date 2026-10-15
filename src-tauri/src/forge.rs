@@ -211,11 +211,11 @@ pub async fn forge_create_repo(host: String, name: String, private: bool, descri
 /**
  * Identificativo dell'applicazione OAuth "Alexandria" registrata su Codeberg (client pubblico, senza
  * segreto, indirizzo di ritorno `http://127.0.0.1`: Forgejo accetta qualsiasi porta per le app
- * native). Si puo' sostituire in compilazione con ALEXANDRIA_CODEBERG_CLIENT_ID; vuoto = solo token.
+ * native). Si puo' sostituire in compilazione con ALEXANDRIA_CODEBERG_CLIENT_ID (vuoto = solo token).
  */
 const OAUTH_CLIENT_ID: &str = match option_env!("ALEXANDRIA_CODEBERG_CLIENT_ID") {
     Some(id) => id,
-    None => "",
+    None => "abcb9caf-7281-4bd9-a305-53db97df77f7",
 };
 /** Tempo concesso per autorizzare nel browser. */
 const OAUTH_WAIT: std::time::Duration = std::time::Duration::from_secs(300);
