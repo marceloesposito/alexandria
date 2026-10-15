@@ -1,6 +1,6 @@
 [package]
 name = "alexandria"
-version = "0.1.0"
+version = "0.2.0"
 description = "Alexandria - offline writing studio for papers and essays"
 authors = ["Marcelo Esposito"]
 edition = "2021"

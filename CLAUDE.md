@@ -77,7 +77,7 @@ diverse: **prima di iniziare `git fetch` e controlla PR aperte e rami recenti** 
 
 ### Dove siamo
 - Milestone M0-M12 su `main` (PR #1-#24), poi PR #25-#40; CI verde su Windows, macOS e frontend.
-- Nessuna release pubblicata, installer non firmati. Versione 0.1.0.
+- Nessuna release pubblicata, installer non firmati. Versione 0.2.0 (tag `v0.2.0`); storia delle versioni in `CHANGELOG.md` (va aggiornata con ogni PR).
 - Sul PC Windows del committente Alexandria e' **installata** (per utente, in
   `%LOCALAPPDATA%\Alexandria`); per aggiornarla si rilancia l'installer con `/S`.
 - Sul Mac del committente e' **installata** in `/Applications/Alexandria.app` (build del 13/10 con

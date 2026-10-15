@@ -1,6 +1,6 @@
 # Stato dei lavori
 
-Aggiornato: 13 ottobre 2026 (spazio sopra il divisore negli export).
+Aggiornato: 15 ottobre 2026 (versione 0.2.0, storia delle versioni in `CHANGELOG.md`).
 
 | Milestone | Stato | PR |
 | --- | --- | --- |
