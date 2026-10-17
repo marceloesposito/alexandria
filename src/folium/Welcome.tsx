@@ -1,10 +1,9 @@
 // Avvio di Folium: splash, onboarding al primo lancio, pagina d'ingresso. La pagina d'ingresso offre
 // solo "Inizia a scrivere" oppure, se ci sono fogli, "Riprendi da dove eri rimasto" e "Nuovo foglio".
 import { useEffect, useState } from 'react';
-import { ArrowRight, Plus, RotateCcw } from 'lucide-react';
+import { ArrowRight, Plus, RotateCcw, PenLine, Shapes, GitFork } from 'lucide-react';
 import { useFolium } from './store';
 import { displayName } from './format';
-import { shortcutLabel } from './keys';
 import { t, useLang } from '../i18n';
 
 /** Il segno di Folium: un foglio con l'angolo piegato (lo stesso dell'icona), nei colori del tema. */
@@ -39,39 +38,41 @@ export function Splash() {
   );
 }
 
-const STEPS = ['sheet', 'tabula', 'context', 'versions'] as const;
+/** Onboarding: una sola schermata, i tre ambienti di Folium in una riga ciascuno. */
+const POINTS = [
+  { key: 'scriptorium', icon: PenLine },
+  { key: 'armarium', icon: Shapes },
+  { key: 'palimpsestus', icon: GitFork },
+] as const;
 
 export function Onboarding() {
   useLang();
-  const [i, setI] = useState(0);
   const done = () => {
     useFolium.getState().setApp({ onboarded: true });
     useFolium.getState().setScreen('landing');
   };
-  const step = STEPS[i];
-  const last = i === STEPS.length - 1;
   return (
     <div className="fx-welcome">
       <div className="fx-onboarding" role="dialog" aria-labelledby="fx-ob-title">
-        <div className="fx-onboarding__dots" aria-hidden>
-          {STEPS.map((s, k) => (
-            <span key={s} className={k === i ? 'is-active' : ''} />
+        <FoliumMark size={48} />
+        <h1 id="fx-ob-title">{t('onboarding.title')}</h1>
+        <ul className="fx-onboarding__points">
+          {POINTS.map((p) => (
+            <li key={p.key}>
+              <span className="fx-onboarding__icon">
+                <p.icon size={18} />
+              </span>
+              <span>
+                <strong>{t(`onboarding.${p.key}.title`)}</strong>
+                {t(`onboarding.${p.key}.text`)}
+              </span>
+            </li>
           ))}
-        </div>
-        <h1 id="fx-ob-title">{t(`onboarding.${step}.title`)}</h1>
-        <p>{t(`onboarding.${step}.text`, { palette: shortcutLabel('Mod+K') })}</p>
-        <div className="fx-onboarding__actions">
-          {!last && (
-            <button className="fx-link" onClick={done}>
-              {t('onboarding.skip')}
-            </button>
-          )}
-          <span className="fx-spacer" />
-          <button className="fx-cta" autoFocus onClick={() => (last ? done() : setI(i + 1))}>
-            {last ? t('onboarding.start') : t('onboarding.next')}
-            <ArrowRight size={16} />
-          </button>
-        </div>
+        </ul>
+        <button className="fx-cta" autoFocus onClick={done}>
+          {t('onboarding.start')}
+          <ArrowRight size={16} />
+        </button>
       </div>
     </div>
   );

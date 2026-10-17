@@ -1308,9 +1308,9 @@ select.fx-input {
   display: none;
 }
 
-/* Silentium toglie anche la barretta e la linguetta della Tabula */
+/* Silentium toglie anche la barretta e la Tabula */
 .fx-app.is-silentium .fx-fbar,
-.fx-app.is-silentium .fx-edge-tab {
+.fx-app.is-silentium .fx-desk {
   display: none;
 }
 
@@ -1319,50 +1319,12 @@ select.fx-input {
   position: absolute;
   inset: 0;
   z-index: 35;
+  overflow: hidden;
   pointer-events: none;
 }
 
 .fx-desk > * {
   pointer-events: auto;
-}
-
-.fx-edge-tab {
-  position: absolute;
-  left: 0;
-  top: 50%;
-  display: flex;
-  flex-direction: column;
-  align-items: center;
-  gap: var(--space-2);
-  padding: var(--space-3) var(--space-1);
-  transform: translateY(-50%);
-  border: 1px solid var(--line);
-  border-left: 0;
-  border-radius: 0 var(--radius) var(--radius) 0;
-  background: var(--chrome);
-  color: var(--muted);
-  cursor: grab;
-  touch-action: none;
-  opacity: 0.6;
-  transition: opacity 0.2s ease, padding 0.2s ease;
-}
-
-.fx-edge-tab span {
-  writing-mode: vertical-rl;
-  transform: rotate(180deg);
-  font-size: var(--fs-ui-small);
-  letter-spacing: 0.08em;
-}
-
-.fx-edge-tab:hover,
-.fx-edge-tab.is-pulling {
-  opacity: 1;
-  padding-left: var(--space-2);
-  color: var(--accent);
-}
-
-.fx-edge-tab.is-pulling {
-  cursor: grabbing;
 }
 
 .fx-float {
@@ -1374,7 +1336,56 @@ select.fx-input {
   border: 1px solid var(--line-strong);
   border-radius: 10px;
   box-shadow: var(--shadow-strong);
-  transition: left 0.18s ease, top 0.18s ease, width 0.18s ease, height 0.18s ease;
+  transition: left 0.28s cubic-bezier(0.2, 0.8, 0.2, 1), top 0.2s ease, width 0.2s ease, height 0.2s ease, box-shadow 0.2s ease;
+}
+
+/* riposta oltre il bordo: resta fuori solo la striscia */
+.fx-float.is-parked {
+  box-shadow: var(--shadow);
+}
+
+.fx-float__rail {
+  position: absolute;
+  top: 0;
+  right: 0;
+  bottom: 0;
+  z-index: 2;
+  width: 18px;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: var(--space-2);
+  background: var(--chrome-2);
+  border-left: 1px solid var(--line);
+  color: var(--muted);
+  cursor: grab;
+  touch-action: none;
+  opacity: 0;
+  pointer-events: none;
+  transition: opacity 0.2s ease, color 0.2s ease;
+}
+
+.fx-float__rail span {
+  writing-mode: vertical-rl;
+  transform: rotate(180deg);
+  font-size: var(--fs-ui-small);
+  letter-spacing: 0.08em;
+}
+
+.fx-float.is-parked .fx-float__rail {
+  opacity: 1;
+  pointer-events: auto;
+}
+
+/* tirandola fuori la striscia svanisce mentre la finestra entra */
+.fx-float.is-dragging .fx-float__rail {
+  opacity: 0.4;
+  pointer-events: auto;
+}
+
+.fx-float.is-parked .fx-float__rail:hover {
+  color: var(--accent);
 }
 
 .fx-float.is-dragging {
@@ -1522,46 +1533,54 @@ select.fx-input {
 }
 
 .fx-onboarding {
-  width: min(460px, calc(100vw - 48px));
+  display: flex;
+  flex-direction: column;
+  align-items: flex-start;
+  width: min(440px, calc(100vw - 48px));
   animation: fx-fade 0.3s ease;
 }
 
 .fx-onboarding h1 {
-  margin: var(--space-4) 0 var(--space-2);
+  margin: var(--space-4) 0 var(--space-5);
   font-family: var(--font-text);
   font-size: 30px;
   font-weight: 700;
   line-height: 1.2;
 }
 
-.fx-onboarding p {
-  margin: 0;
+.fx-onboarding__points {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-4);
+  margin: 0 0 var(--space-6);
+  padding: 0;
+  list-style: none;
+}
+
+.fx-onboarding__points li {
+  display: flex;
+  align-items: flex-start;
+  gap: var(--space-3);
   color: var(--ink-2);
-  font-family: var(--font-text);
-  font-size: 18px;
-  line-height: 1.5;
+  font-size: var(--fs-ui-large);
+  line-height: 1.45;
 }
 
-.fx-onboarding__dots {
-  display: flex;
-  gap: var(--space-2);
+.fx-onboarding__points strong {
+  display: block;
+  color: var(--ink);
+  font-weight: 600;
 }
 
-.fx-onboarding__dots span {
-  width: 6px;
-  height: 6px;
+.fx-onboarding__icon {
+  display: grid;
+  place-items: center;
+  flex: none;
+  width: 36px;
+  height: 36px;
   border-radius: 50%;
-  background: var(--line-strong);
-}
-
-.fx-onboarding__dots span.is-active {
-  background: var(--accent);
-}
-
-.fx-onboarding__actions {
-  display: flex;
-  align-items: center;
-  margin-top: var(--space-6);
+  background: var(--accent-soft);
+  color: var(--accent);
 }
 
 .fx-landing {
@@ -1978,7 +1997,7 @@ select.fx-input {
   .fx-ring__value,
   .fx-block-node,
   .fx-float,
-  .fx-edge-tab {
+  .fx-float__rail {
     transition: none;
   }
 

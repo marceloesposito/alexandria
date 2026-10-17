@@ -102,4 +102,31 @@ export function unsnap(free: Frame, snapped: Frame, px: number, py: number): Fra
   return clampFrame({ x: px - rel * free.w, y: py - 0.01, w: free.w, h: free.h });
 }
 
-export const DEFAULT_FRAME: Frame = { x: 0.52, y: 0.08, w: 0.42, h: 0.8 };
+/** Quasi tutta l'altezza: la Tabula sta accanto al testo come un foglio appoggiato al bordo. */
+export const DEFAULT_FRAME: Frame = { x: 0.52, y: 0.02, w: 0.42, h: 0.96 };
+
+// ---------------------------------------------------------------- parcheggio oltre il bordo
+// "Chiusa", la Tabula non sparisce: scorre oltre il bordo sinistro e ne resta fuori solo una
+// striscia, che si afferra per tirarla di nuovo dentro. E' sempre la stessa finestra che si sposta.
+
+/** Finestra parcheggiata: stesse misure, fuori a sinistra tranne una striscia larga `sliver`. */
+export function parkedFrame(f: Frame, sliver: number): Frame {
+  return { ...f, x: -f.w + sliver };
+}
+
+/** Durante il trascinamento la finestra puo' uscire a sinistra fino a lasciare la sola striscia. */
+export function dragClamp(f: Frame, sliver: number): Frame {
+  const w = Math.min(1, f.w);
+  const h = Math.min(1, f.h);
+  return { x: Math.min(1 - w, Math.max(-w + sliver, f.x)), y: Math.min(1 - h, Math.max(0, f.y)), w, h };
+}
+
+/** Parte visibile della larghezza (0..1 della finestra stessa). */
+export function visibleShare(f: Frame): number {
+  return f.w > 0 ? Math.max(0, Math.min(f.x + f.w, 1) - Math.max(f.x, 0)) / f.w : 0;
+}
+
+/** Al rilascio: oltre il bordo per piu' di meta' si parcheggia, altrimenti resta (tutta dentro). */
+export function shouldPark(f: Frame): boolean {
+  return visibleShare(f) < 0.5;
+}

@@ -455,15 +455,19 @@ cache della webview).
   ⌘K o con le scorciatoie (`home: 'none'` in `commandSpecs.ts`). Tolte le viste Entrambi e Armarium.
 - **Scriptorium come in Silentium**: pagina senza scrivania ne' ombra, barretta in trasparenza finche'
   non ci si passa sopra. Silentium (Ctrl+Maiusc+D) toglie anche barretta e linguetta.
-- **Tabula flottante** (`tabula/FloatingTabula.tsx`): una linguetta sul bordo sinistro che si tira fuori
-  trascinandola (o con un clic, o Ctrl+2) e diventa una finestra sopra il testo, dentro Folium. Si
+- **Tabula flottante** (`tabula/FloatingTabula.tsx`): un'unica finestra sopra il testo, dentro Folium,
+  che non si apre e non si chiude ma si sposta. Riposta, scorre oltre il bordo sinistro e ne resta
+  fuori una striscia di 18 px alta quasi quanto la finestra (96%); afferrandola la finestra intera
+  scorre dentro seguendo il puntatore, spinta oltre il bordo per piu' di meta' si ripone (e richiamata
+  torna dove stava). Anche un clic sulla striscia o Ctrl+2. Si
   sposta dalla sua barra e si ridimensiona dagli orli; posizione, misure e aggancio restano in
   `stato.json`. **Aggancio come in Windows** (`tabula/snap.ts`, puro e testato): meta' sinistra o
   destra, quadranti negli angoli, tutto lo spazio in alto; poco sensibile: la zona si attiva solo col
   puntatore entro 10 px dal bordo e fermo per 280 ms (passando veloce non scatta), con un'anteprima
   prima del rilascio. Staccandola torna alle misure di prima; doppio clic sulla barra = tutto lo
   spazio e ritorno.
-- **Avvio**: splash, onboarding di quattro passi al primo lancio (`onboarded` in `stato.json`), poi la
+- **Avvio**: splash, onboarding in una sola schermata al primo lancio (Scriptorium, Armarium,
+  Palimpsestus, una riga ciascuno con un'icona) (`onboarded` in `stato.json`), poi la
   pagina d'ingresso con solo "Inizia a scrivere" oppure, se ci sono fogli, "Riprendi da dove eri
   rimasto" e "Nuovo foglio" (`Welcome.tsx`). Un file aperto dal sistema salta l'ingresso.
 - Nell'app vera la chiusura della finestra aspetta il salvataggio dell'ultimo testo

@@ -1,5 +1,24 @@
 import { describe, expect, it } from 'vitest';
-import { NO_SNAP, SNAP, clampFrame, trackSnap, unsnap, zoneAt, zoneFrame } from './snap';
+import { NO_SNAP, SNAP, clampFrame, dragClamp, parkedFrame, shouldPark, trackSnap, unsnap, visibleShare, zoneAt, zoneFrame } from './snap';
+
+describe('parcheggio oltre il bordo', () => {
+  const f = { x: 0.3, y: 0.02, w: 0.4, h: 0.96 };
+  it('parcheggiata resta fuori solo la striscia', () => {
+    const p = parkedFrame(f, 0.01);
+    expect(p.x + p.w).toBeCloseTo(0.01);
+    expect(p.w).toBe(0.4);
+    expect(p.h).toBe(0.96);
+  });
+  it('trascinando si puo uscire a sinistra fino alla striscia, non oltre', () => {
+    expect(dragClamp({ ...f, x: -1 }, 0.01).x).toBeCloseTo(-0.39);
+    expect(dragClamp({ ...f, x: 0.9 }, 0.01).x).toBeCloseTo(0.6);
+  });
+  it('al rilascio si parcheggia se e piu fuori che dentro', () => {
+    expect(visibleShare(f)).toBeCloseTo(1);
+    expect(shouldPark({ ...f, x: -0.1 })).toBe(false);
+    expect(shouldPark({ ...f, x: -0.25 })).toBe(true);
+  });
+});
 
 const W = 1200;
 const H = 800;
