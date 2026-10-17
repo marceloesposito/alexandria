@@ -13,6 +13,10 @@ serie completa (M10-M12 e richieste del committente); `0.2.x` = serie attuale.
 ## Non ancora rilasciato
 
 - Piano di **Folium**, l'app sorella portable, in `docs/FOLIUM.md` (#43).
+- **Tabula: i post-it si eliminano** (#44). Un clic seleziona il post-it (e lo trascina), il doppio
+  clic entra nella scrittura, Esc o un clic fuori ne escono. Backspace/Canc su un post-it selezionato
+  lo elimina, come Backspace su un post-it vuoto in scrittura; il clic destro su post-it e cornici
+  offre "Elimina" (e "Modifica testo"). Con la nota spariscono anche i suoi collegamenti.
 
 ## 0.2.0 — 15 ottobre 2026
 

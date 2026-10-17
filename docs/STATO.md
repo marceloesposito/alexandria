@@ -232,6 +232,11 @@ Aggiornato: 15 ottobre 2026 (versione 0.2.0, storia delle versioni in `CHANGELOG
   del gruppo e l'immagine di anteprima se c'e', note in giallo, cornici tratteggiate), sempre leggibile.
   Era vuoto perche' i nodi controllati non riportavano le misure di React Flow: ora le modifiche
   'dimensions' tornano nei nodi come `measured`.
+- **Post-it della Tabula** (17/10): selezione e scrittura separate, come in Miro o FigJam. Un clic
+  seleziona e trascina (la textarea e' `readOnly` e senza `pointer-events`), il doppio clic scrive
+  (`useNoteEdit` in `Whiteboard.tsx`), Esc o un clic fuori escono; un post-it nuovo nasce in scrittura.
+  Backspace/Canc sul post-it selezionato, Backspace su un post-it vuoto e il clic destro lo eliminano
+  passando da `removeBoardItems` (`resources/ui/boardEdit.ts`), che toglie anche i collegamenti.
 - **Collegamenti nella Tabula**: quattro punti di aggancio per nodo (sopra, sotto, destra, sinistra),
   14 px con un'area cliccabile piu' larga; ognuno puo' iniziare o ricevere un collegamento
   (`ConnectionMode.Loose`). Le frecce si attaccano ai lati che si guardano e li seguono quando i nodi

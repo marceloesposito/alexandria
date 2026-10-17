@@ -355,6 +355,14 @@
   font-family: var(--font-text);
   font-size: 15px;
   line-height: 1.35;
+  /* fuori dalla scrittura il clic arriva al post-it: lo seleziona e lo trascina */
+  pointer-events: none;
+  cursor: inherit;
+}
+
+.wb-note.is-editing .wb-note__text {
+  pointer-events: auto;
+  cursor: text;
 }
 
 .wb-frame {
