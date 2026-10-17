@@ -76,8 +76,12 @@ export const MM = 96 / 25.4;
 
 // ---------------------------------------------------------------- plugin dell'editor
 
-/** Geometria della pagina in pixel CSS; enabled = vista pagina (non senza bordi, non Silentium). */
-export const pageGeometry = { enabled: false, textHeight: 0, padTop: 0, padBottom: 0, gap: 28 };
+/**
+ * Geometria della pagina in pixel CSS; enabled = vista pagina (non senza bordi, non Silentium);
+ * hints = vista senza bordi con i confini di pagina: una linea tenue di altezza zero dove finirebbe
+ * ogni pagina (stessa impaginazione, il testo non si sposta).
+ */
+export const pageGeometry = { enabled: false, hints: false, textHeight: 0, padTop: 0, padBottom: 0, gap: 28 };
 
 const views = new Set<EditorView>();
 const listeners = new Set<() => void>();
@@ -129,6 +133,44 @@ function gapEl(height: number, page: number, rest: number, last: boolean): HTMLE
   return el;
 }
 
+function hintEl(page: number): HTMLElement {
+  const el = document.createElement('div');
+  el.className = 'page-hint';
+  el.contentEditable = 'false';
+  el.setAttribute('aria-hidden', 'true');
+  el.dataset.page = String(page);
+  return el;
+}
+
+function buildHints(state: EditorState, p: Pagination): DecorationSet {
+  const offsets: number[] = [];
+  state.doc.forEach((_n, offset) => offsets.push(offset));
+  return DecorationSet.create(
+    state.doc,
+    p.breaks.map((b, k) => Decoration.widget(offsets[b.index], () => hintEl(k + 2), { side: -1, key: `ph${k}-${b.index}`, ignoreSelection: true })),
+  );
+}
+
+/** Confini di pagina nella vista senza bordi: i widget non hanno altezza, si misura il testo com'e'. */
+function measureHints(view: EditorView, st: { sig: string }) {
+  const g = pageGeometry;
+  const dom = view.dom as HTMLElement;
+  if (!dom.offsetWidth) return;
+  const r0 = dom.getBoundingClientRect();
+  const scale = r0.width / dom.offsetWidth || 1;
+  const boxes: BlockBox[] = [];
+  for (const el of Array.from(dom.children) as HTMLElement[]) {
+    if (el.classList.contains('page-hint') || el.classList.contains('page-gap') || el.classList.contains('ProseMirror-widget') || el.classList.contains('ProseMirror-gapcursor')) continue;
+    const r = el.getBoundingClientRect();
+    boxes.push({ top: (r.top - r0.top) / scale, bottom: (r.bottom - r0.top) / scale });
+  }
+  if (boxes.length !== view.state.doc.childCount) return;
+  const p = paginate(boxes, g.textHeight);
+  const sig = `hints|${p.breaks.map((b) => b.index).join(',')}`;
+  if (st.sig === sig) return;
+  view.dispatch(view.state.tr.setMeta(key, { deco: buildHints(view.state, p), sig }).setMeta('addToHistory', false));
+}
+
 function build(state: EditorState, p: Pagination): DecorationSet {
   const g = pageGeometry;
   const offsets: number[] = [];
@@ -154,6 +196,10 @@ function measure(view: EditorView) {
   const st = key.getState(view.state);
   if (!st) return;
   const g = pageGeometry;
+  if (!g.enabled && g.hints && g.textHeight > 0) {
+    measureHints(view, st);
+    return;
+  }
   if (!g.enabled || g.textHeight <= 0) {
     if (st.sig !== '') view.dispatch(view.state.tr.setMeta(key, { deco: DecorationSet.empty, sig: '' }).setMeta('addToHistory', false));
     return;

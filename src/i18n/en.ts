@@ -930,6 +930,7 @@ export const en: Record<string, string> = {
   'counts.pinHint': "Pinned items stay visible when the label is closed",
   'cmd.view.layoutPage': "Page view",
   'cmd.view.layoutBorderless': "Borderless view",
+  'cmd.view.pageHints': "Page boundaries",
   'cmd.view.rulers': "Rulers",
   'menu.view.editorLayout': "Scriptorium appearance",
   'ruler.pageStart': "Estimated start of page {n}",

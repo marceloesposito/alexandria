@@ -1773,6 +1773,25 @@
   margin: 0;
 }
 
+/* vista senza bordi: confine di pagina, una linea tenue che non sposta il testo */
+.doc-body > .page-hint {
+  position: relative;
+  height: 0;
+  margin: 0 !important;
+  pointer-events: none;
+  user-select: none;
+}
+
+.page-hint::after {
+  content: '';
+  position: absolute;
+  left: -8%;
+  right: -8%;
+  top: 0.3em;
+  border-top: 1px dashed var(--line-strong);
+  opacity: 0.6;
+}
+
 .page-gap {
   position: relative;
   pointer-events: none;
