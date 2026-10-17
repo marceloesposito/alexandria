@@ -30,7 +30,9 @@ import {
   type MiniMapNodeProps,
 } from '@xyflow/react';
 import '@xyflow/react/dist/style.css';
+import { create } from 'zustand';
 import { useResources } from '../store';
+import { removeBoardItems } from './boardEdit';
 import { isVisible, isLocked, colorOf, type Resource } from 'logos/resources/model';
 import { ResourceCard, thumbUrl } from './common';
 import { removeWithConfirm } from './remove';
@@ -139,17 +141,60 @@ function ResNode({ data, selected }: NodeProps<Node<ResNodeData>>) {
   );
 }
 
+/** Il post-it in scrittura (al piu' uno): fuori dalla scrittura un clic lo seleziona e lo trascina. */
+const useNoteEdit = create<{ id: string | null }>(() => ({ id: null }));
+const editNote = (id: string | null) => useNoteEdit.setState({ id });
+
+/** Toglie note e cornici (con i loro collegamenti) dalla Tabula; le pergamene restano. */
+function removeItems(ids: string[]) {
+  const st = useResources.getState();
+  const r = removeBoardItems(st.whiteboard, st.links, ids);
+  if (r.links !== st.links) st.replaceRefs(r.links, r.whiteboard);
+  else if (r.whiteboard !== st.whiteboard) st.setWhiteboard(r.whiteboard);
+}
+
 function NoteNode({ data, selected }: NodeProps<Node<NoteNodeData>>) {
+  const editing = useNoteEdit((s) => s.id === data.note.id);
+  const ref = useRef<HTMLTextAreaElement>(null);
+  useEffect(() => {
+    const el = ref.current;
+    if (!editing || !el) return;
+    // React Flow tiene nascosto il nodo finche' non l'ha misurato: si riprova per qualche fotogramma
+    let tries = 0;
+    let raf = 0;
+    const focus = () => {
+      el.focus();
+      if (document.activeElement === el) el.setSelectionRange(el.value.length, el.value.length);
+      else if (tries++ < 20) raf = requestAnimationFrame(focus);
+    };
+    focus();
+    return () => cancelAnimationFrame(raf);
+  }, [editing]);
   return (
-    <div className={`wb-note ${selected ? 'is-selected' : ''}`}>
+    <div className={`wb-note ${selected ? 'is-selected' : ''} ${editing ? 'is-editing' : ''}`} onDoubleClick={() => editNote(data.note.id)}>
       <NodeResizer isVisible={selected} minWidth={120} minHeight={70} onResizeEnd={(_, p) => updateNote(data.note.id, { w: p.width, h: p.height, x: p.x, y: p.y })} />
       <Handles />
       <textarea
-        className="wb-note__text nodrag"
+        ref={ref}
+        className={`wb-note__text ${editing ? 'nodrag nowheel' : ''}`}
+        readOnly={!editing}
+        tabIndex={editing ? 0 : -1}
         defaultValue={data.note.text}
         placeholder={t('wb.notePlaceholder')}
-        onBlur={(e) => updateNote(data.note.id, { text: e.target.value })}
-        onKeyDown={(e) => e.stopPropagation()}
+        onBlur={(e) => {
+          updateNote(data.note.id, { text: e.target.value });
+          if (useNoteEdit.getState().id === data.note.id) editNote(null);
+        }}
+        onKeyDown={(e) => {
+          e.stopPropagation();
+          if (e.key === 'Escape') e.currentTarget.blur();
+          // Backspace su un post-it vuoto lo elimina
+          else if (e.key === 'Backspace' && !e.currentTarget.value) {
+            e.preventDefault();
+            editNote(null);
+            removeItems([data.note.id]);
+          }
+        }}
       />
     </div>
   );
@@ -316,15 +361,8 @@ function Board() {
         if (finished.length) st.setWhiteboard(next);
       }
       // le pergamene sono nodi fissi: non si tolgono dalla Tabula
-      const removed = changes.filter((c) => c.type === 'remove' && !relOfNode(c.id)).map((c) => (c as { id: string }).id);
-      if (removed.length) {
-        const w = st.whiteboard;
-        st.setWhiteboard({
-          ...w,
-          notes: w.notes.filter((n) => !removed.includes(n.id)),
-          frames: w.frames.filter((f) => !removed.includes(f.id)),
-        });
-      }
+      const removed = changes.filter((c) => c.type === 'remove').map((c) => (c as { id: string }).id);
+      if (removed.length) removeItems(removed);
     },
     [nodes],
   );
@@ -353,7 +391,10 @@ function Board() {
     wbApi.addNote = () => {
       const st = useResources.getState();
       const p = center();
-      st.setWhiteboard({ ...st.whiteboard, notes: [...st.whiteboard.notes, { id: uid('n'), x: p.x - 90, y: p.y - 50, w: 200, h: 120, text: '' }] });
+      const id = uid('n');
+      st.setWhiteboard({ ...st.whiteboard, notes: [...st.whiteboard.notes, { id, x: p.x - 90, y: p.y - 50, w: 200, h: 120, text: '' }] });
+      // il post-it nuovo nasce gia' in scrittura
+      editNote(id);
     };
     wbApi.addFrame = async () => {
       const title = await promptDialog(t('wb.frameTitle'), t('wb.frameDefault'));
@@ -409,6 +450,14 @@ function Board() {
             openContextMenu(e as React.MouseEvent, [
               { label: t('wb.doc.open'), onClick: () => (useWorkspace.getState().openDoc(rel), useWorkspace.getState().setView('editor')) },
               { label: t('wb.doc.linkTo'), onClick: () => setPicker({ mode: 'link', rel }) },
+            ]);
+            return;
+          }
+          if (n.type === 'note' || n.type === 'frame') {
+            e.preventDefault();
+            openContextMenu(e as React.MouseEvent, [
+              ...(n.type === 'note' ? [{ label: t('wb.note.edit'), onClick: () => editNote(n.id) }] : []),
+              { label: t(n.type === 'note' ? 'wb.note.delete' : 'wb.frame.delete'), danger: true, onClick: () => removeItems([n.id]) },
             ]);
             return;
           }
