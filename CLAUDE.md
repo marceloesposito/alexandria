@@ -1,5 +1,12 @@
 # Alexandria — contesto per Claude Code
 
+> **Sei sul ramo `folium`?** Qui il codice e' **Folium**, l'app sorella portable: piano, decisioni e
+> avanzamento in `docs/FOLIUM.md` (sezione "Avanzamento"). Il frontend sta in `src/folium/` (ingresso
+> `src/main.tsx`), il Rust in `src-tauri/src/` e' ridotto a `fsops.rs` e `portable.rs`. Prove:
+> `npx vite --port 1430` + `node scripts/cdp.mjs`, app vera con `npm run folium:portable` (cartella
+> `Folium-portable/` sul Desktop) e `node scripts/app-test.mjs <exe> <prova.mjs> <dati>`
+> (`FOLIUM_DATA_DIR`, `FOLIUM_TEST_OFFSCREEN`). Il resto di questo file descrive Alexandria (ramo `main`).
+
 App desktop offline per scrivere paper, articoli e saggi. Specifica completa e
 decisioni prese con il committente: `docs/SPEC.md`. Stato e prossimi passi:
 `docs/STATO.md` (va aggiornato nello stesso commit in cui lo stato cambia).

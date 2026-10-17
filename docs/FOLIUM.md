@@ -392,3 +392,109 @@ A ogni fase: nuova portable sul Desktop e un breve resoconto.
     (`npm run dev` di `main`).
 - Portable: dimensioni dell'eseguibile e della cartella, tempo della seconda compilazione,
   avvio fuori schermo con `Folium-data/` accanto, chiusura forzata senza perdita del foglio.
+
+---
+
+## Avanzamento (ramo `folium`)
+
+| Fase | Stato | Note |
+| --- | --- | --- |
+| A Post-it della Tabula (Alexandria) | fatto | PR #44 su `main` |
+| F0 Dimagrimento | fatto | nuovo ingresso `src/main.tsx` -> `src/folium/App.tsx`; 216 file di Alexandria tolti; Rust ridotto a `fsops.rs` + `portable.rs`; profilo `fast`; `npm run folium:portable` |
+| F1 Il foglio | fatto | formato `.folium`, fogli in lavorazione, Apri (.folium .docx con i commenti di Word, .md, .txt), Salva come; provato con CDP (ricarica, riapertura, .docx) |
+| F2 Interfaccia | fatto | barra da 40 px (6 controlli), barretta, Fogli e Index, menu dell'app, Preferenze, ⌘K, "/", zoom, Silentium, test "un'azione, un controllo" |
+| F3 Marginalia | fatto | clic destro -> Commenta su selezione o punto, Invio/Esc, thread con risposta, Risolvi, Elimina; le ancore seguono il testo |
+| F4 Timer | fatto | fase da 3 s provata: avviso con le parole, fase successiva, storico del giorno, Silentium al via del lavoro |
+| F5 Armarium del foglio | fatto | Entrambi, estratto dal testo, collegamento lasciando un blocco sotto un altro, nessuna sovrapposizione, doppio clic sull'estratto, blocchi illuminati, blocco -> testo |
+| F6 Palimpsestus | fatto | Riprendi da qui -> ramo nuovo, diff sulla biforcazione e anteprima semitrasparente al passaggio del mouse, barretta con due comandi |
+| F7 Uscita | fatto | .docx con i commenti di Word, PDF dalla stampa, Porta in un Compendium (pergamena, Marginalia, post-it, risorse) |
+
+Misure (Windows 11, 17/10/2026): eseguibile **5,9 MB** col profilo `fast` (cartella portable 5,9 MB
+senza i dati); interfaccia 2,9 MB (caratteri ridotti agli alfabeti latini). Prima compilazione 2 min 8 s,
+seconda dopo una modifica all'interfaccia 51 s (Rust 43 s). App vera provata fuori schermo: scrittura,
+salvataggio su disco, chiusura forzata senza perdite, `Folium-data/` accanto all'eseguibile (anche la
+cache della webview).
+
+### Scostamenti dal piano, decisi lavorando
+- **Fogli in lavorazione come cartelle**: in `Folium-data/fogli/<id>/` ci sono gli stessi file del
+  `.folium`, non compressi; il salvataggio automatico riscrive solo quelli cambiati (scrittura atomica
+  del Rust). Lo zip nasce solo con Salva come.
+- **Collisione della Tabula**: i blocchi si scansano solo dal blocco tenuto col mouse. Fra blocchi in
+  volo verso posti d'equilibrio gia' separati la collisione li incastrava; a riposo non si
+  sovrappongono comunque, perche' i posti di `flowLayout` non si sovrappongono (test).
+- **Un solo padre per blocco** nella Tabula (`attach` sostituisce il padre): il flusso dall'alto in
+  basso resta un albero, e i cicli sono impossibili.
+- **Porta in un Compendium porta solo l'ultima versione** (come in B0): niente conversione delle
+  versioni in commit. Note ed estratti diventano post-it, immagini e link risorse dell'Armarium.
+- **L0 contati per superficie**: barra in alto 6 controlli, barretta 6 gruppi (test in
+  `commandSpecs.test.ts`); "/" e ⌘K sono ricerche per nome, non superfici.
+- **PDF**: la stampa la apre il Rust (`print_page`, `WebviewWindow::print`), perche' WKWebView non
+  risponde a `window.print()`.
+- **Formule, citazioni, indici** di un `.md` di Alexandria restano nel testo come segni (nessuna
+  perdita nell'andata e ritorno), ma Folium non li formatta. Le revisioni tracciate si accettano
+  all'apertura.
+
+### Non ancora provato o non fatto
+- **macOS**: niente prove sul Mac. Da verificare la barra in alto fusa con quella del titolo
+  (`titleBarStyle: Overlay` in `tauri.macos.conf.json`, 78 px per i semafori), il pacchetto `.app`
+  minimo che costruisce `scripts/folium-portable.mjs` e `xattr -cr`.
+- **Finestre native** (Apri, Salva come, Esporta, scelta del Compendium) e **stampa vera** provate solo
+  nel browser con la piattaforma in memoria: nell'app vera aprirebbero finestre e ruberebbero il fuoco.
+- **Porta in un Compendium**: i file scritti seguono la struttura di Alexandria (`vault.json`, cartelle,
+  `.alexandria/comments/<chiave>.json`, `whiteboard.json`, `links.json`), ma non e' ancora stato aperto
+  in Alexandria un Compendium che li ha ricevuti.
+- **Animazione del passaggio fra le viste** (la parte nascosta che "scivola via", B9): c'e' solo lo
+  splitter animato; cambiando vista le parti si sostituiscono.
+- Annotato per `main`: "Apri documento" di Alexandria che accetta i `.folium`; togliere
+  `scripts/portable.mjs` e la modalita' portable di Alexandria quando il committente approva Folium.
+
+### Revisione del committente (17/10/2026, dopo la prima prova)
+- **Niente barra di navigazione piena**: in alto resta solo il passaggio fra Scriptorium e
+  Palimpsestus (Ctrl+1 / Ctrl+3), senza bordi e sullo stesso fondo del testo; fa anche da barra del
+  titolo. Fogli, Index, Salva come, Esporta, Porta in un Compendium, Preferenze, Aiuto: per nome con
+  ⌘K o con le scorciatoie (`home: 'none'` in `commandSpecs.ts`). Tolte le viste Entrambi e Armarium.
+- **Scriptorium come in Silentium**: pagina senza scrivania ne' ombra, barretta in trasparenza finche'
+  non ci si passa sopra. Silentium (Ctrl+Maiusc+D) toglie anche barretta e linguetta.
+- **Tabula flottante** (`tabula/FloatingTabula.tsx`): un'unica finestra sopra il testo, dentro Folium,
+  che non si apre e non si chiude ma si sposta. Riposta, scorre oltre il bordo sinistro e ne resta
+  fuori una striscia di 18 px alta quasi quanto la finestra (96%); afferrandola la finestra intera
+  scorre dentro seguendo il puntatore, spinta oltre il bordo per piu' di meta' si ripone (e richiamata
+  torna dove stava). Anche un clic sulla striscia o Ctrl+2. Si
+  sposta dalla sua barra e si ridimensiona dagli orli; posizione, misure e aggancio restano in
+  `stato.json`. **Aggancio come in Windows** (`tabula/snap.ts`, puro e testato): meta' sinistra o
+  destra, quadranti negli angoli, tutto lo spazio in alto; poco sensibile: la zona si attiva solo col
+  puntatore entro 10 px dal bordo e fermo per 280 ms (passando veloce non scatta), con un'anteprima
+  prima del rilascio. Staccandola torna alle misure di prima; doppio clic sulla barra = tutto lo
+  spazio e ritorno.
+- **Avvio**: splash, onboarding in una sola schermata al primo lancio (Scriptorium, Armarium,
+  Palimpsestus, una riga ciascuno con un'icona) (`onboarded` in `stato.json`), poi la
+  pagina d'ingresso con solo "Inizia a scrivere" oppure, se ci sono fogli, "Riprendi da dove eri
+  rimasto" e "Nuovo foglio" (`Welcome.tsx`). Un file aperto dal sistema salta l'ingresso.
+- Nell'app vera la chiusura della finestra aspetta il salvataggio dell'ultimo testo
+  (`onCloseRequested`).
+
+### Seconda revisione (17/10/2026)
+- **Niente barra di navigazione**: in cima, sullo stesso fondo del testo, solo il **timer**, il
+  **contatore di parole** (con conteggi e zoom) e **Esporta** (Word, PDF, Salva come `.folium`, Porta
+  in un Compendium). La fascia fa anche da barra del titolo; il resto per nome con ⌘K.
+- La barretta in basso ha solo Stile, B I U S, Colore e Inserisci.
+- **Palimpsestus come la Tabula, sul bordo destro** (`FloatingPanel.tsx`, comune alle due finestre):
+  riposto oltre il bordo destro con la sua striscia, tirato dentro trascinandola, spinto fuori per
+  riporlo. Ctrl+1 la Tabula, Ctrl+2 il Palimpsestus; la finestra toccata per ultima sta davanti. Non
+  ci sono piu' viste da scegliere: si scrive sempre nello Scriptorium.
+- Onboarding in una sola schermata con tre righe: Scriptorium, Armarium, Palimpsestus.
+
+### Terza revisione (17/10/2026)
+- **Barra in alto**: a sinistra il **nome del foglio**, che si cambia con un clic (Invio o clic fuori
+  salvano, Esc annulla); al centro, centrato sulla finestra intera, il posto della barretta quando e'
+  agganciata; a destra i controlli della finestra (Windows e Linux).
+- **Barretta unica** (`Toolbar.tsx`): stile, B I U S, colore, inserisci, timer, contatore, Esporta.
+  Si sposta dalla maniglia; la posizione libera e' in frazioni della finestra (`barPosition.ts`, puro e
+  testato). **Magnetica**: trascinata entro 36 px dalla barra in alto compare il segnale e, lasciata
+  li', si aggancia e ne diventa parte; trascinata via si stacca. I suoi menu si aprono verso il centro.
+- **Contatore a scelta** (`editor/countsModel.ts`): parole, battute, battute senza spazi, pagine,
+  cartelle, minuti di lettura; si sceglie dal suo menu, almeno uno resta acceso.
+- **Confini di pagina** nel testo senza bordi (`editor/pageHints.ts`): una linea tratteggiata tenue
+  dove finirebbe una pagina A4 del Layout predefinito di Alexandria, in proporzione alla colonna; un
+  blocco non si spezza. Le linee hanno altezza zero (il testo non si sposta) e danno anche le
+  "pagine" del contatore. Stessa cosa nella vista senza bordi di Alexandria (PR su `main`).
