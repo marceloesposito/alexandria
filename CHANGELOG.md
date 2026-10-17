@@ -12,6 +12,9 @@ serie completa (M10-M12 e richieste del committente); `0.2.x` = serie attuale.
 
 ## Non ancora rilasciato
 
+- `CLAUDE.md` piu' leggero (#47): da ~15k a ~7k caratteri; istruzioni di build, glossario e insidie
+  di singole parti in skill caricate solo quando servono (`.claude/skills/`).
+
 - **Confini di pagina nella vista senza bordi** (#46): una linea tratteggiata tenue dove finirebbe ogni
   pagina, con la stessa impaginazione della vista pagina (un paragrafo non si spezza). Non sposta il
   testo; si accende e si spegne da Visualizza > Confini di pagina (acceso di partenza).
