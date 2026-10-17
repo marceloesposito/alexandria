@@ -12,6 +12,10 @@ serie completa (M10-M12 e richieste del committente); `0.2.x` = serie attuale.
 
 ## Non ancora rilasciato
 
+- **Confini di pagina nella vista senza bordi** (#46): una linea tratteggiata tenue dove finirebbe ogni
+  pagina, con la stessa impaginazione della vista pagina (un paragrafo non si spezza). Non sposta il
+  testo; si accende e si spegne da Visualizza > Confini di pagina (acceso di partenza).
+
 - Piano di **Folium**, l'app sorella portable, in `docs/FOLIUM.md` (#43).
 - **Tabula: i post-it si eliminano** (#44). Un clic seleziona il post-it (e lo trascina), il doppio
   clic entra nella scrittura, Esc o un clic fuori ne escono. Backspace/Canc su un post-it selezionato

@@ -43,8 +43,7 @@ import {
   Feather,
   House,
   Languages,
-  PanelBottom,
-} from 'lucide-react';
+  PanelBottom, SeparatorHorizontal } from 'lucide-react';
 import { useDocSettings } from '../layout/docSettings';
 import { registerCommands, notifyCommandState, setShortcutOverrides } from './registry';
 import { useZen } from '../state/zen';
@@ -217,6 +216,7 @@ export function registerAppCommands() {
     },
     { id: 'doc.types', label: 'cmd.doc.types', icon: Shapes, category: 'view', run: () => ws().openDialog('types') },
     { id: 'view.layoutBorderless', label: 'cmd.view.layoutBorderless', icon: ScrollText, category: 'view', views: ['editor'], isActive: () => prefs().editorLayout === 'borderless', run: () => ws().setPrefs({ editorLayout: 'borderless' }) },
+    { id: 'view.pageHints', label: 'cmd.view.pageHints', icon: SeparatorHorizontal, category: 'view', views: ['editor'], isActive: () => prefs().pageHints, isEnabled: () => prefs().editorLayout === 'borderless', run: () => ws().setPrefs({ pageHints: !prefs().pageHints }) },
     { id: 'view.rulers', label: 'cmd.view.rulers', icon: Ruler, category: 'view', views: ['editor'], isActive: () => prefs().rulers, isEnabled: () => prefs().editorLayout === 'page', run: () => ws().setPrefs({ rulers: !prefs().rulers }) },
     { id: 'help.onboarding', label: 'cmd.help.onboarding', icon: Feather, category: 'help', run: () => ws().setPrefs({ onboardingDone: false }) },
     {

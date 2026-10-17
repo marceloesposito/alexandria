@@ -930,6 +930,7 @@ export const it: Record<string, string> = {
   'counts.pinHint': "Le voci con la puntina restano visibili a etichetta chiusa",
   'cmd.view.layoutPage': "Vista pagina",
   'cmd.view.layoutBorderless': "Vista senza bordi",
+  'cmd.view.pageHints': "Confini di pagina",
   'cmd.view.rulers': "Righelli",
   'menu.view.editorLayout': "Aspetto dello Scriptorium",
   'ruler.pageStart': "Inizio stimato della pagina {n}",

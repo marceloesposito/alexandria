@@ -232,6 +232,11 @@ Aggiornato: 15 ottobre 2026 (versione 0.2.0, storia delle versioni in `CHANGELOG
   del gruppo e l'immagine di anteprima se c'e', note in giallo, cornici tratteggiate), sempre leggibile.
   Era vuoto perche' i nodi controllati non riportavano le misure di React Flow: ora le modifiche
   'dimensions' tornano nei nodi come `measured`.
+- **Confini di pagina senza bordi** (17/10): con `prefs.pageHints` la vista senza bordi disegna dove
+  finirebbe ogni pagina. Stessa `paginate()` della vista pagina (`editor/pagination.ts`, modalita'
+  `hints` di `pageGeometry`), ma con widget `.page-hint` di altezza zero: il testo non si sposta e la
+  misura e' quella del testo continuo. La colonna senza bordi e' larga quanto lo specchio di stampa,
+  quindi i confini cadono dove nella pagina.
 - **Post-it della Tabula** (17/10): selezione e scrittura separate, come in Miro o FigJam. Un clic
   seleziona e trascina (la textarea e' `readOnly` e senza `pointer-events`), il doppio clic scrive
   (`useNoteEdit` in `Whiteboard.tsx`), Esc o un clic fuori escono; un post-it nuovo nasce in scrittura.

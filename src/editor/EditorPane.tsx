@@ -193,9 +193,11 @@ export function EditorPane({ overlay, pageRef: externalPageRef }: Props) {
   const m = pageMetrics(layout);
   // vista pagina: fogli del formato del Layout, con i suoi margini e le interruzioni di pagina
   const paged = !borderless && !sourceMode;
+  // senza bordi: la colonna e' larga quanto lo specchio di stampa, i confini cadono dove nella pagina
+  const hints = borderless && !sourceMode && prefs.pageHints;
   useEffect(() => {
-    setPageGeometry({ enabled: paged, textHeight: m.textHeightMm * MM, padTop: layout.marginTopMm * MM, padBottom: layout.marginBottomMm * MM });
-  }, [paged, m.textHeightMm, layout.marginTopMm, layout.marginBottomMm]);
+    setPageGeometry({ enabled: paged, hints, textHeight: m.textHeightMm * MM, padTop: layout.marginTopMm * MM, padBottom: layout.marginBottomMm * MM });
+  }, [paged, hints, m.textHeightMm, layout.marginTopMm, layout.marginBottomMm]);
   const style = {
     '--page-width': `${m.textWidthMm}mm`,
     '--page-pad-x': borderless ? '17mm' : `${m.padXmm}mm`,

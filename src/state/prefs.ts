@@ -25,6 +25,8 @@ export interface Prefs {
   /** editor come pagina (con margini e righelli) o senza bordi, a tutta colonna */
   editorLayout: 'page' | 'borderless';
   rulers: boolean;
+  /** vista senza bordi: linea tenue dove finirebbe ogni pagina */
+  pageHints: boolean;
   zoom: number; // 0.6 .. 2
   ribbonSize: RibbonSize;
   ribbonCollapsed: boolean;
@@ -74,6 +76,7 @@ export const DEFAULT_PREFS: Prefs = {
   focusMode: false,
   editorLayout: 'page',
   rulers: true,
+  pageHints: true,
   zoom: 1,
   ribbonSize: 'large',
   ribbonCollapsed: false,
