@@ -360,6 +360,10 @@ Aggiornato: 15 ottobre 2026 (versione 0.2.0, storia delle versioni in `CHANGELOG
   sullo stesso Compendium, via LAN e internet, con invito tramite ticket. Trasporto P2P iroh in Rust,
   fusione con Yjs di pergamene, Marginalia, Tabula, Strata e risorse; Markdown e git restano la fonte
   di verita'. Piano in 5 PR: `docs/COLLABORAZIONE.md`.
+- **Folium** (piano del 17/10/2026, in corso): app sorella portable e leggera per il lavoro in
+  mobilita', al posto della versione portable di Alexandria; ogni documento e' un foglio `.folium`
+  indipendente, senza Compendium. Branch di lunga durata `folium`. Piano e fasi F0-F7:
+  `docs/FOLIUM.md` (ogni cambiamento di piano si scrive li').
 
 ## Verifica su Windows (5/10)
 
