@@ -4,6 +4,8 @@ import { platform, joinPath } from '../platform';
 import { FILES, sheetFiles, sheetFromFiles, newSheet, type Sheet } from './format';
 import { newId } from './tabula/model';
 import { clampFrame, DEFAULT_FRAME, type Frame, type SnapZone } from './tabula/snap';
+import { DEFAULT_BAR, normalizeBar, type BarPos } from './barPosition';
+import { DEFAULT_SHOWN, normalizeShown, type CountKey } from './editor/countsModel';
 
 export interface SheetEntry {
   id: string;
@@ -144,6 +146,10 @@ export interface AppState {
   tabula: PanelWin;
   /** Palimpsestus flottante (bordo destro) */
   versions: PanelWin;
+  /** barretta: libera dove la si e' lasciata o agganciata in alto */
+  bar: BarPos;
+  /** cosa mostra il contatore */
+  counts: CountKey[];
 }
 
 export interface PanelWin {
@@ -171,7 +177,7 @@ function normalizePanel(raw: unknown, id: PanelId): PanelWin {
 
 export function defaultAppState(): AppState {
   const lang = typeof navigator !== 'undefined' && !navigator.language.startsWith('it') ? 'en' : 'it';
-  return { lastSheet: null, theme: 'system', lang, author: '', panel: null, zoom: 1, onboarded: false, tabula: normalizePanel(null, 'tabula'), versions: normalizePanel(null, 'versions') };
+  return { lastSheet: null, theme: 'system', lang, author: '', panel: null, zoom: 1, onboarded: false, tabula: normalizePanel(null, 'tabula'), versions: normalizePanel(null, 'versions'), bar: DEFAULT_BAR, counts: DEFAULT_SHOWN };
 }
 
 export async function loadAppState(): Promise<AppState> {
@@ -190,6 +196,8 @@ export async function loadAppState(): Promise<AppState> {
       onboarded: raw.onboarded === true,
       tabula: normalizePanel(raw.tabula, 'tabula'),
       versions: normalizePanel(raw.versions, 'versions'),
+      bar: normalizeBar(raw.bar),
+      counts: normalizeShown(raw.counts),
     };
   } catch {
     return defaultAppState();

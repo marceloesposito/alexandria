@@ -8,6 +8,7 @@ import { Header } from './Header';
 import { SidePanel } from './Panels';
 import { Scriptorium } from './editor/Scriptorium';
 import { FloatingPanel } from './FloatingPanel';
+import { Toolbar } from './Toolbar';
 import { TabulaView } from './tabula/TabulaView';
 import { Shapes, GitFork } from 'lucide-react';
 import { VersionsView } from './versions/VersionsView';
@@ -127,6 +128,7 @@ export default function App() {
           </FloatingPanel>
         </main>
       </div>
+      <Toolbar />
       <Palette />
       {hosts}
     </div>

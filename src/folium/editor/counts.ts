@@ -7,6 +7,8 @@ import { bumpEditor } from './editorRef';
 interface CountsState {
   doc: Counts | null;
   selection: { words: number; chars: number } | null;
+  /** pagine contate dai confini di pagina nel testo (null finche' non misurate) */
+  pages: number | null;
   setDoc(c: Counts): void;
   setSelection(editor: Editor): void;
 }
@@ -14,6 +16,7 @@ interface CountsState {
 export const useCounts = create<CountsState>((set, get) => ({
   doc: null,
   selection: null,
+  pages: null,
   setDoc(c) {
     set({ doc: c });
   },

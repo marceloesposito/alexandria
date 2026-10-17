@@ -23,11 +23,9 @@ export async function openFiles() {
   for (const p of paths) await openPath(p);
 }
 
-export async function renameSheet() {
-  const st = useFolium.getState();
-  if (!st.sheet) return;
-  const name = await promptDialog(t('cmd.sheet.rename'), st.sheet.meta.name || sheetTitle(st.sheet));
-  if (name !== null) st.setMeta({ name: name.trim() });
+/** Rinomina: si apre il nome del foglio in alto, li' dove sta. */
+export function renameSheet() {
+  (document.querySelector('[data-cmd="sheet.rename"]') as HTMLElement | null)?.click();
 }
 
 export async function saveAs() {

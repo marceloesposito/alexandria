@@ -483,3 +483,18 @@ cache della webview).
   riporlo. Ctrl+1 la Tabula, Ctrl+2 il Palimpsestus; la finestra toccata per ultima sta davanti. Non
   ci sono piu' viste da scegliere: si scrive sempre nello Scriptorium.
 - Onboarding in una sola schermata con tre righe: Scriptorium, Armarium, Palimpsestus.
+
+### Terza revisione (17/10/2026)
+- **Barra in alto**: a sinistra il **nome del foglio**, che si cambia con un clic (Invio o clic fuori
+  salvano, Esc annulla); al centro, centrato sulla finestra intera, il posto della barretta quando e'
+  agganciata; a destra i controlli della finestra (Windows e Linux).
+- **Barretta unica** (`Toolbar.tsx`): stile, B I U S, colore, inserisci, timer, contatore, Esporta.
+  Si sposta dalla maniglia; la posizione libera e' in frazioni della finestra (`barPosition.ts`, puro e
+  testato). **Magnetica**: trascinata entro 36 px dalla barra in alto compare il segnale e, lasciata
+  li', si aggancia e ne diventa parte; trascinata via si stacca. I suoi menu si aprono verso il centro.
+- **Contatore a scelta** (`editor/countsModel.ts`): parole, battute, battute senza spazi, pagine,
+  cartelle, minuti di lettura; si sceglie dal suo menu, almeno uno resta acceso.
+- **Confini di pagina** nel testo senza bordi (`editor/pageHints.ts`): una linea tratteggiata tenue
+  dove finirebbe una pagina A4 del Layout predefinito di Alexandria, in proporzione alla colonna; un
+  blocco non si spezza. Le linee hanno altezza zero (il testo non si sposta) e danno anche le
+  "pagine" del contatore. Stessa cosa nella vista senza bordi di Alexandria (PR su `main`).

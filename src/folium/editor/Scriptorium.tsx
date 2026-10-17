@@ -17,7 +17,7 @@ import { setEditor, getEditor } from './editorRef';
 import { promptDialog } from '../../components/confirm';
 import { t } from '../../i18n';
 import { loadComments } from '../comments/store';
-import { TextBar } from './TextBar';
+import { PageHints, setPagesListener } from './pageHints';
 import { CommentLayer } from '../comments/CommentLayer';
 import { EXCERPT_MIME, BLOCK_MIME } from '../tabula/dnd';
 import { dropBlockInText, excerptFromSelection } from '../tabula/bridge';
@@ -25,6 +25,9 @@ import { dropBlockInText, excerptFromSelection } from '../tabula/bridge';
 const IMAGE_EXT = /\.(png|jpe?g|gif|webp|svg)$/i;
 
 setMediaResolver(mediaUrl);
+setPagesListener((n) => {
+  if (useCounts.getState().pages !== n) useCounts.setState({ pages: n });
+});
 setFootnoteEditor((text, done) => void promptDialog(t('footnote.edit'), text).then(done));
 
 /** Immagini dagli appunti o trascinate: nel foglio, poi come figure nel punto giusto. */
@@ -45,7 +48,7 @@ export function Scriptorium() {
   const saveTimer = useRef<ReturnType<typeof setTimeout> | null>(null);
 
   const editor = useEditor({
-    extensions: editorExtensions([SlashMenu]),
+    extensions: editorExtensions([SlashMenu, PageHints]),
     content: markdownToDoc(useFolium.getState().sheet?.markdown ?? ''),
     autofocus: 'end',
     editorProps: {
@@ -154,8 +157,6 @@ export function Scriptorium() {
           {editor && <CommentLayer editor={editor} />}
         </div>
       </div>
-      {/* barretta in trasparenza finche' non ci si passa sopra, come in Silentium */}
-      {editor && <TextBar editor={editor} faded />}
     </div>
   );
 }

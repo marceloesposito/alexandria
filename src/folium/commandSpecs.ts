@@ -4,9 +4,9 @@
 // nessun id compaia due volte e che ogni comando sia raggiungibile.
 
 /**
- * header       in cima: timer, conteggio delle parole, export e il suo menu (L0/L1)
+ * header       in alto a sinistra: il nome del foglio (L0)
  * edgeTab      strisce sui bordi: Tabula a sinistra, Palimpsestus a destra (L0)
- * bar          barretta in basso nello Scriptorium e i suoi popover (L0/L1)
+ * bar          barretta (libera o agganciata in alto) e i suoi popover (L0/L1)
  * tabulaBar    barretta della Tabula
  * versionsBar  barretta del Palimpsestus
  * context      clic destro (nel testo o su un blocco)
@@ -29,15 +29,8 @@ export interface CommandSpec {
 
 export const COMMANDS: CommandSpec[] = [
   // barra in alto
-  // in cima: timer e parole
-  { id: 'timer.toggle', label: 'cmd.timer.toggle', home: 'header', shortcut: 'Mod+Alt+T' },
-  { id: 'counts.open', label: 'cmd.counts.open', home: 'header', palette: false },
-  { id: 'export.menu', label: 'cmd.export.menu', home: 'header', palette: false },
-  // nel menu dell'export (L1)
-  { id: 'sheet.exportDocx', label: 'cmd.sheet.exportDocx', home: 'header' },
-  { id: 'sheet.exportPdf', label: 'cmd.sheet.exportPdf', home: 'header', shortcut: 'Mod+P' },
-  { id: 'sheet.saveAs', label: 'cmd.sheet.saveAs', home: 'header', shortcut: 'Mod+Shift+S' },
-  { id: 'sheet.toCompendium', label: 'cmd.sheet.toCompendium', home: 'header' },
+  // in alto a sinistra: il nome del foglio, che si modifica con un clic
+  { id: 'sheet.rename', label: 'cmd.sheet.rename', home: 'header', shortcut: 'Mod+R' },
 
   // strisce sui bordi: la Tabula a sinistra, il Palimpsestus a destra
   { id: 'tabula.toggle', label: 'cmd.tabula.toggle', home: 'edgeTab', shortcut: 'Mod+1' },
@@ -47,7 +40,6 @@ export const COMMANDS: CommandSpec[] = [
   { id: 'palette.open', label: 'cmd.palette.open', home: 'none', shortcut: 'Mod+K', palette: false },
   { id: 'panel.sheets', label: 'cmd.panel.sheets', home: 'none', shortcut: 'Mod+Shift+E' },
   { id: 'panel.index', label: 'cmd.panel.index', home: 'none', shortcut: 'Mod+Shift+I' },
-  { id: 'sheet.rename', label: 'cmd.sheet.rename', home: 'none' },
 
   // pannello Fogli
   { id: 'sheet.new', label: 'cmd.sheet.new', home: 'panel', shortcut: 'Mod+N' },
@@ -62,6 +54,14 @@ export const COMMANDS: CommandSpec[] = [
   { id: 'text.strike', label: 'cmd.text.strike', home: 'bar', shortcut: 'Mod+Shift+X' },
   { id: 'text.color', label: 'cmd.text.color', home: 'bar', palette: false },
   { id: 'text.insert', label: 'cmd.text.insert', home: 'bar', palette: false },
+  { id: 'timer.toggle', label: 'cmd.timer.toggle', home: 'bar', shortcut: 'Mod+Alt+T' },
+  { id: 'counts.open', label: 'cmd.counts.open', home: 'bar', palette: false },
+  { id: 'export.menu', label: 'cmd.export.menu', home: 'bar', palette: false },
+  // nel menu dell'export (L1)
+  { id: 'sheet.exportDocx', label: 'cmd.sheet.exportDocx', home: 'bar' },
+  { id: 'sheet.exportPdf', label: 'cmd.sheet.exportPdf', home: 'bar', shortcut: 'Mod+P' },
+  { id: 'sheet.saveAs', label: 'cmd.sheet.saveAs', home: 'bar', shortcut: 'Mod+Shift+S' },
+  { id: 'sheet.toCompendium', label: 'cmd.sheet.toCompendium', home: 'bar' },
 
   // barretta della Tabula
   { id: 'tabula.add', label: 'cmd.tabula.add', home: 'tabulaBar', palette: false },
@@ -105,9 +105,9 @@ export const COMMANDS: CommandSpec[] = [
 
 /** Controlli sempre visibili (L0) per superficie, in ordine. Il segmentato delle viste e' uno solo. */
 export const L0: Record<'header' | 'edgeTab' | 'bar' | 'tabulaBar' | 'versionsBar', string[][]> = {
-  header: [['timer.toggle'], ['counts.open'], ['export.menu', 'sheet.exportDocx', 'sheet.exportPdf', 'sheet.saveAs', 'sheet.toCompendium']],
+  header: [['sheet.rename']],
   edgeTab: [['tabula.toggle'], ['versions.toggle']],
-  bar: [['text.style'], ['text.bold', 'text.italic', 'text.underline', 'text.strike'], ['text.color'], ['text.insert']],
+  bar: [['text.style'], ['text.bold', 'text.italic', 'text.underline', 'text.strike'], ['text.color'], ['text.insert'], ['timer.toggle'], ['counts.open'], ['export.menu', 'sheet.exportDocx', 'sheet.exportPdf', 'sheet.saveAs', 'sheet.toCompendium']],
   tabulaBar: [['tabula.add'], ['tabula.find'], ['tabula.zoomOut', 'tabula.zoomIn', 'tabula.fit']],
   versionsBar: [['version.save'], ['version.resume']],
 };
