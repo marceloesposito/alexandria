@@ -365,6 +365,13 @@ Aggiornato: 15 ottobre 2026 (versione 0.2.0, storia delle versioni in `CHANGELOG
   sullo stesso Compendium, via LAN e internet, con invito tramite ticket. Trasporto P2P iroh in Rust,
   fusione con Yjs di pergamene, Marginalia, Tabula, Strata e risorse; Markdown e git restano la fonte
   di verita'. Piano in 5 PR: `docs/COLLABORAZIONE.md`.
+- Compendium nella Bibliotheca (istantanea in sola lettura, riuso e citazione del proprio lavoro).
+- Sincronizzazione senza server (remoto git su chiavetta/NAS gia' ammesso; `git bundle` per
+  Nextcloud/Syncthing).
+- Piano di lancio open source (designer per la UI, test di usabilita', licenze: CPAL di citeproc,
+  CC BY-SA degli stili CSL, GPL-3 del thesaurus italiano distribuito come file separato).
+- Limiti noti: in modalita' revisore non si creano paragrafi nuovi (Invio bloccato); la vista pagina
+  non spezza un paragrafo fra due fogli (il PDF si').
 - **Folium** (piano del 17/10/2026, in corso): app sorella portable e leggera per il lavoro in
   mobilita', al posto della versione portable di Alexandria; ogni documento e' un foglio `.folium`
   indipendente, senza Compendium. Branch di lunga durata `folium`. Piano e fasi F0-F7:
