@@ -13,8 +13,6 @@ export const en: Record<string, string> = {
 
   'cmd.panel.sheets': 'Sheets',
   'cmd.panel.index': 'Index',
-  'cmd.view.write': 'Scriptorium',
-  'cmd.view.versions': 'Palimpsestus',
   'cmd.palette.open': 'Search or command',
   'cmd.sheet.rename': 'Rename',
   'cmd.sheet.saveAs': 'Save as…',
@@ -61,7 +59,6 @@ export const en: Record<string, string> = {
   'cmd.zoom.out': 'Smaller text',
   'cmd.zoom.reset': 'Normal size',
 
-  'views.label': 'View',
   'palette.title': 'Search',
   'palette.placeholder': 'Sheets, commands, text…',
   'palette.none': 'No results',
@@ -219,7 +216,6 @@ export const en: Record<string, string> = {
   'about.licenses': 'MIT. Typefaces: Libertinus, Inter, JetBrains Mono (OFL).',
 
   'cmd.tabula.toggle': "Tabula",
-  'tabula.close': "Tuck the Tabula back into the tab",
   'landing.start': "Start writing",
   'landing.resume': "Pick up where you left off",
   'landing.new': "New sheet",
@@ -231,4 +227,8 @@ export const en: Record<string, string> = {
   'onboarding.armarium.text': "The Tabula at the left edge: pull it out for ideas, excerpts and images.",
   'onboarding.palimpsestus.title': "Palimpsestus",
   'onboarding.palimpsestus.text': "The sheet’s versions as a tree: take up an old path without losing the new one.",
+  'cmd.versions.toggle': "Palimpsestus",
+  'panel.putAway': "Put {name} away at the edge",
+  'bar.top': "Timer and words",
+  'cmd.export.menu': "Export",
 };

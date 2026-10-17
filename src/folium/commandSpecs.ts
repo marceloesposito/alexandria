@@ -4,8 +4,8 @@
 // nessun id compaia due volte e che ogni comando sia raggiungibile.
 
 /**
- * header       barra in alto: solo Scriptorium e Palimpsestus (L0)
- * edgeTab      linguetta della Tabula sul bordo sinistro (L0)
+ * header       in cima: timer, conteggio delle parole, export e il suo menu (L0/L1)
+ * edgeTab      strisce sui bordi: Tabula a sinistra, Palimpsestus a destra (L0)
  * bar          barretta in basso nello Scriptorium e i suoi popover (L0/L1)
  * tabulaBar    barretta della Tabula
  * versionsBar  barretta del Palimpsestus
@@ -29,22 +29,25 @@ export interface CommandSpec {
 
 export const COMMANDS: CommandSpec[] = [
   // barra in alto
-  // barra in alto: solo le due viste
-  { id: 'view.write', label: 'cmd.view.write', home: 'header', shortcut: 'Mod+1' },
-  { id: 'view.versions', label: 'cmd.view.versions', home: 'header', shortcut: 'Mod+3' },
+  // in cima: timer e parole
+  { id: 'timer.toggle', label: 'cmd.timer.toggle', home: 'header', shortcut: 'Mod+Alt+T' },
+  { id: 'counts.open', label: 'cmd.counts.open', home: 'header', palette: false },
+  { id: 'export.menu', label: 'cmd.export.menu', home: 'header', palette: false },
+  // nel menu dell'export (L1)
+  { id: 'sheet.exportDocx', label: 'cmd.sheet.exportDocx', home: 'header' },
+  { id: 'sheet.exportPdf', label: 'cmd.sheet.exportPdf', home: 'header', shortcut: 'Mod+P' },
+  { id: 'sheet.saveAs', label: 'cmd.sheet.saveAs', home: 'header', shortcut: 'Mod+Shift+S' },
+  { id: 'sheet.toCompendium', label: 'cmd.sheet.toCompendium', home: 'header' },
 
-  // linguetta a sinistra: la Tabula flottante
-  { id: 'tabula.toggle', label: 'cmd.tabula.toggle', home: 'edgeTab', shortcut: 'Mod+2' },
+  // strisce sui bordi: la Tabula a sinistra, il Palimpsestus a destra
+  { id: 'tabula.toggle', label: 'cmd.tabula.toggle', home: 'edgeTab', shortcut: 'Mod+1' },
+  { id: 'versions.toggle', label: 'cmd.versions.toggle', home: 'edgeTab', shortcut: 'Mod+2' },
 
   // solo per nome (⌘K) e scorciatoie
   { id: 'palette.open', label: 'cmd.palette.open', home: 'none', shortcut: 'Mod+K', palette: false },
   { id: 'panel.sheets', label: 'cmd.panel.sheets', home: 'none', shortcut: 'Mod+Shift+E' },
   { id: 'panel.index', label: 'cmd.panel.index', home: 'none', shortcut: 'Mod+Shift+I' },
   { id: 'sheet.rename', label: 'cmd.sheet.rename', home: 'none' },
-  { id: 'sheet.saveAs', label: 'cmd.sheet.saveAs', home: 'none', shortcut: 'Mod+Shift+S' },
-  { id: 'sheet.exportDocx', label: 'cmd.sheet.exportDocx', home: 'none' },
-  { id: 'sheet.exportPdf', label: 'cmd.sheet.exportPdf', home: 'none', shortcut: 'Mod+P' },
-  { id: 'sheet.toCompendium', label: 'cmd.sheet.toCompendium', home: 'none' },
 
   // pannello Fogli
   { id: 'sheet.new', label: 'cmd.sheet.new', home: 'panel', shortcut: 'Mod+N' },
@@ -59,8 +62,6 @@ export const COMMANDS: CommandSpec[] = [
   { id: 'text.strike', label: 'cmd.text.strike', home: 'bar', shortcut: 'Mod+Shift+X' },
   { id: 'text.color', label: 'cmd.text.color', home: 'bar', palette: false },
   { id: 'text.insert', label: 'cmd.text.insert', home: 'bar', palette: false },
-  { id: 'timer.toggle', label: 'cmd.timer.toggle', home: 'bar', shortcut: 'Mod+Alt+T' },
-  { id: 'counts.open', label: 'cmd.counts.open', home: 'bar', palette: false },
 
   // barretta della Tabula
   { id: 'tabula.add', label: 'cmd.tabula.add', home: 'tabulaBar', palette: false },
@@ -104,9 +105,9 @@ export const COMMANDS: CommandSpec[] = [
 
 /** Controlli sempre visibili (L0) per superficie, in ordine. Il segmentato delle viste e' uno solo. */
 export const L0: Record<'header' | 'edgeTab' | 'bar' | 'tabulaBar' | 'versionsBar', string[][]> = {
-  header: [['view.write', 'view.versions']],
-  edgeTab: [['tabula.toggle']],
-  bar: [['text.style'], ['text.bold', 'text.italic', 'text.underline', 'text.strike'], ['text.color'], ['text.insert'], ['timer.toggle'], ['counts.open']],
+  header: [['timer.toggle'], ['counts.open'], ['export.menu', 'sheet.exportDocx', 'sheet.exportPdf', 'sheet.saveAs', 'sheet.toCompendium']],
+  edgeTab: [['tabula.toggle'], ['versions.toggle']],
+  bar: [['text.style'], ['text.bold', 'text.italic', 'text.underline', 'text.strike'], ['text.color'], ['text.insert']],
   tabulaBar: [['tabula.add'], ['tabula.find'], ['tabula.zoomOut', 'tabula.zoomIn', 'tabula.fit']],
   versionsBar: [['version.save'], ['version.resume']],
 };

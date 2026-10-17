@@ -472,3 +472,14 @@ cache della webview).
   rimasto" e "Nuovo foglio" (`Welcome.tsx`). Un file aperto dal sistema salta l'ingresso.
 - Nell'app vera la chiusura della finestra aspetta il salvataggio dell'ultimo testo
   (`onCloseRequested`).
+
+### Seconda revisione (17/10/2026)
+- **Niente barra di navigazione**: in cima, sullo stesso fondo del testo, solo il **timer**, il
+  **contatore di parole** (con conteggi e zoom) e **Esporta** (Word, PDF, Salva come `.folium`, Porta
+  in un Compendium). La fascia fa anche da barra del titolo; il resto per nome con ⌘K.
+- La barretta in basso ha solo Stile, B I U S, Colore e Inserisci.
+- **Palimpsestus come la Tabula, sul bordo destro** (`FloatingPanel.tsx`, comune alle due finestre):
+  riposto oltre il bordo destro con la sua striscia, tirato dentro trascinandola, spinto fuori per
+  riporlo. Ctrl+1 la Tabula, Ctrl+2 il Palimpsestus; la finestra toccata per ultima sta davanti. Non
+  ci sono piu' viste da scegliere: si scrive sempre nello Scriptorium.
+- Onboarding in una sola schermata con tre righe: Scriptorium, Armarium, Palimpsestus.

@@ -1,30 +1,45 @@
-// Tabula flottante: un'unica finestra sopra il testo che non si apre e non si chiude, si sposta.
-// "Riposta", scorre oltre il bordo sinistro e ne resta fuori una striscia alta quasi quanto la
-// finestra: afferrandola la si tira dentro, spingendola oltre il bordo la si ripone. Si sposta dalla
-// sua barra e si ridimensiona dagli orli; vicino ai bordi, se ci si ferma un attimo, propone
-// l'aggancio a meta' o a un quadrante (snap.ts), come le finestre di Windows.
-import { useEffect, useLayoutEffect, useRef, useState } from 'react';
-import { Shapes, ChevronsLeft } from 'lucide-react';
-import { useFolium } from '../store';
-import { TabulaView } from './TabulaView';
-import { toggleTabula } from '../commands';
-import { commandTitle } from '../FloatingBar';
-import { NO_SNAP, clampFrame, dragClamp, parkedFrame, shouldPark, trackSnap, unsnap, zoneFrame, type Frame, type SnapState } from './snap';
-import { t, useLang } from '../../i18n';
+// Finestre flottanti di Folium: la Tabula sul bordo sinistro, il Palimpsestus sul destro. Ognuna e'
+// un'unica finestra sopra il testo che non si apre e non si chiude, si sposta: riposta, scorre oltre
+// il suo bordo e ne resta fuori una striscia alta quasi quanto la finestra; afferrandola la si tira
+// dentro, spingendola oltre il bordo la si ripone. Si sposta dalla sua barra e si ridimensiona dagli
+// orli; vicino ai bordi, se ci si ferma un attimo, propone l'aggancio a meta' o a un quadrante
+// (tabula/snap.ts), come le finestre di Windows.
+import { useEffect, useLayoutEffect, useRef, useState, type ComponentType, type ReactNode } from 'react';
+import { ChevronsLeft, ChevronsRight } from 'lucide-react';
+import { useFolium } from './store';
+import { useUi } from './ui';
+import { togglePanelWin } from './commands';
+import { commandTitle } from './FloatingBar';
+import { NO_SNAP, clampFrame, dragClamp, parkedFrame, shouldPark, trackSnap, unsnap, zoneFrame, type Frame, type Side, type SnapState } from './tabula/snap';
+import type { PanelId, PanelWin } from './sheets';
+import { t, useLang } from '../i18n';
 
 /** Larghezza della striscia che resta fuori dal bordo (px). */
 const SLIVER = 18;
 
-type Drag = { kind: 'move'; start: { x: number; y: number }; frame: Frame; detached: boolean; fromRail: boolean } | { kind: 'resize'; edge: 'e' | 's' | 'se' | 'w' | 'sw'; start: { x: number; y: number }; frame: Frame };
+type Drag =
+  | { kind: 'move'; start: { x: number; y: number }; frame: Frame; detached: boolean; fromRail: boolean }
+  | { kind: 'resize'; edge: 'e' | 's' | 'se' | 'w' | 'sw'; start: { x: number; y: number }; frame: Frame };
 
 /** Px -> frazioni dello spazio di lavoro. */
 function rel(area: DOMRect, x: number, y: number) {
   return { x: (x - area.left) / area.width, y: (y - area.top) / area.height };
 }
 
-export function FloatingTabula() {
+interface Props {
+  id: PanelId;
+  side: Side;
+  title: string;
+  icon: ComponentType<{ size?: number }>;
+  /** comando che la richiama o la ripone */
+  cmd: string;
+  children: ReactNode;
+}
+
+export function FloatingPanel({ id, side, title, icon: Icon, cmd, children }: Props) {
   useLang();
-  const win = useFolium((s) => s.app.tabula);
+  const win = useFolium((s) => s.app[id]);
+  const front = useUi((s) => s.front === id);
   const area = useRef<HTMLDivElement>(null);
   const [width, setWidth] = useState(1200);
   const [live, setLive] = useState<Frame | null>(null);
@@ -34,9 +49,10 @@ export function FloatingTabula() {
   const snapRef = useRef<SnapState>(NO_SNAP);
   const sliver = SLIVER / width;
   const parked = !win.open && !live;
-  const frame = live ?? (win.open ? win.frame : parkedFrame(win.frame, sliver));
+  const frame = live ?? (win.open ? win.frame : parkedFrame(win.frame, sliver, side));
 
-  const save = (p: Partial<typeof win>) => useFolium.getState().setApp({ tabula: { ...useFolium.getState().app.tabula, ...p } });
+  const save = (p: Partial<PanelWin>) => useFolium.getState().setApp({ [id]: { ...useFolium.getState().app[id], ...p } });
+  const toFront = () => useUi.setState({ front: id });
 
   useLayoutEffect(() => {
     const el = area.current;
@@ -48,7 +64,7 @@ export function FloatingTabula() {
 
   // il puntatore fermo vicino al bordo arma l'aggancio anche senza muoversi
   useEffect(() => {
-    const id = setInterval(() => {
+    const iv = setInterval(() => {
       const d = drag.current;
       const p = pointer.current;
       const a = area.current?.getBoundingClientRect();
@@ -57,12 +73,13 @@ export function FloatingTabula() {
       if (next.armed !== snapRef.current.armed || next.zone !== snapRef.current.zone) setSnap(next);
       snapRef.current = next;
     }, 50);
-    return () => clearInterval(id);
+    return () => clearInterval(iv);
   }, []);
 
   const begin = (e: React.PointerEvent, d: Drag) => {
     if (e.button !== 0) return;
     e.preventDefault();
+    toFront();
     (e.currentTarget as HTMLElement).setPointerCapture(e.pointerId);
     drag.current = d;
     pointer.current = { x: e.clientX, y: e.clientY };
@@ -86,8 +103,8 @@ export function FloatingTabula() {
         if (win.open && win.snap) d.frame = unsnap(win.free, d.frame, s.x, s.y);
       }
       if (!d.detached) return;
-      // la stessa finestra segue il puntatore, anche oltre il bordo sinistro
-      setLive(dragClamp({ ...d.frame, x: d.frame.x + dx, y: d.frame.y + dy }, sliver));
+      // la stessa finestra segue il puntatore, anche oltre il suo bordo
+      setLive(dragClamp({ ...d.frame, x: d.frame.x + dx, y: d.frame.y + dy }, sliver, side));
       const next = trackSnap(snapRef.current, e.clientX - a.left, e.clientY - a.top, a.width, a.height, Date.now());
       snapRef.current = next;
       setSnap(next);
@@ -112,12 +129,12 @@ export function FloatingTabula() {
     setSnap(NO_SNAP);
     if (!d) return;
     if (d.kind === 'move' && !d.detached) {
-      // un clic sulla striscia tira fuori la Tabula al suo posto
-      if (d.fromRail) toggleTabula(true);
+      // un clic sulla striscia tira dentro la finestra al suo posto
+      if (d.fromRail) togglePanelWin(id, true);
       setLive(null);
       return;
     }
-    // gia' piu' fuori che dentro: riporla vince sull'aggancio a sinistra
+    // gia' piu' fuori che dentro: riporla vince sull'aggancio al bordo
     const park = !!live && d.kind === 'move' && shouldPark(live);
     if (d.kind === 'move' && s.armed && s.zone && !park) {
       // aggancio: le misure libere restano per quando la si stacca
@@ -134,15 +151,17 @@ export function FloatingTabula() {
 
   const preview = snap.armed && snap.zone && !(live && shouldPark(live)) ? zoneFrame(snap.zone) : null;
   const pct = (f: Frame) => ({ left: `${f.x * 100}%`, top: `${f.y * 100}%`, width: `${f.w * 100}%`, height: `${f.h * 100}%` });
-  const startMove = (e: React.PointerEvent, fromRail: boolean) => begin(e, { kind: 'move', start: { x: e.clientX, y: e.clientY }, frame: frame, detached: false, fromRail });
+  const startMove = (e: React.PointerEvent, fromRail: boolean) => begin(e, { kind: 'move', start: { x: e.clientX, y: e.clientY }, frame, detached: false, fromRail });
+  const Away = side === 'left' ? ChevronsLeft : ChevronsRight;
 
   return (
-    <div className="fx-desk" ref={area}>
+    <div className={`fx-desk ${front ? 'is-front' : ''}`} ref={area}>
       {preview && <div className="fx-snap-preview" style={pct(preview)} aria-hidden />}
       <section
-        className={`fx-float ${live ? 'is-dragging' : ''} ${parked ? 'is-parked' : ''} ${win.snap && win.open && !live ? 'is-snapped' : ''}`}
+        className={`fx-float fx-float--${side} ${live ? 'is-dragging' : ''} ${parked ? 'is-parked' : ''} ${win.snap && win.open && !live ? 'is-snapped' : ''}`}
         style={pct(frame)}
-        aria-label="Tabula"
+        aria-label={title}
+        onPointerDownCapture={toFront}
         onPointerMove={move}
         onPointerUp={end}
         onPointerCancel={end}
@@ -155,28 +174,28 @@ export function FloatingTabula() {
           }}
           onDoubleClick={() => (win.snap ? save({ frame: win.free, snap: null }) : save({ frame: zoneFrame('top'), free: win.frame, snap: 'top' }))}
         >
-          <Shapes size={13} />
-          <span className="fx-float__title">Tabula</span>
-          <button className="fx-icon" title={commandTitle('tabula.toggle')} aria-label={t('tabula.close')} onClick={() => toggleTabula(false)}>
-            <ChevronsLeft size={15} />
+          <Icon size={13} />
+          <span className="fx-float__title">{title}</span>
+          <button className="fx-icon" title={commandTitle(cmd)} aria-label={t('panel.putAway', { name: title })} onClick={() => togglePanelWin(id, false)}>
+            <Away size={15} />
           </button>
         </header>
         <div className="fx-float__body" inert={parked || undefined}>
-          <TabulaView />
+          {children}
         </div>
-        {/* la striscia che resta fuori dal bordo: si afferra per tirare dentro la Tabula */}
+        {/* la striscia che resta fuori dal bordo: si afferra per tirare dentro la finestra */}
         <div
           className="fx-float__rail"
           role="button"
           tabIndex={parked ? 0 : -1}
-          data-cmd="tabula.toggle"
-          title={commandTitle('tabula.toggle')}
-          aria-label={t('cmd.tabula.toggle')}
+          data-cmd={cmd}
+          title={commandTitle(cmd)}
+          aria-label={t(`cmd.${cmd}`)}
           onPointerDown={(e) => startMove(e, true)}
-          onKeyDown={(e) => (e.key === 'Enter' || e.key === ' ') && toggleTabula(true)}
+          onKeyDown={(e) => (e.key === 'Enter' || e.key === ' ') && togglePanelWin(id, true)}
         >
-          <Shapes size={13} />
-          <span>Tabula</span>
+          <Icon size={13} />
+          <span>{title}</span>
         </div>
         {!parked &&
           (['e', 's', 'se', 'w', 'sw'] as const).map((edge) => (

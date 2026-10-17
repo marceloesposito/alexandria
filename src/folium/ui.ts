@@ -2,7 +2,7 @@
 // visibile e la versione selezionata nel Palimpsestus.
 import { create } from 'zustand';
 
-export type PopoverId = 'appMenu' | 'crumb' | 'style' | 'color' | 'insert' | 'timer' | 'counts' | 'tabulaAdd' | 'tabulaFind';
+export type PopoverId = 'export' | 'style' | 'color' | 'insert' | 'timer' | 'counts' | 'tabulaAdd' | 'tabulaFind';
 export type DialogId = 'prefs' | 'help' | 'about';
 
 export interface TabulaApi {
@@ -19,6 +19,8 @@ interface UiState {
   tabula: TabulaApi | null;
   /** versione selezionata nell'albero */
   selectedVersion: string | null;
+  /** finestra flottante davanti all'altra */
+  front: 'tabula' | 'versions';
   toggle(p: PopoverId): void;
   close(): void;
   setDialog(d: DialogId | null): void;
@@ -31,6 +33,7 @@ export const useUi = create<UiState>((set, get) => ({
   palette: false,
   tabula: null,
   selectedVersion: null,
+  front: 'tabula',
   toggle(p) {
     set({ popover: get().popover === p ? null : p });
   },

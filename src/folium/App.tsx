@@ -1,13 +1,15 @@
 // Folium: il foglio e niente altro. All'avvio splash, onboarding al primo lancio e pagina d'ingresso;
-// poi il testo senza bordi (come lo Scriptorium in Silentium), una barra in alto solo per passare al
-// Palimpsestus, e la Tabula flottante che si tira fuori dalla linguetta sul bordo sinistro.
+// poi il testo senza bordi (come lo Scriptorium in Silentium) con timer e parole in cima, la Tabula
+// riposta sul bordo sinistro e il Palimpsestus sul destro, da tirare dentro afferrandone la striscia.
 import { useEffect } from 'react';
 import { useFolium, openPath, maybeSnapshot } from './store';
 import { useUi } from './ui';
 import { Header } from './Header';
 import { SidePanel } from './Panels';
 import { Scriptorium } from './editor/Scriptorium';
-import { FloatingTabula } from './tabula/FloatingTabula';
+import { FloatingPanel } from './FloatingPanel';
+import { TabulaView } from './tabula/TabulaView';
+import { Shapes, GitFork } from 'lucide-react';
 import { VersionsView } from './versions/VersionsView';
 import { Palette } from './Palette';
 import { Dialogs, Toasts } from './Dialogs';
@@ -23,7 +25,6 @@ import { useLang } from '../i18n';
 export default function App() {
   useLang();
   const screen = useFolium((s) => s.screen);
-  const view = useFolium((s) => s.sheet?.meta.view ?? 'write');
   const silentium = useFolium((s) => s.silentium);
   const sheetId = useFolium((s) => s.sheet?.meta.id);
 
@@ -112,13 +113,18 @@ export default function App() {
     );
 
   return (
-    <div className={`fx-app ${silentium ? 'is-silentium' : ''}`} data-view={view}>
+    <div className={`fx-app ${silentium ? 'is-silentium' : ''}`}>
       <Header />
       <div className="fx-body">
         <SidePanel />
         <main className="fx-main" key={sheetId}>
-          {view === 'versions' ? <VersionsView /> : <Scriptorium />}
-          {view === 'write' && <FloatingTabula />}
+          <Scriptorium />
+          <FloatingPanel id="tabula" side="left" title="Tabula" icon={Shapes} cmd="tabula.toggle">
+            <TabulaView />
+          </FloatingPanel>
+          <FloatingPanel id="versions" side="right" title="Palimpsestus" icon={GitFork} cmd="versions.toggle">
+            <VersionsView />
+          </FloatingPanel>
         </main>
       </div>
       <Palette />

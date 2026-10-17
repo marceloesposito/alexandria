@@ -100,7 +100,7 @@ export function VersionsView() {
       {!slots.length ? (
         <div className="fx-tabula__empty">{t('versions.empty')}</div>
       ) : (
-        <svg className="fx-tree" width={width} height={height} role="tree" aria-label={t('cmd.view.versions')}>
+        <svg className="fx-tree" width={width} height={height} role="tree" aria-label={t('cmd.versions.toggle')}>
           {s.tree.nodes.map((n) =>
             n.parent && byId.has(n.parent) ? (
               (() => {

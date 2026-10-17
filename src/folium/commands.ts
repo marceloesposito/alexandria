@@ -8,26 +8,21 @@ import { startComment } from './comments/store';
 import { editLink } from './editor/insertItems';
 import { useTimer } from './timer/store';
 import { matches } from './keys';
-import type { SheetView } from './format';
+import type { PanelId } from './sheets';
 
 type Runner = { run: () => unknown; active?: () => boolean };
-
-const setView = (view: SheetView) => () => {
-  useFolium.getState().setMeta({ view });
-  useUi.setState({ popover: null });
-};
 
 const zoomBy = (d: number) => () => {
   const z = Math.round(Math.min(2, Math.max(0.6, useFolium.getState().app.zoom + d)) * 10) / 10;
   useFolium.getState().setApp({ zoom: z });
 };
 
-/** Tabula flottante: aperta o richiusa nella linguetta; con la vista Palimpsestus si torna al testo. */
-export function toggleTabula(open?: boolean) {
+/** Tabula (bordo sinistro) o Palimpsestus (bordo destro): dentro, o riposti oltre il loro bordo. */
+export function togglePanelWin(id: PanelId, open?: boolean) {
   const st = useFolium.getState();
-  const next = open ?? !st.app.tabula.open;
-  st.setApp({ tabula: { ...st.app.tabula, open: next } });
-  if (next && st.sheet?.meta.view !== 'write') st.setMeta({ view: 'write' });
+  const next = open ?? !st.app[id].open;
+  st.setApp({ [id]: { ...st.app[id], open: next } });
+  if (next) useUi.setState({ front: id });
 }
 
 const togglePanel = (p: 'sheets' | 'index') => () => {
@@ -43,9 +38,8 @@ const lazy =
 const RUN: Record<string, Runner> = {
   'panel.sheets': { run: togglePanel('sheets'), active: () => useFolium.getState().app.panel === 'sheets' },
   'panel.index': { run: togglePanel('index'), active: () => useFolium.getState().app.panel === 'index' },
-  'view.write': { run: setView('write'), active: () => useFolium.getState().sheet?.meta.view === 'write' },
-  'tabula.toggle': { run: () => toggleTabula(), active: () => useFolium.getState().app.tabula.open },
-  'view.versions': { run: setView('versions'), active: () => useFolium.getState().sheet?.meta.view === 'versions' },
+  'tabula.toggle': { run: () => togglePanelWin('tabula'), active: () => useFolium.getState().app.tabula.open },
+  'versions.toggle': { run: () => togglePanelWin('versions'), active: () => useFolium.getState().app.versions.open },
   'palette.open': { run: () => useUi.getState().setPalette(!useUi.getState().palette) },
 
   'sheet.rename': { run: lazy(() => import('./actions'), (m) => m.renameSheet()) },
@@ -66,6 +60,7 @@ const RUN: Record<string, Runner> = {
   'text.color': { run: () => useUi.getState().toggle('color') },
   'text.insert': { run: () => useUi.getState().toggle('insert') },
   'timer.toggle': { run: () => useTimer.getState().toggle(), active: () => useTimer.getState().state.since !== null },
+  'export.menu': { run: () => useUi.getState().toggle('export') },
   'counts.open': { run: () => useUi.getState().toggle('counts') },
 
   'tabula.add': { run: () => useUi.getState().toggle('tabulaAdd') },

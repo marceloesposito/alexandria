@@ -140,24 +140,38 @@ export interface AppState {
   zoom: number;
   /** onboarding gia' visto */
   onboarded: boolean;
-  /** Tabula flottante: aperta, posizione (frazioni dello spazio), misure prima dell'aggancio */
-  tabula: { open: boolean; frame: Frame; free: Frame; snap: SnapZone | null };
+  /** Tabula flottante (bordo sinistro): aperta, posizione (frazioni dello spazio), misure prima dell'aggancio */
+  tabula: PanelWin;
+  /** Palimpsestus flottante (bordo destro) */
+  versions: PanelWin;
 }
+
+export interface PanelWin {
+  open: boolean;
+  frame: Frame;
+  free: Frame;
+  snap: SnapZone | null;
+}
+
+export type PanelId = 'tabula' | 'versions';
+
+/** Posto di partenza: la Tabula a sinistra, il Palimpsestus a destra, quasi tutta l'altezza. */
+const START: Record<PanelId, Frame> = { tabula: { ...DEFAULT_FRAME, x: 0.04 }, versions: { ...DEFAULT_FRAME, x: 0.54 } };
 
 const ZONES: SnapZone[] = ['left', 'right', 'top', 'top-left', 'top-right', 'bottom-left', 'bottom-right'];
 
-function normalizeTabulaWin(raw: unknown): AppState['tabula'] {
-  const r = (raw && typeof raw === 'object' ? raw : {}) as Partial<AppState['tabula']>;
+function normalizePanel(raw: unknown, id: PanelId): PanelWin {
+  const r = (raw && typeof raw === 'object' ? raw : {}) as Partial<PanelWin>;
   const frame = (f: unknown): Frame => {
     const x = f as Partial<Frame> | null;
-    return x && [x.x, x.y, x.w, x.h].every((v) => typeof v === 'number' && Number.isFinite(v)) ? clampFrame(x as Frame) : DEFAULT_FRAME;
+    return x && [x.x, x.y, x.w, x.h].every((v) => typeof v === 'number' && Number.isFinite(v)) ? clampFrame(x as Frame) : START[id];
   };
   return { open: r.open === true, frame: frame(r.frame), free: frame(r.free ?? r.frame), snap: ZONES.includes(r.snap as SnapZone) ? (r.snap as SnapZone) : null };
 }
 
 export function defaultAppState(): AppState {
   const lang = typeof navigator !== 'undefined' && !navigator.language.startsWith('it') ? 'en' : 'it';
-  return { lastSheet: null, theme: 'system', lang, author: '', panel: null, zoom: 1, onboarded: false, tabula: normalizeTabulaWin(null) };
+  return { lastSheet: null, theme: 'system', lang, author: '', panel: null, zoom: 1, onboarded: false, tabula: normalizePanel(null, 'tabula'), versions: normalizePanel(null, 'versions') };
 }
 
 export async function loadAppState(): Promise<AppState> {
@@ -174,7 +188,8 @@ export async function loadAppState(): Promise<AppState> {
       panel: raw.panel === 'sheets' || raw.panel === 'index' ? raw.panel : null,
       zoom: typeof raw.zoom === 'number' && raw.zoom >= 0.6 && raw.zoom <= 2 ? raw.zoom : 1,
       onboarded: raw.onboarded === true,
-      tabula: normalizeTabulaWin(raw.tabula),
+      tabula: normalizePanel(raw.tabula, 'tabula'),
+      versions: normalizePanel(raw.versions, 'versions'),
     };
   } catch {
     return defaultAppState();

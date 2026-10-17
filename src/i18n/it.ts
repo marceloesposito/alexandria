@@ -13,8 +13,6 @@ export const it: Record<string, string> = {
 
   'cmd.panel.sheets': 'Fogli',
   'cmd.panel.index': 'Index',
-  'cmd.view.write': 'Scriptorium',
-  'cmd.view.versions': 'Palimpsestus',
   'cmd.palette.open': 'Cerca o comando',
   'cmd.sheet.rename': 'Rinomina',
   'cmd.sheet.saveAs': 'Salva come…',
@@ -61,7 +59,6 @@ export const it: Record<string, string> = {
   'cmd.zoom.out': 'Testo più piccolo',
   'cmd.zoom.reset': 'Dimensione normale',
 
-  'views.label': 'Vista',
   'palette.title': 'Cerca',
   'palette.placeholder': 'Fogli, comandi, testo…',
   'palette.none': 'Nessun risultato',
@@ -219,7 +216,6 @@ export const it: Record<string, string> = {
   'about.licenses': 'MIT. Caratteri: Libertinus, Inter, JetBrains Mono (OFL).',
 
   'cmd.tabula.toggle': "Tabula",
-  'tabula.close': "Richiudi la Tabula nella linguetta",
   'landing.start': "Inizia a scrivere",
   'landing.resume': "Riprendi da dove eri rimasto",
   'landing.new': "Nuovo foglio",
@@ -231,4 +227,8 @@ export const it: Record<string, string> = {
   'onboarding.armarium.text': "La Tabula sul bordo sinistro: tirala fuori per idee, estratti e immagini.",
   'onboarding.palimpsestus.title': "Palimpsestus",
   'onboarding.palimpsestus.text': "Le versioni del foglio, ad albero: riprendi una strada vecchia senza perdere la nuova.",
+  'cmd.versions.toggle': "Palimpsestus",
+  'panel.putAway': "Riponi {name} sul bordo",
+  'bar.top': "Timer e parole",
+  'cmd.export.menu': "Esporta",
 };

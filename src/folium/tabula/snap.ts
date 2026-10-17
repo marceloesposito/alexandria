@@ -106,19 +106,24 @@ export function unsnap(free: Frame, snapped: Frame, px: number, py: number): Fra
 export const DEFAULT_FRAME: Frame = { x: 0.52, y: 0.02, w: 0.42, h: 0.96 };
 
 // ---------------------------------------------------------------- parcheggio oltre il bordo
-// "Chiusa", la Tabula non sparisce: scorre oltre il bordo sinistro e ne resta fuori solo una
-// striscia, che si afferra per tirarla di nuovo dentro. E' sempre la stessa finestra che si sposta.
+// "Chiuse", la Tabula e il Palimpsestus non spariscono: scorrono oltre il loro bordo (la Tabula a
+// sinistra, il Palimpsestus a destra) e ne resta fuori solo una striscia, che si afferra per tirarli
+// di nuovo dentro. E' sempre la stessa finestra che si sposta.
 
-/** Finestra parcheggiata: stesse misure, fuori a sinistra tranne una striscia larga `sliver`. */
-export function parkedFrame(f: Frame, sliver: number): Frame {
-  return { ...f, x: -f.w + sliver };
+export type Side = 'left' | 'right';
+
+/** Finestra parcheggiata: stesse misure, oltre il suo bordo tranne una striscia larga `sliver`. */
+export function parkedFrame(f: Frame, sliver: number, side: Side = 'left'): Frame {
+  return { ...f, x: side === 'left' ? -f.w + sliver : 1 - sliver };
 }
 
-/** Durante il trascinamento la finestra puo' uscire a sinistra fino a lasciare la sola striscia. */
-export function dragClamp(f: Frame, sliver: number): Frame {
+/** Durante il trascinamento la finestra puo' uscire dal suo lato fino a lasciare la sola striscia. */
+export function dragClamp(f: Frame, sliver: number, side: Side = 'left'): Frame {
   const w = Math.min(1, f.w);
   const h = Math.min(1, f.h);
-  return { x: Math.min(1 - w, Math.max(-w + sliver, f.x)), y: Math.min(1 - h, Math.max(0, f.y)), w, h };
+  const min = side === 'left' ? -w + sliver : 0;
+  const max = side === 'right' ? 1 - sliver : 1 - w;
+  return { x: Math.min(max, Math.max(min, f.x)), y: Math.min(1 - h, Math.max(0, f.y)), w, h };
 }
 
 /** Parte visibile della larghezza (0..1 della finestra stessa). */

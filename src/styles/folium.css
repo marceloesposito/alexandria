@@ -272,7 +272,7 @@ select.fx-input {
 }
 
 /* ---------------------------------------------------------------- barra in alto */
-/* senza bordi, sullo stesso fondo del testo: solo il passaggio fra Scriptorium e Palimpsestus */
+/* senza bordi, sullo stesso fondo del testo: solo timer, parole ed export */
 .fx-header {
   display: flex;
   align-items: center;
@@ -283,22 +283,30 @@ select.fx-input {
   user-select: none;
 }
 
-.fx-header .fx-header:hover .fx-views,
-.fx-header .fx-views:focus-within {
+/* quieti finche' non ci si passa sopra */
+.fx-top {
+  display: flex;
+  align-items: center;
+  gap: var(--space-1);
+  opacity: 0.55;
+  transition: opacity 0.2s ease;
+}
+
+.fx-header:hover .fx-top,
+.fx-top:focus-within {
   opacity: 1;
 }
 
-.fx-header .fx-seg__btn {
-  font-size: var(--fs-ui-small);
+.fx-top__sep {
+  width: 1px;
+  height: 16px;
+  margin: 0 var(--space-1);
+  background: var(--line);
 }
 
 /* macOS: spazio per i semafori della finestra */
 .fx-header.is-mac {
   padding-left: 78px;
-}
-
-.fx-views {
-  margin-left: var(--space-2);
 }
 
 .fx-header__center {
@@ -1327,6 +1335,11 @@ select.fx-input {
   pointer-events: auto;
 }
 
+/* la finestra toccata per ultima sta davanti */
+.fx-desk.is-front {
+  z-index: 36;
+}
+
 .fx-float {
   position: absolute;
   display: flex;
@@ -1386,6 +1399,18 @@ select.fx-input {
 
 .fx-float.is-parked .fx-float__rail:hover {
   color: var(--accent);
+}
+
+/* sul bordo destro la striscia e' il lato sinistro della finestra */
+.fx-float--right .fx-float__rail {
+  right: auto;
+  left: 0;
+  border-left: 0;
+  border-right: 1px solid var(--line);
+}
+
+.fx-float--right .fx-float__rail span {
+  transform: none;
 }
 
 .fx-float.is-dragging {

@@ -1,4 +1,4 @@
-// Barretta dello Scriptorium: Stile ▾ | B I U S | Colore ▾ | + ▾ | ⏱ | parole.
+// Barretta dello Scriptorium: Stile ▾ | B I U S | Colore ▾ | + ▾. Timer e parole stanno in cima.
 import { useRef, useState } from 'react';
 import type { Editor } from '@tiptap/core';
 import { Bold, Italic, Underline, Strikethrough, Baseline, Plus, ChevronDown, Minus, RotateCcw } from 'lucide-react';
@@ -10,7 +10,6 @@ import { useEditorRef } from './editorRef';
 import { useCounts } from './counts';
 import { useFolium } from '../store';
 import { insertItems } from './insertItems';
-import { TimerChip } from '../timer/TimerChip';
 import { runCommand } from '../commands';
 import { t, useLang } from '../../i18n';
 import type { SheetFont } from '../format';
@@ -116,7 +115,8 @@ function InsertPopover({ editor }: { editor: Editor }) {
   );
 }
 
-function CountsPopover() {
+/** Conteggi e zoom: si apre dal contatore di parole in cima. */
+export function CountsPopover() {
   const c = useCounts((s) => s.doc);
   const sel = useCounts((s) => s.selection);
   const zoom = useFolium((s) => s.app.zoom);
@@ -162,13 +162,10 @@ export function TextBar({ editor, faded }: { editor: Editor; faded: boolean }) {
   useLang();
   useEditorRef((s) => s.tick);
   const popover = useUi((s) => s.popover);
-  const words = useCounts((s) => s.selection?.words ?? s.doc?.words ?? 0);
-  const hasSel = useCounts((s) => !!s.selection);
   const refs = {
     style: useRef<HTMLButtonElement>(null),
     color: useRef<HTMLButtonElement>(null),
     insert: useRef<HTMLButtonElement>(null),
-    counts: useRef<HTMLButtonElement>(null),
   };
   const close = () => useUi.getState().close();
   return (
@@ -199,12 +196,6 @@ export function TextBar({ editor, faded }: { editor: Editor; faded: boolean }) {
         <Plus size={16} />
         <ChevronDown size={12} />
       </CmdButton>
-      <BarSep />
-      <TimerChip />
-      <BarSep />
-      <CmdButton id="counts.open" ref={refs.counts} className="fx-btn--text" pressed={popover === 'counts'}>
-        <span className="fx-btn__label">{t(hasSel ? 'bar.wordsSelected' : 'bar.words', { n: words })}</span>
-      </CmdButton>
       <Popover anchor={refs.style.current} open={popover === 'style'} onClose={close} placement="above">
         <StylePopover editor={editor} />
       </Popover>
@@ -213,9 +204,6 @@ export function TextBar({ editor, faded }: { editor: Editor; faded: boolean }) {
       </Popover>
       <Popover anchor={refs.insert.current} open={popover === 'insert'} onClose={close} placement="above">
         <InsertPopover editor={editor} />
-      </Popover>
-      <Popover anchor={refs.counts.current} open={popover === 'counts'} onClose={close} placement="above">
-        <CountsPopover />
       </Popover>
     </FloatingBar>
   );

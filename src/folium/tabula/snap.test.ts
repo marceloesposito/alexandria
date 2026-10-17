@@ -13,6 +13,14 @@ describe('parcheggio oltre il bordo', () => {
     expect(dragClamp({ ...f, x: -1 }, 0.01).x).toBeCloseTo(-0.39);
     expect(dragClamp({ ...f, x: 0.9 }, 0.01).x).toBeCloseTo(0.6);
   });
+  it('a destra: il Palimpsestus esce oltre il bordo destro', () => {
+    const p = parkedFrame(f, 0.01, 'right');
+    expect(p.x).toBeCloseTo(0.99);
+    expect(dragClamp({ ...f, x: 2 }, 0.01, 'right').x).toBeCloseTo(0.99);
+    expect(dragClamp({ ...f, x: -1 }, 0.01, 'right').x).toBe(0);
+    expect(shouldPark({ ...f, x: 0.85 })).toBe(true);
+    expect(shouldPark({ ...f, x: 0.7 })).toBe(false);
+  });
   it('al rilascio si parcheggia se e piu fuori che dentro', () => {
     expect(visibleShare(f)).toBeCloseTo(1);
     expect(shouldPark({ ...f, x: -0.1 })).toBe(false);

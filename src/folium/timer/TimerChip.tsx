@@ -1,4 +1,4 @@
-// Chip del timer nella barretta: un clic avvia o mette in pausa; la freccia apre il popover con
+// Chip del timer in cima alla finestra: un clic avvia o mette in pausa; la freccia apre il popover con
 // salta, azzera, durate, cicli, avvio automatico, suono, Silentium e lo storico di oggi.
 import { useEffect, useRef } from 'react';
 import { ChevronDown, SkipForward, RotateCcw } from 'lucide-react';
@@ -86,7 +86,7 @@ export function TimerChip() {
       <button ref={more} className={`fx-btn fx-btn--narrow ${popover === 'timer' ? 'is-active' : ''}`} title={t('timer.settings')} aria-label={t('timer.settings')} onMouseDown={(e) => e.preventDefault()} onClick={() => useUi.getState().toggle('timer')}>
         <ChevronDown size={12} />
       </button>
-      <Popover anchor={more.current} open={popover === 'timer'} onClose={() => useUi.getState().close()} placement="above">
+      <Popover anchor={more.current} open={popover === 'timer'} onClose={() => useUi.getState().close()} placement="below">
         <TimerPopover />
       </Popover>
     </span>

@@ -33,9 +33,9 @@ describe("un'azione, un controllo", () => {
 
   it('al massimo 10 controlli sempre visibili per superficie', () => {
     for (const [surface, groups] of Object.entries(L0)) expect(groups.length, surface).toBeLessThanOrEqual(10);
-    // e in tutto lo Scriptorium (barra in alto + barretta) non piu' di 12 gruppi
-    expect(L0.header.length + L0.edgeTab.length + L0.bar.length).toBeLessThanOrEqual(8);
-    // la barra in alto serve solo a passare fra Scriptorium e Palimpsestus
-    expect(L0.header).toEqual([['view.write', 'view.versions']]);
+    // e in tutto lo schermo (cima, strisce, barretta) non piu' di 10
+    expect(L0.header.length + L0.edgeTab.length + L0.bar.length).toBeLessThanOrEqual(10);
+    // in cima solo timer, parole ed export
+    expect(L0.header.map((g) => g[0])).toEqual(['timer.toggle', 'counts.open', 'export.menu']);
   });
 });
