@@ -1,0 +1,128 @@
+// Azioni sul foglio che passano dal disco o chiedono qualcosa: Apri, Salva come, Rinomina, Elimina,
+// Porta in un Compendium, versioni con un nome, Esci.
+import { platform, joinPath } from '../platform';
+import { useFolium, sheetTitle, openPath } from './store';
+import { useUi } from './ui';
+import { EXT, fileStem, pack } from './format';
+import { OPEN_EXTENSIONS } from './importDoc';
+import { planToCompendium, type CompendiumInfo } from './toCompendium';
+import { liveMarkdown } from './editor/Scriptorium';
+import { getEditor } from './editor/editorRef';
+import { confirmDialog, promptDialog } from '../components/confirm';
+import { newId } from './tabula/model';
+import { t } from '../i18n';
+
+/** Il testo dell'editor entra nel foglio prima di salvarlo altrove. */
+function syncText() {
+  const st = useFolium.getState();
+  st.setMarkdown(liveMarkdown(getEditor()));
+}
+
+export async function openFiles() {
+  const paths = await platform.pickFiles(t('open.pick'), OPEN_EXTENSIONS);
+  for (const p of paths) await openPath(p);
+}
+
+export async function renameSheet() {
+  const st = useFolium.getState();
+  if (!st.sheet) return;
+  const name = await promptDialog(t('cmd.sheet.rename'), st.sheet.meta.name || sheetTitle(st.sheet));
+  if (name !== null) st.setMeta({ name: name.trim() });
+}
+
+export async function saveAs() {
+  syncText();
+  const st = useFolium.getState();
+  if (!st.sheet) return;
+  const path = await platform.saveDialog(`${fileStem(sheetTitle(st.sheet))}.${EXT}`, [EXT]);
+  if (!path) return;
+  try {
+    await platform.writeBytes(path, await pack({ ...st.sheet, meta: { ...st.sheet.meta, name: st.sheet.meta.name || sheetTitle(st.sheet) } }));
+    st.toast(t('saveAs.done', { name: path.slice(path.lastIndexOf('/') + 1) }), 'ok');
+  } catch (e) {
+    st.toast(t('saveAs.error', { error: e instanceof Error ? e.message : String(e) }), 'error');
+  }
+}
+
+export async function deleteSheet(id: string) {
+  const st = useFolium.getState();
+  const entry = st.sheets.find((s) => s.id === id);
+  const name = entry ? entry.name || entry.preview.split('\n').find((l) => l.trim())?.replace(/^#+\s*/, '') || t('sheet.untitled') : t('sheet.untitled');
+  const ok = await confirmDialog(t('delete.title', { name }), t('delete.message'), { okLabel: t('cmd.sheet.delete'), danger: true });
+  if (ok) await st.remove(id);
+}
+
+async function readJson<T>(path: string, fallback: T): Promise<T> {
+  try {
+    return JSON.parse(await platform.readText(path)) as T;
+  } catch {
+    return fallback;
+  }
+}
+
+/** Porta il foglio in un Compendium di Alexandria: pergamena, Marginalia, media e Tabula. */
+export async function toCompendium() {
+  syncText();
+  const st = useFolium.getState();
+  if (!st.sheet) return;
+  const root = await platform.pickDirectory(t('compendium.pick'));
+  if (!root) return;
+  const cfgPath = joinPath(root, '.alexandria', 'vault.json');
+  if (!(await platform.exists(cfgPath))) {
+    st.toast(t('compendium.notCompendium'), 'error');
+    return;
+  }
+  const cfg = await readJson<{ dirs?: { docs?: string; res?: string } }>(cfgPath, {});
+  const docs = cfg.dirs?.docs || 'documents';
+  const res = cfg.dirs?.res || 'resources';
+  const list = async (dir: string) => ((await platform.exists(dir)) ? await platform.list(dir) : []);
+  const info: CompendiumInfo = {
+    dirs: cfg.dirs,
+    docNames: (await list(joinPath(root, docs))).filter((e) => !e.isDir).map((e) => e.name),
+    resourceIds: (await list(joinPath(root, res))).filter((e) => e.isDir).map((e) => e.name),
+    whiteboard: await readJson(joinPath(root, '.alexandria', 'whiteboard.json'), null),
+    links: (await readJson<{ links?: CompendiumInfo['links'] }>(joinPath(root, '.alexandria', 'links.json'), {})).links ?? [],
+  };
+  const title = sheetTitle(st.sheet);
+  const plan = planToCompendium(st.sheet, title, info, { now: new Date(), idOf: () => newId('f') });
+  try {
+    for (const w of plan.writes) {
+      const p = joinPath(root, w.path);
+      if (typeof w.data === 'string') await platform.writeText(p, w.data);
+      else await platform.writeBytes(p, w.data);
+    }
+    st.toast(t('compendium.done', { name: plan.docRel.slice(plan.docRel.lastIndexOf('/') + 1) }), 'ok');
+  } catch (e) {
+    st.toast(t('compendium.error', { error: e instanceof Error ? e.message : String(e) }), 'error');
+  }
+}
+
+export async function saveNamedVersion() {
+  syncText();
+  const name = await promptDialog(t('version.nameTitle'), '', t('version.nameHint'));
+  if (name === null) return;
+  const id = useFolium.getState().saveVersion(name.trim() || undefined, false);
+  if (id) useUi.setState({ selectedVersion: id });
+}
+
+export function resumeSelected() {
+  const id = useUi.getState().selectedVersion;
+  if (!id) {
+    useFolium.getState().toast(t('version.selectFirst'), 'info');
+    return;
+  }
+  syncText();
+  useFolium.getState().resumeVersion(id);
+  useFolium.getState().toast(t('version.resumed'), 'ok');
+}
+
+export async function quit() {
+  syncText();
+  const { maybeSnapshot } = await import('./store');
+  maybeSnapshot(true);
+  await useFolium.getState().flush();
+  if (platform.kind === 'tauri') {
+    const { getCurrentWindow } = await import('@tauri-apps/api/window');
+    await getCurrentWindow().close();
+  } else window.close();
+}

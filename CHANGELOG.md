@@ -10,6 +10,13 @@ serie completa (M10-M12 e richieste del committente); `0.2.x` = serie attuale.
 
 ---
 
+## Folium 0.1.0 — in corso (ramo `folium`)
+
+App sorella portable di Alexandria (piano in `docs/FOLIUM.md`): un foglio indipendente `.folium`,
+barra in alto da 40 px, barretta flottante, Marginalia col clic destro, timer pomodoro, Tabula
+gravitazionale accanto al testo, Palimpsestus ad albero, export .docx con commenti e PDF, Porta in un
+Compendium. Eseguibile di 6,8 MB.
+
 ## Non ancora rilasciato
 
 - Piano di **Folium**, l'app sorella portable, in `docs/FOLIUM.md` (#43).

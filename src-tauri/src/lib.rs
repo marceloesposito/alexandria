@@ -1,30 +1,14 @@
-// Alexandria: guscio desktop. Il Rust fa solo I/O, git, indice, rete e impaginazione;
-// tutta la logica di dominio e' nel frontend (src/), in funzioni pure testate.
+// Folium: guscio desktop. Il Rust fa solo I/O (file, dialoghi, stampa); tutta la logica di dominio
+// e' nel frontend (src/), in funzioni pure testate.
 mod fsops;
-mod git;
-mod index;
-mod clipboard;
-mod net;
 mod portable;
-mod snapshot;
-mod thesaurus;
-mod typeset;
 
-/// File .recensio da aprire (passato all'avvio o, su macOS, dal Finder): lo legge una volta il frontend.
+/// File da aprire passato all'avvio (doppio clic, "Apri con"): lo legge una volta il frontend.
 static OPEN_FILE: std::sync::Mutex<Option<String>> = std::sync::Mutex::new(None);
 
-fn remember_open(path: String) {
-    if let Ok(mut f) = OPEN_FILE.lock() {
-        *f = Some(path);
-    }
-}
-
-/// File che l'app sa aprire dal sistema: copie per revisione e documenti da importare.
+/// File che Folium sa aprire dal sistema.
 fn opened_file_ok(path: &str) -> bool {
-    const EXT: [&str; 18] = [
-        "recensio", "docx", "docm", "dotx", "doc", "dot", "odt", "ott", "fodt", "rtf", "html", "htm", "xhtml", "epub", "txt", "text", "md",
-        "markdown",
-    ];
+    const EXT: [&str; 6] = ["folium", "docx", "md", "markdown", "txt", "text"];
     let lower = path.to_lowercase();
     lower.rsplit_once('.').map(|(_, e)| EXT.contains(&e)).unwrap_or(false)
 }
@@ -34,41 +18,33 @@ fn startup_file() -> Option<String> {
     OPEN_FILE.lock().ok()?.take()
 }
 
-/// Autotest dell'import con foto (ALEXANDRIA_EMBED_TEST="<url>|<rapporto.json>"): lo esegue il frontend.
+/// Stampa della pagina (Esporta in PDF): la finestra di stampa del sistema.
 #[tauri::command]
-fn selftest_spec() -> Option<String> {
-    std::env::var("ALEXANDRIA_EMBED_TEST").ok()
-}
-
-#[tauri::command]
-fn selftest_exit(app: tauri::AppHandle) {
-    if std::env::var("ALEXANDRIA_EMBED_TEST").is_ok() {
-        app.exit(0);
-    }
+fn print_page(window: tauri::WebviewWindow) -> Result<(), String> {
+    window.print().map_err(|e| e.to_string())
 }
 
 #[cfg_attr(mobile, tauri::mobile_entry_point)]
 pub fn run() {
-    // portable su Windows: anche la cache di WebView2 resta sulla chiavetta, non sul PC ospite
+    // portable: anche la cache della webview resta nella cartella dei dati, non sul PC ospite
     #[cfg(windows)]
     if let Some(p) = portable::data_root() {
         std::env::set_var("WEBVIEW2_USER_DATA_FOLDER", p.join("webview"));
     }
-    // doppio clic su un .recensio o "Apri con" su un documento (Windows/Linux: il percorso arriva
-    // come argomento); il frontend sceglie fra revisione e import
     if let Some(a) = std::env::args().skip(1).find(|a| opened_file_ok(a)) {
-        remember_open(a);
+        if let Ok(mut f) = OPEN_FILE.lock() {
+            *f = Some(a);
+        }
     }
     tauri::Builder::default()
         .setup(|app| {
             use tauri::Manager;
             if let Some(w) = app.get_webview_window("main") {
-                // Windows: niente barra nativa, la barra dei menu dell'app fa da barra del titolo
-                // (bordi, ombra e ridimensionamento restano quelli del sistema)
-                #[cfg(windows)]
+                // Windows e Linux: niente barra di sistema, la barra in alto dell'app fa da barra del titolo
+                #[cfg(not(target_os = "macos"))]
                 let _ = w.set_decorations(false);
-                // prove automatiche: finestra fuori schermo e senza focus (non disturba chi lavora)
-                if std::env::var("ALEXANDRIA_TEST_OFFSCREEN").is_ok() {
+                // prove automatiche: finestra fuori schermo e senza fuoco (non disturba chi lavora)
+                if std::env::var("FOLIUM_TEST_OFFSCREEN").is_ok() {
                     let _ = w.set_position(tauri::PhysicalPosition::new(-6000, -6000));
                     let _ = w.show();
                 } else {
@@ -76,39 +52,6 @@ pub fn run() {
                     let _ = w.show();
                     let _ = w.set_focus();
                 }
-            }
-            // autotest della foto dei link: ALEXANDRIA_SNAPSHOT_TEST="<url>|<file.png>" fotografa ed esce
-            if let Ok(spec) = std::env::var("ALEXANDRIA_SNAPSHOT_TEST") {
-                let handle = app.handle().clone();
-                tauri::async_runtime::spawn(async move {
-                    let (url, out) = spec.split_once('|').unwrap_or((spec.as_str(), "snapshot-test.png"));
-                    let t0 = std::time::Instant::now();
-                    match snapshot::take(&handle, url).await {
-                        Ok(png) => {
-                            let _ = std::fs::write(out, &png);
-                            eprintln!("SNAPSHOT OK {} byte in {:?} -> {out}", png.len(), t0.elapsed());
-                        }
-                        Err(e) => eprintln!("SNAPSHOT ERRORE dopo {:?}: {e}", t0.elapsed()),
-                    }
-                    handle.exit(0);
-                });
-            }
-            // autotest della lettura nel motore web (siti con controllo anti-bot):
-            // ALEXANDRIA_RENDER_TEST="<url>|<file.html>" salva l'HTML letto ed esce
-            if let Ok(spec) = std::env::var("ALEXANDRIA_RENDER_TEST") {
-                let handle = app.handle().clone();
-                tauri::async_runtime::spawn(async move {
-                    let (url, out) = spec.split_once('|').unwrap_or((spec.as_str(), "render-test.html"));
-                    let t0 = std::time::Instant::now();
-                    match snapshot::render(&handle, url, std::env::var("ALEXANDRIA_RENDER_VISIBLE").is_ok()).await {
-                        Ok(r) => {
-                            let _ = std::fs::write(out, &r.html);
-                            eprintln!("RENDER OK {} caratteri, foto {}, in {:?} -> {out} ({})", r.html.len(), r.png_b64.is_some(), t0.elapsed(), r.url);
-                        }
-                        Err(e) => eprintln!("RENDER ERRORE dopo {:?}: {e}", t0.elapsed()),
-                    }
-                    handle.exit(0);
-                });
             }
             Ok(())
         })
@@ -124,57 +67,12 @@ pub fn run() {
             fsops::fs_mkdir,
             fsops::fs_remove,
             fsops::fs_rename,
-            fsops::fs_copy,
-            fsops::app_data_dir,
-            fsops::documents_dir,
-            git::git_init,
-            git::git_status,
-            git::git_set_author,
-            git::git_commit,
-            git::git_log,
-            git::git_changes,
-            git::git_compare,
-            git::git_read_at,
-            git::git_create_branch,
-            git::git_checkout,
-            git::git_restore,
-            git::git_merge,
-            git::git_complete_merge,
-            git::git_abort_merge,
-            git::git_set_remote,
-            git::git_remote,
-            git::git_clone,
-            git::git_push,
-            git::git_pull,
-            index::index_upsert,
-            index::index_remove,
-            index::index_search,
-            net::net_fetch,
-            snapshot::net_snapshot,
-            snapshot::net_render,
-            thesaurus::thesaurus_lookup,
-            portable::portable_root,
-            clipboard::clipboard_read,
-            selftest_spec,
+            fsops::data_dir,
             startup_file,
-            selftest_exit,
-            typeset::typst_compile,
+            print_page,
         ])
-        .build(tauri::generate_context!())
-        .expect("errore all'avvio di Alexandria")
-        .run(|_app, _event| {
-            // macOS: i file aperti dal Finder arrivano come evento
-            #[cfg(target_os = "macos")]
-            if let tauri::RunEvent::Opened { urls } = &_event {
-                use tauri::Emitter;
-                for u in urls {
-                    if let Ok(p) = u.to_file_path() {
-                        remember_open(p.to_string_lossy().into_owned());
-                        let _ = _app.emit("open-file", ());
-                    }
-                }
-            }
-        });
+        .run(tauri::generate_context!())
+        .expect("errore all'avvio di Folium");
 }
 
 #[cfg(test)]
@@ -184,9 +82,9 @@ mod tests {
     #[test]
     fn file_aperti_dal_sistema() {
         assert!(opened_file_ok("C:/Tesi/capitolo.DOCX"));
-        assert!(opened_file_ok("/Users/a/rev.recensio"));
-        assert!(opened_file_ok("note.rtf"));
+        assert!(opened_file_ok("/Users/a/saggio.folium"));
+        assert!(opened_file_ok("note.md"));
         assert!(!opened_file_ok("--flag"));
-        assert!(!opened_file_ok("foto.png"));
+        assert!(!opened_file_ok("vecchio.doc"));
     }
 }

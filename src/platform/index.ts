@@ -7,7 +7,7 @@ export * from './types';
 
 const isTauri = typeof window !== 'undefined' && '__TAURI_INTERNALS__' in window;
 
-export const platform: Platform = isTauri ? tauriPlatform : createMemoryPlatform({ persist: true });
+export const platform: Platform = isTauri ? tauriPlatform : createMemoryPlatform({ persist: typeof localStorage !== 'undefined' });
 
 export function joinPath(...parts: string[]): string {
   return parts

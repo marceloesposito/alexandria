@@ -1,31 +1,25 @@
-// prima di tutto: funzioni che WKWebView non ha (iterazione dei ReadableStream, usata da pdf.js)
-import './lib/streamPolyfill';
 import React from 'react';
 import ReactDOM from 'react-dom/client';
 import '@fontsource/libertinus-serif/400.css';
 import '@fontsource/libertinus-serif/400-italic.css';
-import '@fontsource/libertinus-serif/600.css';
 import '@fontsource/libertinus-serif/700.css';
 import '@fontsource/inter/400.css';
 import '@fontsource/inter/500.css';
 import '@fontsource/inter/600.css';
 import '@fontsource/jetbrains-mono/400.css';
-import 'katex/dist/katex.min.css';
 import './styles/tokens.css';
-import './styles/app.css';
-import './styles/editor.css';
-import './styles/comments.css';
-import './styles/versions.css';
-import './styles/resources.css';
-import { registerAll } from './modules';
-import App from './App';
-
-registerAll();
-// autotest dell'app nativa: non fa nulla senza la variabile ALEXANDRIA_EMBED_TEST
-void import('./selftest').then((m) => m.runSelfTest());
+import './styles/folium.css';
+import App from './folium/App';
 
 ReactDOM.createRoot(document.getElementById('root') as HTMLElement).render(
   <React.StrictMode>
     <App />
   </React.StrictMode>,
 );
+
+// accesso agli store per le prove nel browser (solo sviluppo)
+if (import.meta.env.DEV) {
+  void Promise.all([import('./folium/store'), import('./folium/ui'), import('./folium/editor/editorRef'), import('./platform'), import('./folium/timer/store')]).then(([s, u, e, p, tm]) => {
+    (window as unknown as Record<string, unknown>).__folium = { store: s.useFolium, ui: u.useUi, editor: e.getEditor, platform: p.platform, timer: tm.useTimer };
+  });
+}

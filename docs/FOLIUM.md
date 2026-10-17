@@ -392,3 +392,41 @@ A ogni fase: nuova portable sul Desktop e un breve resoconto.
     (`npm run dev` di `main`).
 - Portable: dimensioni dell'eseguibile e della cartella, tempo della seconda compilazione,
   avvio fuori schermo con `Folium-data/` accanto, chiusura forzata senza perdita del foglio.
+
+---
+
+## Avanzamento (ramo `folium`)
+
+| Fase | Stato | Note |
+| --- | --- | --- |
+| A Post-it della Tabula (Alexandria) | fatto | PR #44 su `main` |
+| F0 Dimagrimento | fatto | nuovo ingresso `src/main.tsx` -> `src/folium/App.tsx`; 216 file di Alexandria tolti; Rust ridotto a `fsops.rs` + `portable.rs`; profilo `fast`; `npm run folium:portable` |
+| F1 Il foglio | scritto, da provare | formato `.folium`, fogli in lavorazione, Apri (.folium .docx .md .txt), Salva come |
+| F2 Interfaccia | scritto, da provare | barra da 40 px, barretta, Fogli e Index, menu dell'app, ⌘K, test "un'azione, un controllo" |
+| F3 Marginalia | scritto, da provare | clic destro -> Commenta, nuvoletta, thread |
+| F4 Timer | scritto, da provare | modello puro + chip e popover |
+| F5 Armarium del foglio | scritto, da provare | Tabula gravitazionale, Entrambi, trascinamento testo <-> Tabula |
+| F6 Palimpsestus | scritto, da provare | albero, anteprima semitrasparente, barretta |
+| F7 Uscita | scritto, da provare | .docx con commenti, PDF dalla stampa, Porta in un Compendium |
+
+Misure (Windows 11, 17/10/2026): eseguibile 6,8 MB col profilo `fast`; interfaccia 3,9 MB (quasi
+tutto caratteri).
+
+### Scostamenti dal piano, decisi lavorando
+- **Fogli in lavorazione come cartelle**: in `Folium-data/fogli/<id>/` ci sono gli stessi file del
+  `.folium`, non compressi; il salvataggio automatico riscrive solo quelli cambiati (scrittura atomica
+  del Rust). Lo zip nasce solo con Salva come.
+- **Collisione della Tabula**: i blocchi si scansano solo dal blocco tenuto col mouse. Fra blocchi in
+  volo verso posti d'equilibrio gia' separati la collisione li incastrava; a riposo non si
+  sovrappongono comunque, perche' i posti di `flowLayout` non si sovrappongono (test).
+- **Un solo padre per blocco** nella Tabula (`attach` sostituisce il padre): il flusso dall'alto in
+  basso resta un albero, e i cicli sono impossibili.
+- **Porta in un Compendium porta solo l'ultima versione** (come in B0): niente conversione delle
+  versioni in commit. Note ed estratti diventano post-it, immagini e link risorse dell'Armarium.
+- **L0 contati per superficie**: barra in alto 6 controlli, barretta 6 gruppi (test in
+  `commandSpecs.test.ts`); "/" e ⌘K sono ricerche per nome, non superfici.
+- **PDF**: la stampa la apre il Rust (`print_page`, `WebviewWindow::print`), perche' WKWebView non
+  risponde a `window.print()`.
+- **Formule, citazioni, indici** di un `.md` di Alexandria restano nel testo come segni (nessuna
+  perdita nell'andata e ritorno), ma Folium non li formatta. Le revisioni tracciate si accettano
+  all'apertura.

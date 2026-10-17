@@ -10,7 +10,7 @@ const PORT = 9333;
 const sleep = (ms) => new Promise((r) => setTimeout(r, ms));
 
 export async function launch() {
-  const dir = `${process.env.TEMP ?? '/tmp'}/alexandria-cdp-${Date.now()}`;
+  const dir = `${process.env.TEMP ?? '/tmp'}/folium-cdp-${Date.now()}`;
   const proc = spawn(CHROME, ['--headless=new', '--disable-gpu', `--remote-debugging-port=${PORT}`, `--user-data-dir=${dir}`, '--window-size=1440,900', 'about:blank'], { stdio: 'ignore' });
   for (let i = 0; i < 50; i++) {
     try {
