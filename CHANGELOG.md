@@ -10,6 +10,10 @@ serie completa (M10-M12 e richieste del committente); `0.2.x` = serie attuale.
 
 ---
 
+## Non ancora rilasciato
+
+- Piano di **Folium**, l'app sorella portable, in `docs/FOLIUM.md` (#43).
+
 ## 0.2.0 — 15 ottobre 2026
 
 Prima versione con tag (`v0.2.0`).
