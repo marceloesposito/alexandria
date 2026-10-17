@@ -167,7 +167,7 @@ export const en: Record<string, string> = {
   'timer.autoStart': 'Start the next phase automatically',
   'timer.sound': 'Sound at the end of a phase',
   'timer.silentium': 'Silentium while working',
-  'timer.today': 'Today: {pomodoros} pomodoros, {words} words',
+  'timer.today': 'Today: pomodoros {pomodoros} · words {words}',
   'timer.settings': 'Timer settings',
   'timer.workDone': 'Work done: {words} words. Break time.',
   'timer.breakDone': 'Break over: back to writing.',

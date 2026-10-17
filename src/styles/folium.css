@@ -735,6 +735,8 @@ select.fx-input {
 
 .fx-panel__tabs .fx-seg__btn {
   flex: 1;
+  white-space: nowrap;
+  padding: 0 var(--space-1);
 }
 
 .fx-list {

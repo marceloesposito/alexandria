@@ -167,7 +167,7 @@ export const it: Record<string, string> = {
   'timer.autoStart': 'Avvia da solo la fase successiva',
   'timer.sound': 'Suono a fine fase',
   'timer.silentium': 'Silentium durante il lavoro',
-  'timer.today': 'Oggi: {pomodoros} pomodori, {words} parole',
+  'timer.today': 'Oggi: pomodori {pomodoros} · parole {words}',
   'timer.settings': 'Impostazioni del timer',
   'timer.workDone': 'Fine del lavoro: {words} parole. Pausa.',
   'timer.breakDone': 'Fine della pausa: si torna a scrivere.',

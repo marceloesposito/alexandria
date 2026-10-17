@@ -262,6 +262,8 @@ function Board({ narrow }: { narrow: boolean }) {
     data: { block: b, lit: lit.has(b.id), found: found.has(b.id) },
     selected: selected.has(b.id),
     style: { width: b.kind === 'image' ? Math.max(BLOCK_W, b.w) : BLOCK_W },
+    // le misure prese da React Flow tornano nei nodi: senza, il nodo resta nascosto
+    ...(sizes[b.id] ? { measured: sizes[b.id] } : {}),
   }));
 
   const edges: Edge[] = links.map((l) => ({ id: l.id, source: l.from, target: l.to, type: 'default', className: 'fx-edge' }));
@@ -447,7 +449,6 @@ function Board({ narrow }: { narrow: boolean }) {
         maxZoom={2}
         fitView
         fitViewOptions={{ padding: 0.2, maxZoom: 1 }}
-        proOptions={{ hideAttribution: true }}
       >
         <Background variant={BackgroundVariant.Dots} gap={22} size={1.1} />
       </ReactFlow>

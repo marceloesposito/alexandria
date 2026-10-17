@@ -401,16 +401,19 @@ A ogni fase: nuova portable sul Desktop e un breve resoconto.
 | --- | --- | --- |
 | A Post-it della Tabula (Alexandria) | fatto | PR #44 su `main` |
 | F0 Dimagrimento | fatto | nuovo ingresso `src/main.tsx` -> `src/folium/App.tsx`; 216 file di Alexandria tolti; Rust ridotto a `fsops.rs` + `portable.rs`; profilo `fast`; `npm run folium:portable` |
-| F1 Il foglio | scritto, da provare | formato `.folium`, fogli in lavorazione, Apri (.folium .docx .md .txt), Salva come |
-| F2 Interfaccia | scritto, da provare | barra da 40 px, barretta, Fogli e Index, menu dell'app, ⌘K, test "un'azione, un controllo" |
-| F3 Marginalia | scritto, da provare | clic destro -> Commenta, nuvoletta, thread |
-| F4 Timer | scritto, da provare | modello puro + chip e popover |
-| F5 Armarium del foglio | scritto, da provare | Tabula gravitazionale, Entrambi, trascinamento testo <-> Tabula |
-| F6 Palimpsestus | scritto, da provare | albero, anteprima semitrasparente, barretta |
-| F7 Uscita | scritto, da provare | .docx con commenti, PDF dalla stampa, Porta in un Compendium |
+| F1 Il foglio | fatto | formato `.folium`, fogli in lavorazione, Apri (.folium .docx con i commenti di Word, .md, .txt), Salva come; provato con CDP (ricarica, riapertura, .docx) |
+| F2 Interfaccia | fatto | barra da 40 px (6 controlli), barretta, Fogli e Index, menu dell'app, Preferenze, ⌘K, "/", zoom, Silentium, test "un'azione, un controllo" |
+| F3 Marginalia | fatto | clic destro -> Commenta su selezione o punto, Invio/Esc, thread con risposta, Risolvi, Elimina; le ancore seguono il testo |
+| F4 Timer | fatto | fase da 3 s provata: avviso con le parole, fase successiva, storico del giorno, Silentium al via del lavoro |
+| F5 Armarium del foglio | fatto | Entrambi, estratto dal testo, collegamento lasciando un blocco sotto un altro, nessuna sovrapposizione, doppio clic sull'estratto, blocchi illuminati, blocco -> testo |
+| F6 Palimpsestus | fatto | Riprendi da qui -> ramo nuovo, diff sulla biforcazione e anteprima semitrasparente al passaggio del mouse, barretta con due comandi |
+| F7 Uscita | fatto | .docx con i commenti di Word, PDF dalla stampa, Porta in un Compendium (pergamena, Marginalia, post-it, risorse) |
 
-Misure (Windows 11, 17/10/2026): eseguibile 6,8 MB col profilo `fast`; interfaccia 3,9 MB (quasi
-tutto caratteri).
+Misure (Windows 11, 17/10/2026): eseguibile **5,9 MB** col profilo `fast` (cartella portable 5,9 MB
+senza i dati); interfaccia 2,9 MB (caratteri ridotti agli alfabeti latini). Prima compilazione 2 min 8 s,
+seconda dopo una modifica all'interfaccia 51 s (Rust 43 s). App vera provata fuori schermo: scrittura,
+salvataggio su disco, chiusura forzata senza perdite, `Folium-data/` accanto all'eseguibile (anche la
+cache della webview).
 
 ### Scostamenti dal piano, decisi lavorando
 - **Fogli in lavorazione come cartelle**: in `Folium-data/fogli/<id>/` ci sono gli stessi file del
@@ -430,3 +433,17 @@ tutto caratteri).
 - **Formule, citazioni, indici** di un `.md` di Alexandria restano nel testo come segni (nessuna
   perdita nell'andata e ritorno), ma Folium non li formatta. Le revisioni tracciate si accettano
   all'apertura.
+
+### Non ancora provato o non fatto
+- **macOS**: niente prove sul Mac. Da verificare la barra in alto fusa con quella del titolo
+  (`titleBarStyle: Overlay` in `tauri.macos.conf.json`, 78 px per i semafori), il pacchetto `.app`
+  minimo che costruisce `scripts/folium-portable.mjs` e `xattr -cr`.
+- **Finestre native** (Apri, Salva come, Esporta, scelta del Compendium) e **stampa vera** provate solo
+  nel browser con la piattaforma in memoria: nell'app vera aprirebbero finestre e ruberebbero il fuoco.
+- **Porta in un Compendium**: i file scritti seguono la struttura di Alexandria (`vault.json`, cartelle,
+  `.alexandria/comments/<chiave>.json`, `whiteboard.json`, `links.json`), ma non e' ancora stato aperto
+  in Alexandria un Compendium che li ha ricevuti.
+- **Animazione del passaggio fra le viste** (la parte nascosta che "scivola via", B9): c'e' solo lo
+  splitter animato; cambiando vista le parti si sostituiscono.
+- Annotato per `main`: "Apri documento" di Alexandria che accetta i `.folium`; togliere
+  `scripts/portable.mjs` e la modalita' portable di Alexandria quando il committente approva Folium.

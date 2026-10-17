@@ -15,7 +15,7 @@ serie completa (M10-M12 e richieste del committente); `0.2.x` = serie attuale.
 App sorella portable di Alexandria (piano in `docs/FOLIUM.md`): un foglio indipendente `.folium`,
 barra in alto da 40 px, barretta flottante, Marginalia col clic destro, timer pomodoro, Tabula
 gravitazionale accanto al testo, Palimpsestus ad albero, export .docx con commenti e PDF, Porta in un
-Compendium. Eseguibile di 6,8 MB.
+Compendium. Eseguibile di 5,9 MB.
 
 ## Non ancora rilasciato
 

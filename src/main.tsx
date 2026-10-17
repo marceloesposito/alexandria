@@ -1,12 +1,17 @@
 import React from 'react';
 import ReactDOM from 'react-dom/client';
-import '@fontsource/libertinus-serif/400.css';
-import '@fontsource/libertinus-serif/400-italic.css';
-import '@fontsource/libertinus-serif/700.css';
-import '@fontsource/inter/400.css';
-import '@fontsource/inter/500.css';
-import '@fontsource/inter/600.css';
-import '@fontsource/jetbrains-mono/400.css';
+// caratteri inclusi: solo gli alfabeti latini (italiano, inglese e lingue europee occidentali)
+import '@fontsource/libertinus-serif/latin-400.css';
+import '@fontsource/libertinus-serif/latin-ext-400.css';
+import '@fontsource/libertinus-serif/latin-400-italic.css';
+import '@fontsource/libertinus-serif/latin-ext-400-italic.css';
+import '@fontsource/libertinus-serif/latin-700.css';
+import '@fontsource/libertinus-serif/latin-ext-700.css';
+import '@fontsource/inter/latin-400.css';
+import '@fontsource/inter/latin-ext-400.css';
+import '@fontsource/inter/latin-500.css';
+import '@fontsource/inter/latin-600.css';
+import '@fontsource/jetbrains-mono/latin-400.css';
 import './styles/tokens.css';
 import './styles/folium.css';
 import App from './folium/App';

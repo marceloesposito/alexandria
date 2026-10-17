@@ -56,6 +56,8 @@ describe('formato .folium', () => {
   it('nomi', () => {
     expect(displayName({ meta: { ...newSheet('a', new Date()).meta }, markdown: '\n\n## Il *mio* capitolo\ntesto' }, 'Senza titolo')).toBe('Il mio capitolo');
     expect(displayName({ meta: { ...newSheet('a', new Date()).meta }, markdown: '' }, 'Senza titolo')).toBe('Senza titolo');
+    expect(displayName({ meta: { ...newSheet('a', new Date()).meta }, markdown: '\\# Non un titolo <span data-color="red">rosso</span>' }, 'x')).toBe('# Non un titolo rosso');
+    expect(displayName({ meta: { ...newSheet('a', new Date()).meta }, markdown: '|  |  |\n| --- | --- |\n| Anno | Dato |' }, 'x')).toBe('Anno Dato');
     expect(mediaName('a/b:c.png', ['b-c.png'])).toBe('a-b-c.png');
     expect(mediaName('x.png', ['x.png', 'x-2.png'])).toBe('x-3.png');
     expect(fileStem('  Tesi: capitolo 1?  ')).toBe('Tesi capitolo 1');

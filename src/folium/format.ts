@@ -186,8 +186,17 @@ export function displayName(s: Pick<Sheet, 'meta' | 'markdown'>, untitled: strin
   if (s.meta.name.trim()) return s.meta.name.trim();
   const first = s.markdown
     .split('\n')
-    .map((l) => l.replace(/^#{1,6}\s+|^>\s*|^[-*+]\s+|^\d+\.\s+/, '').replace(/[*_`~[\]]/g, '').trim())
-    .find((l) => l.length > 0);
+    .map((l) =>
+      l
+        .replace(/^#{1,6}\s+|^>\s*|^[-*+]\s+|^\d+\.\s+/, '')
+        .replace(/<[^>]+>/g, '')
+        .replace(/\\([\\`*_{}[\]()#+\-.!>~|])/g, '$1')
+        .replace(/[*_`~[\]]/g, '')
+        .replace(/\s*\|\s*/g, ' ')
+        .trim(),
+    )
+    // righe senza lettere ne' cifre (separatori, tabelle vuote) non danno un nome
+    .find((l) => /[\p{L}\p{N}]/u.test(l));
   return first ? (first.length > 60 ? first.slice(0, 57).trimEnd() + '…' : first) : untitled;
 }
 
