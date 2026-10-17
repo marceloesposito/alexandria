@@ -17,7 +17,7 @@ export const FORMAT = 1;
 export const EXT = 'folium';
 
 export type SheetFont = 'serif' | 'sans' | 'mono';
-export type SheetView = 'write' | 'both' | 'tabula' | 'versions';
+export type SheetView = 'write' | 'versions';
 
 export interface SheetMeta {
   format: number;
@@ -27,7 +27,7 @@ export interface SheetMeta {
   updated: string;
   font: SheetFont;
   view: SheetView;
-  /** quota della larghezza data al testo nella vista Entrambi (0.2-0.8) */
+  /** (fogli di prima: quota del testo nella vista affiancata, non piu' usata) */
   split: number;
   /** impostazioni del timer usate con questo foglio */
   timer?: TimerSettings;
@@ -61,7 +61,7 @@ export class FormatError extends Error {
   }
 }
 
-const VIEWS: SheetView[] = ['write', 'both', 'tabula', 'versions'];
+const VIEWS: SheetView[] = ['write', 'versions'];
 const FONTS: SheetFont[] = ['serif', 'sans', 'mono'];
 
 export function newSheet(id: string, now: Date, name = ''): Sheet {

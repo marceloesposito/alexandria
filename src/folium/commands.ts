@@ -22,6 +22,14 @@ const zoomBy = (d: number) => () => {
   useFolium.getState().setApp({ zoom: z });
 };
 
+/** Tabula flottante: aperta o richiusa nella linguetta; con la vista Palimpsestus si torna al testo. */
+export function toggleTabula(open?: boolean) {
+  const st = useFolium.getState();
+  const next = open ?? !st.app.tabula.open;
+  st.setApp({ tabula: { ...st.app.tabula, open: next } });
+  if (next && st.sheet?.meta.view !== 'write') st.setMeta({ view: 'write' });
+}
+
 const togglePanel = (p: 'sheets' | 'index') => () => {
   const st = useFolium.getState();
   st.setApp({ panel: st.app.panel === p ? null : p });
@@ -33,14 +41,11 @@ const lazy =
     void load().then(call);
 
 const RUN: Record<string, Runner> = {
-  'app.menu': { run: () => useUi.getState().toggle('appMenu') },
   'panel.sheets': { run: togglePanel('sheets'), active: () => useFolium.getState().app.panel === 'sheets' },
   'panel.index': { run: togglePanel('index'), active: () => useFolium.getState().app.panel === 'index' },
   'view.write': { run: setView('write'), active: () => useFolium.getState().sheet?.meta.view === 'write' },
-  'view.both': { run: setView('both'), active: () => useFolium.getState().sheet?.meta.view === 'both' },
-  'view.tabula': { run: setView('tabula'), active: () => useFolium.getState().sheet?.meta.view === 'tabula' },
+  'tabula.toggle': { run: () => toggleTabula(), active: () => useFolium.getState().app.tabula.open },
   'view.versions': { run: setView('versions'), active: () => useFolium.getState().sheet?.meta.view === 'versions' },
-  'sheet.menu': { run: () => useUi.getState().toggle('crumb') },
   'palette.open': { run: () => useUi.getState().setPalette(!useUi.getState().palette) },
 
   'sheet.rename': { run: lazy(() => import('./actions'), (m) => m.renameSheet()) },

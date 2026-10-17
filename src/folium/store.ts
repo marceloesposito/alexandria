@@ -12,6 +12,7 @@ import { shouldSnapshot } from './versions/snapshots';
 import { newId } from './tabula/model';
 
 export type SaveState = 'saved' | 'dirty' | 'saving' | 'error';
+export type Screen = 'splash' | 'onboarding' | 'landing' | 'sheet';
 
 export interface Toast {
   id: number;
@@ -21,6 +22,8 @@ export interface Toast {
 
 interface FoliumState {
   ready: boolean;
+  /** cosa si vede: splash all'avvio, onboarding al primo lancio, pagina d'ingresso, il foglio */
+  screen: Screen;
   app: AppState;
   sheets: SheetEntry[];
   sheet: Sheet | null;
@@ -33,6 +36,9 @@ interface FoliumState {
   lastEdit: number;
 
   init(): Promise<void>;
+  setScreen(s: Screen): void;
+  /** riprende l'ultimo foglio (o il piu' recente) */
+  resume(): Promise<void>;
   setApp(p: Partial<AppState>): void;
   refreshSheets(): Promise<void>;
   open(id: string): Promise<void>;
@@ -99,6 +105,7 @@ export const useFolium = create<FoliumState>((set, get) => {
 
   return {
     ready: false,
+    screen: 'splash',
     app: defaultAppState(),
     sheets: [],
     sheet: null,
@@ -114,10 +121,20 @@ export const useFolium = create<FoliumState>((set, get) => {
       applyTheme(app.theme);
       set({ app });
       await get().refreshSheets();
-      const last = app.lastSheet && get().sheets.find((s) => s.id === app.lastSheet);
+      // il foglio si apre dalla pagina d'ingresso: riprendere l'ultimo o cominciarne uno nuovo
+      set({ ready: true });
+    },
+
+    setScreen(screen) {
+      set({ screen });
+    },
+
+    async resume() {
+      const { app, sheets } = get();
+      const last = (app.lastSheet && sheets.find((s) => s.id === app.lastSheet)) || sheets[0];
       if (last) await get().open(last.id);
       else await get().createNew();
-      set({ ready: true });
+      set({ screen: 'sheet' });
     },
 
     setApp(p) {
@@ -139,7 +156,7 @@ export const useFolium = create<FoliumState>((set, get) => {
       try {
         const sheet = await loadSheet(id);
         clearMediaUrls();
-        set({ sheet: sheet, loadTick: get().loadTick + 1, saveState: 'saved', lastEdit: 0 });
+        set({ sheet: sheet, loadTick: get().loadTick + 1, saveState: 'saved', lastEdit: 0, screen: 'sheet' });
         get().setApp({ lastSheet: id });
       } catch (e) {
         get().toast(t('sheet.loadError', { error: String(e) }), 'error');
@@ -152,7 +169,7 @@ export const useFolium = create<FoliumState>((set, get) => {
       await get().flush();
       const s = await createSheet();
       clearMediaUrls();
-      set({ sheet: s, loadTick: get().loadTick + 1, saveState: 'saved', lastEdit: 0 });
+      set({ sheet: s, loadTick: get().loadTick + 1, saveState: 'saved', lastEdit: 0, screen: 'sheet' });
       get().setApp({ lastSheet: s.meta.id });
       await get().refreshSheets();
     },
@@ -178,7 +195,7 @@ export const useFolium = create<FoliumState>((set, get) => {
       await get().flush();
       const sheet = await adoptSheet(s);
       clearMediaUrls();
-      set({ sheet, loadTick: get().loadTick + 1, saveState: 'saved', lastEdit: 0 });
+      set({ sheet, loadTick: get().loadTick + 1, saveState: 'saved', lastEdit: 0, screen: 'sheet' });
       get().setApp({ lastSheet: sheet.meta.id });
       await get().refreshSheets();
     },

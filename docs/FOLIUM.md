@@ -447,3 +447,24 @@ cache della webview).
   splitter animato; cambiando vista le parti si sostituiscono.
 - Annotato per `main`: "Apri documento" di Alexandria che accetta i `.folium`; togliere
   `scripts/portable.mjs` e la modalita' portable di Alexandria quando il committente approva Folium.
+
+### Revisione del committente (17/10/2026, dopo la prima prova)
+- **Niente barra di navigazione piena**: in alto resta solo il passaggio fra Scriptorium e
+  Palimpsestus (Ctrl+1 / Ctrl+3), senza bordi e sullo stesso fondo del testo; fa anche da barra del
+  titolo. Fogli, Index, Salva come, Esporta, Porta in un Compendium, Preferenze, Aiuto: per nome con
+  ⌘K o con le scorciatoie (`home: 'none'` in `commandSpecs.ts`). Tolte le viste Entrambi e Armarium.
+- **Scriptorium come in Silentium**: pagina senza scrivania ne' ombra, barretta in trasparenza finche'
+  non ci si passa sopra. Silentium (Ctrl+Maiusc+D) toglie anche barretta e linguetta.
+- **Tabula flottante** (`tabula/FloatingTabula.tsx`): una linguetta sul bordo sinistro che si tira fuori
+  trascinandola (o con un clic, o Ctrl+2) e diventa una finestra sopra il testo, dentro Folium. Si
+  sposta dalla sua barra e si ridimensiona dagli orli; posizione, misure e aggancio restano in
+  `stato.json`. **Aggancio come in Windows** (`tabula/snap.ts`, puro e testato): meta' sinistra o
+  destra, quadranti negli angoli, tutto lo spazio in alto; poco sensibile: la zona si attiva solo col
+  puntatore entro 10 px dal bordo e fermo per 280 ms (passando veloce non scatta), con un'anteprima
+  prima del rilascio. Staccandola torna alle misure di prima; doppio clic sulla barra = tutto lo
+  spazio e ritorno.
+- **Avvio**: splash, onboarding di quattro passi al primo lancio (`onboarded` in `stato.json`), poi la
+  pagina d'ingresso con solo "Inizia a scrivere" oppure, se ci sono fogli, "Riprendi da dove eri
+  rimasto" e "Nuovo foglio" (`Welcome.tsx`). Un file aperto dal sistema salta l'ingresso.
+- Nell'app vera la chiusura della finestra aspetta il salvataggio dell'ultimo testo
+  (`onCloseRequested`).

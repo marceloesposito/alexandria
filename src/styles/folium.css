@@ -272,15 +272,24 @@ select.fx-input {
 }
 
 /* ---------------------------------------------------------------- barra in alto */
+/* senza bordi, sullo stesso fondo del testo: solo il passaggio fra Scriptorium e Palimpsestus */
 .fx-header {
   display: flex;
   align-items: center;
   gap: var(--space-1);
   height: var(--bar-h);
   padding: 0 var(--space-2);
-  background: var(--chrome);
-  border-bottom: 1px solid var(--line);
+  background: var(--paper);
   user-select: none;
+}
+
+.fx-header .fx-header:hover .fx-views,
+.fx-header .fx-views:focus-within {
+  opacity: 1;
+}
+
+.fx-header .fx-seg__btn {
+  font-size: var(--fs-ui-small);
 }
 
 /* macOS: spazio per i semafori della finestra */
@@ -300,74 +309,6 @@ select.fx-input {
   justify-content: center;
   gap: var(--space-2);
   height: 100%;
-}
-
-.fx-crumb {
-  display: inline-flex;
-  align-items: center;
-  gap: var(--space-1);
-  max-width: 100%;
-  height: var(--ctl-h);
-  padding: 0 var(--space-2);
-  border: 0;
-  border-radius: var(--radius);
-  background: none;
-  font-weight: 500;
-  color: var(--ink);
-}
-
-.fx-crumb:hover,
-.fx-crumb.is-active {
-  background: var(--chrome-2);
-}
-
-.fx-crumb__title {
-  overflow: hidden;
-  text-overflow: ellipsis;
-  white-space: nowrap;
-}
-
-.fx-save {
-  width: 8px;
-  height: 8px;
-  flex: none;
-  border-radius: 50%;
-  border: 1.5px solid var(--ok);
-  background: var(--ok);
-}
-
-.fx-save--dirty,
-.fx-save--saving {
-  background: transparent;
-  border-color: var(--muted);
-}
-
-.fx-save--error {
-  background: var(--bad);
-  border-color: var(--bad);
-}
-
-.fx-search {
-  display: inline-flex;
-  align-items: center;
-  gap: var(--space-2);
-  height: var(--ctl-h);
-  width: 220px;
-  padding: 0 var(--space-2);
-  border: 1px solid var(--line);
-  border-radius: var(--radius);
-  background: var(--paper);
-  color: var(--muted);
-}
-
-.fx-search span {
-  flex: 1;
-  text-align: left;
-}
-
-.fx-search:hover {
-  border-color: var(--line-strong);
-  color: var(--ink-2);
 }
 
 .fx-winctl {
@@ -848,11 +789,12 @@ select.fx-input {
 }
 
 /* ---------------------------------------------------------------- Scriptorium */
+/* lo Scriptorium di base e' come in Silentium: niente scrivania, niente ombra, solo il testo */
 .fx-scriptorium {
   position: relative;
   display: flex;
   min-width: 0;
-  background: var(--desk);
+  background: var(--paper);
 }
 
 .fx-scroll {
@@ -869,8 +811,6 @@ select.fx-input {
   padding: calc(56px * var(--zoom, 1)) calc(64px * var(--zoom, 1)) calc(96px * var(--zoom, 1));
   min-height: 100%;
   background: var(--paper);
-  box-shadow: var(--shadow);
-  border-radius: 2px;
 }
 
 .fx-prose {
@@ -1368,12 +1308,328 @@ select.fx-input {
   display: none;
 }
 
-.fx-app.is-silentium .fx-page {
-  box-shadow: none;
+/* Silentium toglie anche la barretta e la linguetta della Tabula */
+.fx-app.is-silentium .fx-fbar,
+.fx-app.is-silentium .fx-edge-tab {
+  display: none;
 }
 
-.fx-app.is-silentium .fx-scriptorium {
+/* ---------------------------------------------------------------- Tabula flottante */
+.fx-desk {
+  position: absolute;
+  inset: 0;
+  z-index: 35;
+  pointer-events: none;
+}
+
+.fx-desk > * {
+  pointer-events: auto;
+}
+
+.fx-edge-tab {
+  position: absolute;
+  left: 0;
+  top: 50%;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: var(--space-2);
+  padding: var(--space-3) var(--space-1);
+  transform: translateY(-50%);
+  border: 1px solid var(--line);
+  border-left: 0;
+  border-radius: 0 var(--radius) var(--radius) 0;
+  background: var(--chrome);
+  color: var(--muted);
+  cursor: grab;
+  touch-action: none;
+  opacity: 0.6;
+  transition: opacity 0.2s ease, padding 0.2s ease;
+}
+
+.fx-edge-tab span {
+  writing-mode: vertical-rl;
+  transform: rotate(180deg);
+  font-size: var(--fs-ui-small);
+  letter-spacing: 0.08em;
+}
+
+.fx-edge-tab:hover,
+.fx-edge-tab.is-pulling {
+  opacity: 1;
+  padding-left: var(--space-2);
+  color: var(--accent);
+}
+
+.fx-edge-tab.is-pulling {
+  cursor: grabbing;
+}
+
+.fx-float {
+  position: absolute;
+  display: flex;
+  flex-direction: column;
+  overflow: hidden;
+  background: var(--chrome);
+  border: 1px solid var(--line-strong);
+  border-radius: 10px;
+  box-shadow: var(--shadow-strong);
+  transition: left 0.18s ease, top 0.18s ease, width 0.18s ease, height 0.18s ease;
+}
+
+.fx-float.is-dragging {
+  transition: none;
+  user-select: none;
+}
+
+.fx-float.is-snapped {
+  border-radius: 0;
+}
+
+.fx-float__bar {
+  display: flex;
+  align-items: center;
+  gap: var(--space-2);
+  height: var(--ctl-h);
+  flex: none;
+  padding: 0 var(--space-1) 0 var(--space-3);
+  border-bottom: 1px solid var(--line);
+  background: var(--chrome-2);
+  color: var(--ink-2);
+  cursor: grab;
+  touch-action: none;
+}
+
+.fx-float.is-dragging .fx-float__bar {
+  cursor: grabbing;
+}
+
+.fx-float__title {
+  flex: 1;
+  font-size: var(--fs-ui-small);
+  font-weight: 600;
+  letter-spacing: 0.04em;
+}
+
+.fx-float__body {
+  position: relative;
+  flex: 1;
+  min-height: 0;
+  display: flex;
+}
+
+.fx-float__body > * {
+  flex: 1;
+}
+
+.fx-float__edge {
+  position: absolute;
+  touch-action: none;
+}
+
+.fx-float__edge--e {
+  top: var(--ctl-h);
+  right: 0;
+  bottom: 12px;
+  width: 6px;
+  cursor: ew-resize;
+}
+
+.fx-float__edge--w {
+  top: var(--ctl-h);
+  left: 0;
+  bottom: 12px;
+  width: 6px;
+  cursor: ew-resize;
+}
+
+.fx-float__edge--s {
+  left: 12px;
+  right: 12px;
+  bottom: 0;
+  height: 6px;
+  cursor: ns-resize;
+}
+
+.fx-float__edge--se {
+  right: 0;
+  bottom: 0;
+  width: 14px;
+  height: 14px;
+  cursor: nwse-resize;
+}
+
+.fx-float__edge--sw {
+  left: 0;
+  bottom: 0;
+  width: 14px;
+  height: 14px;
+  cursor: nesw-resize;
+}
+
+/* anteprima dell'aggancio: compare solo quando l'aggancio e' armato */
+.fx-snap-preview {
+  position: absolute;
+  border: 2px solid var(--accent);
+  border-radius: 10px;
+  background: color-mix(in srgb, var(--accent) 12%, transparent);
+  pointer-events: none !important;
+  animation: fx-fade 0.15s ease;
+}
+
+/* ---------------------------------------------------------------- avvio */
+.fx-app--welcome {
   background: var(--paper);
+}
+
+.fx-splash,
+.fx-welcome {
+  display: grid;
+  place-items: center;
+  min-height: 0;
+  background: var(--paper);
+}
+
+.fx-splash {
+  align-content: center;
+  gap: var(--space-4);
+  animation: fx-fade 0.4s ease;
+}
+
+.fx-splash__name {
+  font-family: var(--font-text);
+  font-size: 34px;
+  letter-spacing: 0.02em;
+  color: var(--ink);
+}
+
+.fx-mark__sheet {
+  fill: var(--paper);
+  stroke: var(--accent);
+  stroke-width: 28;
+  stroke-linejoin: round;
+}
+
+.fx-mark__fold {
+  fill: var(--accent-soft);
+  stroke: var(--accent);
+  stroke-width: 28;
+  stroke-linejoin: round;
+}
+
+.fx-mark__line {
+  fill: var(--accent);
+}
+
+.fx-onboarding {
+  width: min(460px, calc(100vw - 48px));
+  animation: fx-fade 0.3s ease;
+}
+
+.fx-onboarding h1 {
+  margin: var(--space-4) 0 var(--space-2);
+  font-family: var(--font-text);
+  font-size: 30px;
+  font-weight: 700;
+  line-height: 1.2;
+}
+
+.fx-onboarding p {
+  margin: 0;
+  color: var(--ink-2);
+  font-family: var(--font-text);
+  font-size: 18px;
+  line-height: 1.5;
+}
+
+.fx-onboarding__dots {
+  display: flex;
+  gap: var(--space-2);
+}
+
+.fx-onboarding__dots span {
+  width: 6px;
+  height: 6px;
+  border-radius: 50%;
+  background: var(--line-strong);
+}
+
+.fx-onboarding__dots span.is-active {
+  background: var(--accent);
+}
+
+.fx-onboarding__actions {
+  display: flex;
+  align-items: center;
+  margin-top: var(--space-6);
+}
+
+.fx-landing {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: var(--space-4);
+  animation: fx-fade 0.3s ease;
+}
+
+.fx-cta {
+  display: inline-flex;
+  align-items: center;
+  gap: var(--space-2);
+  height: 40px;
+  padding: 0 var(--space-5);
+  border: 0;
+  border-radius: 20px;
+  background: var(--accent);
+  color: var(--accent-ink);
+  font-weight: 500;
+}
+
+.fx-cta:hover {
+  background: color-mix(in srgb, var(--accent) 85%, var(--ink));
+}
+
+.fx-cta--big {
+  height: auto;
+  min-height: 52px;
+  padding: var(--space-3) var(--space-6);
+  border-radius: 26px;
+  font-size: var(--fs-ui-large);
+}
+
+.fx-cta--big span {
+  display: flex;
+  flex-direction: column;
+  align-items: flex-start;
+}
+
+.fx-cta--big small {
+  max-width: 340px;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+  font-size: var(--fs-ui-small);
+  font-weight: 400;
+  opacity: 0.85;
+}
+
+.fx-cta--quiet {
+  background: none;
+  color: var(--ink-2);
+}
+
+.fx-cta--quiet:hover {
+  background: var(--chrome-2);
+}
+
+.fx-link {
+  border: 0;
+  background: none;
+  color: var(--muted);
+}
+
+.fx-link:hover {
+  color: var(--ink);
 }
 
 /* ---------------------------------------------------------------- ⌘K */
@@ -1444,46 +1700,6 @@ select.fx-input {
   overflow: hidden;
   text-overflow: ellipsis;
   white-space: nowrap;
-}
-
-/* ---------------------------------------------------------------- Entrambi */
-.fx-split {
-  display: flex;
-  min-width: 0;
-}
-
-.fx-split__a {
-  display: flex;
-  flex: 0 0 calc(var(--split) * 100%);
-  min-width: 0;
-  transition: flex-basis 0.25s ease;
-}
-
-.fx-split__a > * {
-  flex: 1;
-}
-
-.fx-split__b {
-  display: flex;
-  flex: 1;
-  min-width: 0;
-}
-
-.fx-split__b > * {
-  flex: 1;
-}
-
-.fx-split__bar {
-  flex: none;
-  width: 6px;
-  cursor: col-resize;
-  background: var(--line);
-  border-left: 2px solid var(--desk);
-  border-right: 2px solid var(--desk);
-}
-
-.fx-split__bar:hover {
-  background: var(--accent);
 }
 
 /* ---------------------------------------------------------------- Tabula */
@@ -1758,14 +1974,19 @@ select.fx-input {
 }
 
 @media (prefers-reduced-motion: reduce) {
-  .fx-split__a,
   .fx-fbar,
   .fx-ring__value,
-  .fx-block-node {
+  .fx-block-node,
+  .fx-float,
+  .fx-edge-tab {
     transition: none;
   }
 
-  .fx-vpreview {
+  .fx-vpreview,
+  .fx-snap-preview,
+  .fx-splash,
+  .fx-onboarding,
+  .fx-landing {
     animation: none;
   }
 }
@@ -1787,8 +2008,7 @@ select.fx-input {
   .fx-fbar,
   .fx-toasts,
   .fx-comment-layer,
-  .fx-split__b,
-  .fx-split__bar,
+  .fx-desk,
   .fx-palette-backdrop {
     display: none !important;
   }

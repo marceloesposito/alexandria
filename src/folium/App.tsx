@@ -1,53 +1,28 @@
-// Folium: il foglio e niente altro. Barra in alto, pannello a sinistra quando serve, e la vista scelta:
-// Scriptorium, Entrambi (testo e Tabula affiancati), Armarium (la Tabula), Palimpsestus.
-import { useEffect, useRef } from 'react';
+// Folium: il foglio e niente altro. All'avvio splash, onboarding al primo lancio e pagina d'ingresso;
+// poi il testo senza bordi (come lo Scriptorium in Silentium), una barra in alto solo per passare al
+// Palimpsestus, e la Tabula flottante che si tira fuori dalla linguetta sul bordo sinistro.
+import { useEffect } from 'react';
 import { useFolium, openPath, maybeSnapshot } from './store';
 import { useUi } from './ui';
 import { Header } from './Header';
 import { SidePanel } from './Panels';
 import { Scriptorium } from './editor/Scriptorium';
-import { TabulaView } from './tabula/TabulaView';
+import { FloatingTabula } from './tabula/FloatingTabula';
 import { VersionsView } from './versions/VersionsView';
 import { Palette } from './Palette';
 import { Dialogs, Toasts } from './Dialogs';
+import { Splash, Onboarding, Landing } from './Welcome';
 import { ContextMenuHost } from '../components/ContextMenu';
 import { AskHost } from '../components/confirm';
 import { handleGlobalKey } from './commands';
+import { getEditor } from './editor/editorRef';
+import { liveMarkdown } from './editor/Scriptorium';
 import { platform } from '../platform';
-import { t, useLang } from '../i18n';
-
-function Split() {
-  const split = useFolium((s) => s.sheet?.meta.split ?? 0.55);
-  const box = useRef<HTMLDivElement>(null);
-  const drag = (e: React.PointerEvent) => {
-    const el = box.current;
-    if (!el) return;
-    (e.target as HTMLElement).setPointerCapture(e.pointerId);
-    const r = el.getBoundingClientRect();
-    const move = (ev: PointerEvent) => useFolium.getState().setMeta({ split: Math.min(0.8, Math.max(0.2, (ev.clientX - r.left) / r.width)) });
-    const up = () => {
-      window.removeEventListener('pointermove', move);
-      window.removeEventListener('pointerup', up);
-    };
-    window.addEventListener('pointermove', move);
-    window.addEventListener('pointerup', up);
-  };
-  return (
-    <div className="fx-split" ref={box} style={{ '--split': split } as React.CSSProperties}>
-      <div className="fx-split__a">
-        <Scriptorium />
-      </div>
-      <div className="fx-split__bar" role="separator" aria-orientation="vertical" aria-label={t('views.splitter')} onPointerDown={drag} />
-      <div className="fx-split__b">
-        <TabulaView narrow />
-      </div>
-    </div>
-  );
-}
+import { useLang } from '../i18n';
 
 export default function App() {
   useLang();
-  const ready = useFolium((s) => s.ready);
+  const screen = useFolium((s) => s.screen);
   const view = useFolium((s) => s.sheet?.meta.view ?? 'write');
   const silentium = useFolium((s) => s.silentium);
   const sheetId = useFolium((s) => s.sheet?.meta.id);
@@ -57,14 +32,16 @@ export default function App() {
       .getState()
       .init()
       .then(async () => {
+        // un file aperto dal sistema salta l'ingresso
         const f = await platform.startupFile();
         if (f) await openPath(f);
       });
   }, []);
 
-  // scorciatoie globali; Esc esce da Silentium
+  // scorciatoie globali (solo col foglio aperto); Esc esce da Silentium
   useEffect(() => {
     const onKey = (e: KeyboardEvent) => {
+      if (useFolium.getState().screen !== 'sheet') return;
       if (useUi.getState().palette && e.key !== 'Escape') return;
       if (e.key === 'Escape' && useFolium.getState().silentium && !useUi.getState().popover) {
         useFolium.getState().setSilentium(false);
@@ -90,7 +67,24 @@ export default function App() {
     };
   }, []);
 
-  // file trascinati sulla finestra fuori dal testo e dalla Tabula: si aprono come fogli
+  // app vera: la finestra si chiude solo dopo aver scritto su disco l'ultimo testo
+  useEffect(() => {
+    if (platform.kind !== 'tauri') return;
+    let off: (() => void) | undefined;
+    void import('@tauri-apps/api/window').then(async ({ getCurrentWindow }) => {
+      const w = getCurrentWindow();
+      off = await w.onCloseRequested(async (e) => {
+        e.preventDefault();
+        const ed = getEditor();
+        if (ed && useFolium.getState().screen === 'sheet') useFolium.getState().setMarkdown(liveMarkdown(ed));
+        maybeSnapshot(true);
+        await useFolium.getState().flush();
+        await w.destroy();
+      });
+    });
+    return () => off?.();
+  }, []);
+
   useEffect(() => {
     const over = (e: DragEvent) => {
       if (e.dataTransfer?.types.includes('Files')) e.preventDefault();
@@ -99,24 +93,36 @@ export default function App() {
     return () => window.removeEventListener('dragover', over);
   }, []);
 
-  if (!ready) return <div className="fx-app fx-app--loading" />;
+  const hosts = (
+    <>
+      <Dialogs />
+      <Toasts />
+      <ContextMenuHost />
+      <AskHost />
+    </>
+  );
+
+  if (screen !== 'sheet')
+    return (
+      <div className="fx-app fx-app--welcome">
+        <Header bare />
+        {screen === 'splash' ? <Splash /> : screen === 'onboarding' ? <Onboarding /> : <Landing />}
+        {hosts}
+      </div>
+    );
+
   return (
     <div className={`fx-app ${silentium ? 'is-silentium' : ''}`} data-view={view}>
       <Header />
       <div className="fx-body">
         <SidePanel />
         <main className="fx-main" key={sheetId}>
-          {view === 'write' && <Scriptorium />}
-          {view === 'both' && <Split />}
-          {view === 'tabula' && <TabulaView />}
-          {view === 'versions' && <VersionsView />}
+          {view === 'versions' ? <VersionsView /> : <Scriptorium />}
+          {view === 'write' && <FloatingTabula />}
         </main>
       </div>
       <Palette />
-      <Dialogs />
-      <Toasts />
-      <ContextMenuHost />
-      <AskHost />
+      {hosts}
     </div>
   );
 }

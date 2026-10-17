@@ -40,7 +40,6 @@ async function insertImages(editor: Editor, files: File[], pos?: number) {
 export function Scriptorium() {
   const sheet = useFolium((s) => s.sheet);
   const loadTick = useFolium((s) => s.loadTick);
-  const silentium = useFolium((s) => s.silentium);
   const zoom = useFolium((s) => s.app.zoom);
   const font = sheet?.meta.font ?? 'serif';
   const saveTimer = useRef<ReturnType<typeof setTimeout> | null>(null);
@@ -155,7 +154,8 @@ export function Scriptorium() {
           {editor && <CommentLayer editor={editor} />}
         </div>
       </div>
-      {editor && <TextBar editor={editor} faded={silentium} />}
+      {/* barretta in trasparenza finche' non ci si passa sopra, come in Silentium */}
+      {editor && <TextBar editor={editor} faded />}
     </div>
   );
 }

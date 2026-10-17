@@ -28,12 +28,14 @@ describe("un'azione, un controllo", () => {
   });
 
   it('ogni comando e raggiungibile da una superficie o per nome', () => {
-    for (const c of COMMANDS) expect(c.home !== 'none' || c.palette !== false, c.id).toBe(true);
+    for (const c of COMMANDS) expect(c.home !== 'none' || c.palette !== false || !!c.shortcut, c.id).toBe(true);
   });
 
   it('al massimo 10 controlli sempre visibili per superficie', () => {
     for (const [surface, groups] of Object.entries(L0)) expect(groups.length, surface).toBeLessThanOrEqual(10);
     // e in tutto lo Scriptorium (barra in alto + barretta) non piu' di 12 gruppi
-    expect(L0.header.length + L0.bar.length).toBeLessThanOrEqual(12);
+    expect(L0.header.length + L0.edgeTab.length + L0.bar.length).toBeLessThanOrEqual(8);
+    // la barra in alto serve solo a passare fra Scriptorium e Palimpsestus
+    expect(L0.header).toEqual([['view.write', 'view.versions']]);
   });
 });
