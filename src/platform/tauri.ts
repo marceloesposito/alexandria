@@ -96,6 +96,7 @@ export const tauriPlatform: Platform = {
   },
 
   thesaurus: (lang, word) => invoke<string | null>('thesaurus_lookup', { lang, word }),
+  thesaurusMany: (lang, words) => invoke<(string | null)[]>('thesaurus_lookup_many', { lang, words }),
   picusResources: () => invoke<string[]>('picus_resources'),
   picusResource: (lang) => invoke<string | null>('picus_resource', { lang }),
 

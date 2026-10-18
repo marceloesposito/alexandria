@@ -36,6 +36,24 @@ export interface Variant {
   /** locuzione nominale: genere e numero (ms fs mp fp; "n" senza genere). L'articolo che la precede
    *  fa parte del tratto e si accorda all'alternativa ("la chiave di volta" -> "il cardine") */
   gender?: string;
+  /** locuzione fissa: non si flette ("does not" / "doesn't") */
+  fixed?: boolean;
+}
+
+/** Euristica del registro per le parole che il dizionario non conosce (@register). */
+export interface RegisterRules {
+  /** suffisso -> punteggio ("zione" +1) */
+  suffix: Map<string, number>;
+  /** parola -> registro ("roba" -1, "pertanto" +1) */
+  word: Map<string, number>;
+  /** particelle dei verbi frasali ("out", "up"): verbo + particella scende */
+  particles: Set<string>;
+  particle: number;
+  /** almeno n sillabe: punteggio; al massimo n sillabe: punteggio */
+  long: [number, number] | null;
+  short: [number, number] | null;
+  /** almeno n significati nel thesaurus (parola comune): punteggio */
+  poly: [number, number] | null;
 }
 
 export interface ArticleTable {
@@ -130,6 +148,13 @@ export interface Pack {
   prep: Map<string, Map<string, string>>;
   prepDrop: Set<string>;
   article: ArticleTable;
+  register: RegisterRules;
+  /** plurale dei nomi per desinenza ("ca>che:f"), dal suffisso piu' lungo; "*" = invariabile */
+  plural: { suffix: string; repl: string; gender: string | null }[];
+  /** genere dei nomi per desinenza ("zione f", "ma m"), dal suffisso piu' lungo */
+  genders: { suffix: string; gender: string }[];
+  /** contrari scritti a mano (il thesaurus italiano non ne ha), in tutte e due le direzioni */
+  antonyms: Map<string, string[]>;
   senses: Sense[];
   replaces: Replace[];
 }
@@ -176,8 +201,13 @@ function parseVariant(rest: string, line: number, section: string, needRegister:
   let note: string | undefined;
   let reason: string | undefined;
   let gender: string | undefined;
+  let fixed = false;
   for (; i < words.length; i++) {
     const w = words[i];
+    if (w === 'fixed') {
+      fixed = true;
+      continue;
+    }
     if (w.startsWith('g:')) {
       gender = w.slice(2);
       if (!/^(ms|fs|mp|fp|n)$/.test(gender)) throw new PackError(`genere "${gender}": ms, fs, mp, fp o n`, line, section);
@@ -195,9 +225,11 @@ function parseVariant(rest: string, line: number, section: string, needRegister:
     if (f < 0) throw new PackError(`flag sconosciuto "${w}"`, line, section);
     flags |= 1 << f;
   }
-  const joined = text.join(' ');
+  // "-" e' la variante vuota: in quel tono la parola si toglie ("basically" nel formale)
+  const joined = text.join(' ') === '-' ? '' : text.join(' ');
   const v: Variant & { reason?: string } = { text: joined, tokens: phraseTokens(joined, elision), register, flags, note, reason };
   if (gender) v.gender = gender;
+  if (fixed) v.fixed = true;
   return v;
 }
 
@@ -261,6 +293,10 @@ export function parsePack(src: string): Pack {
     prep: new Map(),
     prepDrop: new Set(),
     article: { rows: new Map(), classes: new Map() },
+    register: { suffix: new Map(), word: new Map(), particles: new Set(), particle: -1, long: null, short: null, poly: null },
+    antonyms: new Map(),
+    plural: [],
+    genders: [],
     senses: [],
     replaces: [],
   };
@@ -282,7 +318,7 @@ export function parsePack(src: string): Pack {
         if (!rest.length) throw new PackError('@sense senza nome', line, head);
         sense = { name: rest.join(' '), variants: [] };
         pack.senses.push(sense);
-      } else if (!['meta', 'stopwords', 'stem', 'paradigm', 'irregular', 'derive', 'agree', 'aux', 'clitic', 'prep', 'article', 'replace'].includes(head)) {
+      } else if (!['meta', 'stopwords', 'stem', 'paradigm', 'irregular', 'derive', 'agree', 'aux', 'clitic', 'prep', 'article', 'register', 'antonym', 'noun', 'replace'].includes(head)) {
         throw new PackError(`sezione sconosciuta "@${head}"`, line, head);
       }
       continue;
@@ -422,6 +458,60 @@ export function parsePack(src: string): Pack {
         pack.prep.set(key, m);
         break;
       }
+      case 'register': {
+        // suffix +1 zione sione ita' / word -1 roba cosa / particles -1 out up / long 4 +0.5 / short 1 -0.5 / poly 5 -0.5
+        const r = pack.register;
+        const num = (s: string | undefined) => {
+          const n = Number(s);
+          if (s === undefined || !Number.isFinite(n) || Math.abs(n) > 2) throw new PackError(`"${s}": serve un numero fra -2 e +2`, line, section);
+          return n;
+        };
+        if (key === 'suffix' || key === 'word') {
+          const [score, ...list] = rest;
+          const n = num(score);
+          for (const w of list) r[key].set(w.toLowerCase(), n);
+        } else if (key === 'particles') {
+          const [score, ...list] = rest;
+          r.particle = num(score);
+          list.forEach((w) => r.particles.add(w.toLowerCase()));
+        } else if (key === 'long' || key === 'short' || key === 'poly') {
+          const n = Number(rest[0]);
+          if (!Number.isInteger(n) || n < 1) throw new PackError(`${key}: "${key} soglia punteggio"`, line, section);
+          r[key] = [n, num(rest[1])];
+        } else throw new PackError(`riga non riconosciuta "${raw}"`, line, section);
+        break;
+      }
+      case 'noun': {
+        // "plural ca>che:f a>i:m tà>*" / "gender f zione sione tà" / "gender m ma ista"
+        if (key === 'plural') {
+          for (const r of rest) {
+            const m = /^([^>]+)>([^:]*)(?::([mf]))?$/.exec(r);
+            if (!m) throw new PackError(`plurale "${r}": serve "desinenza>plurale[:genere]"`, line, section);
+            pack.plural.push({ suffix: m[1], repl: m[2], gender: m[3] ?? null });
+          }
+          pack.plural.sort((a, b) => b.suffix.length - a.suffix.length);
+        } else if (key === 'gender') {
+          const [g, ...suffixes] = rest;
+          if (g !== 'm' && g !== 'f') throw new PackError('gender: "gender m|f desinenze..."', line, section);
+          for (const s of suffixes) pack.genders.push({ suffix: s, gender: g });
+          pack.genders.sort((a, b) => b.suffix.length - a.suffix.length);
+        } else throw new PackError(`riga non riconosciuta "${raw}"`, line, section);
+        break;
+      }
+      case 'antonym': {
+        // "bello brutto orribile": la prima parola e i suoi contrari (valgono anche al contrario)
+        if (!rest.length) throw new PackError('serve almeno un contrario', line, section);
+        const add = (w: string, a: string) => {
+          const list = pack.antonyms.get(w) ?? [];
+          if (!list.includes(a)) list.push(a);
+          pack.antonyms.set(w, list);
+        };
+        for (const a of rest) {
+          add(key.toLowerCase(), a.replace(/_/g, ' '));
+          add(a.replace(/_/g, ' ').toLowerCase(), key);
+        }
+        break;
+      }
       case 'article': {
         // "cls Z sb sc ... z gn" classi d'iniziale; "def ms il lo:Z l':V" forme con la loro classe
         if (key === 'cls') {
@@ -456,6 +546,7 @@ export function parsePack(src: string): Pack {
           if (v.note) note = v.note;
           const out: Variant = { text: v.text, tokens: v.tokens, register: v.register, flags: v.flags };
           if (v.gender) out.gender = v.gender;
+          if (v.fixed) out.fixed = true;
           return out;
         });
         if (!reason) throw new PackError('manca "reason:"', line, section);

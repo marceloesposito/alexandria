@@ -7,11 +7,11 @@ import { buildLexicon, findMatches, type Hit, type Lexicon, type Match } from '.
 import { tokenize, type Token } from './tokens';
 import { makeStemmer } from './stem';
 import { SENSE_RULES, type SenseRule } from './senses';
-import { rank, toneCenter, type Ranked, type Tone } from './rank';
+import { rank, type Ranked } from './rank';
 import { matchCase } from '../thesaurus/model';
 import { articleIndex, determiner, joinArticle, type Det } from './article';
 
-export type FindingKind = 'style' | 'tone' | 'repetition' | 'variation' | 'synonym';
+export type FindingKind = 'style' | 'repetition' | 'variation' | 'synonym';
 
 export interface Suggestion {
   /** testo da mettere al posto dell'originale */
@@ -50,24 +50,17 @@ export interface Finding {
   senses: SenseSuggestions[];
   /** ripetizione: l'occorrenza precedente */
   prev?: [number, number];
-  /** per "ignora": stesso rilievo nello stesso documento */
+  /** identita' del rilievo (tipo e forma base) */
   key: string;
-  /** per "disattiva questa categoria": style:<motivo>, tone, repetition, variation, synonym */
-  category: string;
   /** le alternative vengono dal thesaurus (attribuzione nel pannello) */
   source?: 'thesaurus';
 }
 
 export interface AnalyzeOptions {
-  tone?: Tone | null;
-  /** scarto di registro dal tono del documento oltre cui si segnala (2) */
-  tolerance?: number;
   /** finestra delle ripetizioni in parole (50) */
   window?: number;
   /** anche le locuzioni senza problemi, con le loro varianti (domanda su una selezione) */
   variations?: boolean;
-  ignore?: Set<string>;
-  off?: Set<string>;
   /** ultima posizione nel documento di ogni locuzione (vedi `usage`) */
   lastUse?: Map<string, number>;
 }
@@ -123,7 +116,7 @@ interface Ctx {
   detText: string | null;
 }
 
-interface Resolved {
+export interface Resolved {
   start: number;
   hit: Hit;
   ctx: Ctx;
@@ -216,7 +209,7 @@ function resolve(e: Engine, text: string, tokens: Token[], m: Match, hit: Hit): 
 export function realize(e: Engine, target: Variant, ctx: Ctx): { text: string; alt?: string; to?: number } {
   const { morph, pack } = e;
   const [head, ...rest] = target.tokens;
-  const split = target.gender ? null : morph.isVerb(head) ? { verb: head, clitic: '' } : morph.splitClitic(head);
+  const split = target.gender || target.fixed || !head ? null : morph.isVerb(head) ? { verb: head, clitic: '' } : morph.splitClitic(head);
   const f = split && ctx.slot ? morph.forms(split.verb) : null;
   let words: string[];
   let altWords: string[] | null = null;
@@ -303,24 +296,49 @@ export function usage(e: Engine, blocks: string[]): Map<string, number> {
   return out;
 }
 
-const PRIORITY: FindingKind[] = ['style', 'tone', 'repetition', 'variation', 'synonym'];
+const PRIORITY: FindingKind[] = ['style', 'repetition', 'variation', 'synonym'];
+
+/** Lettura di una corrispondenza: per ogni variante la migliore, poi il senso scelto dalla regola. */
+export interface MatchReading {
+  /** inizio (indice di token) del tratto, compresi ausiliare, clitico e articolo */
+  start: number;
+  resolved: Resolved[];
+}
+
+export function resolveMatch(e: Engine, text: string, tokens: Token[], m: Match): MatchReading | null {
+  // per ogni variante la lettura migliore (participio con ausiliare, clitico presente...)
+  const byVariant = new Map<number, Resolved>();
+  for (const h of m.hits) {
+    const r = resolve(e, text, tokens, m, h);
+    if (!r) continue;
+    const old = byVariant.get(h.vi);
+    if (!old || r.score > old.score) byVariant.set(h.vi, r);
+  }
+  if (!byVariant.size) return null;
+  let resolved = [...byVariant.values()];
+  const entryOf = (r: Resolved) => e.lex.entries[r.hit.vi];
+  // sensi: se piu' di uno, la regola della locuzione (se c'e') sceglie
+  const senseRes = resolved.filter((r) => entryOf(r).sense >= 0);
+  if (senseRes.length > 1) {
+    const rule = e.rules[entryOf(senseRes[0]).variant.text];
+    const name = rule?.(tokens, m.start, m.end);
+    const pick = name ? senseRes.filter((r) => e.pack.senses[entryOf(r).sense].name === name) : [];
+    if (pick.length) resolved = [...resolved.filter((r) => entryOf(r).sense < 0), ...pick];
+  }
+  return { start: Math.min(...resolved.map((r) => r.start)), resolved };
+}
 
 export function analyze(e: Engine, text: string, opts: AnalyzeOptions = {}): Finding[] {
   const tokens = tokenize(text, e.pack.elision);
   const matches = findMatches(e.lex, tokens);
   const lastUse = opts.lastUse ?? new Map();
-  const target = opts.tone ?? null;
-  const tolerance = opts.tolerance ?? 2;
   const window = opts.window ?? 50;
-  const off = opts.off ?? new Set();
-  const ignore = opts.ignore ?? new Set();
   const found = new Map<number, Finding>();
   const covered = new Set<number>();
   const lastSense = new Map<number, { at: number; span: [number, number] }>();
   let paraStart = 0;
 
   const add = (f: Finding, at: number) => {
-    if (off.has(f.category) || off.has(f.kind) || ignore.has(f.key)) return;
     const old = found.get(at);
     if (!old) return void found.set(at, f);
     // "varianti" non e' un motivo: accanto a un problema vero non si dice
@@ -343,7 +361,6 @@ export function analyze(e: Engine, text: string, opts: AnalyzeOptions = {}): Fin
           return s;
         }),
       lastUse,
-      target,
     );
 
   for (const m of matches) {
@@ -351,25 +368,10 @@ export function analyze(e: Engine, text: string, opts: AnalyzeOptions = {}): Fin
       lastSense.clear();
       paraStart = m.start;
     }
-    // per ogni variante la lettura migliore (participio con ausiliare, clitico presente...)
-    const byVariant = new Map<number, Resolved>();
-    for (const h of m.hits) {
-      const r = resolve(e, text, tokens, m, h);
-      if (!r) continue;
-      const old = byVariant.get(h.vi);
-      if (!old || r.score > old.score) byVariant.set(h.vi, r);
-    }
-    if (!byVariant.size) continue;
-    let resolved = [...byVariant.values()];
+    const reading = resolveMatch(e, text, tokens, m);
+    if (!reading) continue;
+    const { resolved } = reading;
     const entryOf = (r: Resolved) => e.lex.entries[r.hit.vi];
-    // sensi: se piu' di uno, la regola della locuzione (se c'e') sceglie
-    const senseRes = resolved.filter((r) => entryOf(r).sense >= 0);
-    if (senseRes.length > 1) {
-      const rule = e.rules[entryOf(senseRes[0]).variant.text];
-      const name = rule?.(tokens, m.start, m.end);
-      const pick = name ? senseRes.filter((r) => e.pack.senses[entryOf(r).sense].name === name) : [];
-      if (pick.length) resolved = [...resolved.filter((r) => entryOf(r).sense < 0), ...pick];
-    }
     const r0 = resolved.reduce((a, b) => (b.start < a.start ? b : a));
     const start = tokens[r0.start].start;
     const end = tokens[m.end - 1].end;
@@ -393,7 +395,6 @@ export function analyze(e: Engine, text: string, opts: AnalyzeOptions = {}): Fin
           note: rep.from.note,
           senses: [{ sense: '', sections: suggest(rep.to, '', r.ctx, original) }],
           key: `style:${rep.from.text}`,
-          category: `style:${rep.reason}`,
         },
         start,
       );
@@ -413,13 +414,11 @@ export function analyze(e: Engine, text: string, opts: AnalyzeOptions = {}): Fin
     for (const r of senseHits) {
       const si = entryOf(r).sense;
       const last = lastSense.get(si);
-      if (last && m.start - last.at <= window && m.start >= paraStart) add({ ...common, kind: 'repetition', tags: ['repetition'], prev: last.span, key: `repetition:${base}`, category: 'repetition' }, start);
+      if (last && m.start - last.at <= window && m.start >= paraStart) add({ ...common, kind: 'repetition', tags: ['repetition'], prev: last.span, key: `repetition:${base}` }, start);
       lastSense.set(si, { at: m.start, span: [start, end] });
     }
 
-    // tono: scarto dal tono del documento
-    if (target && Math.abs(register - toneCenter(target)) >= tolerance) add({ ...common, kind: 'tone', tags: ['tone'], key: `tone:${base}`, category: 'tone' }, start);
-    if (opts.variations) add({ ...common, kind: 'variation', tags: ['variation'], key: `variation:${base}`, category: 'variation' }, start);
+    if (opts.variations) add({ ...common, kind: 'variation', tags: ['variation'], key: `variation:${base}` }, start);
   }
 
   // ripetizioni di parole piene (stessa radice) fuori dalle locuzioni
@@ -449,7 +448,6 @@ export function analyze(e: Engine, text: string, opts: AnalyzeOptions = {}): Fin
         senses: [],
         prev: [p.start, p.end],
         key: `repetition:${s}`,
-        category: 'repetition',
       },
       t.start,
     );

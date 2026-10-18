@@ -573,6 +573,14 @@ export function createMemoryPlatform(opts: { persist?: boolean } = {}): Platform
         return null;
       }
     },
+    async thesaurusMany(lang, words) {
+      try {
+        const text = await (thesaurusText[lang] ??= loadThesaurus(lang));
+        return words.map((w) => findBlock(text, w));
+      } catch {
+        return words.map(() => null);
+      }
+    },
     // Picus nel browser di sviluppo: i pacchetti arrivano dal server di Vite (stessi file delle risorse)
     async picusResources() {
       return (await this.picusResource('it')) ? ['it'] : [];

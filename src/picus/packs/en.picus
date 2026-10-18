@@ -131,6 +131,7 @@ rule ing ie>-2+ying ee,ye,oe>+ing e>-1+ing #CVK>++ing *>+ing
 double refer occur prefer admit commit permit omit regret control compel propel transfer deter incur submit expel begin forget upset
 # verbi regolari che aprono una locuzione del dizionario (gli irregolari si riconoscono da soli)
 verbs look carry figure point sum turn pick check sort work fill try help start need want seem appear resemble
+verbs obtain receive purchase tolerate abandon stop desist
 verbs use utilize employ consider factor allow discover learn ascertain determine perform conduct execute handle
 verbs address tackle cope note observe highlight investigate examine explore establish create devise develop ensure
 verbs postpone delay defer increase decrease decline talk discuss demonstrate assist aid commence kick eliminate
@@ -416,6 +417,110 @@ a lot of             -1
 lots of              -2
 plenty of            -1
 a great deal of      +1  note:only with uncountable nouns (a great deal of time)
+
+# registro stimato delle parole che il dizionario non conosce (sinonimi del thesaurus)
+@register
+suffix +1 tion sion ity ence ance ize ise ify ous ive ical ure ism
+suffix 0.5 ment ant ent ary ory ial
+word -2 gonna wanna kinda sorta ain't yeah yep nope awesome cool dude
+word -1 get gets got stuff thing things kids guy guys okay ok pretty huge tons lots bunch fix chat buy boss job
+word 1 therefore thus hence moreover furthermore whereas regarding obtain require purchase assist commence utilize sufficient numerous approximately
+particles -1 up out off down away over back around about through along
+long 4 0.5
+short 1 -0.5
+poly 8 -0.5
+
+# ---- tono: contrazioni, riempitivi (la variante "-" toglie la parola) ----
+@sense do not
+do not                0  fixed
+don't                -1  fixed
+@sense does not
+does not              0  fixed
+doesn't              -1  fixed
+@sense did not
+did not               0  fixed
+didn't               -1  fixed
+@sense is not
+is not                0  fixed
+isn't                -1  fixed
+@sense are not
+are not               0  fixed
+aren't               -1  fixed
+@sense was not
+was not               0  fixed
+wasn't               -1  fixed
+@sense cannot
+cannot                0  fixed
+can't                -1  fixed
+@sense will not
+will not              0  fixed
+won't                -1  fixed
+@sense would not
+would not             0  fixed
+wouldn't             -1  fixed
+@sense should not
+should not            0  fixed
+shouldn't            -1  fixed
+@sense it is
+it is                 0  fixed
+it's                 -1  fixed
+@sense that is
+that is               0  fixed
+that's               -1  fixed
+@sense there is
+there is              0  fixed
+there's              -1  fixed
+@sense we are
+we are                0  fixed
+we're                -1  fixed
+@sense they are
+they are              0  fixed
+they're              -1  fixed
+@sense let us
+let us               +1  fixed
+let's                 0  fixed
+
+@sense filler
+basically            -1
+-                     0
+
+@sense a lot
+a lot                -1
+a great deal         +1
+considerably         +1
+
+@sense okay
+okay                 -1
+fine                  0
+acceptable           +1
+
+@sense children
+kids                 -1
+children              0
+
+@sense obtain
+get                  -1
+obtain               +1
+receive               0
+
+@sense buy
+buy                   0
+purchase             +1
+
+@sense enough
+enough                0
+sufficient           +1
+
+@sense give up
+give up              -1
+desist               +1
+abandon              +1  note:needs an object (abandon the plan)
+stop                  0
+
+@sense put up with
+put up with          -1
+tolerate             +1
+bear                  0
 
 # articoli delle locuzioni nominali ("a keystone" -> "an essential element")
 @article

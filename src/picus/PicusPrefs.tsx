@@ -1,20 +1,10 @@
-// Preferenze > Picus: lingue (inclusa, installate con l'app, aggiunte dall'utente), categorie spente.
+// Preferenze > Picus: se mostrarlo e le lingue (inclusa, installate con l'app, aggiunte dall'utente).
+// Nessuna impostazione sul tono: Picus propone tutti i toni ogni volta che lo si interroga.
 import { useEffect, useState } from 'react';
 import { useWorkspace } from '../state/workspace';
 import { platform } from '../platform';
 import { t, useLang } from '../i18n';
 import type { PackInfo } from './packs';
-
-const tOr = (key: string, fallback: string) => {
-  const s = t(key);
-  return s === key ? fallback : s;
-};
-
-/** Etichetta breve di una categoria: "style:wordy" -> "Giri di parole", "repetition" -> "Ripetizioni". */
-export function categoryLabel(c: string): string {
-  const name = c.startsWith('style:') ? c.slice(6) : c;
-  return tOr(`picus.cat.${name}`, name);
-}
 
 export function PicusPrefs() {
   useLang();
@@ -71,21 +61,6 @@ export function PicusPrefs() {
         </button>
       </div>
       <p className="hint">{t('picus.languagesHint')}</p>
-      {prefs.picusOff.length > 0 && (
-        <div className="form__row">
-          <span>{t('picus.off')}</span>
-          <ul className="picus-langs">
-            {prefs.picusOff.map((c) => (
-              <li key={c}>
-                <span>{categoryLabel(c)}</span>
-                <button className="btn btn--ghost small" onClick={() => set({ picusOff: prefs.picusOff.filter((x) => x !== c) })}>
-                  {t('picus.enable')}
-                </button>
-              </li>
-            ))}
-          </ul>
-        </div>
-      )}
     </>
   );
 }

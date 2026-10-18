@@ -89,7 +89,7 @@ export function buildLexicon(pack: Pack, morph: Morph): Lexicon {
     };
 
     // le locuzioni nominali non si flettono ("il potere" non e' il verbo potere)
-    const split = v.gender ? null : morph.isVerb(head) ? { verb: head, clitic: '' } : morph.splitClitic(head);
+    const split = v.gender || v.fixed ? null : morph.isVerb(head) ? { verb: head, clitic: '' } : morph.splitClitic(head);
     const forms = split && morph.forms(split.verb);
     if (!split || !forms) {
       add(head, null, null, null);

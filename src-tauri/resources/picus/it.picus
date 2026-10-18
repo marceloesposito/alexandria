@@ -284,7 +284,205 @@ in nel:il nello:lo nella:la nei:i negli:gli nelle:le nell':l'
 su sul:il sullo:lo sulla:la sui:i sugli:gli sulle:le sull':l'
 drop che
 
-# articoli delle locuzioni nominali: la forma con la classe d'iniziale vince sulla semplice
+# registro stimato delle parole che il dizionario non conosce (sinonimi del thesaurus)
+@register
+suffix +1 ismo istico
+suffix 0.5 zione sione ità evole ibile abile
+suffix 0.5 mento enza anza
+word -2 figo casino boh mitico sfiga
+word -1 roba cosa cose tizio mica okay ok beccare fregare prof bici
+word 1 pertanto tuttavia nondimeno qualora nonché ossia ovvero altresì giacché poiché sebbene benché
+particles -1 fuori su giù via dentro sopra sotto indietro avanti
+long 5 0.5
+short 1 -0.5
+
+# ---- tono: riempitivi e locuzioni colloquiali ----
+@sense cioè
+cioè                       -1
+vale a dire                 0
+ossia                      +1
+ovvero                     +1
+
+@sense un sacco di
+un sacco di                -2
+un mucchio di              -1
+una grande quantità di      0
+una notevole quantità di   +1
+
+@sense un sacco
+un sacco                   -2
+moltissimo                  0
+enormemente                +1
+
+@sense va bene
+ok                         -1
+va bene                     0
+d'accordo                   0
+
+@sense porre una domanda
+fare una domanda            0
+porre una domanda          +1
+chiedere                    0
+
+@sense sistemare
+mettere a posto            -1
+sistemare                   0
+riordinare                  0
+
+@sense estrarre
+tirare fuori               -1
+estrarre                   +1
+fare emergere               0
+
+# nomi: genere dalla desinenza (le -e ambigue si chiedono al thesaurus) e plurale
+@noun
+gender f zione sione tà tù trice ie i a
+gender m ma ista eta o ore ere one ile ame ume ale ante ente
+plural tà>* tù>* i>* ie>* ca>che:f ga>ghe:f ca>chi:m ga>ghi:m co>chi go>ghi cia>ce gia>ge io>i ma>mi:m ista>isti:m a>e:f a>i:m o>i e>i
+
+# contrari scritti a mano: il thesaurus italiano non ne ha ("bello brutto" vale nei due sensi;
+# "_" unisce le parole di una locuzione)
+@antonym
+bello brutto
+buono cattivo
+grande piccolo
+alto basso
+lungo corto breve
+largo stretto
+nuovo vecchio
+giovane vecchio anziano
+facile difficile
+semplice complesso complicato
+veloce lento
+rapido lento
+forte debole
+ricco povero
+caldo freddo
+pieno vuoto
+chiaro scuro oscuro
+leggero pesante
+vero falso
+giusto sbagliato ingiusto
+possibile impossibile
+probabile improbabile
+utile inutile
+importante irrilevante trascurabile
+necessario superfluo
+certo incerto
+sicuro insicuro pericoloso
+noto ignoto sconosciuto
+comune raro
+frequente raro
+positivo negativo
+attivo passivo
+pubblico privato
+interno esterno
+superiore inferiore
+maggiore minore
+primo ultimo
+iniziale finale
+antico moderno
+naturale artificiale
+reale immaginario
+concreto astratto
+generale particolare specifico
+semplice composto
+uguale diverso
+simile diverso
+stesso diverso
+presente assente
+vivo morto
+felice infelice triste
+allegro triste
+calmo agitato
+tranquillo inquieto
+gentile scortese
+onesto disonesto
+coraggioso codardo
+intelligente stupido
+saggio sciocco
+ordinato disordinato
+pulito sporco
+morbido duro
+liscio ruvido
+dolce amaro
+umido secco
+vicino lontano
+dentro fuori
+sopra sotto
+prima dopo
+spesso raramente
+sempre mai
+molto poco
+tanto poco
+tutto niente nulla
+qualcosa niente
+inizio fine
+entrata uscita
+domanda risposta
+vittoria sconfitta
+successo fallimento
+vantaggio svantaggio
+pregio difetto
+pace guerra
+amore odio
+amico nemico
+ordine disordine
+luce buio
+giorno notte
+guadagno perdita
+aumento diminuzione
+crescita calo
+salita discesa
+inizio conclusione
+causa effetto
+teoria pratica
+regola eccezione
+pro contro
+accettare rifiutare
+amare odiare
+aprire chiudere
+accendere spegnere
+entrare uscire
+salire scendere
+arrivare partire
+cominciare finire
+iniziare concludere terminare
+vincere perdere
+comprare vendere
+dare prendere ricevere
+aumentare diminuire ridurre
+crescere calare
+costruire distruggere
+creare distruggere
+ricordare dimenticare
+trovare perdere
+unire separare dividere
+accogliere respingere
+confermare smentire
+ammettere negare
+permettere vietare impedire
+approvare disapprovare
+lodare criticare
+rispettare disprezzare
+difendere attaccare
+nascondere mostrare rivelare
+aggiungere togliere
+riempire svuotare
+alzare abbassare
+avvicinare allontanare
+includere escludere
+importare esportare
+accelerare rallentare
+migliorare peggiorare
+semplificare complicare
+vivere morire
+ridere piangere
+parlare tacere
+sapere ignorare
+insegnare imparare
+domandare rispondere
+
 @article
 cls V a e i o u h à è é ì ò ù
 cls Z sb sc sd sf sg sl sm sn sp sq sr st sv z gn ps pn x y

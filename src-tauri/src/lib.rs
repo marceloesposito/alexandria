@@ -154,6 +154,7 @@ pub fn run() {
             snapshot::net_snapshot,
             snapshot::net_render,
             thesaurus::thesaurus_lookup,
+            thesaurus::thesaurus_lookup_many,
             picus::picus_resources,
             picus::picus_resource,
             portable::portable_root,

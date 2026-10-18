@@ -167,6 +167,8 @@ export interface Platform {
   // thesaurus offline (dati MyThes nelle risorse dell'app)
   /** blocco grezzo del thesaurus per una parola (null: non c'e') */
   thesaurus(lang: 'it' | 'en', word: string): Promise<string | null>;
+  /** blocchi per piu' parole in una chiamata, nello stesso ordine */
+  thesaurusMany(lang: 'it' | 'en', words: string[]): Promise<(string | null)[]>;
 
   // Picus: pacchetti di lingua installati con l'app (quelli aggiunti dall'utente stanno in appDataDir)
   /** lingue dei pacchetti fra le risorse dell'app */

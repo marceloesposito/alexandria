@@ -84,6 +84,20 @@ pub async fn thesaurus_lookup(app: tauri::AppHandle, lang: String, word: String)
     .map_err(err)?
 }
 
+/// Blocchi per piu' parole in una chiamata (Picus riscrive un tratto intero), nello stesso ordine.
+#[tauri::command]
+pub async fn thesaurus_lookup_many(app: tauri::AppHandle, lang: String, words: Vec<String>) -> CmdResult<Vec<Option<String>>> {
+    if lang != "it" && lang != "en" {
+        return Ok(vec![None; words.len()]);
+    }
+    tauri::async_runtime::spawn_blocking(move || {
+        let t = load(&app, &lang)?;
+        Ok(words.iter().map(|w| t.lookup(w).map(str::to_string)).collect())
+    })
+    .await
+    .map_err(err)?
+}
+
 #[cfg(test)]
 mod tests {
     use super::Thes;

@@ -3,7 +3,7 @@ import { readFileSync } from 'node:fs';
 import { gunzipSync } from 'node:zlib';
 import { join } from 'node:path';
 import { createEngine } from './analyze';
-import { probes, synonymFinding, entryOf } from './synonyms';
+import { probes, synonymFinding, entryOf, ANTONYMS } from './synonyms';
 import { tokenize } from './tokens';
 import { findBlock } from '../thesaurus/model';
 
@@ -21,7 +21,12 @@ function ask(lang: 'it' | 'en', text: string, word: string) {
       const entry = entryOf(findBlock(thes[lang], k.key));
       if (!entry) continue;
       const f = synonymFinding(e, text, tokens[p.start].start, tokens[p.end - 1].end, k.key, entry, k.lemma, lang);
-      if (f) return { original: f.original, key: k.key, items: f.senses.flatMap((s) => s.sections[0].items.map((i) => i.text)), senses: f.senses.map((s) => s.sense) };
+      if (f) {
+        const syn = f.senses.filter((s) => s.sense !== ANTONYMS);
+        const opp = f.senses.find((s) => s.sense === ANTONYMS);
+        const texts = (ss: typeof syn) => ss.flatMap((s) => s.sections.flatMap((x) => x.items.map((i) => i.text)));
+        return { original: f.original, key: k.key, items: texts(syn), senses: syn.map((s) => s.sense), antonyms: opp ? texts([opp]) : [], tones: syn.flatMap((s) => s.sections.map((x) => x.tone)) };
+      }
     }
   }
   return null;
@@ -42,6 +47,15 @@ describe('sinonimi dal thesaurus', () => {
     expect(r.items).toEqual(expect.arrayContaining(['executed', 'implemented', 'accomplished']));
     const k = ask('en', 'It is the keystone of the theory.', 'keystone')!;
     expect(k.items).toEqual(expect.arrayContaining(['linchpin', 'mainstay']));
+  });
+
+  it('contrari e toni: dal thesaurus inglese, dal pacchetto per l\'italiano', () => {
+    const big = ask('en', 'A big house.', 'big')!;
+    expect(big.antonyms).toContain('small');
+    const bello = ask('it', 'Un posto bello.', 'bello')!;
+    expect(bello.antonyms).toContain('brutto');
+    // le alternative divise per tono (registro stimato)
+    expect(new Set(ask('en', 'We will commence soon.', 'commence')!.tones).size).toBeGreaterThan(1);
   });
 
   it('plurali e maiuscole', () => {

@@ -79,41 +79,19 @@ describe('ordine e tono', () => {
     expect(alts(f)).toEqual(['executed', 'undertook', 'conducted', 'performed']);
   });
 
-  it('sezioni per tono; con un tono di documento la sua sezione e\' prima e aperta', () => {
+  it('sezioni per tono, sempre Formale, Neutro, Informale; le vuote non ci sono', () => {
     const f = at(analyze(EN, 'She looks like her mother.', { variations: true }), 'looks like')!;
     expect(f.senses[0].sections.map((s) => [s.tone, s.open])).toEqual([
       ['formal', true],
       ['neutral', true],
       ['casual', true],
     ]);
-    const g = at(analyze(EN, 'She looks like her mother.', { variations: true, tone: 'casual' }), 'looks like')!;
-    expect(g.senses[0].sections.map((s) => [s.tone, s.open])).toEqual([
-      ['casual', true],
-      ['formal', false],
-      ['neutral', false],
-    ]);
-    // sezioni vuote nascoste
     expect(at(analyze(EN, 'In order to win.'), 'In order to')!.senses[0].sections.map((s) => s.tone)).toEqual(['neutral']);
   });
 
-  it('scarto di tono oltre la tolleranza', () => {
-    const text = 'There are lots of results and a lot of noise, and they are really super good.';
-    const tone = (t: 'formal' | 'neutral' | 'casual', tolerance?: number) =>
-      analyze(EN, text, { tone: t, tolerance })
-        .filter((f) => f.tags.includes('tone'))
-        .map((f) => f.original);
-    expect(tone('neutral')).toEqual(['lots of', 'super']);
-    expect(tone('formal')).toEqual(['lots of', 'a lot of', 'really', 'super']);
-    expect(tone('neutral', 1)).toEqual(['lots of', 'a lot of', 'really', 'super']);
-    expect(tone('casual')).toEqual([]);
-  });
-
-  it('ignora e disattiva una categoria', () => {
+  it('nessuna impostazione a priori: giri di parole e ripetizioni ci sono sempre', () => {
     const text = 'In order to win, we trained. Therefore we won; thus we slept.';
     expect(analyze(EN, text).map((f) => f.key)).toEqual(['style:in order to', 'repetition:thus']);
-    expect(analyze(EN, text, { ignore: new Set(['style:in order to']) }).map((f) => f.key)).toEqual(['repetition:thus']);
-    expect(analyze(EN, text, { off: new Set(['repetition']) }).map((f) => f.key)).toEqual(['style:in order to']);
-    expect(analyze(EN, text, { off: new Set(['style:wordy']) }).map((f) => f.key)).toEqual(['repetition:thus']);
   });
 });
 
@@ -151,12 +129,12 @@ describe('velocità', () => {
     analyze(EN, para);
     const t0 = performance.now();
     const n = 200;
-    for (let i = 0; i < n; i++) analyze(EN, para, { tone: 'formal' });
+    for (let i = 0; i < n; i++) analyze(EN, para);
     const perPara = (performance.now() - t0) / n;
     const doc = Array.from({ length: 10000 / 50 }, () => para);
     const t1 = performance.now();
     const lastUse = usage(EN, doc);
-    for (const p of doc) analyze(EN, p, { lastUse, tone: 'formal' });
+    for (const p of doc) analyze(EN, p, { lastUse });
     const perDoc = performance.now() - t1;
     console.log(`picus: ${perPara.toFixed(3)} ms per paragrafo (50 parole), ${perDoc.toFixed(1)} ms per 10.000 parole`);
     // soglie larghe per le macchine lente della CI; il valore vero e' nel log

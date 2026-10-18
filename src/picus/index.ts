@@ -1,6 +1,8 @@
-// Picus, il consigliere di scrittura: comandi e azioni. Parla solo se interrogato (F7 il paragrafo o
-// la selezione, Ctrl+F7 tutta la pergamena); mentre si scrive non analizza nulla. Il motore e i
-// pacchetti si caricano in modo pigro, in un momento di calma dopo l'apertura dell'editor.
+// Picus, il consigliere di scrittura: comandi e azioni. Nessuna impostazione a priori: si seleziona e
+// si chiede (clic sul picchio o F7). Una parola sola -> sinonimi e contrari; piu' parole (o, senza
+// selezione, la frase del cursore) -> tre riscritture, Formale, Neutra, Informale. Ctrl+F7 rivede la
+// pergamena intera (giri di parole e ripetizioni sottolineati). Mentre si scrive non analizza nulla;
+// motore e pacchetti si caricano in modo pigro, in un momento di calma dopo l'apertura dell'editor.
 import { Bird, ScanText, ArrowDownToLine, EyeOff } from 'lucide-react';
 import { registerCommands } from '../commands/registry';
 import { getEditor, onEditor } from '../state/editorRef';
@@ -11,9 +13,10 @@ import { thesaurusLang } from '../thesaurus/model';
 import { textBlocks, type Block } from './blocks';
 import { pickBlocks, placeFindings } from './scope';
 import { picusHooks, picusKey, type Live } from './plugin';
-import { usePicus, saveDocFile, type Bubble } from './store';
-import type { Finding, Suggestion } from './analyze';
-import type { Tone } from './rank';
+import { usePicus, type Bubble, type DocEdit, type PieceOption, type RewriteView } from './store';
+import { rank } from './rank';
+import type { Engine, Finding, Suggestion } from './analyze';
+import type { Rewrite } from './rewrite';
 
 const say = (bubble: Bubble | null) => usePicus.setState({ bubble });
 
@@ -21,7 +24,7 @@ const say = (bubble: Bubble | null) => usePicus.setState({ bubble });
 function warm() {
   const go = () => {
     void import('./packs').then((m) => m.loadEngine(getWritingLang())).catch(() => {});
-    void import('./synonyms').catch(() => {});
+    void import('./rewrite').catch(() => {});
     // il thesaurus si decomprime e si indicizza alla prima richiesta: meglio adesso che al primo clic
     const th = thesaurusLang(getWritingLang());
     if (th) void platform.thesaurus(th, 'a').catch(() => null);
@@ -31,64 +34,172 @@ function warm() {
   else setTimeout(go, 500);
 }
 
-/** Interroga Picus: la selezione o il paragrafo del cursore; con `whole` tutta la pergamena. */
+async function engineNow(): Promise<Engine | null> {
+  const lang = getWritingLang();
+  const { loadEngine } = await import('./packs');
+  try {
+    const engine = await loadEngine(lang);
+    if (!engine) say({ kind: 'nopack', lang });
+    return engine;
+  } catch (e) {
+    say({ kind: 'error', text: String(e instanceof Error ? e.message : e) });
+    return null;
+  }
+}
+
+/** offset nel testo del blocco della posizione `pos` del documento */
+const offsetIn = (b: Block, pos: number) => {
+  const i = b.map.findIndex((p) => p >= pos);
+  return i < 0 ? b.text.length : i;
+};
+
+/** posizioni nel documento del tratto [start, end) del testo del blocco */
+const docSpan = (b: Block, start: number, end: number) => ({ from: start < b.map.length ? b.map[start] : b.to, to: end > start ? b.map[end - 1] + 1 : start < b.map.length ? b.map[start] : b.to });
+
+/**
+ * Interroga Picus: con una parola sola selezionata sinonimi e contrari, altrimenti le riscritture
+ * della selezione (o della frase del cursore); con `whole` la revisione di tutta la pergamena.
+ */
 export async function ask(whole = false) {
   const ed = getEditor();
   if (!ed) return;
-  const lang = getWritingLang();
-  const [{ loadEngine }, { analyze, usage }] = await Promise.all([import('./packs'), import('./engine')]);
-  let engine;
-  try {
-    engine = await loadEngine(lang);
-  } catch (e) {
-    return say({ kind: 'error', text: String(e instanceof Error ? e.message : e) });
-  }
-  if (!engine) return say({ kind: 'nopack', lang });
-  const st = usePicus.getState();
+  const engine = await engineNow();
+  if (!engine) return;
+  if (whole) return review(engine);
+  const th = thesaurusLang(getWritingLang());
   const { from, to, empty } = ed.state.selection;
-  const sel = { from, to, empty };
   const blocks = textBlocks(ed.state.doc);
-  const opts = {
-    tone: st.tone,
-    ignore: new Set(st.ignored),
-    off: new Set(useWorkspace.getState().app.prefs.picusOff),
-    lastUse: usage(engine, blocks.map((b) => b.text)),
-    variations: !whole,
-  };
-  const items = pickBlocks(blocks, sel, whole).flatMap((b) => placeFindings(b, analyze(engine, b.text, opts), sel, whole));
-  let current = -1;
+  const [{ sentenceAt, rewrite }, { tokenize }] = await Promise.all([import('./rewrite'), import('./tokens')]);
+  // i tratti da riscrivere, uno per blocco
+  const ranges: { b: Block; s: number; e: number }[] = [];
+  if (empty) {
+    const b = blocks.find((x) => from >= x.from && from <= x.to);
+    if (b) {
+      const [s, e] = sentenceAt(b.text, offsetIn(b, from));
+      ranges.push({ b, s, e });
+    }
+  } else {
+    for (const b of blocks) {
+      if (b.to <= from || b.from >= to) continue;
+      let s = Math.max(0, offsetIn(b, from));
+      let e = Math.min(b.text.length, offsetIn(b, to));
+      while (s < e && /\s/.test(b.text[s])) s++;
+      while (e > s && /\s/.test(b.text[e - 1])) e--;
+      if (e > s) ranges.push({ b, s, e });
+    }
+  }
+  if (!ranges.length) return say({ kind: 'quiet' });
+  clear();
 
-  // sinonimi dal thesaurus (italiano e inglese): per il punto chiesto e per le parole ripetute
-  const th = thesaurusLang(lang);
+  // una parola sola selezionata: sinonimi e contrari, per tono
+  const only = ranges.length === 1 && !empty ? ranges[0] : null;
+  if (only && th && tokenize(only.b.text.slice(only.s, only.e), engine.pack.elision).length === 1) {
+    const { synonymsAt } = await import('./synonyms');
+    const f = await synonymsAt(engine, only.b.text, th, (key) => platform.thesaurus(th, key).catch(() => null), only.s, only.e);
+    if (f) {
+      const span = docSpan(only.b, f.start, f.end);
+      ed.view.dispatch(ed.state.tr.setMeta(picusKey, { items: [{ ...span, f }], current: 0 }));
+      usePicus.setState({ open: true, focus: usePicus.getState().focus + 1, bubble: null });
+      return;
+    }
+  }
+
+  // piu' parole: tre riscritture
+  const lookupMany = async (keys: string[]) => {
+    const list = th && keys.length ? await platform.thesaurusMany(th, keys).catch(() => keys.map(() => null)) : keys.map(() => null);
+    return new Map(keys.map((k, i) => [k, list[i]]));
+  };
+  const results = await Promise.all(ranges.map((r) => rewrite(engine, r.b.text, r.s, r.e, th, lookupMany)));
+  const view = toView(ranges, results);
+  if (!view.pieces.length) return say({ kind: 'quiet' });
+  usePicus.setState({ rewrite: view, focus: usePicus.getState().focus + 1, bubble: null });
+}
+
+/** Le riscritture nelle posizioni del documento, per il pannello. */
+function toView(ranges: { b: Block; s: number; e: number }[], results: Rewrite[]): RewriteView {
+  const edit = (b: Block, start: number, end: number, text: string): DocEdit => ({ ...docSpan(b, start, end), text });
+  const versions = results[0].versions.map((v0, vi) => {
+    let text = '';
+    const changes: { start: number; end: number }[] = [];
+    const edits: DocEdit[] = [];
+    results.forEach((r, ri) => {
+      const v = r.versions[vi];
+      if (ri) text += '\n';
+      v.changes.forEach((c) => changes.push({ start: c.start + text.length, end: c.end + text.length }));
+      text += v.text;
+      v.edits.forEach((ed) => edits.push(edit(ranges[ri].b, ed.start, ed.end, ed.text)));
+    });
+    return { tone: v0.tone, text, changes, edits };
+  });
+  const pieces = results.flatMap((r, ri) =>
+    r.units.map((u) => {
+      const options: PieceOption[] = u.options.map((o) => ({ text: o.text, register: o.register, flags: o.flags, ...(o.note ? { note: o.note } : {}), base: o.base, edit: edit(ranges[ri].b, u.start, o.to ?? u.end, o.text) }));
+      return { original: u.original, label: u.label, sections: rank(options, new Map()) };
+    }),
+  );
+  const first = ranges[0];
+  const last = ranges[ranges.length - 1];
+  return { from: docSpan(first.b, first.s, first.e).from, to: docSpan(last.b, last.s, last.e).to, original: results.map((r) => r.original).join('\n'), versions, pieces };
+}
+
+/** Applica modifiche al documento (dall'ultima, cosi' le posizioni restano buone): un solo Ctrl+Z. */
+function applyEdits(edits: DocEdit[]) {
+  const ed = getEditor();
+  if (!ed) return;
+  const tr = ed.state.tr;
+  for (const e of [...edits].sort((a, b) => b.from - a.from)) {
+    if (e.text) tr.insertText(e.text, e.from, e.to);
+    else tr.delete(e.from, e.to);
+  }
+  ed.view.dispatch(tr.scrollIntoView());
+}
+
+/** Il tratto riscritto e' ancora com'era? (se nel frattempo si e' scritto, le posizioni non valgono) */
+function stillThere(v: RewriteView): boolean {
+  const ed = getEditor();
+  return !!ed && v.to <= ed.state.doc.content.size && ed.state.doc.textBetween(v.from, v.to, '\n') === v.original;
+}
+
+/** Sceglie una versione intera (1, 2, 3 nel pannello). */
+export function applyVersion(i: number) {
+  const v = usePicus.getState().rewrite;
+  const version = v?.versions[i];
+  if (!v || !version) return;
+  if (stillThere(v)) applyEdits(version.edits);
+  closeRewrite();
+}
+
+/** Cambia un pezzo solo e rifa' le riscritture del tratto aggiornato. */
+export async function applyPiece(o: PieceOption) {
+  const v = usePicus.getState().rewrite;
+  const ed = getEditor();
+  if (!v || !ed || !stillThere(v)) return closeRewrite();
+  applyEdits([o.edit]);
+  const delta = o.text.length - (o.edit.to - o.edit.from);
+  ed.commands.setTextSelection({ from: v.from, to: v.to + delta });
+  await ask(false);
+}
+
+export function closeRewrite(refocus = true) {
+  usePicus.setState({ rewrite: null });
+  if (refocus) getEditor()?.commands.focus();
+}
+
+/** Revisione di tutta la pergamena: giri di parole e ripetizioni sottolineati, con le alternative. */
+async function review(engine: Engine) {
+  const ed = getEditor()!;
+  const { analyze, usage } = await import('./engine');
+  const blocks = textBlocks(ed.state.doc);
+  const sel = { from: 0, to: 0, empty: true };
+  const opts = { lastUse: usage(engine, blocks.map((b) => b.text)) };
+  const items = pickBlocks(blocks, sel, true).flatMap((b) => placeFindings(b, analyze(engine, b.text, opts), sel, true));
+  // parole ripetute: i loro sinonimi
+  const th = thesaurusLang(getWritingLang());
   if (th) {
     const { synonymsAt } = await import('./synonyms');
     const lookup = (key: string) => platform.thesaurus(th, key).catch(() => null);
     const blockOf = (pos: number) => blocks.find((b) => pos >= b.from && pos <= b.to);
-    const offset = (b: Block, pos: number) => {
-      const i = b.map.findIndex((p) => p >= pos);
-      return i < 0 ? b.text.length : i;
-    };
     const withSynonyms = (l: Live, f: Finding): Live => ({ ...l, f: { ...l.f, senses: f.senses, source: 'thesaurus' } });
-    // il punto chiesto: se il dizionario di Picus ha gia' alternative vincono loro (locuzioni)
-    if (!whole) {
-      const here = items.findIndex((l) => (empty ? from >= l.from && from <= l.to : l.from <= from && l.to >= to));
-      if (here >= 0 && items[here].f.senses.length) current = here;
-      else {
-        const b = blockOf(from);
-        const f = b && (await synonymsAt(engine, b.text, th, lookup, offset(b, from), empty ? null : offset(b, to)));
-        if (b && f) {
-          let live: Live = { from: b.map[f.start], to: b.map[f.end - 1] + 1, f };
-          // stesso tratto di una ripetizione: la ripetizione prende i sinonimi
-          if (here >= 0 && items[here].from === live.from && items[here].to === live.to) live = items[here] = withSynonyms(items[here], f);
-          else {
-            items.push(live);
-            items.sort((a, c) => a.from - c.from || a.to - c.to);
-          }
-          current = items.indexOf(live);
-        }
-      }
-    }
-    // parole ripetute: i loro sinonimi al posto di "cerca sinonimi"
     await Promise.all(
       items.slice(0, 60).map(async (l, i) => {
         if (l.f.kind !== 'repetition' || l.f.senses.length) return;
@@ -98,10 +209,9 @@ export async function ask(whole = false) {
       }),
     );
   }
-  // altrimenti il primo rilievo dal cursore in poi
-  if (current < 0 && items.length) current = Math.max(0, items.findIndex((l) => l.to >= from));
+  const current = items.length ? 0 : -1;
   ed.view.dispatch(ed.state.tr.setMeta(picusKey, { items, current }));
-  usePicus.setState({ open: items.length > 0, focus: st.focus + 1, bubble: items.length ? { kind: 'result', n: items.length } : { kind: 'quiet' } });
+  usePicus.setState({ open: items.length > 0, rewrite: null, focus: usePicus.getState().focus + 1, bubble: items.length ? { kind: 'result', n: items.length } : { kind: 'quiet' } });
   if (current >= 0) reveal(items[current]);
 }
 
@@ -131,7 +241,7 @@ export function close(refocus = true) {
   if (refocus) getEditor()?.commands.focus();
 }
 
-/** Sceglie un'alternativa: sostituisce il tratto (stessi stili, si annulla con Ctrl+Z). */
+/** Sceglie un'alternativa di un rilievo: sostituisce il tratto (stessi stili, si annulla con Ctrl+Z). */
 export function apply(l: Live, s: Suggestion, alt = false) {
   const ed = getEditor();
   if (!ed) return;
@@ -144,30 +254,11 @@ export function apply(l: Live, s: Suggestion, alt = false) {
   if (items.length && current >= 0) reveal(items[current]);
 }
 
-/** "Ignora": questo rilievo non torna piu' in questa pergamena. */
-export function ignore(l: Live) {
-  const ed = getEditor();
-  saveDocFile({ ignored: [...new Set([...usePicus.getState().ignored, l.f.key])] });
-  ed?.view.dispatch(ed.state.tr.setMeta(picusKey, { drop: (x: Live) => x.f.key === l.f.key }));
-}
-
-/** "Disattiva questa categoria": in tutte le pergamene, finche' non la si riaccende in Preferenze. */
-export function disable(l: Live) {
-  const ed = getEditor();
-  const prefs = useWorkspace.getState().app.prefs;
-  useWorkspace.getState().setPrefs({ picusOff: [...new Set([...prefs.picusOff, l.f.category])] });
-  ed?.view.dispatch(ed.state.tr.setMeta(picusKey, { drop: (x: Live) => x.f.category === l.f.category }));
-}
-
-export function setTone(tone: Tone | null) {
-  saveDocFile({ tone });
-}
-
-/** Toglie tutte le sottolineature. */
+/** Toglie sottolineature e pannelli. */
 export function clear() {
   const ed = getEditor();
   ed?.view.dispatch(ed.state.tr.setMeta(picusKey, { items: [], current: -1 }));
-  usePicus.setState({ open: false, bubble: null });
+  usePicus.setState({ open: false, rewrite: null, bubble: null });
 }
 
 export function registerPicus() {

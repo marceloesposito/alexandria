@@ -1737,6 +1737,71 @@
   border-top: 1px solid var(--line);
 }
 
+.picus-panel__sense.is-antonyms .picus-panel__sensename {
+  color: var(--series-7);
+}
+
+/* pannello delle riscritture: tre versioni, i tratti cambiati evidenziati */
+.picus-rewrite {
+  width: 440px;
+  max-height: min(560px, 80vh);
+}
+
+.picus-rewrite__version + .picus-rewrite__version {
+  margin-top: 8px;
+}
+
+.picus-rewrite__version .picus-panel__sectionhead kbd {
+  color: var(--muted);
+  font-family: var(--font-ui);
+  font-size: 10px;
+}
+
+.picus-rewrite__text {
+  display: block;
+  width: 100%;
+  padding: 6px 10px;
+  border: 1px solid var(--line);
+  border-radius: var(--radius-small);
+  background: var(--paper);
+  color: var(--ink);
+  font-family: var(--font-text);
+  font-size: 14px;
+  line-height: 1.45;
+  text-align: left;
+  cursor: pointer;
+}
+
+.picus-rewrite__text:hover {
+  border-color: var(--accent);
+  background: var(--accent-soft);
+}
+
+.picus-rewrite__text mark {
+  padding: 0 1px;
+  border-radius: 2px;
+  background: color-mix(in srgb, var(--accent) 22%, transparent);
+  color: inherit;
+}
+
+.picus-rewrite__same {
+  margin: 0;
+  padding: 4px 0;
+}
+
+.picus-rewrite__toggle {
+  margin-top: 12px;
+}
+
+.picus-rewrite__toggle[aria-expanded='false']::after {
+  content: ' …';
+}
+
+.picus-rewrite__tone {
+  min-width: 70px;
+  font-size: 11px;
+}
+
 .picus-langs {
   flex: 1;
   margin: 0;

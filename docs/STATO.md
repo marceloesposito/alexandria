@@ -149,24 +149,29 @@ Aggiornato: 15 ottobre 2026 (versione 0.2.0, storia delle versioni in `CHANGELOG
   italiano di LibreItalia (GPL-3, distribuito come file separato, non incluso nel codice MIT), inglese da
   WordNet (licenza Princeton). Il Rust (`thesaurus.rs`) decomprime e indicizza alla prima richiesta
   (16 ms e 60 ms) e restituisce il blocco grezzo; l'interpretazione e' in `src/thesaurus/model.ts`.
-- **Picus al clic dice subito come intervenire** sulla parola o la locuzione sotto il cursore (o
-  selezionata): prima le alternative del suo dizionario (locuzioni, verbi fraseologici, locuzioni
-  nominali con l'articolo accordato: "la chiave di volta" -> "il cardine", "della chiave di volta" ->
-  "del cardine"), altrimenti i sinonimi del thesaurus, anche per locuzioni intere (WordNet ne ha 63.822:
-  "carried out" -> "executed"; il verbo si riporta alla forma base e il sinonimo si flette: "looked" ->
-  "appeared", "cerchiamo" -> "ci aspettiamo"). Le parole ripetute arrivano con i loro sinonimi.
 - **Picus, il consigliere di scrittura** (`src/picus/`): un picchio flottante e trascinabile nello
-  Scriptorium che parla solo se interrogato (clic o F7: selezione o paragrafo del cursore; Maiusc+clic
-  o Ctrl+F7: tutta la pergamena; Alt+F7 il rilievo successivo). Sottolinea giri di parole (@replace),
-  ripetizioni (stessa radice o stesso gruppo di sinonimi entro 50 parole, la finestra riparte a ogni
-  paragrafo), scarti dal tono della pergamena (Formale/Neutro/Informale, nel menu del picchio) e, su
-  una selezione o sotto il cursore, le varianti di una locuzione. Il pannello propone le alternative
-  gia' flesse come l'originale ("has looked like" -> "has borne a resemblance to", "mi sono reso
-  conto del" -> "ho capito il"), per tono, prima le meno usate nella pergamena; tasti 1-9, I ignora
-  (nella pergamena, `.alexandria/picus/`), D disattiva la categoria (Preferenze > Picus), Esc.
-  Niente LLM e niente rete: dizionario e regole deterministiche. Motore in TS puro e indipendente
-  dalla lingua, chunk caricato in idle (40 kB, 15 kB gzip con l'inglese); 0,2 ms per paragrafo,
-  18 ms per 10.000 parole. Ogni lingua e' un pacchetto di soli dati (`.picus`: stopword, stemmer
+  Scriptorium che parla solo se interrogato, **senza impostazioni a priori** (dal 18/10/2026 niente
+  tono della pergamena, niente categorie disattivate o rilievi ignorati). Si seleziona e si chiede
+  (clic o F7):
+  - **una parola**: sinonimi (thesaurus offline, flessi come nel testo: "looked" -> "appeared",
+    "cerchiamo" -> "ci aspettiamo") divisi per tono, e **contrari** (thesaurus inglese; per l'italiano
+    `@antonym` nel pacchetto, scritti a mano);
+  - **piu' parole** (anche frasi o paragrafi; senza selezione la frase del cursore): **tre riscritture,
+    Formale, Neutra, Informale** (`rewrite.ts`), con i tratti cambiati evidenziati; 1/2/3 o un clic
+    applicano (si cambiano solo i tratti, gli stili restano; un Ctrl+Z annulla tutto), "Pezzo per
+    pezzo" cambia un'unita' sola. Deterministico, niente LLM: unita' del dizionario del pacchetto
+    (locuzioni, giri di parole, contrazioni, riempitivi con la variante vuota `-`, locuzioni nominali
+    con l'articolo accordato: "la chiave di volta" -> "il cardine") e parole piene dal thesaurus, col
+    significato scelto da un Lesk semplificato; il registro delle parole non curate e' stimato da
+    `register.ts` (`@register`: suffissi dotti, particelle dei verbi frasali, sillabe, polisemia in
+    inglese). Si cambia solo cio' che stona con il tono e solo con alternative sicure; i nomi italiani
+    accordano articolo e numero (`@noun`: "i problemi" -> "le grane"). Limite: la riscrittura e'
+    lessicale e fraseologica, non riformula la sintassi.
+  Maiusc+clic o Ctrl+F7 rivede tutta la pergamena: giri di parole e ripetizioni (stessa radice o stesso
+  gruppo entro 50 parole) sottolineati, con le alternative (Alt+F7 il successivo). Motore in TS puro e
+  indipendente dalla lingua, caricato in idle (~47 kB minificati con l'inglese); 0,2 ms per paragrafo
+  nella revisione, una frase riscritta in pochi ms dopo la lettura del thesaurus (una chiamata Rust,
+  `thesaurus_lookup_many`). Ogni lingua e' un pacchetto di soli dati (`.picus`: stopword, stemmer
   sul modello di Snowball con accordo del 99,99% sui vocabolari di prova, paradigmi a "slot", irregolari,
   clitici, ausiliari, preposizioni articolate, locuzioni con registro e flag). L'inglese e' incluso;
   l'italiano e' fra le risorse (`src-tauri/resources/picus/`) e l'installer lo propone nella pagina

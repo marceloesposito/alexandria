@@ -4,6 +4,9 @@
 import { parseEntry, baseForms, inflectLike, matchCase, type Entry } from '../thesaurus/model';
 import { cliticWords, type Engine, type Finding, type Suggestion } from './analyze';
 import { tokenize, type Token } from './tokens';
+import { phraseRegister, wordRegister } from './register';
+import { rank } from './rank';
+import { ANTONYMS } from './flags';
 
 /** Una sequenza di parole del testo con le chiavi da cercare nel thesaurus, nell'ordine. */
 export interface Probe {
@@ -63,10 +66,25 @@ export function probes(e: Engine, tokens: Token[], at: number, lang: 'it' | 'en'
 
 const joinWords = (ws: string[]) => ws.join(' ').replace(/' /g, "'");
 
-const isVerbPos = (pos: string) => /^v|verb/i.test(pos);
+export const isVerbPos = (pos: string) => /^v|verb/i.test(pos);
+export const isNounPos = (pos: string) => /^s\.|noun/i.test(pos);
+
+export { ANTONYMS };
+
+/**
+ * Lesk semplificato: il significato i cui sinonimi hanno piu' radici in comune con le parole vicine.
+ * Restituisce l'indice e se la scelta e' sicura (un solo significato, o un vincitore netto).
+ */
+export function chooseMeaning(e: Engine, meanings: Entry['meanings'], context: Set<string>): { index: number; sure: boolean } {
+  if (meanings.length <= 1) return { index: 0, sure: meanings.length === 1 };
+  const scores = meanings.map((m) => [...m.synonyms, ...m.related].reduce((n, t) => n + (context.has(e.stem(t.split(' ')[0].toLowerCase())) ? 1 : 0), 0));
+  const best = Math.max(...scores);
+  const index = scores.indexOf(best);
+  return { index, sure: best > 0 && scores.filter((s) => s === best).length === 1 };
+}
 
 /** Il sinonimo nella forma dell'originale. */
-function inflect(e: Engine, syn: string, original: string, base: string, lemma: Probe['keys'][number]['lemma'], lang: 'it' | 'en'): string {
+export function inflect(e: Engine, syn: string, original: string, base: string, lemma: Probe['keys'][number]['lemma'], lang: 'it' | 'en'): string {
   const words = syn.split(' ');
   if (lemma) {
     const head = words[0].toLowerCase();
@@ -124,16 +142,21 @@ export function synonymFinding(e: Engine, text: string, start: number, end: numb
           const s = matchCase(original, inflect(e, t, original, key, lemma, lang));
           if (seen.has(s.toLowerCase()) || s.toLowerCase() === original.toLowerCase()) continue;
           seen.add(s.toLowerCase());
-          const it: Suggestion = { text: s, base: t, register: 0, flags: 0 };
+          // il thesaurus non ha registri: stima euristica, per dividere le alternative per tono
+          const it: Suggestion = { text: s, base: t, register: phraseRegister(e.pack, t), flags: 0 };
           if (related) it.related = true;
           items.push(it);
         }
       }
-      return { sense: m.pos, sections: [{ tone: 'neutral' as const, open: true, items }] };
+      return { sense: m.pos, sections: rank(items, new Map()) };
     })
-    .filter((s) => s.sections[0].items.length);
+    .filter((s) => s.sections.length);
+  // contrari: dal thesaurus (inglese) o scritti a mano nel pacchetto (italiano)
+  const antonyms = [...new Set([...entry.meanings.flatMap((m) => m.antonyms), ...(e.pack.antonyms.get(key) ?? [])])];
+  const opposite: Suggestion[] = antonyms.slice(0, MAX_TERMS).map((t) => ({ text: matchCase(original, inflect(e, t, original, key, lemma, lang)), base: t, register: phraseRegister(e.pack, t), flags: 0 }));
+  if (opposite.length) senses.push({ sense: ANTONYMS, sections: rank(opposite, new Map()) });
   if (!senses.length) return null;
-  return { kind: 'synonym', tags: ['synonym'], start, end, original, base: key, register: null, senses, key: `synonym:${key}`, category: 'synonym', source: 'thesaurus' };
+  return { kind: 'synonym', tags: ['synonym'], start, end, original, base: key, register: wordRegister(e.pack, key, entry.meanings.length), senses, key: `synonym:${key}`, source: 'thesaurus' };
 }
 
 /** Voce del thesaurus da un blocco grezzo (null se vuoto). */
