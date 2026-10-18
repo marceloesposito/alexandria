@@ -33,10 +33,11 @@ import '@xyflow/react/dist/style.css';
 import { create } from 'zustand';
 import { useResources } from '../store';
 import { removeBoardItems } from './boardEdit';
+import { KnifeLayer } from './KnifeLayer';
 import { isVisible, isLocked, colorOf, type Resource } from 'logos/resources/model';
 import { ResourceCard, thumbUrl } from './common';
 import { removeWithConfirm } from './remove';
-import { t } from '../../i18n';
+import { t, tn } from '../../i18n';
 import { openContextMenu } from '../../components/ContextMenu';
 import { promptDialog } from '../../components/confirm';
 import type { WbNote, WbFrame } from '../storage';
@@ -499,6 +500,15 @@ function Board() {
         />
         <Controls showInteractive={false} className="wb-controls" />
       </ReactFlow>
+      <KnifeLayer
+        container={wrap}
+        label={t('wb.knife')}
+        onCut={(ids) => {
+          const st = useResources.getState();
+          for (const id of ids) st.removeLink(id);
+          useWorkspace.getState().toast(tn('wb.knifeCut', ids.length), 'info');
+        }}
+      />
       {picker?.mode === 'link' && (
         <DocPicker
           title={t('wb.doc.linkTitle', { name: docs.find((d) => d.rel === picker.rel)?.title ?? '' })}

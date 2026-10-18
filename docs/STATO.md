@@ -237,6 +237,11 @@ Aggiornato: 15 ottobre 2026 (versione 0.2.0, storia delle versioni in `CHANGELOG
   `hints` di `pageGeometry`), ma con widget `.page-hint` di altezza zero: il testo non si sposta e la
   misura e' quella del testo continuo. La colonna senza bordi e' larga quanto lo specchio di stampa,
   quindi i confini cadono dove nella pagina.
+- **Coltello della Tabula** (18/10): con Ctrl premuto uno strato sopra React Flow (`KnifeLayer.tsx`)
+  raccoglie il puntatore, disegna la scia e al rilascio campiona i tracciati dei collegamenti
+  (`.react-flow__edge` con `data-id`, `getPointAtLength` in coordinate dello schermo); `knife.ts` (puro,
+  testato) decide quali tagliare. Non si arma mentre si scrive in una nota; il cursore e' un'immagine
+  SVG bianca e nera (unica eccezione ai token).
 - **Post-it della Tabula** (17/10): selezione e scrittura separate, come in Miro o FigJam. Un clic
   seleziona e trascina (la textarea e' `readOnly` e senza `pointer-events`), il doppio clic scrive
   (`useNoteEdit` in `Whiteboard.tsx`), Esc o un clic fuori escono; un post-it nuovo nasce in scrittura.
