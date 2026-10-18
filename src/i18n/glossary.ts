@@ -25,6 +25,7 @@ export const GLOSSARY: Record<string, GlossaryTerm> = {
   Bibliotheca: { pattern: /\bBibliotheca\b/, avoid: [/\blibreria\b/i, /\bbiblioteca\b/i] },
   Codex: { pattern: /\bCodex\b/, avoid: [/\bLibrum\b/] },
   Silentium: { pattern: /\bSilentium\b/, avoid: [/\bzen\b/i, /scrittura minimale/i, /minimal writing/i] },
+  Picus: { pattern: /\bPicus\b/, avoid: [/\bclippy\b/i, /\bpicchio\b/i, /\bwoodpecker\b/i] },
 };
 
 /** Chiavi in cui `text` (nella lingua `lang`) non rispetta il glossario rispetto all'inglese `ref`. */

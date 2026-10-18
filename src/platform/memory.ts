@@ -573,6 +573,20 @@ export function createMemoryPlatform(opts: { persist?: boolean } = {}): Platform
         return null;
       }
     },
+    // Picus nel browser di sviluppo: i pacchetti arrivano dal server di Vite (stessi file delle risorse)
+    async picusResources() {
+      return (await this.picusResource('it')) ? ['it'] : [];
+    },
+    async picusResource(lang) {
+      if (!/^[a-z]{2,3}$/.test(lang)) return null;
+      try {
+        const res = await fetch(`/src-tauri/resources/picus/${lang}.picus`);
+        const text = res.ok ? await res.text() : '';
+        return text.startsWith('#') || text.startsWith('@') ? text : null;
+      } catch {
+        return null;
+      }
+    },
     async typst() {
       return { ok: false, errors: ['Typst is available only in the desktop app.'] };
     },

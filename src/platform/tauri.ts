@@ -96,6 +96,8 @@ export const tauriPlatform: Platform = {
   },
 
   thesaurus: (lang, word) => invoke<string | null>('thesaurus_lookup', { lang, word }),
+  picusResources: () => invoke<string[]>('picus_resources'),
+  picusResource: (lang) => invoke<string | null>('picus_resource', { lang }),
 
   renderPage: async (url, opts) => {
     const r = await invoke<{ url: string; html: string; pngB64: string | null } | null>('net_render', { url, interactive: opts?.interactive ?? false });

@@ -48,7 +48,8 @@
     "targets": ["nsis", "msi", "dmg", "app"],
     "category": "Productivity",
     "resources": {
-      "resources/thesaurus/": "thesaurus/"
+      "resources/thesaurus/": "thesaurus/",
+      "resources/picus/": "picus/"
     },
     "fileAssociations": [
       {

@@ -168,6 +168,12 @@ export interface Platform {
   /** blocco grezzo del thesaurus per una parola (null: non c'e') */
   thesaurus(lang: 'it' | 'en', word: string): Promise<string | null>;
 
+  // Picus: pacchetti di lingua installati con l'app (quelli aggiunti dall'utente stanno in appDataDir)
+  /** lingue dei pacchetti fra le risorse dell'app */
+  picusResources(): Promise<string[]>;
+  /** testo del pacchetto di una lingua fra le risorse (null: non installato) */
+  picusResource(lang: string): Promise<string | null>;
+
   // impaginazione
   typst(source: string, files: TypstFile[], format: 'pdf' | 'svg'): Promise<TypstOutput>;
 }

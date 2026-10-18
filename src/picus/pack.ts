@@ -22,8 +22,9 @@
 // Registro da -2 (gergale) a +2 (molto formale); flag: figurative, dated, technical, emphatic,
 // euphemistic. "*" in una locuzione e' un vuoto di 1-3 parole ("take * into account").
 
-export const FLAGS = ['figurative', 'dated', 'technical', 'emphatic', 'euphemistic'] as const;
-export type Flag = (typeof FLAGS)[number];
+import { FLAGS } from './flags';
+
+export { FLAGS, type Flag } from './flags';
 
 export interface Variant {
   text: string;

@@ -62,6 +62,10 @@ export interface Prefs {
   titleFromHeading: boolean;
   /** sezioni della colonna sinistra dello Scriptorium: ordine e nascoste */
   leftSections: SectionLayout;
+  /** Picus, il consigliere di scrittura: a schermo, dove (null: in basso a destra), categorie spente */
+  picusShown: boolean;
+  picusPos: { x: number; y: number } | null;
+  picusOff: string[];
 }
 
 export const DEFAULT_PREFS: Prefs = {
@@ -101,6 +105,9 @@ export const DEFAULT_PREFS: Prefs = {
   countsShown: [...DEFAULT_COUNTS_SHOWN],
   titleFromHeading: true,
   leftSections: { order: [], hidden: [] },
+  picusShown: true,
+  picusPos: null,
+  picusOff: [],
 };
 
 export interface DocCursor {

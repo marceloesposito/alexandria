@@ -69,6 +69,11 @@ export function docSettingsFile(rel: string): string {
   return `${META_DIR}/doc-settings/${docKey(rel)}.json`;
 }
 
+/** Picus: tono della pergamena e rilievi ignorati */
+export function picusFile(rel: string): string {
+  return `${META_DIR}/picus/${docKey(rel)}.json`;
+}
+
 export function abs(root: string, rel: string): string {
   return joinPath(root, rel);
 }
