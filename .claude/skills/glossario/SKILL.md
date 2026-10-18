@@ -1,6 +1,6 @@
 ---
 name: glossario
-description: Nomi tematici dell'interfaccia di Alexandria e Folium (Compendium, pergamena, Scriptorium, Armarium, Palimpsestus, Tabula...) e regole delle traduzioni. Da usare quando si scrivono o cambiano testi visibili, chiavi i18n (it.ts, en.ts) o nomi di funzioni nell'interfaccia.
+description: Nomi tematici dell'interfaccia di Alexandria (Compendium, pergamena, Scriptorium, Armarium, Palimpsestus, Tabula...) e regole delle traduzioni. Da usare quando si scrivono o cambiano testi visibili, chiavi i18n (it.ts, en.ts) o nomi di funzioni nell'interfaccia.
 ---
 
 # Glossario dei nomi tematici
@@ -34,3 +34,5 @@ Unica eccezione voluta dal committente: in italiano lo Scroll si chiama **pergam
 - Ogni stringa visibile passa da `t()` (`src/i18n/`), con la chiave sia in `it.ts` sia in `en.ts`;
   le variabili `{nome}` devono coincidere fra le lingue.
 - Elenco e controlli: `src/i18n/glossary.ts` e `src/i18n/i18n.test.ts`.
+- Column, l'app sorella (ramo `column`), ha un glossario suo, da redazione (Piece, Copy, Clips,
+  Editions...): e' descritto nella stessa skill su quel ramo.
