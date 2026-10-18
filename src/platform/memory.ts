@@ -3,7 +3,7 @@
 import type { Platform, DirEntry } from './types';
 import { bytesToBase64, base64ToBytes } from 'logos/lib/bytes';
 
-const PERSIST_KEY = 'folium.memfs.v1';
+const PERSIST_KEY = 'column.memfs.v1';
 
 function norm(p: string): string {
   let s = p.replace(/\\/g, '/').replace(/\/+/g, '/');
@@ -136,7 +136,7 @@ export function createMemoryPlatform(opts: { persist?: boolean; dataDir?: string
     },
 
     async dataDir() {
-      const d = opts.dataDir ?? '/Folium-data';
+      const d = opts.dataDir ?? '/Column-data';
       ensureDir(d);
       return d;
     },

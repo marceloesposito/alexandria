@@ -10,12 +10,14 @@ serie completa (M10-M12 e richieste del committente); `0.2.x` = serie attuale.
 
 ---
 
-## Folium 0.1.0 — in corso (ramo `folium`)
+## Column 0.1.0 — in corso (ramo `column`, prima Folium)
 
-App sorella portable di Alexandria (piano in `docs/FOLIUM.md`): un foglio indipendente `.folium`,
-barra in alto da 40 px, barretta flottante, Marginalia col clic destro, timer pomodoro, Tabula
-gravitazionale accanto al testo, Palimpsestus ad albero, export .docx con commenti e PDF, Porta in un
-Compendium. Eseguibile di 5,9 MB.
+App sorella portable di Alexandria (piano in `docs/COLUMN.md`): un pezzo indipendente `.clmn`,
+barra in alto da 40 px, barretta flottante, Queries col clic destro, timer Deadline, Clips
+gravitazionali accanto al testo, Editions ad albero, export .docx con commenti e PDF, Porta in un
+Compendium. Eseguibile di 5,9 MB. Il 18/10/2026 Folium diventa Column, con il glossario di redazione
+(Piece, Copy, Clips, Editions, Queries, Rundown, Deadline, Typewriter) e il coltello nei Clips; i
+vecchi `.folium` si aprono ancora.
 
 ## Non ancora rilasciato
 

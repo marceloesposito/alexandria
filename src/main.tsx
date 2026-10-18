@@ -13,8 +13,8 @@ import '@fontsource/inter/latin-500.css';
 import '@fontsource/inter/latin-600.css';
 import '@fontsource/jetbrains-mono/latin-400.css';
 import './styles/tokens.css';
-import './styles/folium.css';
-import App from './folium/App';
+import './styles/column.css';
+import App from './column/App';
 
 ReactDOM.createRoot(document.getElementById('root') as HTMLElement).render(
   <React.StrictMode>
@@ -24,7 +24,7 @@ ReactDOM.createRoot(document.getElementById('root') as HTMLElement).render(
 
 // accesso agli store per le prove nel browser (solo sviluppo)
 if (import.meta.env.DEV) {
-  void Promise.all([import('./folium/store'), import('./folium/ui'), import('./folium/editor/editorRef'), import('./platform'), import('./folium/timer/store')]).then(([s, u, e, p, tm]) => {
-    (window as unknown as Record<string, unknown>).__folium = { store: s.useFolium, ui: u.useUi, editor: e.getEditor, platform: p.platform, timer: tm.useTimer };
+  void Promise.all([import('./column/store'), import('./column/ui'), import('./column/editor/editorRef'), import('./platform'), import('./column/timer/store')]).then(([s, u, e, p, tm]) => {
+    (window as unknown as Record<string, unknown>).__column = { store: s.useColumn, ui: u.useUi, editor: e.getEditor, platform: p.platform, timer: tm.useTimer };
   });
 }

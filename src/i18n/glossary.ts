@@ -1,6 +1,7 @@
-// Identita' di Alexandria: i nomi degli ambienti e degli oggetti sono nomi propri, uguali in tutte
-// le lingue (mai tradotti). Una nuova lingua li riprende cosi' come sono; un test lo controlla.
-// Unica eccezione voluta dal committente: in italiano lo Scroll si chiama pergamena.
+// Identita' di Column: i nomi degli ambienti vengono dalla redazione e dall'epoca delle macchine da
+// scrivere e sono nomi propri, uguali in tutte le lingue (mai tradotti). Una nuova lingua li riprende
+// cosi' come sono; un test lo controlla. Unica eccezione: in italiano il Piece si chiama pezzo.
+// Compendium resta: e' il nome di Alexandria per la cartella in cui si porta un pezzo.
 
 export interface GlossaryTerm {
   /** forma del nome (singolare e plurale ammessi), maiuscola come in interfaccia */
@@ -9,22 +10,20 @@ export interface GlossaryTerm {
   avoid: RegExp[];
   /** lingue con un nome proprio diverso: li' si usa questo e il nome inglese e' da evitare */
   local?: Partial<Record<string, RegExp>>;
+  /** chiavi in cui la stessa parola e' una parola comune (Copy: copia negli appunti) */
+  except?: string[];
 }
 
 export const GLOSSARY: Record<string, GlossaryTerm> = {
   Compendium: { pattern: /\bCompendi(um|a)\b/, avoid: [/\bvault\b/i] },
-  Scroll: { pattern: /\bScrolls?\b/, avoid: [/pergamen/i, /\bscrolls?\b/], local: { it: /\bpergamen[ae]\b/i } },
-  Armarium: { pattern: /\bArmari(um|a)\b/, avoid: [/\bbookshelf\b/i, /\bscaffal/i, /gestore risorse/i] },
-  Scriptorium: { pattern: /\bScriptorium\b/, avoid: [] },
-  Palimpsestus: { pattern: /\bPalimpsestus\b/, avoid: [/\bstoria\b/i, /\bcronologia\b/i, /\bhistory\b/] },
-  Marginalia: { pattern: /\bMarginalia\b/, avoid: [] },
-  Tabula: { pattern: /\bTabula\b/, avoid: [/\blavagn/i, /whiteboard/i, /\bboard\b/] },
-  Excerpta: { pattern: /\bExcerpt(um|a)\b/, avoid: [/bookmark/i, /segnalibr/i, /\bIndices\b/] },
-  Index: { pattern: /\bIndex\b/, avoid: [/\bindice\b/i, /\bsommario\b/i, /\boutline\b/i, /table of contents/i] },
-  Strata: { pattern: /\bStrata\b/, avoid: [] },
-  Bibliotheca: { pattern: /\bBibliotheca\b/, avoid: [/\blibreria\b/i, /\bbiblioteca\b/i] },
-  Codex: { pattern: /\bCodex\b/, avoid: [/\bLibrum\b/] },
-  Silentium: { pattern: /\bSilentium\b/, avoid: [/\bzen\b/i, /scrittura minimale/i, /minimal writing/i] },
+  Piece: { pattern: /\bPieces?\b/, avoid: [/\bfogli\b/i, /\bsheets\b/i], local: { it: /\bpezz[oi]\b/i } },
+  Copy: { pattern: /\bCopy\b/, avoid: [/scriptorium/i], except: ['cmd.edit.copy'] },
+  Clips: { pattern: /\bClips\b/, avoid: [/tabula/i, /armarium/i, /\blavagn/i, /whiteboard/i] },
+  Editions: { pattern: /\bEditions\b/, avoid: [/palimpsest/i, /\bcronologia\b/i, /\bhistory\b/i] },
+  Queries: { pattern: /\bQueries\b/, avoid: [/marginalia/i] },
+  Rundown: { pattern: /\bRundown\b/, avoid: [/\bindex\b/i, /\bindice\b/i, /\bsommario\b/i, /\boutline\b/i] },
+  Deadline: { pattern: /\bDeadline\b/, avoid: [] },
+  Typewriter: { pattern: /\bTypewriter\b/, avoid: [/silentium/i, /\bzen\b/i] },
 };
 
 /** Chiavi in cui `text` (nella lingua `lang`) non rispetta il glossario rispetto all'inglese `ref`. */
@@ -34,6 +33,7 @@ export function glossaryViolations(ref: Record<string, string>, text: Record<str
     const base = ref[key];
     if (base === undefined) continue;
     for (const [name, term] of Object.entries(GLOSSARY)) {
+      if (term.except?.includes(key)) continue;
       const local = term.local?.[lang];
       if (term.pattern.test(base) && !(local ?? term.pattern).test(value)) out.push(`${key}: manca ${name}`);
       const avoid = local ? [term.pattern] : term.avoid;

@@ -32,4 +32,4 @@ public/tessdata
 dist-portable/
 
 # Folium
-src-tauri/target-folium/
+src-tauri/target-column/

@@ -32,7 +32,7 @@ fn ensure_parent(path: &str) -> CmdResult<()> {
 /// Scrittura atomica: file temporaneo + rename, cosi' un crash non lascia file a meta'.
 pub fn write_atomic(path: &str, data: &[u8]) -> CmdResult<()> {
     ensure_parent(path)?;
-    let tmp = format!("{}.folium-tmp", path);
+    let tmp = format!("{}.clmn-tmp", path);
     fs::write(&tmp, data).map_err(err)?;
     fs::rename(&tmp, path).map_err(|e| {
         let _ = fs::remove_file(&tmp);
@@ -119,11 +119,11 @@ fn slash(p: std::path::PathBuf) -> String {
     p.to_string_lossy().replace('\\', "/")
 }
 
-/// Cartella dei dati: Folium-data accanto all'app (portable) o quella dell'utente.
+/// Cartella dei dati: Column-data accanto all'app (portable) o quella dell'utente.
 #[tauri::command]
 pub fn data_dir(app: tauri::AppHandle) -> CmdResult<String> {
     // prove automatiche: tutto in una cartella a parte, mai nei dati veri dell'utente
-    let dir = match std::env::var("FOLIUM_DATA_DIR") {
+    let dir = match std::env::var("COLUMN_DATA_DIR") {
         Ok(d) => Path::new(&d).to_path_buf(),
         Err(_) => match crate::portable::data_root() {
             Some(p) => p.to_path_buf(),

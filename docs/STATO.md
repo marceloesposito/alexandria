@@ -372,10 +372,10 @@ Aggiornato: 15 ottobre 2026 (versione 0.2.0, storia delle versioni in `CHANGELOG
   CC BY-SA degli stili CSL, GPL-3 del thesaurus italiano distribuito come file separato).
 - Limiti noti: in modalita' revisore non si creano paragrafi nuovi (Invio bloccato); la vista pagina
   non spezza un paragrafo fra due fogli (il PDF si').
-- **Folium** (piano del 17/10/2026, in corso): app sorella portable e leggera per il lavoro in
-  mobilita', al posto della versione portable di Alexandria; ogni documento e' un foglio `.folium`
-  indipendente, senza Compendium. Branch di lunga durata `folium`. Piano e fasi F0-F7:
-  `docs/FOLIUM.md` (ogni cambiamento di piano si scrive li').
+- **Column** (prima Folium; piano del 17/10/2026, in corso): app sorella portable e leggera per il
+  lavoro in mobilita', al posto della versione portable di Alexandria; ogni documento e' un pezzo
+  `.clmn` indipendente, senza Compendium. Branch di lunga durata `column`. Piano e fasi F0-F7:
+  `docs/COLUMN.md` (ogni cambiamento di piano si scrive li').
 
 ## Verifica su Windows (5/10)
 

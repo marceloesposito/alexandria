@@ -1,5 +1,5 @@
 // Contratto fra interfaccia e sistema. Due implementazioni: Tauri (Rust) e memoria (browser, per i
-// test e lo sviluppo dell'interfaccia senza backend). In Folium solo file, dialoghi e link.
+// test e lo sviluppo dell'interfaccia senza backend). In Column solo file, dialoghi e link.
 
 export interface DirEntry {
   name: string;
@@ -22,7 +22,7 @@ export interface Platform {
   remove(path: string): Promise<void>;
   rename(from: string, to: string): Promise<void>;
 
-  /** cartella dei dati: Folium-data accanto all'app (portable) o quella dell'utente */
+  /** cartella dei dati: Column-data accanto all'app (portable) o quella dell'utente */
   dataDir(): Promise<string>;
   /** scelta di file; con `extensions` la finestra propone solo quelli */
   pickFiles(title?: string, extensions?: string[]): Promise<string[]>;

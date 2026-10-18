@@ -1,5 +1,5 @@
 {
-  "name": "folium",
+  "name": "column",
   "private": true,
   "version": "0.1.0",
   "type": "module",
@@ -12,7 +12,7 @@
     "test:watch": "vitest",
     "typecheck": "tsc --noEmit",
     "test:rust": "cd src-tauri && cargo test",
-    "folium:portable": "node scripts/folium-portable.mjs"
+    "column:portable": "node scripts/column-portable.mjs"
   },
   "dependencies": {
     "@fontsource/inter": "^5.3.0",

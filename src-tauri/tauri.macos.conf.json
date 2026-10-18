@@ -4,7 +4,7 @@
     "windows": [
       {
         "label": "main",
-        "title": "Folium",
+        "title": "Column",
         "width": 1200,
         "height": 800,
         "minWidth": 640,

@@ -1,4 +1,4 @@
-// Folium: guscio desktop. Il Rust fa solo I/O (file, dialoghi, stampa); tutta la logica di dominio
+// Column: guscio desktop. Il Rust fa solo I/O (file, dialoghi, stampa); tutta la logica di dominio
 // e' nel frontend (src/), in funzioni pure testate.
 mod fsops;
 mod portable;
@@ -6,9 +6,9 @@ mod portable;
 /// File da aprire passato all'avvio (doppio clic, "Apri con"): lo legge una volta il frontend.
 static OPEN_FILE: std::sync::Mutex<Option<String>> = std::sync::Mutex::new(None);
 
-/// File che Folium sa aprire dal sistema.
+/// File che Column sa aprire dal sistema.
 fn opened_file_ok(path: &str) -> bool {
-    const EXT: [&str; 6] = ["folium", "docx", "md", "markdown", "txt", "text"];
+    const EXT: [&str; 7] = ["clmn", "folium", "docx", "md", "markdown", "txt", "text"];
     let lower = path.to_lowercase();
     lower.rsplit_once('.').map(|(_, e)| EXT.contains(&e)).unwrap_or(false)
 }
@@ -44,7 +44,7 @@ pub fn run() {
                 #[cfg(not(target_os = "macos"))]
                 let _ = w.set_decorations(false);
                 // prove automatiche: finestra fuori schermo e senza fuoco (non disturba chi lavora)
-                if std::env::var("FOLIUM_TEST_OFFSCREEN").is_ok() {
+                if std::env::var("COLUMN_TEST_OFFSCREEN").is_ok() {
                     let _ = w.set_position(tauri::PhysicalPosition::new(-6000, -6000));
                     let _ = w.show();
                 } else {
@@ -72,7 +72,7 @@ pub fn run() {
             print_page,
         ])
         .run(tauri::generate_context!())
-        .expect("errore all'avvio di Folium");
+        .expect("errore all'avvio di Column");
 }
 
 #[cfg(test)]
@@ -82,7 +82,8 @@ mod tests {
     #[test]
     fn file_aperti_dal_sistema() {
         assert!(opened_file_ok("C:/Tesi/capitolo.DOCX"));
-        assert!(opened_file_ok("/Users/a/saggio.folium"));
+        assert!(opened_file_ok("/Users/a/saggio.clmn"));
+        assert!(opened_file_ok("vecchio.folium"));
         assert!(opened_file_ok("note.md"));
         assert!(!opened_file_ok("--flag"));
         assert!(!opened_file_ok("vecchio.doc"));
