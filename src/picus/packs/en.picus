@@ -417,6 +417,37 @@ lots of              -2
 plenty of            -1
 a great deal of      +1  note:only with uncountable nouns (a great deal of time)
 
+# articoli delle locuzioni nominali ("a keystone" -> "an essential element")
+@article
+cls V a e i o u !uni !use !usu !eu !one !ua
+def * the
+ind * a an:V
+
+# ---- locuzioni nominali (per il resto ci sono le locuzioni del thesaurus) ----
+@sense keystone
+keystone              0  g:n figurative
+cornerstone           0  g:n figurative
+linchpin              0  g:n figurative
+mainstay              0  g:n
+essential element     0  g:n
+
+@sense weak point
+weak point            0  g:n
+weakness              0  g:n
+Achilles' heel        0  g:n figurative
+weak spot            -1  g:n
+
+@sense turning point
+turning point         0  g:n
+milestone             0  g:n figurative
+watershed            +1  g:n figurative
+
+@sense point of view
+point of view         0  g:n
+perspective           0  g:n
+viewpoint             0  g:n
+standpoint           +1  g:n
+
 # ---- verbi e locuzioni verbali ----
 @sense resemblance
 look like             0

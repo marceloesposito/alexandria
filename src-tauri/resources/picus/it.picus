@@ -284,6 +284,96 @@ in nel:il nello:lo nella:la nei:i negli:gli nelle:le nell':l'
 su sul:il sullo:lo sulla:la sui:i sugli:gli sulle:le sull':l'
 drop che
 
+# articoli delle locuzioni nominali: la forma con la classe d'iniziale vince sulla semplice
+@article
+cls V a e i o u h à è é ì ò ù
+cls Z sb sc sd sf sg sl sm sn sp sq sr st sv z gn ps pn x y
+def ms il lo:Z l':V
+def fs la l':V
+def mp i gli:Z gli:V
+def fp le
+ind ms un uno:Z
+ind fs una un':V
+
+# ---- locuzioni nominali (l'articolo si accorda: "la chiave di volta" -> "il cardine") ----
+@sense elemento fondamentale
+chiave di volta             0  g:fs figurative
+cardine                    +1  g:ms
+perno                       0  g:ms
+fulcro                      0  g:ms
+pilastro                    0  g:ms figurative
+elemento portante           0  g:ms
+punto cruciale              0  g:ms
+
+@sense punto debole
+punto debole                0  g:ms
+tallone d'Achille           0  g:ms figurative
+lato debole                 0  g:ms
+punto critico               0  g:ms
+
+@sense punto di forza
+punto di forza              0  g:ms
+pregio                      0  g:ms
+vantaggio                   0  g:ms
+asso nella manica          -1  g:ms figurative
+
+@sense svolta
+pietra miliare              0  g:fs figurative
+punto di svolta             0  g:ms
+svolta                      0  g:fs
+tappa fondamentale          0  g:fs
+
+@sense banco di prova
+banco di prova              0  g:ms figurative
+prova del nove             -1  g:fs figurative
+verifica                    0  g:fs
+collaudo                    0  g:ms
+
+@sense punto di riferimento
+punto di riferimento        0  g:ms
+riferimento                 0  g:ms
+modello                     0  g:ms
+faro                       +1  g:ms figurative
+
+@sense punto di vista
+punto di vista              0  g:ms
+prospettiva                 0  g:fs
+ottica                     +1  g:fs
+angolazione                 0  g:fs
+
+@sense questione centrale
+nocciolo della questione    0  g:ms figurative
+nodo cruciale               0  g:ms figurative
+punto centrale              0  g:ms
+questione centrale          0  g:fs
+
+@sense specialità
+cavallo di battaglia       -1  g:ms figurative
+punto forte                 0  g:ms
+specialità                  0  g:fs
+
+@sense messa a punto
+messa a punto               0  g:fs
+perfezionamento            +1  g:ms
+affinamento                +1  g:ms
+ottimizzazione              0  g:fs technical
+
+@sense presa di coscienza
+presa di coscienza          0  g:fs
+consapevolezza              0  g:fs
+presa d'atto               +1  g:fs
+
+@sense linee guida
+linee guida                 0  g:fp
+indicazioni                 0  g:fp
+criteri                     0  g:mp
+direttive                  +1  g:fp
+
+@sense via d'uscita
+via d'uscita                0  g:fs
+soluzione                   0  g:fs
+scappatoia                 -1  g:fs  note:ha una sfumatura negativa
+
 # ---- connettivi ----
 @sense conseguenza
 quindi                0
@@ -499,6 +589,52 @@ togliere                   -1
 provare                     0
 cercare di                  0
 tentare                    +1
+
+@sense mettere a fuoco
+mettere a fuoco             0  figurative
+chiarire                    0
+precisare                   0
+focalizzare                +1
+
+@sense fare il punto
+fare il punto               0
+fare un bilancio            0
+riassumere                  0
+
+@sense tirare le somme
+tirare le somme            -1  figurative
+trarre le conclusioni       0
+concludere                  0
+
+@sense venire meno
+venire meno                 0
+mancare                     0
+cessare                    +1
+
+@sense dare per scontato
+dare per scontato           0
+dare per certo              0
+presupporre                +1
+
+@sense prendere piede
+prendere piede              0  figurative
+diffondersi                 0
+affermarsi                 +1
+
+@sense andare a buon fine
+andare a buon fine          0
+riuscire                    0
+avere successo              0
+
+@sense mettere in dubbio
+mettere in discussione      0
+mettere in dubbio           0
+contestare                 +1
+
+@sense fare luce
+fare luce su                0  figurative
+gettare luce su            +1  figurative
+chiarire                    0
 
 @sense capire
 capire                      0

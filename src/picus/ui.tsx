@@ -8,9 +8,6 @@ import { Bird, ChevronLeft, ChevronRight, Ellipsis, X } from 'lucide-react';
 import { useWorkspace } from '../state/workspace';
 import { getEditor } from '../state/editorRef';
 import { openContextMenu } from '../components/ContextMenu';
-import { lookupSelection } from '../thesaurus/ui';
-import { thesaurusLang } from '../thesaurus/model';
-import { getWritingLang } from 'logos/i18n/writing';
 import { t, useLang } from '../i18n';
 import { usePicus, type Bubble } from './store';
 import { ask, apply, close, disable, ignore, setTone, step, clear } from './index';
@@ -161,7 +158,7 @@ export function PicusCompanion() {
 function SuggestionButton({ l, s, n }: { l: Live; s: Suggestion; n: number | null }) {
   return (
     <span className="picus-panel__choice">
-      <button className="picus-panel__item" onClick={() => apply(l, s)} title={t('picus.replace', { text: s.text })}>
+      <button className={`picus-panel__item ${s.related ? 'is-related' : ''}`} onClick={() => apply(l, s)} title={t(s.related ? 'picus.related' : 'picus.replace', { text: s.text })}>
         {n !== null && <kbd>{n}</kbd>}
         <span className="picus-panel__text">{s.text}</span>
         {flagsOf(s.flags).map((f) => (
@@ -255,8 +252,11 @@ export function PicusPanel() {
         ? t('picus.offTone', { tone: t(`picus.tone.${docTone ?? 'neutral'}`).toLowerCase() })
         : f.kind === 'repetition'
           ? t(f.base ? 'picus.repeatedGroup' : 'picus.repeatedWord')
-          : t('picus.variations');
-  const thes = f.kind === 'repetition' && !f.senses.length && thesaurusLang(getWritingLang());
+          : f.kind === 'synonym'
+            ? t('picus.synonymsOf', { text: f.base })
+            : t('picus.variations');
+  // alternative dal thesaurus: per significato, senza sezioni di tono (il thesaurus non ha registri)
+  const thes = f.source === 'thesaurus';
   const category = categoryLabel(f.category);
   let n = 0;
 
@@ -292,15 +292,17 @@ export function PicusPanel() {
         {f.note && <p className="picus-panel__note">{f.note}</p>}
         {f.senses.map((s, si) => (
           <section key={si} className="picus-panel__sense">
-            {f.senses.length > 1 && <div className="picus-panel__sensename">{t('picus.sense', { sense: s.sense })}</div>}
+            {thes ? <div className="picus-panel__sensename">{s.sense}</div> : f.senses.length > 1 && <div className="picus-panel__sensename">{t('picus.sense', { sense: s.sense })}</div>}
             {s.sections.map((sec) => {
               const k = `${si}:${sec.tone}`;
-              const shown = isOpen(k, sec.open);
+              const shown = thes || isOpen(k, sec.open);
               return (
                 <div key={k} className="picus-panel__section">
-                  <button className="picus-panel__sectionhead" aria-expanded={shown} onClick={() => setToggled({ ...toggled, [k]: !shown })}>
-                    {t(`picus.tone.${sec.tone as Tone}`)} <span className="hint">{sec.items.length}</span>
-                  </button>
+                  {!thes && (
+                    <button className="picus-panel__sectionhead" aria-expanded={shown} onClick={() => setToggled({ ...toggled, [k]: !shown })}>
+                      {t(`picus.tone.${sec.tone as Tone}`)} <span className="hint">{sec.items.length}</span>
+                    </button>
+                  )}
                   {shown && (
                     <div className="picus-panel__items">
                       {sec.items.map((it, j) => {
@@ -314,20 +316,7 @@ export function PicusPanel() {
             })}
           </section>
         ))}
-        {thes && (
-          <button
-            className="btn small"
-            onClick={() => {
-              const ed = getEditor();
-              if (!ed) return;
-              ed.commands.setTextSelection({ from: l.from, to: l.to });
-              close(false);
-              void lookupSelection();
-            }}
-          >
-            {t('picus.synonyms')}
-          </button>
-        )}
+        {thes && <p className="picus-panel__source hint">{t('thes.source')}</p>}
       </div>
       <footer className="picus-panel__foot">
         <button className="btn btn--ghost small" onClick={() => ignore(l)} title={t('picus.ignoreHint')}>

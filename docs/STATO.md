@@ -140,15 +140,21 @@ Aggiornato: 15 ottobre 2026 (versione 0.2.0, storia delle versioni in `CHANGELOG
 - **Stile di paragrafo "Didascalia"**: nel menu degli stili, in Formato e nel menu /; nel Markdown
   `<!-- style:caption -->` in coda al paragrafo (accanto a `<!-- align:... -->`); negli export lo stile
   "caption" del layout (Typst), `p.caption` (HTML), lo stile Caption di Word.
-- **Thesaurus offline** (italiano e inglese, lingua di scrittura del Compendium): parola selezionata, tasto
-  destro > "Cerca sinonimi" (o Maiusc+F7); senza una selezione fatta prima resta il menu del sistema col
-  controllo ortografico. Il pannello mostra i significati per categoria, i termini simili e i contrari;
-  un clic sostituisce la parola con le stesse maiuscole. Se la parola non c'e' si provano le forme base
+- **Thesaurus offline** (italiano e inglese, lingua di scrittura del Compendium): dal 18/10/2026 lo usa
+  Picus (sotto), che ha preso il posto del pannello "Cerca sinonimi"; tasto destro su una parola
+  selezionata > "Chiedi a Picus", Maiusc+F7 come prima. I sinonimi escono per significato, flessi come
+  la parola nel testo, con le stesse maiuscole. Se la parola non c'e' si provano le forme base
   (bella -> bello, cities -> city) e in italiano il sinonimo si accorda (amena). Dati: thesaurus MyThes di
   LibreOffice, compressi in `src-tauri/resources/thesaurus/` (0,7 + 4 MB) con le licenze accanto:
   italiano di LibreItalia (GPL-3, distribuito come file separato, non incluso nel codice MIT), inglese da
   WordNet (licenza Princeton). Il Rust (`thesaurus.rs`) decomprime e indicizza alla prima richiesta
   (16 ms e 60 ms) e restituisce il blocco grezzo; l'interpretazione e' in `src/thesaurus/model.ts`.
+- **Picus al clic dice subito come intervenire** sulla parola o la locuzione sotto il cursore (o
+  selezionata): prima le alternative del suo dizionario (locuzioni, verbi fraseologici, locuzioni
+  nominali con l'articolo accordato: "la chiave di volta" -> "il cardine", "della chiave di volta" ->
+  "del cardine"), altrimenti i sinonimi del thesaurus, anche per locuzioni intere (WordNet ne ha 63.822:
+  "carried out" -> "executed"; il verbo si riporta alla forma base e il sinonimo si flette: "looked" ->
+  "appeared", "cerchiamo" -> "ci aspettiamo"). Le parole ripetute arrivano con i loro sinonimi.
 - **Picus, il consigliere di scrittura** (`src/picus/`): un picchio flottante e trascinabile nello
   Scriptorium che parla solo se interrogato (clic o F7: selezione o paragrafo del cursore; Maiusc+clic
   o Ctrl+F7: tutta la pergamena; Alt+F7 il rilievo successivo). Sottolinea giri di parole (@replace),

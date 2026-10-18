@@ -33,6 +33,16 @@ export interface Variant {
   /** bit di FLAGS */
   flags: number;
   note?: string;
+  /** locuzione nominale: genere e numero (ms fs mp fp; "n" senza genere). L'articolo che la precede
+   *  fa parte del tratto e si accorda all'alternativa ("la chiave di volta" -> "il cardine") */
+  gender?: string;
+}
+
+export interface ArticleTable {
+  /** "def"/"ind" + genere ("*" per tutti) -> forme in ordine, ognuna con le classi d'iniziale richieste */
+  rows: Map<string, { form: string; when: string | null }[]>;
+  /** classi d'iniziale: prefissi che ci stanno e prefissi esclusi ("!uni") */
+  classes: Map<string, { yes: string[]; no: string[] }>;
 }
 
 export interface Sense {
@@ -119,6 +129,7 @@ export interface Pack {
   clitic: { person: string[]; beforene: string[]; modals: string[] } | null;
   prep: Map<string, Map<string, string>>;
   prepDrop: Set<string>;
+  article: ArticleTable;
   senses: Sense[];
   replaces: Replace[];
 }
@@ -164,8 +175,14 @@ function parseVariant(rest: string, line: number, section: string, needRegister:
   let flags = 0;
   let note: string | undefined;
   let reason: string | undefined;
+  let gender: string | undefined;
   for (; i < words.length; i++) {
     const w = words[i];
+    if (w.startsWith('g:')) {
+      gender = w.slice(2);
+      if (!/^(ms|fs|mp|fp|n)$/.test(gender)) throw new PackError(`genere "${gender}": ms, fs, mp, fp o n`, line, section);
+      continue;
+    }
     if (w.startsWith('note:')) {
       note = [w.slice(5), ...words.slice(i + 1)].join(' ').trim();
       break;
@@ -179,7 +196,9 @@ function parseVariant(rest: string, line: number, section: string, needRegister:
     flags |= 1 << f;
   }
   const joined = text.join(' ');
-  return { text: joined, tokens: phraseTokens(joined, elision), register, flags, note, reason };
+  const v: Variant & { reason?: string } = { text: joined, tokens: phraseTokens(joined, elision), register, flags, note, reason };
+  if (gender) v.gender = gender;
+  return v;
 }
 
 const regionOf = (s: string) => (s === 'r1' || s === 'r2' || s === 'rv' ? s : null);
@@ -241,6 +260,7 @@ export function parsePack(src: string): Pack {
     clitic: null,
     prep: new Map(),
     prepDrop: new Set(),
+    article: { rows: new Map(), classes: new Map() },
     senses: [],
     replaces: [],
   };
@@ -262,7 +282,7 @@ export function parsePack(src: string): Pack {
         if (!rest.length) throw new PackError('@sense senza nome', line, head);
         sense = { name: rest.join(' '), variants: [] };
         pack.senses.push(sense);
-      } else if (!['meta', 'stopwords', 'stem', 'paradigm', 'irregular', 'derive', 'agree', 'aux', 'clitic', 'prep', 'replace'].includes(head)) {
+      } else if (!['meta', 'stopwords', 'stem', 'paradigm', 'irregular', 'derive', 'agree', 'aux', 'clitic', 'prep', 'article', 'replace'].includes(head)) {
         throw new PackError(`sezione sconosciuta "@${head}"`, line, head);
       }
       continue;
@@ -402,6 +422,22 @@ export function parsePack(src: string): Pack {
         pack.prep.set(key, m);
         break;
       }
+      case 'article': {
+        // "cls Z sb sc ... z gn" classi d'iniziale; "def ms il lo:Z l':V" forme con la loro classe
+        if (key === 'cls') {
+          const [name, ...prefixes] = rest;
+          if (!name || !prefixes.length) throw new PackError('cls: "cls Nome prefisso..."', line, section);
+          pack.article.classes.set(name, { yes: prefixes.filter((x) => !x.startsWith('!')), no: prefixes.filter((x) => x.startsWith('!')).map((x) => x.slice(1)) });
+        } else if (key === 'def' || key === 'ind') {
+          const [gender, ...forms] = rest;
+          if (!gender || !forms.length) throw new PackError(`${key}: "${key} genere forma[:classe]..."`, line, section);
+          pack.article.rows.set(`${key} ${gender}`, forms.map((f) => {
+            const i = f.lastIndexOf(':');
+            return i > 0 ? { form: f.slice(0, i), when: f.slice(i + 1) } : { form: f, when: null };
+          }));
+        } else throw new PackError(`riga non riconosciuta "${raw}"`, line, section);
+        break;
+      }
       case 'sense': {
         const v = parseVariant(raw, line, section, true, pack.elision);
         sense!.variants.push(v);
@@ -418,10 +454,14 @@ export function parsePack(src: string): Pack {
           const v = parseVariant(p, line, section, false, pack.elision);
           if (v.reason) reason = v.reason;
           if (v.note) note = v.note;
-          return { text: v.text, tokens: v.tokens, register: v.register, flags: v.flags };
+          const out: Variant = { text: v.text, tokens: v.tokens, register: v.register, flags: v.flags };
+          if (v.gender) out.gender = v.gender;
+          return out;
         });
         if (!reason) throw new PackError('manca "reason:"', line, section);
-        pack.replaces.push({ from: { text: from.text, tokens: from.tokens, register: from.register, flags: from.flags, note }, to, reason });
+        const src: Variant = { text: from.text, tokens: from.tokens, register: from.register, flags: from.flags, note };
+        if (from.gender) src.gender = from.gender;
+        pack.replaces.push({ from: src, to, reason });
         break;
       }
       default:

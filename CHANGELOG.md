@@ -15,7 +15,9 @@ serie completa (M10-M12 e richieste del committente); `0.2.x` = serie attuale.
 - **Picus, il consigliere di scrittura**: un picchio a schermo che parla solo se interrogato (F7,
   Ctrl+F7 su tutta la pergamena). Giri di parole, ripetizioni, scarti di tono e varianti di una
   locuzione, con alternative gia' flesse come l'originale e divise per tono. Niente LLM, niente
-  rete. Inglese incluso, italiano facoltativo nell'installer o da Preferenze > Picus.
+  rete. Inglese incluso, italiano facoltativo nell'installer o da Preferenze > Picus. Al clic propone
+  subito sinonimi e alternative per la parola o la locuzione sotto il cursore ("la chiave di volta" ->
+  "il cardine"): prende il posto del pannello "Cerca sinonimi".
 
 - **Tabula: il coltello** (#48): tenendo premuto Ctrl il cursore diventa un coltello; trascinando si
   tagliano i collegamenti che la scia attraversa, un clic su un collegamento taglia quello.

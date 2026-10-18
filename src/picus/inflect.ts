@@ -13,6 +13,10 @@ export interface Morph {
   base: string;
   /** forme di un verbo, una per slot; null se la parola non e' un verbo conosciuto */
   forms(verb: string): string[] | null;
+  /** come forms, ma in inglese flette anche un verbo che il pacchetto non elenca */
+  formsAny(word: string): string[] | null;
+  /** forme base e slot di una parola del testo; `guesses` sono forme base candidate da provare */
+  lemmas(word: string, guesses: string[]): { base: string; slot: string }[];
   isVerb(word: string): boolean;
   /** persona 1-6 dello slot (o indice 1-4 del participio); null per inf, ger, base */
   personOf(slot: string): number | null;
@@ -179,6 +183,34 @@ export function buildMorph(pack: Pack): Morph {
     return out;
   }
 
+  // forme di una parola trattata come verbo anche se non e' fra i "verbs" del pacchetto (sinonimi del
+  // thesaurus: "appear" non sta nel dizionario ma si flette come "look")
+  const anyCache = new Map<string, string[] | null>();
+  function formsAny(word: string): string[] | null {
+    const known = forms(word);
+    if (known || !p.rules.size || p.classes.length || !/^\p{L}+$/u.test(word)) return known;
+    if (anyCache.has(word)) return anyCache.get(word)!;
+    const out = ruleForms(word, undefined);
+    anyCache.set(word, out);
+    return out;
+  }
+
+  // forme irregolari (e dei composti) -> verbo e slot, per riconoscere "took" o "presi"
+  let reverse: Map<string, { base: string; slot: string }[]> | null = null;
+  function reverseIndex() {
+    if (reverse) return reverse;
+    reverse = new Map();
+    for (const v of [...irregular.keys(), ...pack.derive.keys()]) {
+      forms(v)?.forEach((f, i) => {
+        if (!f) return;
+        const list = reverse!.get(f) ?? [];
+        if (!list.some((x) => x.base === v && x.slot === p.slots[i])) list.push({ base: v, slot: p.slots[i] });
+        reverse!.set(f, list);
+      });
+    }
+    return reverse;
+  }
+
   function isVerb(w: string): boolean {
     if (p.notverbs.has(w)) return false;
     if (p.verbs.has(w) || irregular.has(w) || pack.derive.has(w)) return true;
@@ -192,6 +224,18 @@ export function buildMorph(pack: Pack): Morph {
     slots: p.slots,
     base: p.base,
     forms,
+    formsAny,
+    lemmas(word, guesses) {
+      // prima gli irregolari, poi le forme base candidate (dal thesaurus o dallo stemmer): vale quella
+      // le cui forme contengono davvero la parola
+      const out: { base: string; slot: string }[] = [...(reverseIndex().get(word) ?? [])];
+      for (const g of guesses) {
+        const f = formsAny(g);
+        if (!f) continue;
+        f.forEach((x, i) => x === word && !out.some((o) => o.base === g && o.slot === p.slots[i]) && out.push({ base: g, slot: p.slots[i] }));
+      }
+      return out;
+    },
     isVerb: (w) => isVerb(w) && forms(w) !== null,
     personOf(slot) {
       const m = /(\d)$/.exec(slot);

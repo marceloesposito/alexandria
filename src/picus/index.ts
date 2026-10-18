@@ -6,18 +6,26 @@ import { registerCommands } from '../commands/registry';
 import { getEditor, onEditor } from '../state/editorRef';
 import { useWorkspace } from '../state/workspace';
 import { getWritingLang, onWritingLang } from 'logos/i18n/writing';
-import { textBlocks } from './blocks';
+import { platform } from '../platform';
+import { thesaurusLang } from '../thesaurus/model';
+import { textBlocks, type Block } from './blocks';
 import { pickBlocks, placeFindings } from './scope';
 import { picusHooks, picusKey, type Live } from './plugin';
 import { usePicus, saveDocFile, type Bubble } from './store';
-import type { Suggestion } from './analyze';
+import type { Finding, Suggestion } from './analyze';
 import type { Tone } from './rank';
 
 const say = (bubble: Bubble | null) => usePicus.setState({ bubble });
 
 /** Motore pronto prima della prima domanda (in idle: non rallenta l'apertura). */
 function warm() {
-  const go = () => void import('./packs').then((m) => m.loadEngine(getWritingLang())).catch(() => {});
+  const go = () => {
+    void import('./packs').then((m) => m.loadEngine(getWritingLang())).catch(() => {});
+    void import('./synonyms').catch(() => {});
+    // il thesaurus si decomprime e si indicizza alla prima richiesta: meglio adesso che al primo clic
+    const th = thesaurusLang(getWritingLang());
+    if (th) void platform.thesaurus(th, 'a').catch(() => null);
+  };
   const idle = (window as { requestIdleCallback?: (f: () => void) => void }).requestIdleCallback;
   if (idle) idle(go);
   else setTimeout(go, 500);
@@ -48,8 +56,50 @@ export async function ask(whole = false) {
     variations: !whole,
   };
   const items = pickBlocks(blocks, sel, whole).flatMap((b) => placeFindings(b, analyze(engine, b.text, opts), sel, whole));
-  // il primo rilievo dal cursore in poi
-  const current = items.length ? Math.max(0, items.findIndex((l) => l.to >= from)) : -1;
+  let current = -1;
+
+  // sinonimi dal thesaurus (italiano e inglese): per il punto chiesto e per le parole ripetute
+  const th = thesaurusLang(lang);
+  if (th) {
+    const { synonymsAt } = await import('./synonyms');
+    const lookup = (key: string) => platform.thesaurus(th, key).catch(() => null);
+    const blockOf = (pos: number) => blocks.find((b) => pos >= b.from && pos <= b.to);
+    const offset = (b: Block, pos: number) => {
+      const i = b.map.findIndex((p) => p >= pos);
+      return i < 0 ? b.text.length : i;
+    };
+    const withSynonyms = (l: Live, f: Finding): Live => ({ ...l, f: { ...l.f, senses: f.senses, source: 'thesaurus' } });
+    // il punto chiesto: se il dizionario di Picus ha gia' alternative vincono loro (locuzioni)
+    if (!whole) {
+      const here = items.findIndex((l) => (empty ? from >= l.from && from <= l.to : l.from <= from && l.to >= to));
+      if (here >= 0 && items[here].f.senses.length) current = here;
+      else {
+        const b = blockOf(from);
+        const f = b && (await synonymsAt(engine, b.text, th, lookup, offset(b, from), empty ? null : offset(b, to)));
+        if (b && f) {
+          let live: Live = { from: b.map[f.start], to: b.map[f.end - 1] + 1, f };
+          // stesso tratto di una ripetizione: la ripetizione prende i sinonimi
+          if (here >= 0 && items[here].from === live.from && items[here].to === live.to) live = items[here] = withSynonyms(items[here], f);
+          else {
+            items.push(live);
+            items.sort((a, c) => a.from - c.from || a.to - c.to);
+          }
+          current = items.indexOf(live);
+        }
+      }
+    }
+    // parole ripetute: i loro sinonimi al posto di "cerca sinonimi"
+    await Promise.all(
+      items.slice(0, 60).map(async (l, i) => {
+        if (l.f.kind !== 'repetition' || l.f.senses.length) return;
+        const b = blockOf(l.from);
+        const f = b && (await synonymsAt(engine, b.text, th, lookup, l.f.start, l.f.end));
+        if (f) items[i] = withSynonyms(l, f);
+      }),
+    );
+  }
+  // altrimenti il primo rilievo dal cursore in poi
+  if (current < 0 && items.length) current = Math.max(0, items.findIndex((l) => l.to >= from));
   ed.view.dispatch(ed.state.tr.setMeta(picusKey, { items, current }));
   usePicus.setState({ open: items.length > 0, focus: st.focus + 1, bubble: items.length ? { kind: 'result', n: items.length } : { kind: 'quiet' } });
   if (current >= 0) reveal(items[current]);

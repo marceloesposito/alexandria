@@ -9,8 +9,9 @@ import { makeStemmer } from './stem';
 import { SENSE_RULES, type SenseRule } from './senses';
 import { rank, toneCenter, type Ranked, type Tone } from './rank';
 import { matchCase } from '../thesaurus/model';
+import { articleIndex, determiner, joinArticle, type Det } from './article';
 
-export type FindingKind = 'style' | 'tone' | 'repetition' | 'variation';
+export type FindingKind = 'style' | 'tone' | 'repetition' | 'variation' | 'synonym';
 
 export interface Suggestion {
   /** testo da mettere al posto dell'originale */
@@ -24,6 +25,8 @@ export interface Suggestion {
   alt?: string;
   /** la sostituzione arriva fino a qui (inghiotte l'articolo che segue: "di" + "l'" -> "dell'") */
   to?: number;
+  /** termine simile, non sinonimo stretto (thesaurus) */
+  related?: boolean;
 }
 
 export interface SenseSuggestions {
@@ -49,8 +52,10 @@ export interface Finding {
   prev?: [number, number];
   /** per "ignora": stesso rilievo nello stesso documento */
   key: string;
-  /** per "disattiva questa categoria": style:<motivo>, tone, repetition, variation */
+  /** per "disattiva questa categoria": style:<motivo>, tone, repetition, variation, synonym */
   category: string;
+  /** le alternative vengono dal thesaurus (attribuzione nel pannello) */
+  source?: 'thesaurus';
 }
 
 export interface AnalyzeOptions {
@@ -77,6 +82,8 @@ export interface Engine {
   slotIndex: Map<string, number>;
   /** articoli delle preposizioni articolate (il, lo, la, l'...) */
   articles: Set<string>;
+  /** articoli e preposizioni articolate davanti alle locuzioni nominali */
+  dets: Map<string, Det>;
 }
 
 export function createEngine(src: string | Pack): Engine {
@@ -91,6 +98,7 @@ export function createEngine(src: string | Pack): Engine {
     ppSlots: morph.slots.filter((s) => s.startsWith('pp')),
     slotIndex: new Map(morph.slots.map((s, i) => [s, i])),
     articles: new Set([...pack.prep.values()].flatMap((m) => [...m.values()])),
+    dets: articleIndex(pack),
   };
 }
 
@@ -110,6 +118,9 @@ interface Ctx {
   next: { w: string; end: number } | null;
   /** parola subito dopo il tratto */
   after: string | undefined;
+  /** articolo davanti a una locuzione nominale, compreso nel tratto ("la chiave di volta") */
+  det: Det | null;
+  detText: string | null;
 }
 
 interface Resolved {
@@ -119,7 +130,7 @@ interface Resolved {
   score: number;
 }
 
-function cliticWords(e: Engine, clitic: string, person: number): string[] {
+export function cliticWords(e: Engine, clitic: string, person: number): string[] {
   const cl = e.pack.clitic;
   if (!clitic || !cl) return [];
   if (clitic === 'ne') return ['ne'];
@@ -132,7 +143,7 @@ function resolve(e: Engine, text: string, tokens: Token[], m: Match, hit: Hit): 
   let start = m.start;
   let score = 1;
   const nx = tokens[m.end];
-  const ctx: Ctx = { slot: hit.slot, person: null, prev: undefined, auxSlot: null, auxText: null, fem: false, femKnown: false, article: hit.article, gapText: null, next: null, after: nx && !nx.brk ? nx.w : undefined };
+  const ctx: Ctx = { slot: hit.slot, person: null, prev: undefined, auxSlot: null, auxText: null, fem: false, femKnown: false, article: hit.article, gapText: null, next: null, after: nx && !nx.brk ? nx.w : undefined, det: null, detText: null };
   if (nx && !nx.brk && hit.article === null && e.articles.has(nx.w)) ctx.next = { w: nx.w, end: nx.end };
   const slot = hit.slot;
   // la k-esima parola prima di `at`, se fra le due non c'e' punteggiatura
@@ -186,6 +197,16 @@ function resolve(e: Engine, text: string, tokens: Token[], m: Match, hit: Hit): 
     const p = prev && lex.modal.get(prev.w);
     if (p) ctx.person = p;
   }
+  // locuzione nominale: l'articolo (anche articolato) che la precede si accorda all'alternativa
+  if (lex.entries[hit.vi].variant.gender) {
+    const a = before(1);
+    const d = a && e.dets.get(a.w);
+    if (d) {
+      start--;
+      ctx.det = d;
+      ctx.detText = text.slice(tokens[start].start, tokens[start].end);
+    }
+  }
   ctx.prev = before(1)?.w;
   if (m.gap) ctx.gapText = text.slice(tokens[m.gap[0]].start, tokens[m.gap[1] - 1].end);
   return { start, hit, ctx, score };
@@ -195,7 +216,7 @@ function resolve(e: Engine, text: string, tokens: Token[], m: Match, hit: Hit): 
 export function realize(e: Engine, target: Variant, ctx: Ctx): { text: string; alt?: string; to?: number } {
   const { morph, pack } = e;
   const [head, ...rest] = target.tokens;
-  const split = morph.isVerb(head) ? { verb: head, clitic: '' } : morph.splitClitic(head);
+  const split = target.gender ? null : morph.isVerb(head) ? { verb: head, clitic: '' } : morph.splitClitic(head);
   const f = split && ctx.slot ? morph.forms(split.verb) : null;
   let words: string[];
   let altWords: string[] | null = null;
@@ -252,7 +273,15 @@ export function realize(e: Engine, target: Variant, ctx: Ctx): { text: string; a
         to = ctx.next.end;
       }
     }
-    return out.join(' ');
+    // con l'elisione "l'" + "accento" si riattaccano
+    let s = out.join(' ');
+    if (pack.elision) s = s.replace(/(\p{L})' (?=\p{L})/gu, "$1'");
+    if (ctx.det) {
+      const first = s.split(' ')[0] ?? '';
+      const art = target.gender ? determiner(pack, ctx.det, target.gender, first) : null;
+      s = joinArticle(art ?? ctx.detText!.toLowerCase(), s);
+    }
+    return s;
   };
   const text = finish(words);
   const r: { text: string; alt?: string; to?: number } = { text };
@@ -274,7 +303,7 @@ export function usage(e: Engine, blocks: string[]): Map<string, number> {
   return out;
 }
 
-const PRIORITY: FindingKind[] = ['style', 'tone', 'repetition', 'variation'];
+const PRIORITY: FindingKind[] = ['style', 'tone', 'repetition', 'variation', 'synonym'];
 
 export function analyze(e: Engine, text: string, opts: AnalyzeOptions = {}): Finding[] {
   const tokens = tokenize(text, e.pack.elision);
