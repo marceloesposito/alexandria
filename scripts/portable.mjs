@@ -30,9 +30,12 @@ mkdirSync(join(out, 'Alexandria-data'), { recursive: true });
 if (args.mac) cpSync(args.mac, join(out, 'Alexandria.app'), { recursive: true, verbatimSymlinks: true });
 if (args.win) {
   cpSync(args.win, join(out, 'Alexandria.exe'));
-  // risorse dell'app accanto all'eseguibile (thesaurus con le licenze), come le mette l'installer
-  const res = join(dirname(args.win), 'thesaurus');
-  if (existsSync(res)) cpSync(res, join(out, 'thesaurus'), { recursive: true });
+  // risorse dell'app accanto all'eseguibile (thesaurus con le licenze, lingue di Picus), come le
+  // mette l'installer; nel portable ci sono tutte le lingue (pesano pochi kB)
+  for (const dir of ['thesaurus', 'picus']) {
+    const res = join(dirname(args.win), dir);
+    if (existsSync(res)) cpSync(res, join(out, dir), { recursive: true });
+  }
 }
 
 writeFileSync(

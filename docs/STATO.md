@@ -149,6 +149,24 @@ Aggiornato: 15 ottobre 2026 (versione 0.2.0, storia delle versioni in `CHANGELOG
   italiano di LibreItalia (GPL-3, distribuito come file separato, non incluso nel codice MIT), inglese da
   WordNet (licenza Princeton). Il Rust (`thesaurus.rs`) decomprime e indicizza alla prima richiesta
   (16 ms e 60 ms) e restituisce il blocco grezzo; l'interpretazione e' in `src/thesaurus/model.ts`.
+- **Picus, il consigliere di scrittura** (`src/picus/`): un picchio flottante e trascinabile nello
+  Scriptorium che parla solo se interrogato (clic o F7: selezione o paragrafo del cursore; Maiusc+clic
+  o Ctrl+F7: tutta la pergamena; Alt+F7 il rilievo successivo). Sottolinea giri di parole (@replace),
+  ripetizioni (stessa radice o stesso gruppo di sinonimi entro 50 parole, la finestra riparte a ogni
+  paragrafo), scarti dal tono della pergamena (Formale/Neutro/Informale, nel menu del picchio) e, su
+  una selezione o sotto il cursore, le varianti di una locuzione. Il pannello propone le alternative
+  gia' flesse come l'originale ("has looked like" -> "has borne a resemblance to", "mi sono reso
+  conto del" -> "ho capito il"), per tono, prima le meno usate nella pergamena; tasti 1-9, I ignora
+  (nella pergamena, `.alexandria/picus/`), D disattiva la categoria (Preferenze > Picus), Esc.
+  Niente LLM e niente rete: dizionario e regole deterministiche. Motore in TS puro e indipendente
+  dalla lingua, chunk caricato in idle (40 kB, 15 kB gzip con l'inglese); 0,2 ms per paragrafo,
+  18 ms per 10.000 parole. Ogni lingua e' un pacchetto di soli dati (`.picus`: stopword, stemmer
+  sul modello di Snowball con accordo del 99,99% sui vocabolari di prova, paradigmi a "slot", irregolari,
+  clitici, ausiliari, preposizioni articolate, locuzioni con registro e flag). L'inglese e' incluso;
+  l'italiano e' fra le risorse (`src-tauri/resources/picus/`) e l'installer lo propone nella pagina
+  Componenti (preselezionato se il sistema e' in italiano; `/PICUS=it|none` con `/S`). Sul Mac e nel
+  portable le lingue si aggiungono da Preferenze > Picus > Aggiungi lingua (cartella dati dell'app).
+  Modello NSIS personalizzato in `src-tauri/windows/installer.nsi` (aggiunte marcate "Alexandria:").
 - **Lettura continua del Codex**: la pergamena aperta resta leggibile, il testo delle altre pergamene
   collegate e' attenuato (piu' chiaro al passaggio del mouse).
 - **Spostamento dei blocchi come in Notion** (`src/editor/extensions/blockReorder.ts`): mentre si trascina
