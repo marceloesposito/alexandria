@@ -12,6 +12,9 @@ serie completa (M10-M12 e richieste del committente); `0.2.x` = serie attuale.
 
 ## Non ancora rilasciato
 
+- **Tabula: il coltello** (#48): tenendo premuto Ctrl il cursore diventa un coltello; trascinando si
+  tagliano i collegamenti che la scia attraversa, un clic su un collegamento taglia quello.
+
 - `CLAUDE.md` piu' leggero (#47): da ~15k a ~7k caratteri; istruzioni di build, glossario e insidie
   di singole parti in skill caricate solo quando servono (`.claude/skills/`).
 
