@@ -1,5 +1,8 @@
 # Post-it della Tabula + Folium, l'app sorella in mobilita'
 
+> Piano originale. Dal 18/10/2026 Folium si chiama **Column**: il piano aggiornato e l'avanzamento
+> sono in `docs/COLUMN.md` sul ramo `column`.
+
 ## Context
 Alexandria e' completa ma l'interfaccia e' carica. Oggi sopra il testo ci sono circa 190 px di cromo
 (menu, NavBar, ribbon) e lo Scriptorium mostra 80-85 controlli. L'app pesa 65 MB e la compilazione
