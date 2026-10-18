@@ -16,6 +16,7 @@ import { usePicus, type Bubble } from './store';
 import { ask, apply, close, disable, ignore, setTone, step, clear } from './index';
 import { flagsOf } from './flags';
 import { TONES, toneOf, type Tone } from './rank';
+import { categoryLabel } from './PicusPrefs';
 import type { Live } from './plugin';
 import type { Suggestion } from './analyze';
 
@@ -197,10 +198,6 @@ export function PicusPanel() {
   useEffect(() => {
     if (open) ref.current?.focus({ preventScroll: true });
   }, [focus, open]);
-  // finiti i rilievi il focus torna al testo
-  useEffect(() => {
-    if (!open && ref.current?.contains(document.activeElement)) getEditor()?.commands.focus();
-  }, [open]);
   useEffect(() => {
     if (!open) return;
     const on = () => setTick((n) => n + 1);
@@ -260,7 +257,7 @@ export function PicusPanel() {
           ? t(f.base ? 'picus.repeatedGroup' : 'picus.repeatedWord')
           : t('picus.variations');
   const thes = f.kind === 'repetition' && !f.senses.length && thesaurusLang(getWritingLang());
-  const category = f.category.startsWith('style:') ? tOr(`picus.reason.${f.reason}`, f.reason ?? '') : t(`picus.kind.${f.kind}`);
+  const category = categoryLabel(f.category);
   let n = 0;
 
   return createPortal(

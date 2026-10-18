@@ -3,6 +3,7 @@
 // plugin dell'editor, che le segue mentre si scrive; qui arriva una copia a ogni cambio.
 import { create } from 'zustand';
 import { useWorkspace } from '../state/workspace';
+import { getEditor } from '../state/editorRef';
 import { readJson, writeJson } from '../vault/vault';
 import { abs, picusFile } from '../vault/paths';
 import { picusHooks, type Live } from './plugin';
@@ -33,6 +34,8 @@ picusHooks.change = (items, current) => {
   // il fumetto conta i rilievi rimasti; finiti tutti (sostituiti o spariti) dice "fatto" e il pannello si chiude
   let bubble = st.bubble;
   if (bubble?.kind === 'result') bubble = items.length ? { kind: 'result', n: items.length } : { kind: 'done' };
+  // finiti i rilievi mentre si lavorava nel pannello: il focus torna al testo
+  if (st.open && !items.length && document.activeElement?.closest('.picus-panel')) getEditor()?.commands.focus();
   usePicus.setState({ items, current, open: st.open && items.length > 0, bubble });
 };
 
@@ -48,6 +51,11 @@ export function saveDocFile(patch: Partial<DocFile>) {
   const root = useWorkspace.getState().vaultRoot;
   if (root && rel) void writeJson(abs(root, picusFile(rel)), { tone, ignored });
 }
+
+// un dialogo che si apre chiude il pannello
+useWorkspace.subscribe((st, prev) => {
+  if (st.dialog && st.dialog !== prev.dialog && usePicus.getState().open) usePicus.setState({ open: false });
+});
 
 // segue il documento attivo
 useWorkspace.subscribe((st, prev) => {

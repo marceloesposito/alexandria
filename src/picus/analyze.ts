@@ -294,7 +294,8 @@ export function analyze(e: Engine, text: string, opts: AnalyzeOptions = {}): Fin
     if (off.has(f.category) || off.has(f.kind) || ignore.has(f.key)) return;
     const old = found.get(at);
     if (!old) return void found.set(at, f);
-    const tags = [...new Set([...old.tags, ...f.tags])];
+    // "varianti" non e' un motivo: accanto a un problema vero non si dice
+    const tags = [...new Set([...old.tags, ...f.tags])].filter((k, _, all) => k !== 'variation' || all.length === 1);
     const first = PRIORITY.indexOf(f.kind) < PRIORITY.indexOf(old.kind) ? f : old;
     found.set(at, { ...first, tags, senses: first.senses.length ? first.senses : f.senses, prev: old.prev ?? f.prev });
   };

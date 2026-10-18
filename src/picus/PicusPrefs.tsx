@@ -10,9 +10,10 @@ const tOr = (key: string, fallback: string) => {
   return s === key ? fallback : s;
 };
 
-/** Etichetta di una categoria spenta: "style:wordy" -> "Giri di parole". */
+/** Etichetta breve di una categoria: "style:wordy" -> "Giri di parole", "repetition" -> "Ripetizioni". */
 export function categoryLabel(c: string): string {
-  return c.startsWith('style:') ? tOr(`picus.reason.${c.slice(6)}`, c.slice(6)) : t(`picus.kind.${c}`);
+  const name = c.startsWith('style:') ? c.slice(6) : c;
+  return tOr(`picus.cat.${name}`, name);
 }
 
 export function PicusPrefs() {
@@ -49,7 +50,7 @@ export function PicusPrefs() {
       </label>
       <p className="hint">{t('picus.prefsHint')}</p>
       <div className="form__row">
-        <span>{t('picus.languages')}</span>
+        <span>{t('picus.langs')}</span>
         <ul className="picus-langs">
           {(packs ?? []).map((p) => (
             <li key={p.lang}>
