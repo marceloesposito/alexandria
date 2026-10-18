@@ -1,5 +1,5 @@
 // Column interface in English. Glossary names (Piece, Copy, Clips, Editions, Queries, Rundown,
-// Deadline, Typewriter, Compendium) stay the same in every language (Piece is "pezzo" in Italian).
+// Typewriter, Compendium) stay the same in every language (Piece is "pezzo" in Italian).
 export const en: Record<string, string> = {
   'common.ok': 'OK',
   'common.cancel': 'Cancel',
@@ -29,9 +29,9 @@ export const en: Record<string, string> = {
   'cmd.text.strike': 'Strikethrough',
   'cmd.text.color': 'Color',
   'cmd.text.insert': 'Insert',
-  'cmd.timer.toggle': 'Start or pause Deadline',
+  'cmd.timer.toggle': 'Start or pause the pomodoro timer',
   'cmd.timer.skip': 'Skip phase',
-  'cmd.timer.reset': 'Reset Deadline',
+  'cmd.timer.reset': 'Reset the pomodoro timer',
   'cmd.counts.open': 'Counts and zoom',
   'cmd.tabula.add': 'Add a block',
   'cmd.tabula.find': 'Search the Clips',
@@ -154,7 +154,7 @@ export const en: Record<string, string> = {
   'timer.sound': 'Sound at the end of a phase',
   'timer.silentium': 'Typewriter while working',
   'timer.today': 'Today: pomodoros {pomodoros} · words {words}',
-  'timer.settings': 'Deadline settings',
+  'timer.settings': 'Pomodoro timer settings',
   'timer.workDone': 'Work done: {words} words. Break time.',
   'timer.breakDone': 'Break over: back to writing.',
 

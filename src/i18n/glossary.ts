@@ -22,7 +22,6 @@ export const GLOSSARY: Record<string, GlossaryTerm> = {
   Editions: { pattern: /\bEditions\b/, avoid: [/palimpsest/i, /\bcronologia\b/i, /\bhistory\b/i] },
   Queries: { pattern: /\bQueries\b/, avoid: [/marginalia/i] },
   Rundown: { pattern: /\bRundown\b/, avoid: [/\bindex\b/i, /\bindice\b/i, /\bsommario\b/i, /\boutline\b/i] },
-  Deadline: { pattern: /\bDeadline\b/, avoid: [] },
   Typewriter: { pattern: /\bTypewriter\b/, avoid: [/silentium/i, /\bzen\b/i] },
 };
 

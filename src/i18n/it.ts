@@ -1,5 +1,5 @@
 // Interfaccia di Column in italiano. I nomi del glossario (Copy, Clips, Editions, Queries, Rundown,
-// Deadline, Typewriter, Compendium) restano uguali in ogni lingua; Piece in italiano e' il pezzo.
+// Typewriter, Compendium) restano uguali in ogni lingua; Piece in italiano e' il pezzo.
 export const it: Record<string, string> = {
   'common.ok': 'OK',
   'common.cancel': 'Annulla',
@@ -29,9 +29,9 @@ export const it: Record<string, string> = {
   'cmd.text.strike': 'Barrato',
   'cmd.text.color': 'Colore',
   'cmd.text.insert': 'Inserisci',
-  'cmd.timer.toggle': 'Avvia o metti in pausa Deadline',
+  'cmd.timer.toggle': 'Avvia o metti in pausa il timer pomodoro',
   'cmd.timer.skip': 'Salta la fase',
-  'cmd.timer.reset': 'Azzera Deadline',
+  'cmd.timer.reset': 'Azzera il timer pomodoro',
   'cmd.counts.open': 'Conteggi e zoom',
   'cmd.tabula.add': 'Aggiungi un blocco',
   'cmd.tabula.find': 'Cerca nei Clips',
@@ -154,7 +154,7 @@ export const it: Record<string, string> = {
   'timer.sound': 'Suono a fine fase',
   'timer.silentium': 'Typewriter durante il lavoro',
   'timer.today': 'Oggi: pomodori {pomodoros} · parole {words}',
-  'timer.settings': 'Impostazioni di Deadline',
+  'timer.settings': 'Impostazioni del timer pomodoro',
   'timer.workDone': 'Fine del lavoro: {words} parole. Pausa.',
   'timer.breakDone': 'Fine della pausa: si torna a scrivere.',
 

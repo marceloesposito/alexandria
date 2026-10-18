@@ -47,9 +47,8 @@ sempre nomi propri uguali in ogni lingua. Eccezione: in italiano il Piece e' il 
 | Editions | l'albero delle versioni | Palimpsestus |
 | Queries | i commenti | Marginalia |
 | Rundown | la struttura del testo | Index |
-| Deadline | il timer pomodoro | — |
 | Typewriter | la scrittura minimale | Silentium |
 
-Compendium resta (e' Alexandria). Da evitare: i nomi latini sopra, fogli/sheets, whiteboard,
+Il timer resta "timer pomodoro" (Deadline e' stato scartato). Compendium resta (e' Alexandria). Da evitare: i nomi latini sopra, fogli/sheets, whiteboard,
 lavagna, history, cronologia, index, indice, sommario, outline, zen. "Copy" come comando degli
 appunti (`cmd.edit.copy`) e' escluso dal controllo.

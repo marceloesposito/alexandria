@@ -516,7 +516,8 @@ cache della webview).
   `Column.exe`, identificatore `app.column`, variabili `COLUMN_DATA_DIR` e `COLUMN_TEST_OFFSCREEN`.
 - **Glossario** (`src/i18n/glossary.ts`, controllato dal test): Piece (in italiano *pezzo*) = il
   foglio; **Copy** = lo Scriptorium; **Clips** = Tabula e Armarium del foglio; **Editions** = il
-  Palimpsestus; **Queries** = i Marginalia; **Rundown** = l'Index; **Deadline** = il timer;
+  Palimpsestus; **Queries** = i Marginalia; **Rundown** = l'Index; il timer resta **timer pomodoro**
+  (Deadline provato e scartato dal committente);
   **Typewriter** = il Silentium. Compendium resta, perche' e' il nome di Alexandria. Onboarding:
   "Un foglio nella macchina", con Copy, Clips ed Editions.
 - **Nome nella landing** in Courier Prime (OFL, incluso nel pacchetto; token `--font-type`), da
