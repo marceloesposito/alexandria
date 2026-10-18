@@ -212,7 +212,7 @@ export const en: Record<string, string> = {
   'help.slash': 'Insert in the text',
   'about.version': 'Version {v}',
   'about.text': 'Alexandria\'s sister app for writing on the go: a sheet in the typewriter, nothing else. Offline, portable, no account.',
-  'about.licenses': 'MIT. Typefaces: Libertinus, Inter, JetBrains Mono (OFL).',
+  'about.licenses': 'MIT. Typefaces: Libertinus, Inter, JetBrains Mono, Courier Prime (OFL).',
 
   'cmd.tabula.toggle': 'Clips',
   'landing.start': "Start writing",

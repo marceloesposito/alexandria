@@ -88,6 +88,7 @@ export function Landing() {
     <div className="fx-welcome">
       <div className="fx-landing">
         <ColumnMark size={64} />
+        <div className="fx-landing__name">Column</div>
         {last ? (
           <>
             <button className="fx-cta fx-cta--big" autoFocus onClick={() => void st.resume()}>

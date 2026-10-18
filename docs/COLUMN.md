@@ -519,5 +519,7 @@ cache della webview).
   Palimpsestus; **Queries** = i Marginalia; **Rundown** = l'Index; **Deadline** = il timer;
   **Typewriter** = il Silentium. Compendium resta, perche' e' il nome di Alexandria. Onboarding:
   "Un foglio nella macchina", con Copy, Clips ed Editions.
+- **Nome nella landing** in Courier Prime (OFL, incluso nel pacchetto; token `--font-type`), da
+  macchina da scrivere.
 - **Coltello nei Clips**: lo stesso di Alexandria (PR #48): tenendo premuto Ctrl il cursore diventa un
   coltello e la scia taglia i collegamenti che attraversa (`tabula/knife.ts`, `KnifeLayer.tsx`).

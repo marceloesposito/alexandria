@@ -1742,6 +1742,14 @@ select.fx-input {
   animation: fx-fade 0.3s ease;
 }
 
+.fx-landing__name {
+  margin-top: calc(-1 * var(--space-2));
+  font-family: var(--font-type);
+  font-size: 30px;
+  letter-spacing: 0.04em;
+  color: var(--ink);
+}
+
 .fx-cta {
   display: inline-flex;
   align-items: center;

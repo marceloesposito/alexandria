@@ -212,7 +212,7 @@ export const it: Record<string, string> = {
   'help.slash': 'Inserisci nel testo',
   'about.version': 'Versione {v}',
   'about.text': 'L\'app sorella di Alexandria per scrivere in mobilità: un foglio nella macchina, niente altro. Offline, portable, senza account.',
-  'about.licenses': 'MIT. Caratteri: Libertinus, Inter, JetBrains Mono (OFL).',
+  'about.licenses': 'MIT. Caratteri: Libertinus, Inter, JetBrains Mono, Courier Prime (OFL).',
 
   'cmd.tabula.toggle': 'Clips',
   'landing.start': "Inizia a scrivere",

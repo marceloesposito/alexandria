@@ -12,6 +12,8 @@ import '@fontsource/inter/latin-ext-400.css';
 import '@fontsource/inter/latin-500.css';
 import '@fontsource/inter/latin-600.css';
 import '@fontsource/jetbrains-mono/latin-400.css';
+// nome dell'app: carattere da macchina da scrivere (Courier Prime, OFL)
+import '@fontsource/courier-prime/latin-400.css';
 import './styles/tokens.css';
 import './styles/column.css';
 import App from './column/App';
