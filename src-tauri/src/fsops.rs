@@ -1,4 +1,4 @@
-// Operazioni sul file system per vault, Library e stato dell'app.
+// Operazioni sul file system: fogli in lavorazione, stato dell'app, file aperti e salvati altrove.
 use base64::Engine;
 use serde::Serialize;
 use std::fs;
@@ -32,7 +32,7 @@ fn ensure_parent(path: &str) -> CmdResult<()> {
 /// Scrittura atomica: file temporaneo + rename, cosi' un crash non lascia file a meta'.
 pub fn write_atomic(path: &str, data: &[u8]) -> CmdResult<()> {
     ensure_parent(path)?;
-    let tmp = format!("{}.alexandria-tmp", path);
+    let tmp = format!("{}.clmn-tmp", path);
     fs::write(&tmp, data).map_err(err)?;
     fs::rename(&tmp, path).map_err(|e| {
         let _ = fs::remove_file(&tmp);
@@ -115,57 +115,21 @@ pub fn fs_rename(from: String, to: String) -> CmdResult<()> {
     fs::rename(&from, &to).map_err(err)
 }
 
-fn copy_rec(from: &Path, to: &Path) -> std::io::Result<()> {
-    if from.is_dir() {
-        fs::create_dir_all(to)?;
-        for e in fs::read_dir(from)? {
-            let e = e?;
-            copy_rec(&e.path(), &to.join(e.file_name()))?;
-        }
-        Ok(())
-    } else {
-        fs::copy(from, to).map(|_| ())
-    }
-}
-
-#[tauri::command]
-pub fn fs_copy(from: String, to: String) -> CmdResult<()> {
-    ensure_parent(&to)?;
-    copy_rec(Path::new(&from), Path::new(&to)).map_err(err)
-}
-
 fn slash(p: std::path::PathBuf) -> String {
     p.to_string_lossy().replace('\\', "/")
 }
 
+/// Cartella dei dati: Column-data accanto all'app (portable) o quella dell'utente.
 #[tauri::command]
-pub fn app_data_dir(app: tauri::AppHandle) -> CmdResult<String> {
+pub fn data_dir(app: tauri::AppHandle) -> CmdResult<String> {
     // prove automatiche: tutto in una cartella a parte, mai nei dati veri dell'utente
-    let dir = match std::env::var("ALEXANDRIA_DATA_DIR") {
-        Ok(d) => Path::new(&d).join("appdata"),
-        // portable: lo stato dell'app viaggia sulla chiavetta
+    let dir = match std::env::var("COLUMN_DATA_DIR") {
+        Ok(d) => Path::new(&d).to_path_buf(),
         Err(_) => match crate::portable::data_root() {
-            Some(p) => p.join("appdata"),
-            None => app.path().app_config_dir().map_err(err)?,
+            Some(p) => p.to_path_buf(),
+            None => app.path().app_data_dir().map_err(err)?,
         },
     };
     fs::create_dir_all(&dir).map_err(err)?;
     Ok(slash(dir))
-}
-
-#[tauri::command]
-pub fn documents_dir(app: tauri::AppHandle) -> CmdResult<String> {
-    if let Ok(d) = std::env::var("ALEXANDRIA_DATA_DIR") {
-        let p = Path::new(&d).join("documents");
-        fs::create_dir_all(&p).map_err(err)?;
-        return Ok(slash(p));
-    }
-    if let Some(p) = crate::portable::data_root() {
-        return Ok(slash(p.to_path_buf()));
-    }
-    app.path()
-        .document_dir()
-        .or_else(|_| app.path().home_dir())
-        .map(slash)
-        .map_err(err)
 }

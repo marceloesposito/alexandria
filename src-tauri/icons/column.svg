@@ -1,0 +1,12 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1024 1024">
+  <rect x="64" y="64" width="896" height="896" rx="200" fill="#f6f1e6"/>
+  <rect x="64" y="64" width="896" height="896" rx="200" fill="none" stroke="#8a4f2a" stroke-width="24"/>
+  <!-- un foglio con l'angolo piegato, come la pagina aperta di Alexandria -->
+  <path d="M300 200 H620 L740 320 V824 H300 Z" fill="#fffdf8" stroke="#8a4f2a" stroke-width="28" stroke-linejoin="round"/>
+  <path d="M620 200 V320 H740" fill="#e9dcc8" stroke="#8a4f2a" stroke-width="28" stroke-linejoin="round"/>
+  <g fill="#8a4f2a">
+    <rect x="370" y="420" width="300" height="30" rx="15"/>
+    <rect x="370" y="510" width="300" height="30" rx="15"/>
+    <rect x="370" y="600" width="220" height="30" rx="15"/>
+  </g>
+</svg>

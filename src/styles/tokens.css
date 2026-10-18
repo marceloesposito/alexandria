@@ -4,6 +4,7 @@
   --font-ui: 'Inter', system-ui, sans-serif;
   --font-text: 'Libertinus Serif', 'Georgia', serif;
   --font-mono: 'JetBrains Mono', ui-monospace, monospace;
+  --font-type: 'Courier Prime', 'Courier New', monospace;
 
   --fs-ui: 13px;
   --fs-ui-small: 11.5px;
@@ -35,6 +36,24 @@
   --shadow-strong: 0 8px 40px rgb(40 30 10 / 0.22);
   --radius: 6px;
   --radius-small: 4px;
+
+  /* misure di Column: scala di 4 px, controlli e bersagli da 28, barra da 40 */
+  --space-1: 4px;
+  --space-2: 8px;
+  --space-3: 12px;
+  --space-4: 16px;
+  --space-5: 20px;
+  --space-6: 24px;
+  --ctl-h: 28px;
+  --bar-h: 40px;
+  --icon: 16px;
+  --hit: 28px;
+
+  /* velo dietro finestre e ricerca; carta e inchiostro della stampa (sempre chiari) */
+  --scrim: rgb(20 15 5 / 0.35);
+  --scrim-soft: rgb(20 15 5 / 0.2);
+  --print-paper: #fff;
+  --print-ink: #000;
 
   /* Serie per layer, grafi e branch (sempre con etichetta accanto) */
   --series-1: #8a4f2a;

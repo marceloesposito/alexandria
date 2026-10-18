@@ -30,3 +30,6 @@ test-results
 public/tesseract
 public/tessdata
 dist-portable/
+
+# Folium
+src-tauri/target-column/

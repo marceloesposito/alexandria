@@ -1,8 +1,8 @@
 {
   "$schema": "https://schema.tauri.app/config/2",
-  "productName": "Alexandria",
-  "version": "0.2.0",
-  "identifier": "app.alexandria.desktop",
+  "productName": "Column",
+  "version": "0.1.0",
+  "identifier": "app.column",
   "build": {
     "beforeDevCommand": "npm run dev",
     "devUrl": "http://localhost:1420",
@@ -13,11 +13,11 @@
     "windows": [
       {
         "label": "main",
-        "title": "Alexandria",
-        "width": 1440,
-        "height": 900,
-        "minWidth": 1000,
-        "minHeight": 640,
+        "title": "Column",
+        "width": 1200,
+        "height": 800,
+        "minWidth": 640,
+        "minHeight": 480,
         "dragDropEnabled": false,
         "visible": false,
         "focus": false
@@ -26,51 +26,21 @@
     "security": {
       "csp": {
         "default-src": "'self'",
-        "script-src": "'self' 'wasm-unsafe-eval'",
+        "script-src": "'self'",
         "style-src": "'self' 'unsafe-inline'",
-        "img-src": "'self' data: blob: asset: http://asset.localhost",
+        "img-src": "'self' data: blob:",
         "font-src": "'self' data:",
-        "media-src": "'self' blob: asset: http://asset.localhost",
         "connect-src": "'self' ipc: http://ipc.localhost blob: data:",
-        "worker-src": "'self' blob:",
-        "frame-src": "https://www.youtube-nocookie.com",
         "object-src": "'none'",
         "base-uri": "'none'"
-      },
-      "assetProtocol": {
-        "enable": true,
-        "scope": { "allow": ["**"], "requireLiteralLeadingDot": false }
       }
     }
   },
   "bundle": {
-    "active": true,
-    "targets": ["nsis", "msi", "dmg", "app"],
+    "active": false,
     "category": "Productivity",
-    "resources": {
-      "resources/thesaurus/": "thesaurus/"
-    },
-    "fileAssociations": [
-      {
-        "ext": ["recensio"],
-        "name": "Recensio",
-        "description": "Copia per revisione di Alexandria",
-        "role": "Editor",
-        "mimeType": "application/x-alexandria-recensio"
-      }
-    ],
-    "shortDescription": "Offline writing studio for papers and essays",
+    "shortDescription": "A sheet, nothing else",
     "copyright": "© 2026 Marcelo Esposito — MIT",
-    "icon": [
-      "icons/32x32.png",
-      "icons/128x128.png",
-      "icons/128x128@2x.png",
-      "icons/icon.icns",
-      "icons/icon.ico"
-    ],
-    "macOS": {
-      "signingIdentity": "-",
-      "minimumSystemVersion": "10.15"
-    }
+    "icon": ["icons/32x32.png", "icons/128x128.png", "icons/128x128@2x.png", "icons/icon.icns", "icons/icon.ico"]
   }
 }

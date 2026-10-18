@@ -1,5 +1,12 @@
 # Alexandria — contesto per Claude Code
 
+> **Sei sul ramo `column`?** Qui il codice e' **Column** (prima Folium), l'app sorella portable: piano,
+> decisioni e avanzamento in `docs/COLUMN.md` (sezione "Avanzamento" e revisioni). Il frontend sta in `src/column/` (ingresso
+> `src/main.tsx`), il Rust in `src-tauri/src/` e' ridotto a `fsops.rs` e `portable.rs`. Prove:
+> `npx vite --port 1430` + `node scripts/cdp.mjs`, app vera con `npm run column:portable` (cartella
+> `Column-portable/` sul Desktop) e `node scripts/app-test.mjs <exe> <prova.mjs> <dati>`
+> (`COLUMN_DATA_DIR`, `COLUMN_TEST_OFFSCREEN`); glossario di Column nella skill `glossario`. Il resto di questo file descrive Alexandria (ramo `main`).
+
 App desktop offline per scrivere paper, articoli e saggi. Specifica completa e
 decisioni prese con il committente: `docs/SPEC.md`. Stato e prossimi passi:
 `docs/STATO.md` (va aggiornato nello stesso commit in cui lo stato cambia).

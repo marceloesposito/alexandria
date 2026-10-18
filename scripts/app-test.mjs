@@ -8,13 +8,13 @@ const [exe, scriptPath, dataDir] = process.argv.slice(2);
 const PORT = 9555;
 const sleep = (ms) => new Promise((r) => setTimeout(r, ms));
 
-// argomenti in piu' per l'app (es. un .recensio da aprire): ALEXANDRIA_TEST_ARGS, separati da |
-const extra = process.env.ALEXANDRIA_TEST_ARGS ? process.env.ALEXANDRIA_TEST_ARGS.split('|') : [];
+// argomenti in piu' per l'app (es. un .recensio da aprire): COLUMN_TEST_ARGS, separati da |
+const extra = process.env.COLUMN_TEST_ARGS ? process.env.COLUMN_TEST_ARGS.split('|') : [];
 const proc = spawn(exe, extra, {
   env: {
     ...process.env,
-    ALEXANDRIA_TEST_OFFSCREEN: '1',
-    ...(dataDir ? { ALEXANDRIA_DATA_DIR: dataDir } : {}),
+    COLUMN_TEST_OFFSCREEN: '1',
+    ...(dataDir ? { COLUMN_DATA_DIR: dataDir } : {}),
     WEBVIEW2_ADDITIONAL_BROWSER_ARGUMENTS: `--remote-debugging-port=${PORT}`,
   },
   stdio: 'ignore',

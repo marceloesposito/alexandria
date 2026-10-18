@@ -1,6 +1,6 @@
 ---
 name: glossario
-description: Nomi tematici dell'interfaccia di Alexandria (Compendium, pergamena, Scriptorium, Armarium, Palimpsestus, Tabula...) e regole delle traduzioni. Da usare quando si scrivono o cambiano testi visibili, chiavi i18n (it.ts, en.ts) o nomi di funzioni nell'interfaccia.
+description: Nomi tematici dell'interfaccia di Alexandria (latini - Compendium, pergamena, Scriptorium, Armarium, Palimpsestus, Tabula...) e di Column (redazione - Piece, Copy, Clips, Editions...) e regole delle traduzioni. Da usare quando si scrivono o cambiano testi visibili, chiavi i18n (it.ts, en.ts) o nomi di funzioni nell'interfaccia.
 ---
 
 # Glossario dei nomi tematici
@@ -34,5 +34,21 @@ Unica eccezione voluta dal committente: in italiano lo Scroll si chiama **pergam
 - Ogni stringa visibile passa da `t()` (`src/i18n/`), con la chiave sia in `it.ts` sia in `en.ts`;
   le variabili `{nome}` devono coincidere fra le lingue.
 - Elenco e controlli: `src/i18n/glossary.ts` e `src/i18n/i18n.test.ts`.
-- Column, l'app sorella (ramo `column`), ha un glossario suo, da redazione (Piece, Copy, Clips,
-  Editions...): e' descritto nella stessa skill su quel ramo.
+
+## Column (ramo `column`)
+Column non usa i nomi latini: il lessico e' quello della redazione e delle macchine da scrivere,
+sempre nomi propri uguali in ogni lingua. Eccezione: in italiano il Piece e' il **pezzo**.
+
+| Nome | Cos'e' | In Alexandria |
+| --- | --- | --- |
+| Piece / pezzo (it) | il documento (file `.clmn`) | Scroll |
+| Copy | l'editor | Scriptorium |
+| Clips | blocchi e collegamenti del pezzo | Tabula / Armarium |
+| Editions | l'albero delle versioni | Palimpsestus |
+| Queries | i commenti | Marginalia |
+| Rundown | la struttura del testo | Index |
+| Typewriter | la scrittura minimale | Silentium |
+
+Il timer resta "timer pomodoro" (Deadline e' stato scartato). Compendium resta (e' Alexandria). Da evitare: i nomi latini sopra, fogli/sheets, whiteboard,
+lavagna, history, cronologia, index, indice, sommario, outline, zen. "Copy" come comando degli
+appunti (`cmd.edit.copy`) e' escluso dal controllo.

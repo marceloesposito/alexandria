@@ -232,16 +232,6 @@ Aggiornato: 15 ottobre 2026 (versione 0.2.0, storia delle versioni in `CHANGELOG
   del gruppo e l'immagine di anteprima se c'e', note in giallo, cornici tratteggiate), sempre leggibile.
   Era vuoto perche' i nodi controllati non riportavano le misure di React Flow: ora le modifiche
   'dimensions' tornano nei nodi come `measured`.
-- **Confini di pagina senza bordi** (17/10): con `prefs.pageHints` la vista senza bordi disegna dove
-  finirebbe ogni pagina. Stessa `paginate()` della vista pagina (`editor/pagination.ts`, modalita'
-  `hints` di `pageGeometry`), ma con widget `.page-hint` di altezza zero: il testo non si sposta e la
-  misura e' quella del testo continuo. La colonna senza bordi e' larga quanto lo specchio di stampa,
-  quindi i confini cadono dove nella pagina.
-- **Coltello della Tabula** (18/10): con Ctrl premuto uno strato sopra React Flow (`KnifeLayer.tsx`)
-  raccoglie il puntatore, disegna la scia e al rilascio campiona i tracciati dei collegamenti
-  (`.react-flow__edge` con `data-id`, `getPointAtLength` in coordinate dello schermo); `knife.ts` (puro,
-  testato) decide quali tagliare. Non si arma mentre si scrive in una nota; il cursore e' un'immagine
-  SVG bianca e nera (unica eccezione ai token).
 - **Post-it della Tabula** (17/10): selezione e scrittura separate, come in Miro o FigJam. Un clic
   seleziona e trascina (la textarea e' `readOnly` e senza `pointer-events`), il doppio clic scrive
   (`useNoteEdit` in `Whiteboard.tsx`), Esc o un clic fuori escono; un post-it nuovo nasce in scrittura.
@@ -384,9 +374,8 @@ Aggiornato: 15 ottobre 2026 (versione 0.2.0, storia delle versioni in `CHANGELOG
   non spezza un paragrafo fra due fogli (il PDF si').
 - **Column** (prima Folium; piano del 17/10/2026, in corso): app sorella portable e leggera per il
   lavoro in mobilita', al posto della versione portable di Alexandria; ogni documento e' un pezzo
-  `.clmn` indipendente, senza Compendium, con nomi da redazione (Copy, Clips, Editions...) invece
-  dei latini. Branch di lunga durata `column` (PR in bozza #49). Piano e avanzamento:
-  `docs/COLUMN.md` su quel ramo; `docs/FOLIUM.md` qui e' il piano originale.
+  `.clmn` indipendente, senza Compendium. Branch di lunga durata `column`. Piano e fasi F0-F7:
+  `docs/COLUMN.md` (ogni cambiamento di piano si scrive li').
 
 ## Verifica su Windows (5/10)
 
