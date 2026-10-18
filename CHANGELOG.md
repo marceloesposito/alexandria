@@ -21,7 +21,18 @@ vecchi `.folium` si aprono ancora.
 
 ## Non ancora rilasciato
 
-- Piano di **Folium**, l'app sorella portable, in `docs/FOLIUM.md` (#43).
+- **Tabula: il coltello** (#48): tenendo premuto Ctrl il cursore diventa un coltello; trascinando si
+  tagliano i collegamenti che la scia attraversa, un clic su un collegamento taglia quello.
+
+- `CLAUDE.md` piu' leggero (#47): da ~15k a ~7k caratteri; istruzioni di build, glossario e insidie
+  di singole parti in skill caricate solo quando servono (`.claude/skills/`).
+
+- **Confini di pagina nella vista senza bordi** (#46): una linea tratteggiata tenue dove finirebbe ogni
+  pagina, con la stessa impaginazione della vista pagina (un paragrafo non si spezza). Non sposta il
+  testo; si accende e si spegne da Visualizza > Confini di pagina (acceso di partenza).
+
+- Piano di **Folium**, l'app sorella portable, in `docs/FOLIUM.md` (#43). Il 18/10/2026 Folium
+  diventa **Column** (ramo `column`, #49).
 - **Tabula: i post-it si eliminano** (#44). Un clic seleziona il post-it (e lo trascina), il doppio
   clic entra nella scrittura, Esc o un clic fuori ne escono. Backspace/Canc su un post-it selezionato
   lo elimina, come Backspace su un post-it vuoto in scrittura; il clic destro su post-it e cornici

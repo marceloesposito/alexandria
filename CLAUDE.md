@@ -10,6 +10,7 @@
 App desktop offline per scrivere paper, articoli e saggi. Specifica completa e
 decisioni prese con il committente: `docs/SPEC.md`. Stato e prossimi passi:
 `docs/STATO.md` (va aggiornato nello stesso commit in cui lo stato cambia).
+Column (prima Folium), l'app sorella portable, vive sul ramo `column` (piano in `docs/COLUMN.md` su quel ramo).
 
 ## Principi non negoziabili
 
