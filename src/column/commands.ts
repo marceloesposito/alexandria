@@ -99,6 +99,7 @@ const RUN: Record<string, Runner> = {
   'app.quit': { run: lazy(() => import('./actions'), (m) => m.quit()) },
 
   'silentium.toggle': { run: () => useColumn.getState().setSilentium(!useColumn.getState().silentium), active: () => useColumn.getState().silentium },
+  'focus.toggle': { run: () => useColumn.getState().setApp({ focus: !useColumn.getState().app.focus }), active: () => useColumn.getState().app.focus },
   'timer.skip': { run: () => useTimer.getState().skip() },
   'timer.reset': { run: () => useTimer.getState().reset() },
   'zoom.in': { run: zoomBy(0.1) },

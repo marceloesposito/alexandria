@@ -1,6 +1,6 @@
 // Scriptorium di Column: l'editor del foglio. Carica il testo quando cambia il foglio, salva con un
 // breve ritardo, conta le parole, accoglie immagini incollate o trascinate (in media/).
-import { useEffect, useRef } from 'react';
+import { useEffect, useRef, useState } from 'react';
 import { useEditor, EditorContent } from '@tiptap/react';
 import { EditorState } from '@tiptap/pm/state';
 import type { Editor } from '@tiptap/core';
@@ -9,6 +9,7 @@ import { countDoc } from 'logos/doc/counts';
 import { useColumn, mediaUrl } from '../store';
 import { markdownToDoc, docToMarkdown } from '../doc';
 import { editorExtensions } from './extensions';
+import { FocusBlock } from './focusBlock';
 import { setMediaResolver, setFootnoteEditor } from './nodes';
 import { SlashMenu } from './slash';
 import { openTextMenu } from './textMenu';
@@ -45,10 +46,13 @@ export function Scriptorium() {
   const loadTick = useColumn((s) => s.loadTick);
   const zoom = useColumn((s) => s.app.zoom);
   const font = sheet?.meta.font ?? 'serif';
+  const focus = useColumn((s) => s.app.focus);
+  // si scrive: gli altri paragrafi si attenuano finche' non si muove il mouse
+  const [writing, setWriting] = useState(false);
   const saveTimer = useRef<ReturnType<typeof setTimeout> | null>(null);
 
   const editor = useEditor({
-    extensions: editorExtensions([SlashMenu, PageHints]),
+    extensions: editorExtensions([SlashMenu, PageHints, FocusBlock]),
     content: markdownToDoc(useColumn.getState().sheet?.markdown ?? ''),
     autofocus: 'end',
     editorProps: {
@@ -109,6 +113,7 @@ export function Scriptorium() {
         useCounts.getState().setDoc(countDoc(doc));
       }, 300);
       useColumn.setState({ lastEdit: Date.now() });
+      setWriting(true);
     },
     onSelectionUpdate({ editor: ed }) {
       useCounts.getState().setSelection(ed);
@@ -132,6 +137,23 @@ export function Scriptorium() {
     if (!useColumn.getState().silentium) editor.commands.focus('end');
   }, [editor, loadTick]);
 
+  // il mouse che si muove (non un tremolio) riporta tutto il testo in primo piano
+  useEffect(() => {
+    if (!writing) return;
+    let start: { x: number; y: number } | null = null;
+    const move = (e: MouseEvent) => {
+      start ??= { x: e.clientX, y: e.clientY };
+      if (Math.hypot(e.clientX - start.x, e.clientY - start.y) > 8) setWriting(false);
+    };
+    const down = () => setWriting(false);
+    window.addEventListener('mousemove', move);
+    window.addEventListener('mousedown', down);
+    return () => {
+      window.removeEventListener('mousemove', move);
+      window.removeEventListener('mousedown', down);
+    };
+  }, [writing]);
+
   // salvataggio immediato quando la finestra perde il fuoco
   useEffect(() => {
     const flush = () => {
@@ -150,7 +172,7 @@ export function Scriptorium() {
   }, [editor]);
 
   return (
-    <div className={`fx-scriptorium fx-font--${font}`} style={{ '--zoom': zoom } as React.CSSProperties}>
+    <div className={`fx-scriptorium fx-font--${font} ${focus ? 'is-focus' : ''} ${writing ? 'is-writing' : ''}`} style={{ '--zoom': zoom } as React.CSSProperties}>
       <div className="fx-scroll">
         <div className="fx-page">
           <EditorContent editor={editor} />

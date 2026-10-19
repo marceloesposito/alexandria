@@ -153,6 +153,8 @@ export interface AppState {
   bar: BarPos;
   /** cosa mostra il contatore */
   counts: CountKey[];
+  /** mentre si scrive gli altri paragrafi si attenuano (in Typewriter sempre) */
+  focus: boolean;
 }
 
 export interface PanelWin {
@@ -180,7 +182,7 @@ function normalizePanel(raw: unknown, id: PanelId): PanelWin {
 
 export function defaultAppState(): AppState {
   const lang = typeof navigator !== 'undefined' && !navigator.language.startsWith('it') ? 'en' : 'it';
-  return { lastSheet: null, theme: 'system', lang, author: '', panel: null, zoom: 1, onboarded: false, tabula: normalizePanel(null, 'tabula'), versions: normalizePanel(null, 'versions'), bar: DEFAULT_BAR, counts: DEFAULT_SHOWN };
+  return { lastSheet: null, theme: 'system', lang, author: '', panel: null, zoom: 1, onboarded: false, tabula: normalizePanel(null, 'tabula'), versions: normalizePanel(null, 'versions'), bar: DEFAULT_BAR, counts: DEFAULT_SHOWN, focus: true };
 }
 
 export async function loadAppState(): Promise<AppState> {
@@ -201,6 +203,7 @@ export async function loadAppState(): Promise<AppState> {
       versions: normalizePanel(raw.versions, 'versions'),
       bar: normalizeBar(raw.bar),
       counts: normalizeShown(raw.counts),
+      focus: raw.focus !== false,
     };
   } catch {
     return defaultAppState();

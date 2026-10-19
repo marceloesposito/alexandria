@@ -28,6 +28,10 @@ function Prefs() {
           <option value="dark">{t('prefs.theme.dark')}</option>
         </select>
       </label>
+      <label className="fx-check">
+        <input type="checkbox" checked={app.focus} onChange={(e) => set({ focus: e.target.checked })} />
+        <span>{t('prefs.focus')}</span>
+      </label>
       <label className="fx-field">
         <span>{t('prefs.author')}</span>
         <input className="fx-input" value={app.author} placeholder={t('prefs.authorHint')} onChange={(e) => set({ author: e.target.value })} />

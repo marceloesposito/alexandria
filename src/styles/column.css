@@ -935,6 +935,17 @@ select.fx-input {
   margin-top: 0;
 }
 
+/* focus mentre si scrive: gli altri paragrafi svaniscono e tornano quando si muove il mouse;
+   in Typewriter restano sempre attenuati (come Silentium in Alexandria) */
+.fx-prose > * {
+  transition: opacity 0.4s ease;
+}
+
+.fx-scriptorium.is-focus.is-writing .fx-prose > :not(.has-focus),
+.fx-app.is-silentium .fx-scriptorium.is-focus .fx-prose > :not(.has-focus) {
+  opacity: 0.3;
+}
+
 .fx-prose blockquote {
   margin: 0.6em 0;
   padding: 0 0 0 1.2em;

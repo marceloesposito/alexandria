@@ -96,6 +96,7 @@ export const COMMANDS: CommandSpec[] = [
 
   // solo per nome
   { id: 'silentium.toggle', label: 'cmd.silentium.toggle', home: 'none', shortcut: 'Mod+Shift+D' },
+  { id: 'focus.toggle', label: 'cmd.focus.toggle', home: 'none' },
   { id: 'timer.skip', label: 'cmd.timer.skip', home: 'none' },
   { id: 'timer.reset', label: 'cmd.timer.reset', home: 'none' },
   { id: 'zoom.in', label: 'cmd.zoom.in', home: 'none', shortcut: 'Mod+=' },

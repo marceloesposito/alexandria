@@ -524,3 +524,10 @@ cache della webview).
   macchina da scrivere.
 - **Coltello nei Clips**: lo stesso di Alexandria (PR #48): tenendo premuto Ctrl il cursore diventa un
   coltello e la scia taglia i collegamenti che attraversa (`tabula/knife.ts`, `KnifeLayer.tsx`).
+
+### Quinta revisione (19/10/2026): focus mentre si scrive
+
+- **Paragrafo in primo piano, acceso di default**: mentre si scrive nel Copy gli altri paragrafi
+  svaniscono (opacita' 0,3, dissolvenza di 0,4 s) e tornano quando si muove il mouse o si clicca; in
+  Typewriter restano sempre attenuati, come Silentium in Alexandria. Si spegne nelle Preferenze o con
+  il comando "Paragrafo in primo piano" (`app.focus` in `stato.json`, `editor/focusBlock.ts`).
