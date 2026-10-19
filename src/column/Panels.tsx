@@ -20,7 +20,7 @@ function ago(iso: string): string {
 
 function SheetsPanel() {
   const sheets = useColumn((s) => s.sheets);
-  const current = useColumn((s) => s.sheet?.meta.id);
+  const current = useColumn((s) => s.path);
   return (
     <div className="fx-panel__body">
       <div className="fx-panel__actions">
@@ -47,8 +47,7 @@ function SheetsPanel() {
                 openContextMenu(e, [
                   {
                     label: t('cmd.sheet.delete'),
-                    danger: true,
-                    onClick: () => void import('./actions').then((m) => m.deleteSheet(s.id)),
+                    onClick: () => void import('./actions').then((m) => m.forgetSheet(s.id)),
                   },
                 ])
               }

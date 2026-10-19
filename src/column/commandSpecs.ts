@@ -45,6 +45,7 @@ export const COMMANDS: CommandSpec[] = [
   { id: 'sheet.new', label: 'cmd.sheet.new', home: 'panel', shortcut: 'Mod+N' },
   { id: 'sheet.open', label: 'cmd.sheet.open', home: 'panel', shortcut: 'Mod+O' },
   { id: 'sheet.delete', label: 'cmd.sheet.delete', home: 'panel', palette: false },
+  { id: 'sheet.save', label: 'cmd.sheet.save', home: 'none', shortcut: 'Mod+S' },
 
   // barretta dello Scriptorium
   { id: 'text.style', label: 'cmd.text.style', home: 'bar', palette: false },

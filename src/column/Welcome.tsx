@@ -82,7 +82,9 @@ export function Landing() {
   useLang();
   const sheets = useColumn((s) => s.sheets);
   const lastId = useColumn((s) => s.app.lastSheet);
-  const last = sheets.find((s) => s.id === lastId) ?? sheets[0];
+  const draft = useColumn((s) => s.draft);
+  // la bozza (pezzo senza file) se era quello aperto, altrimenti l'ultimo file
+  const last = (!lastId && draft) || sheets.find((s) => s.id === lastId) || sheets[0] || draft;
   const st = useColumn.getState();
   return (
     <div className="fx-welcome">

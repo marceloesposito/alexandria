@@ -1,19 +1,24 @@
-// Fogli in lavorazione: ogni foglio e' una cartella in <dati>/fogli/<id>/ con gli stessi file del
-// .clmn (non compressi). Il salvataggio riscrive solo i file cambiati dall'ultima volta.
+// Pezzi su disco. Column non crea cartelle per i pezzi: un pezzo nuovo non ha un file finche' l'utente
+// non sceglie dove salvarlo (Salva, Salva come); da li' si salva da solo in quel .clmn. Finche' non ha
+// un file, il pezzo aperto sta in una bozza sola (bozza.clmn nella cartella dei dati), cosi' una
+// chiusura o un crash non lo perdono. L'elenco dei pezzi e' quello dei file aperti di recente.
 import { platform, joinPath } from '../platform';
-import { FILES, sheetFiles, sheetFromFiles, newSheet, type Sheet } from './format';
+import { pack, unpack, type Sheet } from './format';
 import { newId } from './tabula/model';
 import { clampFrame, DEFAULT_FRAME, type Frame, type SnapZone } from './tabula/snap';
 import { DEFAULT_BAR, normalizeBar, type BarPos } from './barPosition';
 import { DEFAULT_SHOWN, normalizeShown, type CountKey } from './editor/countsModel';
 
+/** Un pezzo nell'elenco dei recenti: `id` e' il percorso del suo file. */
 export interface SheetEntry {
   id: string;
   name: string;
   updated: string;
-  /** prime parole del testo, per riconoscere i fogli senza nome */
+  /** prime parole del testo, per riconoscere i pezzi senza nome */
   preview: string;
 }
+
+export const MAX_RECENT = 30;
 
 let root: string | null = null;
 
@@ -22,118 +27,57 @@ export async function dataRoot(): Promise<string> {
   return root;
 }
 
-export async function sheetsDir(): Promise<string> {
-  return joinPath(await dataRoot(), 'fogli');
+async function draftPath(): Promise<string> {
+  return joinPath(await dataRoot(), 'bozza.clmn');
 }
 
-async function sheetDir(id: string): Promise<string> {
-  return joinPath(await sheetsDir(), id);
+export function entryOf(path: string, s: Sheet): SheetEntry {
+  return { id: path, name: s.meta.name, updated: s.meta.updated, preview: s.markdown.slice(0, 400) };
 }
 
-/** Ultimo contenuto scritto per ogni file di ogni foglio (percorso assoluto -> testo o byte). */
-const written = new Map<string, string | Uint8Array>();
-
-function same(a: string | Uint8Array | undefined, b: string | Uint8Array): boolean {
-  if (a === undefined) return false;
-  if (typeof a === 'string' || typeof b === 'string') return a === b;
-  if (a.length !== b.length) return false;
-  for (let i = 0; i < a.length; i++) if (a[i] !== b[i]) return false;
-  return true;
+/** I recenti con `entry` in cima (al posto della sua voce vecchia). */
+export function withRecent(list: SheetEntry[], entry: SheetEntry): SheetEntry[] {
+  return [entry, ...list.filter((e) => e.id !== entry.id)].slice(0, MAX_RECENT);
 }
 
-export async function listSheets(): Promise<SheetEntry[]> {
-  const dir = await sheetsDir();
-  if (!(await platform.exists(dir))) return [];
-  const out: SheetEntry[] = [];
-  for (const e of await platform.list(dir)) {
-    if (!e.isDir) continue;
-    try {
-      const metaPath = joinPath(e.path, FILES.meta);
-      // fogli in lavorazione di quando l'app si chiamava Folium
-      const legacy = joinPath(e.path, 'folium.json');
-      const meta = JSON.parse(await platform.readText((await platform.exists(metaPath)) || !(await platform.exists(legacy)) ? metaPath : legacy));
-      let preview = '';
-      try {
-        preview = (await platform.readText(joinPath(e.path, FILES.text))).slice(0, 400);
-      } catch {
-        /* foglio senza testo */
-      }
-      out.push({ id: e.name, name: String(meta.name ?? ''), updated: String(meta.updated ?? ''), preview });
-    } catch {
-      /* cartella che non e' un foglio */
-    }
-  }
-  return out.sort((a, b) => b.updated.localeCompare(a.updated));
+export async function readSheetFile(path: string): Promise<Sheet> {
+  return unpack(await platform.readBytes(path), newId('f'));
 }
 
-async function readDirFiles(dir: string, prefix = ''): Promise<Map<string, string | Uint8Array>> {
-  const out = new Map<string, string | Uint8Array>();
-  for (const e of await platform.list(dir)) {
-    const rel = prefix + e.name;
-    if (e.isDir) {
-      for (const [k, v] of await readDirFiles(e.path, rel + '/')) out.set(k, v);
-    } else if (rel.startsWith(FILES.mediaDir)) out.set(rel, await platform.readBytes(e.path));
-    else if (!/\.(clmn|folium)-tmp$/.test(rel)) out.set(rel, await platform.readText(e.path));
-  }
-  return out;
+/** Scrive il .clmn passando da un file accanto: un'interruzione non lascia mai un file a meta'. */
+export async function writeSheetFile(path: string, s: Sheet): Promise<void> {
+  const tmp = `${path}-tmp`;
+  await platform.writeBytes(tmp, await pack(s));
+  if (await platform.exists(path)) await platform.remove(path);
+  await platform.rename(tmp, path);
 }
 
-export async function loadSheet(id: string): Promise<Sheet> {
-  const dir = await sheetDir(id);
-  const files = await readDirFiles(dir);
-  for (const [rel, v] of files) written.set(joinPath(dir, rel), v);
-  const s = sheetFromFiles(files, id);
-  // l'id e' quello della cartella, anche se il file dice altro (copie fatte a mano)
-  return { ...s, meta: { ...s.meta, id } };
-}
-
-/** Scrive i file cambiati del foglio; toglie quelli che non ci sono piu' (versioni potate, media). */
-export async function saveSheet(s: Sheet): Promise<void> {
-  const dir = await sheetDir(s.meta.id);
-  const files = sheetFiles(s);
-  const keep = new Set<string>();
-  for (const [rel, data] of files) {
-    const path = joinPath(dir, rel);
-    keep.add(path);
-    if (same(written.get(path), data)) continue;
-    if (typeof data === 'string') await platform.writeText(path, data);
-    else await platform.writeBytes(path, data);
-    written.set(path, data);
-  }
-  for (const path of [...written.keys()]) {
-    if (!path.startsWith(dir + '/') || keep.has(path)) continue;
-    await platform.remove(path);
-    written.delete(path);
+export async function readDraft(): Promise<Sheet | null> {
+  const p = await draftPath();
+  if (!(await platform.exists(p))) return null;
+  try {
+    return await readSheetFile(p);
+  } catch {
+    return null;
   }
 }
 
-export async function createSheet(now = new Date(), name = ''): Promise<Sheet> {
-  const s = newSheet(newId('f'), now, name);
-  await platform.mkdir(await sheetDir(s.meta.id));
-  await saveSheet(s);
-  return s;
+export async function writeDraft(s: Sheet): Promise<void> {
+  await writeSheetFile(await draftPath(), s);
 }
 
-export async function deleteSheet(id: string): Promise<void> {
-  const dir = await sheetDir(id);
-  await platform.remove(dir);
-  for (const path of [...written.keys()]) if (path.startsWith(dir + '/')) written.delete(path);
-}
-
-/** Un foglio arrivato da fuori (.clmn aperto, documento importato) diventa un foglio in lavorazione. */
-export async function adoptSheet(s: Sheet): Promise<Sheet> {
-  const taken = new Set((await listSheets()).map((e) => e.id));
-  const id = taken.has(s.meta.id) || !s.meta.id ? newId('f') : s.meta.id;
-  const out = { ...s, meta: { ...s.meta, id } };
-  await platform.mkdir(await sheetDir(id));
-  await saveSheet(out);
-  return out;
+export async function clearDraft(): Promise<void> {
+  const p = await draftPath();
+  if (await platform.exists(p)) await platform.remove(p);
 }
 
 // ---------------------------------------------------------------- stato dell'app
 
 export interface AppState {
+  /** file dell'ultimo pezzo aperto (null: la bozza o nessuno) */
   lastSheet: string | null;
+  /** pezzi aperti di recente, il piu' recente in cima */
+  recent: SheetEntry[];
   theme: 'system' | 'light' | 'dark';
   lang: 'it' | 'en';
   author: string;
@@ -180,9 +124,18 @@ function normalizePanel(raw: unknown, id: PanelId): PanelWin {
   return { open: r.open === true, frame: frame(r.frame), free: frame(r.free ?? r.frame), snap: ZONES.includes(r.snap as SnapZone) ? (r.snap as SnapZone) : null };
 }
 
+function normalizeRecent(raw: unknown): SheetEntry[] {
+  if (!Array.isArray(raw)) return [];
+  const str = (v: unknown) => (typeof v === 'string' ? v : '');
+  return raw
+    .filter((e): e is Record<string, unknown> => !!e && typeof e === 'object' && typeof (e as SheetEntry).id === 'string' && !!(e as SheetEntry).id)
+    .map((e) => ({ id: str(e.id), name: str(e.name), updated: str(e.updated), preview: str(e.preview) }))
+    .slice(0, MAX_RECENT);
+}
+
 export function defaultAppState(): AppState {
   const lang = typeof navigator !== 'undefined' && !navigator.language.startsWith('it') ? 'en' : 'it';
-  return { lastSheet: null, theme: 'system', lang, author: '', panel: null, zoom: 1, onboarded: false, tabula: normalizePanel(null, 'tabula'), versions: normalizePanel(null, 'versions'), bar: DEFAULT_BAR, counts: DEFAULT_SHOWN, focus: true };
+  return { lastSheet: null, recent: [], theme: 'system', lang, author: '', panel: null, zoom: 1, onboarded: false, tabula: normalizePanel(null, 'tabula'), versions: normalizePanel(null, 'versions'), bar: DEFAULT_BAR, counts: DEFAULT_SHOWN, focus: true };
 }
 
 export async function loadAppState(): Promise<AppState> {
@@ -191,6 +144,7 @@ export async function loadAppState(): Promise<AppState> {
     const d = defaultAppState();
     return {
       lastSheet: typeof raw.lastSheet === 'string' ? raw.lastSheet : null,
+      recent: normalizeRecent(raw.recent),
       theme: ['system', 'light', 'dark'].includes(raw.theme) ? raw.theme : d.theme,
       lang: raw.lang === 'en' || raw.lang === 'it' ? raw.lang : d.lang,
       author: typeof raw.author === 'string' ? raw.author : '',

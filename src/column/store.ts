@@ -1,11 +1,13 @@
-// Stato di Column: il foglio aperto (testo, Marginalia, Tabula, versioni, media), l'elenco dei fogli
-// in lavorazione e le preferenze. Il salvataggio e' automatico, con un breve ritardo.
+// Stato di Column: il pezzo aperto (testo, Marginalia, Tabula, versioni, media), l'elenco dei pezzi
+// aperti di recente e le preferenze. Il salvataggio e' automatico, con un breve ritardo: nel .clmn
+// scelto dall'utente o, finche' il pezzo non ha un file, nella bozza (sheets.ts).
 import { create } from 'zustand';
 import type { CommentsFile } from 'logos/comments/model';
 import { platform } from '../platform';
 import { setLang, t } from '../i18n';
-import { displayName, mediaName, FILES, type Sheet, type SheetFont, type SheetView } from './format';
-import { adoptSheet, createSheet, defaultAppState, deleteSheet, listSheets, loadAppState, loadSheet, saveAppState, saveSheet, type AppState, type SheetEntry } from './sheets';
+import { displayName, mediaName, newSheet, EXT, FILES, fileStem, type Sheet, type SheetFont, type SheetView } from './format';
+import { clearDraft, defaultAppState, entryOf, loadAppState, readDraft, readSheetFile, saveAppState, withRecent, writeDraft, writeSheetFile, type AppState, type SheetEntry } from './sheets';
+import { choiceDialog } from '../components/confirm';
 import type { Tabula } from './tabula/model';
 import { prune, record, resumeFrom, rename as renameVersion, type VersionTree } from './versions/tree';
 import { shouldSnapshot } from './versions/snapshots';
@@ -25,8 +27,13 @@ interface ColumnState {
   /** cosa si vede: splash all'avvio, onboarding al primo lancio, pagina d'ingresso, il foglio */
   screen: Screen;
   app: AppState;
+  /** pezzi aperti di recente (id = percorso del file) */
   sheets: SheetEntry[];
   sheet: Sheet | null;
+  /** file del pezzo aperto; null finche' l'utente non sceglie dove salvarlo */
+  path: string | null;
+  /** il pezzo senza file rimasto aperto alla chiusura (bozza), da riprendere */
+  draft: SheetEntry | null;
   /** cambia a ogni foglio caricato: l'editor ricarica il contenuto */
   loadTick: number;
   saveState: SaveState;
@@ -37,15 +44,20 @@ interface ColumnState {
 
   init(): Promise<void>;
   setScreen(s: Screen): void;
-  /** riprende l'ultimo foglio (o il piu' recente) */
+  /** riprende la bozza, l'ultimo pezzo o il piu' recente */
   resume(): Promise<void>;
   setApp(p: Partial<AppState>): void;
-  refreshSheets(): Promise<void>;
-  open(id: string): Promise<void>;
+  /** apre il .clmn al percorso `path` (anche dall'elenco dei recenti) */
+  open(path: string): Promise<void>;
   createNew(): Promise<void>;
-  remove(id: string): Promise<void>;
-  /** un foglio arrivato da fuori diventa un foglio in lavorazione e si apre */
-  adopt(s: Sheet): Promise<void>;
+  /** toglie un pezzo dall'elenco dei recenti (il file resta dov'e') */
+  remove(path: string): Promise<void>;
+  /** un pezzo arrivato da fuori: con `path` resta nel suo file, senza diventa un pezzo da salvare */
+  adopt(s: Sheet, path?: string | null): Promise<void>;
+  /** Salva: nel suo file o, la prima volta, dove sceglie l'utente. false se ha annullato */
+  save(): Promise<boolean>;
+  /** Salva come: un file nuovo, che da quel momento e' il file del pezzo */
+  saveAs(): Promise<boolean>;
   patchSheet(p: Partial<Sheet>): void;
   setMarkdown(md: string): void;
   setComments(c: CommentsFile): void;
@@ -103,12 +115,54 @@ export const useColumn = create<ColumnState>((set, get) => {
   };
   const touch = (s: Sheet): Sheet => ({ ...s, meta: { ...s.meta, updated: new Date().toISOString() } });
 
+  /** Mostra un pezzo appena letto o creato (`path` null: senza file). */
+  const show = (sheet: Sheet, path: string | null) => {
+    clearMediaUrls();
+    set({ sheet, path, loadTick: get().loadTick + 1, saveState: 'saved', lastEdit: 0, screen: 'sheet' });
+    get().setApp({ lastSheet: path });
+    if (path) recentAdd(path, sheet);
+  };
+
+  const recentAdd = (path: string, s: Sheet) => {
+    const recent = withRecent(get().app.recent, entryOf(path, s));
+    set({ sheets: recent });
+    get().setApp({ recent });
+  };
+
+  const recentRemove = (path: string) => {
+    const recent = get().app.recent.filter((e) => e.id !== path);
+    set({ sheets: recent });
+    get().setApp({ recent, lastSheet: get().app.lastSheet === path ? null : get().app.lastSheet });
+  };
+
+  /**
+   * Prima di passare a un altro pezzo: quello aperto si salva. Se non ha ancora un file e contiene
+   * qualcosa, si chiede se salvarlo (la bozza e' una sola). false: l'utente ha annullato.
+   */
+  const leave = async (): Promise<boolean> => {
+    await get().flush();
+    snapshotOnLeave();
+    await get().flush();
+    const s = get().sheet;
+    if (!s || get().path || (!s.markdown.trim() && !s.tabula?.blocks?.length)) return true;
+    const choice = await choiceDialog(t('leave.title', { name: sheetTitle(s) }), t('leave.message'), { okLabel: t('leave.save'), altLabel: t('leave.discard') });
+    if (choice === null) return false;
+    if (choice === 'ok' && !(await get().saveAs())) return false;
+    if (choice === 'alt') {
+      await clearDraft();
+      set({ draft: null });
+    }
+    return true;
+  };
+
   return {
     ready: false,
     screen: 'splash',
     app: defaultAppState(),
     sheets: [],
     sheet: null,
+    path: null,
+    draft: null,
     loadTick: 0,
     saveState: 'saved',
     silentium: false,
@@ -119,8 +173,8 @@ export const useColumn = create<ColumnState>((set, get) => {
       const app = await loadAppState();
       setLang(app.lang);
       applyTheme(app.theme);
-      set({ app });
-      await get().refreshSheets();
+      const draft = await readDraft();
+      set({ app, sheets: app.recent, draft: draft ? entryOf('', draft) : null });
       // il foglio si apre dalla pagina d'ingresso: riprendere l'ultimo o cominciarne uno nuovo
       set({ ready: true });
     },
@@ -131,8 +185,14 @@ export const useColumn = create<ColumnState>((set, get) => {
 
     async resume() {
       const { app, sheets } = get();
+      const draft = await readDraft();
+      if (draft && !app.lastSheet) {
+        show(draft, null);
+        return;
+      }
       const last = (app.lastSheet && sheets.find((s) => s.id === app.lastSheet)) || sheets[0];
       if (last) await get().open(last.id);
+      else if (draft) show(draft, null);
       else await get().createNew();
       set({ screen: 'sheet' });
     },
@@ -145,59 +205,69 @@ export const useColumn = create<ColumnState>((set, get) => {
       scheduleApp();
     },
 
-    async refreshSheets() {
-      set({ sheets: await listSheets() });
-    },
-
-    async open(id) {
-      await get().flush();
-      snapshotOnLeave();
-      await get().flush();
+    async open(path) {
+      if (path === get().path && get().sheet) {
+        set({ screen: 'sheet' });
+        return;
+      }
+      if (!(await leave())) return;
       try {
-        const sheet = await loadSheet(id);
-        clearMediaUrls();
-        set({ sheet: sheet, loadTick: get().loadTick + 1, saveState: 'saved', lastEdit: 0, screen: 'sheet' });
-        get().setApp({ lastSheet: id });
+        show(await readSheetFile(path), path);
       } catch (e) {
-        get().toast(t('sheet.loadError', { error: String(e) }), 'error');
+        // file spostato o cancellato: esce dall'elenco
+        get().toast(t('sheet.loadError', { error: e instanceof Error ? e.message : String(e) }), 'error');
+        recentRemove(path);
       }
     },
 
     async createNew() {
-      await get().flush();
-      snapshotOnLeave();
-      await get().flush();
-      const s = await createSheet();
-      clearMediaUrls();
-      set({ sheet: s, loadTick: get().loadTick + 1, saveState: 'saved', lastEdit: 0, screen: 'sheet' });
-      get().setApp({ lastSheet: s.meta.id });
-      await get().refreshSheets();
+      if (!(await leave())) return;
+      show(newSheet(newId('f'), new Date()), null);
     },
 
-    async remove(id) {
-      if (get().sheet?.meta.id === id) {
-        if (saveTimer) clearTimeout(saveTimer);
-        saveTimer = null;
-        set({ sheet: null });
-      }
-      await deleteSheet(id);
-      await get().refreshSheets();
-      if (!get().sheet) {
-        const next = get().sheets[0];
-        if (next) await get().open(next.id);
-        else await get().createNew();
-      }
+    async remove(path) {
+      recentRemove(path);
     },
 
-    async adopt(s) {
+    async adopt(s, path = null) {
+      if (!(await leave())) return;
+      show(s, path);
+      // un documento importato e' gia' testo da non perdere: va subito nella bozza
+      if (!path) scheduleSave();
+    },
+
+    async save() {
+      if (!get().sheet) return false;
+      if (!get().path) return get().saveAs();
+      set({ saveState: 'dirty' });
       await get().flush();
-      snapshotOnLeave();
-      await get().flush();
-      const sheet = await adoptSheet(s);
-      clearMediaUrls();
-      set({ sheet, loadTick: get().loadTick + 1, saveState: 'saved', lastEdit: 0, screen: 'sheet' });
-      get().setApp({ lastSheet: sheet.meta.id });
-      await get().refreshSheets();
+      return get().saveState === 'saved';
+    },
+
+    async saveAs() {
+      const s = get().sheet;
+      if (!s) return false;
+      const name = s.meta.name || sheetTitle(s);
+      const path = await platform.saveDialog(`${fileStem(name)}.${EXT}`, [EXT]);
+      if (!path) return false;
+      const wasDraft = !get().path;
+      const named = { ...s, meta: { ...s.meta, name: s.meta.name || name } };
+      try {
+        await writeSheetFile(path, named);
+      } catch (e) {
+        get().toast(t('saveAs.error', { error: e instanceof Error ? e.message : String(e) }), 'error');
+        return false;
+      }
+      if (saveTimer) clearTimeout(saveTimer);
+      saveTimer = null;
+      set({ sheet: named, path, saveState: 'saved' });
+      if (wasDraft) {
+        await clearDraft();
+        set({ draft: null });
+      }
+      recentAdd(path, named);
+      get().toast(t('saveAs.done', { name: path.slice(path.lastIndexOf('/') + 1) }), 'ok');
+      return true;
     },
 
     patchSheet(p) {
@@ -227,7 +297,6 @@ export const useColumn = create<ColumnState>((set, get) => {
       if (!s) return;
       set({ sheet: touch({ ...s, meta: { ...s.meta, ...p } }) });
       scheduleSave();
-      if ('name' in p) void get().refreshSheets();
     },
 
     setSilentium(on) {
@@ -278,17 +347,22 @@ export const useColumn = create<ColumnState>((set, get) => {
         saveTimer = null;
       }
       const s = get().sheet;
+      const path = get().path;
       if (!s || get().saveState === 'saved') return;
+      // un pezzo nuovo ancora vuoto non lascia niente su disco
+      if (!path && !s.markdown.trim() && !s.tabula?.blocks?.length) {
+        set({ saveState: 'saved' });
+        return;
+      }
       set({ saveState: 'saving' });
       try {
-        await saveSheet(s);
+        if (path) await writeSheetFile(path, s);
+        else await writeDraft(s);
         // nel frattempo puo' essere cambiato di nuovo
         if (get().sheet === s) set({ saveState: 'saved' });
         else scheduleSave();
-        const entry = get().sheets.find((e) => e.id === s.meta.id);
-        if (!entry || entry.updated !== s.meta.updated) {
-          set({ sheets: [{ id: s.meta.id, name: s.meta.name, updated: s.meta.updated, preview: s.markdown.slice(0, 400) }, ...get().sheets.filter((e) => e.id !== s.meta.id)] });
-        }
+        if (path && get().path === path) recentAdd(path, s);
+        else if (!path) set({ draft: entryOf('', s) });
       } catch (e) {
         set({ saveState: 'error' });
         get().toast(t('sheet.saveError', { error: String(e) }), 'error');
@@ -327,6 +401,12 @@ function snapshotOnLeave() {
 
 /** Il foglio appena scelto o aperto dal sistema: lo si legge e si mette fra quelli in lavorazione. */
 export async function openPath(path: string): Promise<void> {
+  // un .clmn si apre nel suo file e li' si salva; il resto (anche i vecchi .folium) diventa un pezzo
+  // nuovo da salvare dove si vuole
+  if (path.toLowerCase().endsWith(`.${EXT}`)) {
+    await useColumn.getState().open(path);
+    return;
+  }
   const { importFile } = await import('./importDoc');
   try {
     const s = await importFile(path, await platform.readBytes(path));

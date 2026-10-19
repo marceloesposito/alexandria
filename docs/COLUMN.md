@@ -540,3 +540,12 @@ cache della webview).
   vuoto (`editor/blockReorder.ts` e `dragHandlePosition.ts`, copiati da Alexandria). Dipendenze nuove:
   `@tiptap/extension-drag-handle(-react)` con i suoi pari (node-range, collaboration, y-tiptap, yjs),
   circa 0,1 MB in piu' nel pacchetto.
+- **Niente cartelle per i pezzi** (19/10/2026, decisione del committente): Column non tiene piu' i pezzi
+  in `fogli/<id>/` nella cartella dei dati. Un pezzo nuovo non ha un file finche' l'utente non sceglie
+  dove salvarlo (Salva ⌘S, Salva come); da li' si salva da solo in quel `.clmn` (scritto passando da
+  `<file>-tmp`). Finche' non ha un file, accanto al nome c'e' "non salvato" e il testo sta in una bozza
+  sola (`bozza.clmn` nella cartella dei dati), ripresa al riavvio. Passando a un altro pezzo, quello
+  senza file chiede Salva / Non salvare / Annulla. Il pannello mostra i **pezzi recenti** (percorsi in
+  `stato.json`, `recent`); "Togli dall'elenco" non cancella il file. Un `.clmn` aperto da fuori si
+  salva nel suo file; un .docx, .md, .txt o un vecchio `.folium` diventa un pezzo da salvare. I pezzi
+  gia' presenti in `fogli/` restano li' (non elencati) e si possono recuperare a mano.

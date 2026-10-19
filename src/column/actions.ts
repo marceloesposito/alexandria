@@ -1,14 +1,14 @@
-// Azioni sul foglio che passano dal disco o chiedono qualcosa: Apri, Salva come, Rinomina, Elimina,
+// Azioni sul pezzo che passano dal disco o chiedono qualcosa: Apri, Salva, Salva come, Rinomina,
+// Togli dall'elenco,
 // Porta in un Compendium, versioni con un nome, Esci.
 import { platform, joinPath } from '../platform';
 import { useColumn, sheetTitle, openPath } from './store';
 import { useUi } from './ui';
-import { EXT, fileStem, pack } from './format';
 import { OPEN_EXTENSIONS } from './importDoc';
 import { planToCompendium, type CompendiumInfo } from './toCompendium';
 import { liveMarkdown } from './editor/Scriptorium';
 import { getEditor } from './editor/editorRef';
-import { confirmDialog, promptDialog } from '../components/confirm';
+import { promptDialog } from '../components/confirm';
 import { newId } from './tabula/model';
 import { t } from '../i18n';
 
@@ -28,26 +28,19 @@ export function renameSheet() {
   (document.querySelector('[data-cmd="sheet.rename"]') as HTMLElement | null)?.click();
 }
 
-export async function saveAs() {
+export async function save() {
   syncText();
-  const st = useColumn.getState();
-  if (!st.sheet) return;
-  const path = await platform.saveDialog(`${fileStem(sheetTitle(st.sheet))}.${EXT}`, [EXT]);
-  if (!path) return;
-  try {
-    await platform.writeBytes(path, await pack({ ...st.sheet, meta: { ...st.sheet.meta, name: st.sheet.meta.name || sheetTitle(st.sheet) } }));
-    st.toast(t('saveAs.done', { name: path.slice(path.lastIndexOf('/') + 1) }), 'ok');
-  } catch (e) {
-    st.toast(t('saveAs.error', { error: e instanceof Error ? e.message : String(e) }), 'error');
-  }
+  await useColumn.getState().save();
 }
 
-export async function deleteSheet(id: string) {
-  const st = useColumn.getState();
-  const entry = st.sheets.find((s) => s.id === id);
-  const name = entry ? entry.name || entry.preview.split('\n').find((l) => l.trim())?.replace(/^#+\s*/, '') || t('sheet.untitled') : t('sheet.untitled');
-  const ok = await confirmDialog(t('delete.title', { name }), t('delete.message'), { okLabel: t('cmd.sheet.delete'), danger: true });
-  if (ok) await st.remove(id);
+export async function saveAs() {
+  syncText();
+  await useColumn.getState().saveAs();
+}
+
+/** Toglie il pezzo dall'elenco dei recenti; il file resta dov'e'. */
+export async function forgetSheet(path: string | null) {
+  if (path) await useColumn.getState().remove(path);
 }
 
 async function readJson<T>(path: string, fallback: T): Promise<T> {

@@ -54,6 +54,16 @@ function SheetName() {
   );
 }
 
+/** Accanto al nome, finche' il pezzo non ha un file: un promemoria, non un controllo. */
+function Unsaved() {
+  const has = useColumn((s) => !!s.sheet && !s.path);
+  return has ? (
+    <span className="fx-unsaved" title={t('sheet.unsavedHint')}>
+      {t('sheet.unsaved')}
+    </span>
+  ) : null;
+}
+
 /** `bare`: solo trascinamento e controlli della finestra (schermate d'avvio). */
 export function Header({ bare = false }: { bare?: boolean }) {
   useLang();
@@ -62,6 +72,7 @@ export function Header({ bare = false }: { bare?: boolean }) {
     <header className={`fx-header ${macOverlay ? 'is-mac' : ''}`} data-tauri-drag-region>
       <div className="fx-header__left" data-tauri-drag-region>
         {!bare && <SheetName />}
+        {!bare && <Unsaved />}
       </div>
       {/* centrato sulla finestra intera, non sullo spazio rimasto */}
       <div id="fx-dock" className="fx-header__center" data-tauri-drag-region />

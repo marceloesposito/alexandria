@@ -5,12 +5,21 @@ import { t } from '../i18n';
 
 interface Ask {
   kind: 'confirm' | 'prompt';
+  /** terzo pulsante (es. "Non salvare"): la risposta e' 'alt' */
+  altLabel?: string;
   title: string;
   message?: string;
   value?: string;
   okLabel?: string;
   danger?: boolean;
   resolve: (v: string | boolean | null) => void;
+}
+
+/** Tre scelte: 'ok', 'alt' (il pulsante in mezzo) o null (Annulla, Esc). */
+export function choiceDialog(title: string, message: string, opts: { okLabel: string; altLabel: string }): Promise<'ok' | 'alt' | null> {
+  return new Promise((resolve) =>
+    useAsk.setState({ ask: { kind: 'confirm', title, message, ...opts, resolve: (v) => resolve(v === true ? 'ok' : v === 'alt' ? 'alt' : null) } }),
+  );
 }
 
 const useAsk = create<{ ask: Ask | null }>(() => ({ ask: null }));
@@ -65,6 +74,11 @@ export function AskHost() {
           <button className="btn" onClick={() => close(ask.kind === 'confirm' ? false : null)}>
             {t('common.cancel')}
           </button>
+          {ask.altLabel && (
+            <button className="btn" onClick={() => close('alt')}>
+              {ask.altLabel}
+            </button>
+          )}
           <button
             className={`btn ${ask.danger ? 'btn--danger' : 'btn--primary'}`}
             autoFocus={ask.kind === 'confirm'}

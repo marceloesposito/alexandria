@@ -1,5 +1,5 @@
 // Modalita' portable: se accanto all'app c'e' una cartella "Column-data", tutto vive li'
-// (stato dell'app, fogli in lavorazione, dati della webview). Pensata per una chiavetta USB.
+// (stato dell'app, bozza del pezzo senza file, dati della webview). Pensata per una chiavetta USB.
 use std::path::{Path, PathBuf};
 use std::sync::OnceLock;
 

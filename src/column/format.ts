@@ -5,8 +5,8 @@
 //   tabula.json      Armarium del foglio: blocchi e collegamenti
 //   media/           immagini incollate o trascinate (nel testo o nella Tabula)
 //   palimpsestus/    versions.json (albero) + un file Markdown per versione
-// I fogli in lavorazione stanno nella cartella dei dati con gli stessi file, non compressi, cosi'
-// il salvataggio automatico riscrive solo cio' che e' cambiato. Funzioni pure.
+// Il pezzo si salva in un .clmn scelto dall'utente (o nella bozza, finche' non ha un file: sheets.ts).
+// Funzioni pure.
 import JSZip from 'jszip';
 import { normalizeCommentsFile, type CommentsFile } from 'logos/comments/model';
 import { emptyTabula, normalizeTabula, type Tabula } from './tabula/model';
@@ -109,7 +109,7 @@ export function mediaName(name: string, taken: Iterable<string>): string {
   for (let i = 2; ; i++) if (!used.has(`${stem}-${i}${ext}`)) return `${stem}-${i}${ext}`;
 }
 
-/** I file del foglio (percorso relativo -> contenuto), per lo zip e per la cartella di lavoro. */
+/** I file del foglio (percorso relativo -> contenuto), per lo zip. */
 export function sheetFiles(s: Sheet): Map<string, string | Uint8Array> {
   const out = new Map<string, string | Uint8Array>();
   out.set(FILES.meta, JSON.stringify(s.meta, null, 2));

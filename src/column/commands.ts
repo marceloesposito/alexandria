@@ -44,6 +44,7 @@ const RUN: Record<string, Runner> = {
   'palette.open': { run: () => useUi.getState().setPalette(!useUi.getState().palette) },
 
   'sheet.rename': { run: lazy(() => import('./actions'), (m) => m.renameSheet()) },
+  'sheet.save': { run: lazy(() => import('./actions'), (m) => m.save()) },
   'sheet.saveAs': { run: lazy(() => import('./actions'), (m) => m.saveAs()) },
   'sheet.exportDocx': { run: lazy(() => import('./exportDoc'), (m) => m.exportDocx()) },
   'sheet.exportPdf': { run: lazy(() => import('./exportDoc'), (m) => m.exportPdf()) },
@@ -51,7 +52,7 @@ const RUN: Record<string, Runner> = {
 
   'sheet.new': { run: () => void useColumn.getState().createNew() },
   'sheet.open': { run: lazy(() => import('./actions'), (m) => m.openFiles()) },
-  'sheet.delete': { run: lazy(() => import('./actions'), (m) => m.deleteSheet(useColumn.getState().sheet?.meta.id ?? '')) },
+  'sheet.delete': { run: lazy(() => import('./actions'), (m) => m.forgetSheet(useColumn.getState().path)) },
 
   'text.style': { run: () => useUi.getState().toggle('style') },
   'text.bold': { run: () => getEditor()?.chain().focus().toggleBold().run(), active: () => !!getEditor()?.isActive('bold') },
