@@ -12,6 +12,12 @@ serie completa (M10-M12 e richieste del committente); `0.2.x` = serie attuale.
 
 ## Non ancora rilasciato
 
+- **Tabelle piu' regolabili**: con il cursore in una tabella compare una barra con il numero di righe e
+  di colonne (- / + o scritto), l'allineamento della colonna e le larghezze uguali; il tasto destro su
+  una cella aggiunge o elimina righe e colonne; il bordo fra due colonne si trascina per cambiarne la
+  larghezza (doppio clic: uguali). Larghezza e allineamento restano nel Markdown e negli export
+  (logos 0.2.2).
+
 - **Picus, il consigliere di scrittura**: un picchio a schermo che parla solo se interrogato, senza
   impostazioni da scegliere prima. Si seleziona e si clicca (o F7): per una parola sinonimi e
   contrari divisi per tono; per piu' parole, o la frase del cursore, tre riscritture (Formale,

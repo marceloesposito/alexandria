@@ -48,8 +48,11 @@ import {
   BetweenHorizontalStart,
   Columns2,
   FileSymlink,
-  TableRowsSplit,
-  TableColumnsSplit,
+  BetweenHorizontalEnd,
+  BetweenVerticalStart,
+  BetweenVerticalEnd,
+  Grid3x3,
+  Columns3,
   Trash2,
 } from 'lucide-react';
 import { registerCommands } from './registry';
@@ -58,6 +61,8 @@ import { useDoc } from '../editor/session';
 import { ws } from '../state/workspace';
 import { t } from '../i18n';
 import { promptDialog } from '../components/confirm';
+import { columnAlign, columnCommand, setColumnAlign, setColumnWidths, setTableSize, tableAt } from '../editor/tableActions';
+import { parseSize } from '../editor/tableModel';
 import { getSourceView } from '../editor/SourceView';
 import { undo as cmUndo, redo as cmRedo } from '@codemirror/commands';
 import { ask as askPicus } from '../picus';
@@ -174,10 +179,49 @@ export function registerEditorCommands() {
       views: ['editor'],
       run: () => chain().insertTable({ rows: 3, cols: 3, withHeaderRow: true }).run(),
     },
-    { id: 'table.addRow', label: 'cmd.table.addRow', icon: TableRowsSplit, category: 'insert', views: ['editor'], isEnabled: () => !!E()?.can().addRowAfter(), run: () => chain().addRowAfter().run() },
-    { id: 'table.addColumn', label: 'cmd.table.addColumn', icon: TableColumnsSplit, category: 'insert', views: ['editor'], isEnabled: () => !!E()?.can().addColumnAfter(), run: () => chain().addColumnAfter().run() },
+    { id: 'table.addRowBefore', label: 'cmd.table.addRowBefore', icon: BetweenHorizontalStart, category: 'insert', views: ['editor'], isEnabled: () => !!E()?.can().addRowBefore(), run: () => chain().addRowBefore().run() },
+    { id: 'table.addRow', label: 'cmd.table.addRow', icon: BetweenHorizontalEnd, category: 'insert', views: ['editor'], isEnabled: () => !!E()?.can().addRowAfter(), run: () => chain().addRowAfter().run() },
+    { id: 'table.addColumnBefore', label: 'cmd.table.addColumnBefore', icon: BetweenVerticalStart, category: 'insert', views: ['editor'], isEnabled: () => !!E()?.can().addColumnBefore(), run: () => columnCommand(E()!, 'before') },
+    { id: 'table.addColumn', label: 'cmd.table.addColumn', icon: BetweenVerticalEnd, category: 'insert', views: ['editor'], isEnabled: () => !!E()?.can().addColumnAfter(), run: () => columnCommand(E()!, 'after') },
+    {
+      id: 'table.resize',
+      label: 'cmd.table.resize',
+      icon: Grid3x3,
+      category: 'insert',
+      views: ['editor'],
+      isEnabled: () => !!E() && !!tableAt(E()!.state),
+      run: async () => {
+        const here = tableAt(E()!.state);
+        if (!here) return;
+        const v = await promptDialog(t('table.resize.title'), `${here.rows}x${here.cols}`, t('table.resize.hint'));
+        const size = v ? parseSize(v) : null;
+        if (size) setTableSize(E()!, size.rows, size.cols);
+      },
+    },
+    {
+      id: 'table.equalWidths',
+      label: 'cmd.table.equalWidths',
+      icon: Columns3,
+      category: 'format',
+      views: ['editor'],
+      isEnabled: () => !!E() && !!tableAt(E()!.state)?.node.attrs.widths,
+      run: () => void setColumnWidths(E()!, null),
+    },
+    ...(['left', 'center', 'right'] as const).map((a) => ({
+      id: `table.align.${a}`,
+      label: `cmd.table.align.${a}`,
+      icon: a === 'left' ? AlignLeft : a === 'center' ? AlignCenter : AlignRight,
+      category: 'format' as const,
+      views: ['editor' as const],
+      isEnabled: () => !!E() && !!tableAt(E()!.state),
+      isActive: () => {
+        const cur = columnAlign(E());
+        return a === 'left' ? cur === null || cur === 'left' : cur === a;
+      },
+      run: () => void setColumnAlign(E()!, a === 'left' ? null : a),
+    })),
     { id: 'table.deleteRow', label: 'cmd.table.deleteRow', icon: Trash2, category: 'insert', views: ['editor'], isEnabled: () => !!E()?.can().deleteRow(), run: () => chain().deleteRow().run() },
-    { id: 'table.deleteColumn', label: 'cmd.table.deleteColumn', icon: Trash2, category: 'insert', views: ['editor'], isEnabled: () => !!E()?.can().deleteColumn(), run: () => chain().deleteColumn().run() },
+    { id: 'table.deleteColumn', label: 'cmd.table.deleteColumn', icon: Trash2, category: 'insert', views: ['editor'], isEnabled: () => !!E()?.can().deleteColumn(), run: () => columnCommand(E()!, 'delete') },
     { id: 'table.delete', label: 'cmd.table.delete', icon: Trash2, category: 'insert', views: ['editor'], isEnabled: () => !!E()?.can().deleteTable(), run: () => chain().deleteTable().run() },
     { id: 'insert.footnote', label: 'cmd.insert.footnote', icon: Footprints, shortcut: 'Mod+Alt+F', category: 'insert', views: ['editor'], run: () => chain().insertFootnote('').run() },
     { id: 'insert.pageBreak', label: 'cmd.insert.pageBreak', icon: SeparatorHorizontal, shortcut: 'Mod+Enter', category: 'insert', views: ['editor'], run: () => chain().insertPageBreak().run() },

@@ -2819,6 +2819,69 @@ table.kv td:last-child {
   color: var(--muted);
 }
 
+/* barra della tabella: sopra quella di formattazione (o al suo posto se e' chiusa) */
+.fbar.tbar {
+  bottom: 56px;
+}
+
+.editor-center.has-footer .fbar.tbar {
+  bottom: 86px;
+}
+
+.editor-center:not(:has(.fbar:not(.tbar))) .fbar.tbar {
+  bottom: 14px;
+}
+
+.editor-center.has-footer:not(:has(.fbar:not(.tbar))) .fbar.tbar {
+  bottom: 44px;
+}
+
+.editor-center:has(.fbar.tbar:not(.fbar--pill)) .counts-badge {
+  bottom: 102px;
+}
+
+.editor-center.has-footer:has(.fbar.tbar:not(.fbar--pill)) .counts-badge {
+  bottom: 132px;
+}
+
+.tbar__stepper {
+  display: flex;
+  align-items: center;
+  gap: 1px;
+}
+
+.tbar__stepper + .tbar__stepper {
+  margin-left: 6px;
+}
+
+.tbar__label {
+  padding: 0 4px 0 6px;
+  font-size: 12px;
+  color: var(--muted);
+}
+
+.tbar__count {
+  width: 2.6em;
+  height: 24px;
+  padding: 0 2px;
+  border: 1px solid var(--line);
+  border-radius: 6px;
+  background: var(--paper);
+  color: var(--ink);
+  font: inherit;
+  font-size: 13px;
+  text-align: center;
+}
+
+.fbar__btn:disabled {
+  opacity: 0.4;
+  cursor: default;
+}
+
+.fbar__btn:disabled:hover {
+  background: transparent;
+}
+
 .fbar--pill {
   gap: 4px;
   padding: 6px 12px;

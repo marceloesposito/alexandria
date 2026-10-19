@@ -298,6 +298,12 @@ Aggiornato: 15 ottobre 2026 (versione 0.2.0, storia delle versioni in `CHANGELOG
   versione il centro si divide nelle due versioni allineate (`src/versions/docDiff.ts`). Interfaccia in
   parole semplici: versione (commit), variante (branch), unisci (merge), pubblica/scarica (push/pull).
 - **Introduzione** al primo avvio (sette pagine con le funzioni di ogni ambiente), riapribile da Aiuto.
+- **Tabelle** (19/10): barra della tabella sopra quella di formattazione quando il cursore e' in una
+  tabella (righe e colonne con - / + o scritte, allineamento della colonna, larghezze uguali, menu);
+  tasto destro su una cella: aggiungi/elimina riga e colonna, allineamento, larghezze; bordo fra due
+  colonne trascinabile (doppio clic: uguali). Il Markdown GFM conosce solo l'allineamento delle colonne:
+  la larghezza va in `<!-- widths:30,70 -->` dopo la tabella (percentuali, logos 0.2.2, rispettata
+  negli export). Righe e colonne in meno si tolgono dal fondo e da destra (`editor/tableModel.ts`).
 - **Armarium**: l'albero degli Strata mostra le risorse sotto gruppi e filtri, con filtro e ordinamento.
 
 ## Installer
