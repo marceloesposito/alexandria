@@ -48,7 +48,8 @@
     "targets": ["nsis", "msi", "dmg", "app"],
     "category": "Productivity",
     "resources": {
-      "resources/thesaurus/": "thesaurus/"
+      "resources/thesaurus/": "thesaurus/",
+      "resources/picus/": "picus/"
     },
     "fileAssociations": [
       {
@@ -68,6 +69,11 @@
       "icons/icon.icns",
       "icons/icon.ico"
     ],
+    "windows": {
+      "nsis": {
+        "template": "windows/installer.nsi"
+      }
+    },
     "macOS": {
       "signingIdentity": "-",
       "minimumSystemVersion": "10.15"

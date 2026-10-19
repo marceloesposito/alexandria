@@ -140,15 +140,44 @@ Aggiornato: 15 ottobre 2026 (versione 0.2.0, storia delle versioni in `CHANGELOG
 - **Stile di paragrafo "Didascalia"**: nel menu degli stili, in Formato e nel menu /; nel Markdown
   `<!-- style:caption -->` in coda al paragrafo (accanto a `<!-- align:... -->`); negli export lo stile
   "caption" del layout (Typst), `p.caption` (HTML), lo stile Caption di Word.
-- **Thesaurus offline** (italiano e inglese, lingua di scrittura del Compendium): parola selezionata, tasto
-  destro > "Cerca sinonimi" (o Maiusc+F7); senza una selezione fatta prima resta il menu del sistema col
-  controllo ortografico. Il pannello mostra i significati per categoria, i termini simili e i contrari;
-  un clic sostituisce la parola con le stesse maiuscole. Se la parola non c'e' si provano le forme base
+- **Thesaurus offline** (italiano e inglese, lingua di scrittura del Compendium): dal 18/10/2026 lo usa
+  Picus (sotto), che ha preso il posto del pannello "Cerca sinonimi"; tasto destro su una parola
+  selezionata > "Chiedi a Picus", Maiusc+F7 come prima. I sinonimi escono per significato, flessi come
+  la parola nel testo, con le stesse maiuscole. Se la parola non c'e' si provano le forme base
   (bella -> bello, cities -> city) e in italiano il sinonimo si accorda (amena). Dati: thesaurus MyThes di
   LibreOffice, compressi in `src-tauri/resources/thesaurus/` (0,7 + 4 MB) con le licenze accanto:
   italiano di LibreItalia (GPL-3, distribuito come file separato, non incluso nel codice MIT), inglese da
   WordNet (licenza Princeton). Il Rust (`thesaurus.rs`) decomprime e indicizza alla prima richiesta
   (16 ms e 60 ms) e restituisce il blocco grezzo; l'interpretazione e' in `src/thesaurus/model.ts`.
+- **Picus, il consigliere di scrittura** (`src/picus/`): un picchio flottante e trascinabile nello
+  Scriptorium che parla solo se interrogato, **senza impostazioni a priori** (dal 18/10/2026 niente
+  tono della pergamena, niente categorie disattivate o rilievi ignorati). Si seleziona e si chiede
+  (clic o F7):
+  - **una parola**: sinonimi (thesaurus offline, flessi come nel testo: "looked" -> "appeared",
+    "cerchiamo" -> "ci aspettiamo") divisi per tono, e **contrari** (thesaurus inglese; per l'italiano
+    `@antonym` nel pacchetto, scritti a mano);
+  - **piu' parole** (anche frasi o paragrafi; senza selezione la frase del cursore): **tre riscritture,
+    Formale, Neutra, Informale** (`rewrite.ts`), con i tratti cambiati evidenziati; 1/2/3 o un clic
+    applicano (si cambiano solo i tratti, gli stili restano; un Ctrl+Z annulla tutto), "Pezzo per
+    pezzo" cambia un'unita' sola. Deterministico, niente LLM: unita' del dizionario del pacchetto
+    (locuzioni, giri di parole, contrazioni, riempitivi con la variante vuota `-`, locuzioni nominali
+    con l'articolo accordato: "la chiave di volta" -> "il cardine") e parole piene dal thesaurus, col
+    significato scelto da un Lesk semplificato; il registro delle parole non curate e' stimato da
+    `register.ts` (`@register`: suffissi dotti, particelle dei verbi frasali, sillabe, polisemia in
+    inglese). Si cambia solo cio' che stona con il tono e solo con alternative sicure; i nomi italiani
+    accordano articolo e numero (`@noun`: "i problemi" -> "le grane"). Limite: la riscrittura e'
+    lessicale e fraseologica, non riformula la sintassi.
+  Maiusc+clic o Ctrl+F7 rivede tutta la pergamena: giri di parole e ripetizioni (stessa radice o stesso
+  gruppo entro 50 parole) sottolineati, con le alternative (Alt+F7 il successivo). Motore in TS puro e
+  indipendente dalla lingua, caricato in idle (~47 kB minificati con l'inglese); 0,2 ms per paragrafo
+  nella revisione, una frase riscritta in pochi ms dopo la lettura del thesaurus (una chiamata Rust,
+  `thesaurus_lookup_many`). Ogni lingua e' un pacchetto di soli dati (`.picus`: stopword, stemmer
+  sul modello di Snowball con accordo del 99,99% sui vocabolari di prova, paradigmi a "slot", irregolari,
+  clitici, ausiliari, preposizioni articolate, locuzioni con registro e flag). L'inglese e' incluso;
+  l'italiano e' fra le risorse (`src-tauri/resources/picus/`) e l'installer lo propone nella pagina
+  Componenti (preselezionato se il sistema e' in italiano; `/PICUS=it|none` con `/S`). Sul Mac e nel
+  portable le lingue si aggiungono da Preferenze > Picus > Aggiungi lingua (cartella dati dell'app).
+  Modello NSIS personalizzato in `src-tauri/windows/installer.nsi` (aggiunte marcate "Alexandria:").
 - **Lettura continua del Codex**: la pergamena aperta resta leggibile, il testo delle altre pergamene
   collegate e' attenuato (piu' chiaro al passaggio del mouse).
 - **Spostamento dei blocchi come in Notion** (`src/editor/extensions/blockReorder.ts`): mentre si trascina

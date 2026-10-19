@@ -1446,12 +1446,120 @@
   display: none;
 }
 
-/* ---------------------------------------------------------------- thesaurus */
-.thes {
+/* ---------------------------------------------------------------- Picus, il consigliere di scrittura */
+.picus-hit {
+  --picus: var(--accent);
+  text-decoration: underline dotted var(--picus);
+  text-decoration-thickness: 2px;
+  text-underline-offset: 3px;
+  cursor: pointer;
+}
+
+.picus-hit.is-style {
+  --picus: var(--warn);
+}
+
+.picus-hit.is-tone {
+  --picus: var(--info);
+}
+
+.picus-hit.is-repetition {
+  --picus: var(--series-5);
+}
+
+.picus-hit.is-current {
+  background: color-mix(in srgb, var(--picus) 14%, transparent);
+  border-radius: 2px;
+}
+
+/* il compagno: grande quanto il picchio, il fumetto gli sta accanto */
+.picus {
+  position: fixed;
+  right: 24px;
+  bottom: 56px;
+  /* sotto i dialoghi (100) */
+  z-index: 90;
+  width: 44px;
+  height: 44px;
+}
+
+.picus.is-placed {
+  right: auto;
+  bottom: auto;
+}
+
+.picus__bird {
+  width: 44px;
+  height: 44px;
+  display: grid;
+  place-items: center;
+  border: 1px solid var(--line);
+  border-radius: 50%;
+  background: var(--paper);
+  color: var(--accent);
+  box-shadow: var(--shadow);
+  cursor: pointer;
+  touch-action: none;
+}
+
+.picus__bird:hover {
+  border-color: var(--accent);
+}
+
+.picus__bird:active {
+  cursor: grabbing;
+}
+
+.picus__more {
+  position: absolute;
+  right: -6px;
+  bottom: -6px;
+  background: var(--paper);
+  border: 1px solid var(--line);
+  border-radius: 50%;
+}
+
+.picus__bubble {
+  position: absolute;
+  right: 0;
+  bottom: calc(100% + 8px);
+  width: max-content;
+  max-width: 280px;
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  padding: 6px 6px 6px 10px;
+  background: var(--paper);
+  border: 1px solid var(--line);
+  border-radius: var(--radius);
+  box-shadow: var(--shadow);
+  color: var(--ink);
+  font-size: var(--fs-ui-small);
+}
+
+.picus.is-below .picus__bubble {
+  top: calc(100% + 8px);
+  bottom: auto;
+}
+
+.picus.is-left .picus__bubble {
+  left: 0;
+  right: auto;
+}
+
+.picus__bubble.is-error {
+  border-color: var(--bad);
+}
+
+.picus__nav {
+  display: inline-flex;
+}
+
+.picus-panel {
   position: fixed;
   z-index: 300;
-  width: 340px;
-  max-height: min(420px, 70vh);
+  width: 360px;
+  max-height: min(460px, 70vh);
   display: flex;
   flex-direction: column;
   background: var(--paper);
@@ -1459,65 +1567,118 @@
   border-radius: var(--radius);
   box-shadow: var(--shadow);
   font-size: var(--fs-ui-small);
+  outline: none;
 }
 
-.thes__head {
+.picus-panel:focus-visible {
+  border-color: var(--accent);
+}
+
+.picus-panel__head {
   display: flex;
   align-items: center;
-  gap: 6px;
-  padding: 8px 8px 8px 12px;
+  gap: 4px;
+  padding: 6px 6px 6px 12px;
   border-bottom: 1px solid var(--line);
   color: var(--ink);
-  font-weight: 600;
 }
 
-.thes__head > span:nth-child(2) {
+.picus-panel__orig {
   flex: 1;
   overflow: hidden;
   text-overflow: ellipsis;
   white-space: nowrap;
+  font-weight: 600;
 }
 
-.thes__lang {
-  padding: 1px 6px;
-  border: 1px solid var(--line);
-  border-radius: 999px;
+.picus-panel__tone,
+.picus-panel__count {
   color: var(--muted);
-  font-size: 10px;
-  font-weight: 500;
+  font-weight: 400;
 }
 
-.thes__body {
+.picus-panel__body {
   overflow: auto;
   padding: 8px 12px;
 }
 
-.thes__meaning + .thes__meaning {
-  margin-top: 10px;
+.picus-panel__why {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 6px;
+  margin: 0 0 6px;
+  color: var(--ink-2);
 }
 
-.thes__pos {
-  margin-bottom: 4px;
+.picus-panel__tag {
+  --picus: var(--accent);
+  padding: 0 6px;
+  border: 1px solid var(--picus);
+  border-radius: 999px;
+  color: var(--picus);
+  font-size: 10px;
+  font-weight: 600;
+}
+
+.picus-panel__tag.is-style {
+  --picus: var(--warn);
+}
+
+.picus-panel__tag.is-tone {
+  --picus: var(--info);
+}
+
+.picus-panel__tag.is-repetition {
+  --picus: var(--series-5);
+}
+
+.picus-panel__note {
+  margin: 0 0 6px;
   color: var(--muted);
   font-style: italic;
 }
 
-.thes__terms {
+.picus-panel__sensename {
+  margin: 8px 0 2px;
+  color: var(--muted);
+  font-style: italic;
+}
+
+.picus-panel__sectionhead {
+  margin: 6px 0 4px;
+  padding: 0;
+  border: 0;
+  background: none;
+  color: var(--ink-2);
+  font-size: 11px;
+  font-weight: 600;
+  letter-spacing: 0.04em;
+  text-transform: uppercase;
+  cursor: pointer;
+}
+
+.picus-panel__sectionhead[aria-expanded='false']::after {
+  content: ' …';
+}
+
+.picus-panel__items {
   display: flex;
+  flex-wrap: wrap;
+  gap: 4px;
+}
+
+.picus-panel__choice {
+  display: inline-flex;
   flex-wrap: wrap;
   align-items: center;
   gap: 4px;
 }
 
-.thes__terms + .thes__terms {
-  margin-top: 4px;
-}
-
-.thes__label {
-  color: var(--muted);
-}
-
-.thes__term {
+.picus-panel__item {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
   padding: 2px 8px;
   border: 1px solid var(--line);
   border-radius: 999px;
@@ -1528,28 +1689,135 @@
   cursor: pointer;
 }
 
-.thes__term:hover {
+.picus-panel__item:hover {
   border-color: var(--accent);
   background: var(--accent-soft);
 }
 
-.thes__term.is-rel {
+.picus-panel__item kbd {
   color: var(--muted);
+  font-family: var(--font-ui);
+  font-size: 10px;
+}
+
+.picus-panel__item.is-related {
   border-style: dashed;
 }
 
-.thes__term.is-ant {
-  color: var(--series-7);
-}
-
-.thes__foot {
-  padding: 6px 12px;
-  border-top: 1px solid var(--line);
+.picus-panel__source {
+  margin: 8px 0 0;
   font-size: 11px;
 }
 
-.thes__base {
-  margin: 0 0 8px;
+.picus-panel__item.is-alt {
+  border-style: dashed;
+  color: var(--muted);
+}
+
+.picus-panel__flag {
+  padding: 0 5px;
+  border: 1px solid var(--line);
+  border-radius: 999px;
+  color: var(--muted);
+  font-family: var(--font-ui);
+  font-size: 10px;
+}
+
+.picus-panel__choice > .picus-panel__note {
+  flex-basis: 100%;
+  margin: 0 0 2px 8px;
+  font-size: 11px;
+}
+
+.picus-panel__foot {
+  display: flex;
+  justify-content: flex-end;
+  gap: 6px;
+  padding: 6px 8px;
+  border-top: 1px solid var(--line);
+}
+
+.picus-panel__sense.is-antonyms .picus-panel__sensename {
+  color: var(--series-7);
+}
+
+/* pannello delle riscritture: tre versioni, i tratti cambiati evidenziati */
+.picus-rewrite {
+  width: 440px;
+  max-height: min(560px, 80vh);
+}
+
+.picus-rewrite__version + .picus-rewrite__version {
+  margin-top: 8px;
+}
+
+.picus-rewrite__version .picus-panel__sectionhead kbd {
+  color: var(--muted);
+  font-family: var(--font-ui);
+  font-size: 10px;
+}
+
+.picus-rewrite__text {
+  display: block;
+  width: 100%;
+  padding: 6px 10px;
+  border: 1px solid var(--line);
+  border-radius: var(--radius-small);
+  background: var(--paper);
+  color: var(--ink);
+  font-family: var(--font-text);
+  font-size: 14px;
+  line-height: 1.45;
+  text-align: left;
+  cursor: pointer;
+}
+
+.picus-rewrite__text:hover {
+  border-color: var(--accent);
+  background: var(--accent-soft);
+}
+
+.picus-rewrite__text mark {
+  padding: 0 1px;
+  border-radius: 2px;
+  background: color-mix(in srgb, var(--accent) 22%, transparent);
+  color: inherit;
+}
+
+.picus-rewrite__same {
+  margin: 0;
+  padding: 4px 0;
+}
+
+.picus-rewrite__toggle {
+  margin-top: 12px;
+}
+
+.picus-rewrite__toggle[aria-expanded='false']::after {
+  content: ' …';
+}
+
+.picus-rewrite__tone {
+  min-width: 70px;
+  font-size: 11px;
+}
+
+.picus-langs {
+  flex: 1;
+  margin: 0;
+  padding: 0;
+  list-style: none;
+}
+
+.picus-langs li {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  padding: 2px 0;
+}
+
+.picus-langs li > span:first-child {
+  flex: 1;
 }
 
 /* ---------------------------------------------------------------- blocchi evidenziati (callout) */

@@ -1,0 +1,759 @@
+# Picus: pacchetto inglese (incluso nell'app). Scritto a mano; formato in src/picus/pack.ts.
+@meta
+lang en
+name English
+version 1
+vowels aeiouy
+license MIT (Alexandria); stemmer rules after Snowball English (Porter2), BSD
+
+@stopwords
+a about above after again against all almost also although always am among an and another any anyone
+anything are around as at be because been before being below between both but by can cannot could
+did do does doing done down during each either else enough even ever every for from further get gets
+got had has have having he her here hers herself him himself his how however i if in into is it its
+itself just least less like many may me might more most much must my myself neither never no nor not
+now of off often on once one only or other others our ours ourselves out over own perhaps quite rather
+same shall she should since so some something such than that the their theirs them themselves then
+there these they this those though through thus to too under until up upon us very was we well were
+what when where whether which while who whom whose why will with within without would yet you your
+yours yourself yourselves also still already ever
+
+@stem
+r1prefix gener commun arsen past univers later emerg organ inter
+mark y Y initial,after-vowel
+fixe at bl iz
+undouble bb dd ff gg mm nn pp rr tt
+= skis ski
+= skies sky
+= dying die
+= lying lie
+= tying tie
+= idly idl
+= gently gentl
+= ugly ugli
+= early earli
+= only onli
+= singly singl
+= sky sky
+= news news
+= howe howe
+= atlas atlas
+= cosmos cosmos
+= bias bias
+= andes andes
+= inning inning
+= innings inning
+= outing outing
+= outings outing
+= canning canning
+= herring herring
+= herrings herring
+= earring earring
+= earrings earring
+= proceed proceed
+= proceeds proceed
+= exceed exceed
+= exceeds exceed
+= succeed succeed
+= succeeds succeed
+= added add
+= adding add
+= ebbed ebb
+= ebbing ebb
+= erred err
+= erring err
+= offing off
+= evening evening
+= evenings evening
+# 0: possessivi
+step
+'s','s,' -
+# 1a
+step
+sses ss
+ied,ies i min=2
+ied,ies ie
+us,ss =
+s - vnb
+# 1b
+step
+eed,eedly ee r1
+ed,edly,ing,ingly - v fix
+# 1c
+step
+y,Y i npre=aeiouy min=2
+# 2
+step
+tional tion r1
+enci ence r1
+anci ance r1
+abli able r1
+entli ent r1
+izer,ization ize r1
+ational,ation,ator ate r1
+alism,aliti,alli al r1
+fulness ful r1
+ousli,ousness ous r1
+iveness,iviti ive r1
+biliti,bli ble r1
+ogi og r1 pre=l
+ogist og r1
+fulli ful r1
+lessli less r1
+li - r1 pre=cdeghkmnrt
+# 3
+step
+tional tion r1
+ational ate r1
+alize al r1
+icate,iciti,ical ic r1
+ful,ness - r1
+ative - r2
+# 4
+step
+al,ance,ence,er,ic,able,ible,ant,ement,ment,ent,ism,ate,iti,ous,ive,ize - r2
+ion - r2 pre=st
+# 5
+step
+e - r2
+e - r1 nshort
+l - r2 pre=l
+
+@paradigm
+slots base 3sg past pp ing
+base base
+irregular base past pp 3sg ing
+rule 3sg s,x,z,ch,sh,o>+es Cy>-1+ies *>+s
+rule past e>+d Cy>-1+ied #CVK>++ed *>+ed
+rule pp past
+rule ing ie>-2+ying ee,ye,oe>+ing e>-1+ing #CVK>++ing *>+ing
+# polisillabi con l'accento in fondo: raddoppiano (referred, beginning)
+double refer occur prefer admit commit permit omit regret control compel propel transfer deter incur submit expel begin forget upset
+# verbi regolari che aprono una locuzione del dizionario (gli irregolari si riconoscono da soli)
+verbs look carry figure point sum turn pick check sort work fill try help start need want seem appear resemble
+verbs obtain receive purchase tolerate abandon stop desist
+verbs use utilize employ consider factor allow discover learn ascertain determine perform conduct execute handle
+verbs address tackle cope note observe highlight investigate examine explore establish create devise develop ensure
+verbs postpone delay defer increase decrease decline talk discuss demonstrate assist aid commence kick eliminate
+verbs remove attempt endeavor improve enhance grasp comprehend explain clarify spell decide assume conclude act
+verbs agree tend indicate suggest own reach resemble
+
+@irregular
+be was been is being
+have had had has
+do did done
+go went gone
+arise arose arisen
+awake awoke awoken
+bear bore borne
+beat beat beaten
+begin began begun
+bend bent bent
+bet bet bet
+bind bound bound
+bite bit bitten
+bleed bled bled
+blow blew blown
+break broke broken
+breed bred bred
+bring brought brought
+build built built
+burst burst burst
+buy bought bought
+cast cast cast
+catch caught caught
+choose chose chosen
+cling clung clung
+come came come
+cost cost cost
+creep crept crept
+cut cut cut
+deal dealt dealt
+dig dug dug
+draw drew drawn
+drink drank drunk
+drive drove driven
+dwell dwelt dwelt
+eat ate eaten
+fall fell fallen
+feed fed fed
+feel felt felt
+fight fought fought
+find found found
+flee fled fled
+fling flung flung
+fly flew flown
+forbid forbade forbidden
+forget forgot forgotten
+forgive forgave forgiven
+freeze froze frozen
+get got got
+give gave given
+grind ground ground
+grow grew grown
+hang hung hung
+hear heard heard
+hide hid hidden
+hit hit hit
+hold held held
+hurt hurt hurt
+keep kept kept
+kneel knelt knelt
+know knew known
+lay laid laid
+lead led led
+leave left left
+lend lent lent
+let let let
+lie lay lain
+light lit lit
+lose lost lost
+make made made
+mean meant meant
+meet met met
+pay paid paid
+prove proved proven
+put put put
+quit quit quit
+read read read
+ride rode ridden
+ring rang rung
+rise rose risen
+run ran run
+say said said
+see saw seen
+seek sought sought
+sell sold sold
+send sent sent
+set set set
+sew sewed sewn
+shake shook shaken
+shed shed shed
+shine shone shone
+shoot shot shot
+show showed shown
+shrink shrank shrunk
+shut shut shut
+sing sang sung
+sink sank sunk
+sit sat sat
+sleep slept slept
+slide slid slid
+sow sowed sown
+speak spoke spoken
+speed sped sped
+spend spent spent
+spin spun spun
+spit spat spat
+split split split
+spread spread spread
+spring sprang sprung
+stand stood stood
+steal stole stolen
+stick stuck stuck
+sting stung stung
+stink stank stunk
+stride strode stridden
+strike struck struck
+string strung strung
+strive strove striven
+swear swore sworn
+sweep swept swept
+swell swelled swollen
+swim swam swum
+swing swung swung
+take took taken
+teach taught taught
+tear tore torn
+tell told told
+think thought thought
+throw threw thrown
+thrust thrust thrust
+tread trod trodden
+wake woke woken
+wear wore worn
+weave wove woven
+weep wept wept
+win won won
+wind wound wound
+wring wrung wrung
+write wrote written
+
+@derive
+come become overcome
+take mistake undertake overtake retake partake
+stand understand withstand
+go undergo forgo
+draw withdraw
+hold behold uphold withhold
+tell foretell
+see foresee oversee
+write rewrite underwrite
+make remake
+do undo redo outdo overdo
+set upset reset offset
+cast broadcast forecast
+lay mislay
+lead mislead
+think rethink
+build rebuild
+run outrun overrun
+bear forbear
+spend overspend
+give misgive
+
+@agree
+be base to,will,would,can,could,may,might,must,shall,should,do,does,did,don't,doesn't,didn't,won't,wouldn't,can't,couldn't,shouldn't,mustn't,not,never,let>be i>am *>are
+be past we,you,they,these,those>were *>was
+
+@aux
+have *
+
+# ---- connettivi ----
+@sense consequence
+therefore            +1
+thus                 +1
+hence                +2
+consequently         +1
+accordingly          +2
+as a result           0
+for this reason       0
+that is why          -1
+
+@sense addition
+moreover             +1
+furthermore          +1
+in addition           0
+additionally          0
+what is more          0
+besides              -1
+on top of that       -1
+
+@sense contrast
+however               0
+nevertheless         +1
+nonetheless          +1
+even so              -1
+all the same         -1
+
+@sense example
+for example           0
+for instance          0
+by way of example    +2
+
+@sense summary
+in short              0
+in brief             +1
+in summary           +1
+to sum up             0
+in a nutshell        -1  figurative
+all in all           -1
+
+@sense emphasis
+in fact               0
+indeed               +1
+as a matter of fact   0
+actually             -1
+
+@sense cause
+because of            0
+due to                0
+owing to             +1
+on account of        +1
+as a result of        0
+thanks to            -1  note:only when the cause is positive
+
+@sense topic
+regarding            +1
+with regard to       +2
+with respect to      +2
+as regards           +2
+as for                0
+when it comes to     -1
+
+@sense nowadays
+nowadays             -1
+today                 0
+currently             0
+at present           +1
+these days           -1
+
+@sense opening
+first of all         -1
+first                 0
+to begin with         0
+firstly               0
+
+@sense evidently
+obviously            -1
+clearly               0
+evidently            +1
+plainly               0
+
+@sense nearly
+almost                0
+nearly                0
+virtually            +1
+practically          -1
+
+@sense hedge
+perhaps               0
+maybe                -1
+possibly              0
+arguably             +1
+
+@sense intensifier
+very                  0
+extremely            +1
+highly               +1
+really               -1
+incredibly           -1  emphatic
+super                -2
+
+@sense quantity
+many                  0
+numerous             +1
+a lot of             -1
+lots of              -2
+plenty of            -1
+a great deal of      +1  note:only with uncountable nouns (a great deal of time)
+
+# registro stimato delle parole che il dizionario non conosce (sinonimi del thesaurus)
+@register
+suffix +1 tion sion ity ence ance ize ise ify ous ive ical ure ism
+suffix 0.5 ment ant ent ary ory ial
+word -2 gonna wanna kinda sorta ain't yeah yep nope awesome cool dude
+word -1 get gets got stuff thing things kids guy guys okay ok pretty huge tons lots bunch fix chat buy boss job
+word 1 therefore thus hence moreover furthermore whereas regarding obtain require purchase assist commence utilize sufficient numerous approximately
+particles -1 up out off down away over back around about through along
+long 4 0.5
+short 1 -0.5
+poly 8 -0.5
+
+# ---- tono: contrazioni, riempitivi (la variante "-" toglie la parola) ----
+@sense do not
+do not                0  fixed
+don't                -1  fixed
+@sense does not
+does not              0  fixed
+doesn't              -1  fixed
+@sense did not
+did not               0  fixed
+didn't               -1  fixed
+@sense is not
+is not                0  fixed
+isn't                -1  fixed
+@sense are not
+are not               0  fixed
+aren't               -1  fixed
+@sense was not
+was not               0  fixed
+wasn't               -1  fixed
+@sense cannot
+cannot                0  fixed
+can't                -1  fixed
+@sense will not
+will not              0  fixed
+won't                -1  fixed
+@sense would not
+would not             0  fixed
+wouldn't             -1  fixed
+@sense should not
+should not            0  fixed
+shouldn't            -1  fixed
+@sense it is
+it is                 0  fixed
+it's                 -1  fixed
+@sense that is
+that is               0  fixed
+that's               -1  fixed
+@sense there is
+there is              0  fixed
+there's              -1  fixed
+@sense we are
+we are                0  fixed
+we're                -1  fixed
+@sense they are
+they are              0  fixed
+they're              -1  fixed
+@sense let us
+let us               +1  fixed
+let's                 0  fixed
+
+@sense filler
+basically            -1
+-                     0
+
+@sense a lot
+a lot                -1
+a great deal         +1
+considerably         +1
+
+@sense okay
+okay                 -1
+fine                  0
+acceptable           +1
+
+@sense children
+kids                 -1
+children              0
+
+@sense obtain
+get                  -1
+obtain               +1
+receive               0
+
+@sense buy
+buy                   0
+purchase             +1
+
+@sense enough
+enough                0
+sufficient           +1
+
+@sense give up
+give up              -1
+desist               +1
+abandon              +1  note:needs an object (abandon the plan)
+stop                  0
+
+@sense put up with
+put up with          -1
+tolerate             +1
+bear                  0
+
+# articoli delle locuzioni nominali ("a keystone" -> "an essential element")
+@article
+cls V a e i o u !uni !use !usu !eu !one !ua
+def * the
+ind * a an:V
+
+# ---- locuzioni nominali (per il resto ci sono le locuzioni del thesaurus) ----
+@sense keystone
+keystone              0  g:n figurative
+cornerstone           0  g:n figurative
+linchpin              0  g:n figurative
+mainstay              0  g:n
+essential element     0  g:n
+
+@sense weak point
+weak point            0  g:n
+weakness              0  g:n
+Achilles' heel        0  g:n figurative
+weak spot            -1  g:n
+
+@sense turning point
+turning point         0  g:n
+milestone             0  g:n figurative
+watershed            +1  g:n figurative
+
+@sense point of view
+point of view         0  g:n
+perspective           0  g:n
+viewpoint             0  g:n
+standpoint           +1  g:n
+
+# ---- verbi e locuzioni verbali ----
+@sense resemblance
+look like             0
+resemble             +1
+bear a resemblance to +2
+be similar to         0
+take after           -1  note:only between relatives
+be the spitting image of -1  figurative
+be a dead ringer for -2  figurative
+
+@sense seeming
+look like             0
+seem                  0
+appear               +1
+look as if            0
+
+@sense take into account
+take into account     0
+consider              0
+bear in mind          0
+keep in mind         -1
+allow for             0
+factor in            -1
+
+@sense take it into account
+take * into account   0
+consider *            0
+bear * in mind        0
+keep * in mind       -1
+factor * in          -1
+
+@sense discover
+find out             -1
+discover              0
+ascertain            +2
+determine            +1
+figure out           -1
+learn                 0
+
+@sense perform
+carry out             0
+perform              +1
+conduct              +1
+execute              +1
+undertake            +2
+
+@sense handle
+deal with             0
+handle                0
+address              +1
+tackle                0
+cope with             0  note:means managing something difficult
+
+@sense point out
+point out             0
+note                 +1
+observe              +1
+highlight             0
+
+@sense investigate
+look into            -1
+investigate          +1
+examine              +1
+explore               0
+
+@sense establish
+set up               -1
+establish            +1
+create                0
+
+@sense devise
+come up with         -1
+devise               +1
+think up             -1
+develop               0
+
+@sense ensure
+make sure             0
+ensure               +1
+
+@sense postpone
+put off              -1
+postpone              0
+delay                 0
+defer                +1
+
+@sense increase
+go up                -1
+increase              0
+rise                  0
+
+@sense decrease
+go down              -1
+decrease              0
+decline              +1
+fall                  0
+
+@sense discuss
+talk about           -1
+discuss               0
+
+@sense show
+show                  0
+demonstrate          +1
+
+@sense assist
+help                  0
+assist               +1
+aid                  +1
+
+@sense begin
+begin                 0
+start                 0
+commence             +2
+kick off             -2  figurative
+
+@sense remove
+get rid of           -1
+eliminate            +1
+remove                0
+
+@sense use
+use                   0
+utilize              +1  note:often plain "use" is better
+employ               +1
+make use of           0
+
+@sense attempt
+try                   0
+attempt              +1
+endeavor             +2  note:British spelling "endeavour"
+
+@sense improve
+improve               0
+get better           -1
+enhance              +1
+
+@sense understand
+understand            0
+grasp                 0
+comprehend           +1
+make sense of         0
+
+@sense explain
+explain               0
+clarify              +1
+spell out            -1
+shed light on         0  figurative
+
+# ---- giri di parole e ridondanze (in un senso solo) ----
+@replace
+in order to -> to                                  reason:wordy
+due to the fact that -> because | since            reason:wordy
+owing to the fact that -> because                  reason:wordy
+in view of the fact that -> because | since        reason:wordy
+in light of the fact that -> because | given that  reason:wordy
+despite the fact that -> although | though         reason:wordy
+in spite of the fact that -> although | though     reason:wordy
+at this point in time -> now | currently           reason:wordy
+at the present time -> now | currently             reason:wordy
+at that point in time -> then                      reason:wordy
+in the event that -> if                            reason:wordy
+in the near future -> soon                         reason:wordy
+a large number of -> many                          reason:wordy
+the majority of -> most                            reason:wordy
+in close proximity to -> near | close to           reason:wordy
+with the exception of -> except | except for       reason:wordy
+for the purpose of -> for                          reason:wordy
+on a daily basis -> daily | every day              reason:wordy
+on a regular basis -> regularly                    reason:wordy
+in a timely manner -> promptly | on time           reason:wordy
+until such time as -> until                        reason:wordy
+in excess of -> more than                          reason:wordy
+it is important to note that -> note that          reason:wordy
+it should be noted that -> note that               reason:wordy
+there is no doubt that -> undoubtedly | certainly  reason:wordy
+has the ability to -> can                          reason:wordy
+make a decision -> decide                          reason:wordy
+make an assumption -> assume                       reason:wordy
+come to a conclusion -> conclude                   reason:wordy
+give consideration to -> consider                  reason:wordy
+conduct an investigation into -> investigate       reason:wordy
+reach an agreement -> agree                        reason:wordy
+have a tendency to -> tend to                      reason:wordy
+make an attempt to -> try to | attempt to +1       reason:wordy
+be indicative of -> indicate | suggest             reason:wordy
+be in possession of -> have | own                  reason:wordy
+prior to +1 -> before                              reason:pompous
+subsequent to +2 -> after                          reason:pompous
+in regard to -> regarding +1 | about               reason:wordy
+in regards to -> regarding +1 | about              reason:nonstandard
+each and every -> every | each                     reason:redundant
+first and foremost -> first                        reason:redundant
+end result -> result                               reason:redundant
+final outcome -> outcome                           reason:redundant
+past history -> history                            reason:redundant
+future plans -> plans                              reason:redundant
+advance planning -> planning                       reason:redundant
+basic fundamentals -> fundamentals | basics        reason:redundant
+close proximity -> proximity                       reason:redundant
+true fact -> fact                                  reason:redundant
+unexpected surprise -> surprise                    reason:redundant
+very unique -> unique                              reason:absolute
+the reason why is because -> the reason is that    reason:redundant

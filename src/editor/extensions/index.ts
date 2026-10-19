@@ -33,7 +33,8 @@ import { CustomShortcuts } from './customShortcuts';
 import { Insertion, Deletion, TrackChanges } from './track';
 import { FocusBlock } from './focusBlock';
 import { BlockReorder } from './blockReorder';
-import { ThesaurusMenu } from '../../thesaurus/ui';
+import { PicusMenu } from '../../picus/menu';
+import { PicusMarks } from '../../picus/plugin';
 import { PageView } from '../pagination';
 
 /** Tabella con l'allineamento delle colonne del Markdown (GFM). */
@@ -71,7 +72,8 @@ export function buildExtensions() {
     }),
     FocusBlock,
     BlockReorder,
-    ThesaurusMenu,
+    PicusMenu,
+    PicusMarks,
     Figure,
     Embed,
     MathBlock,

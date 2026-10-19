@@ -16,6 +16,7 @@ import { registerWritingLang } from './shell/WritingLang';
 import { registerColorWidgets } from './editor/FormatBar';
 import { AppendDialog } from './vault/AppendDialog';
 import { registerTitleSync } from './editor/titleSync';
+import { registerPicus } from './picus';
 
 let done = false;
 
@@ -28,6 +29,7 @@ export function registerAll() {
   registerEditorCommands();
   registerComments();
   registerRevision();
+  registerPicus();
   registerVersions();
   registerResources();
   registerTitleSync();

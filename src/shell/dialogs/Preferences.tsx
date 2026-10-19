@@ -7,6 +7,7 @@ import { platform } from '../../platform';
 import type { Prefs, ThemePref } from '../../state/prefs';
 import { Sun, Moon, Monitor } from 'lucide-react';
 import { ShortcutsPrefs } from './ShortcutsPrefs';
+import { PicusPrefs } from '../../picus/PicusPrefs';
 
 const THEMES: { id: ThemePref; icon: typeof Sun; label: string }[] = [
   { id: 'light', icon: Sun, label: 'prefs.theme.light' },
@@ -14,20 +15,23 @@ const THEMES: { id: ThemePref; icon: typeof Sun; label: string }[] = [
   { id: 'system', icon: Monitor, label: 'prefs.theme.system' },
 ];
 
-type Tab = 'general' | 'editor' | 'versions' | 'resources' | 'shortcuts';
+type Tab = 'general' | 'editor' | 'picus' | 'versions' | 'resources' | 'shortcuts';
 
 export function PreferencesDialog() {
   useLang();
   const prefs = useWorkspace((s) => s.app.prefs);
   const set = (p: Partial<Prefs>) => useWorkspace.getState().setPrefs(p);
   const close = () => useWorkspace.getState().closeDialog();
-  // si puo' aprire direttamente su una scheda (es. Aiuto > Scorciatoie > Personalizza)
-  const [tab, setTab] = useState<Tab>(() => (useWorkspace.getState().dialogArg === 'shortcuts' ? 'shortcuts' : 'general'));
+  // si puo' aprire direttamente su una scheda (es. Aiuto > Scorciatoie > Personalizza, il menu di Picus)
+  const [tab, setTab] = useState<Tab>(() => {
+    const arg = useWorkspace.getState().dialogArg;
+    return arg === 'shortcuts' || arg === 'picus' ? arg : 'general';
+  });
 
   return (
     <Modal title={t('cmd.app.preferences')} onClose={close} size="medium">
       <div className="tabs-row" role="tablist">
-        {(['general', 'editor', 'versions', 'resources', 'shortcuts'] as Tab[]).map((x) => (
+        {(['general', 'editor', 'picus', 'versions', 'resources', 'shortcuts'] as Tab[]).map((x) => (
           <button key={x} role="tab" aria-selected={tab === x} className={`seg ${tab === x ? 'is-active' : ''}`} onClick={() => setTab(x)}>
             {t(`prefs.tab.${x}`)}
           </button>
@@ -80,6 +84,7 @@ export function PreferencesDialog() {
           </>
         )}
         {tab === 'shortcuts' && <ShortcutsPrefs />}
+        {tab === 'picus' && <PicusPrefs />}
         {tab === 'editor' && (
           <>
             <label className="form__check">

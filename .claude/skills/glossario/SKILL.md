@@ -24,6 +24,7 @@ Unica eccezione voluta dal committente: in italiano lo Scroll si chiama **pergam
 | Index | l'indice dei contenuti | — |
 | Silentium | la scrittura minimale | zen |
 | Recensio | la copia per revisione (`.recensio`) | — |
+| Picus | il consigliere di scrittura (il picchio indovino di Circe) | Clippy, picchio, woodpecker |
 
 ## Regole
 - Gli identificatori interni non sono cambiati (`resources`, `versions`, `view === 'resources'`...).

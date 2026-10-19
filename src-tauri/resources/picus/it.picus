@@ -1,0 +1,875 @@
+# Picus: pacchetto italiano (facoltativo: si sceglie nell'installer o si aggiunge da Preferenze).
+# Scritto a mano; formato in src/picus/pack.ts.
+@meta
+lang it
+name Italiano
+version 1
+vowels aeiouàèéìíòóù
+elision on
+license MIT (Alexandria); regole dello stemmer da Snowball Italian, BSD
+
+@stopwords
+a ad al allo ai agli all alla alle anche ancora avere aveva avevano c che chi ci come con contro cui
+da dal dallo dai dagli dall dalla dalle de dei degli del dell della delle dello di dove e ed era erano
+essere fa fino fra gli ha hanno ho i il in io la le lei li lo loro lui ma me mi mia mie miei mio ne
+negli nei nel nell nella nelle nello noi non nostra nostre nostri nostro o od ogni per perché più poi
+quale quali quando quanto quella quelle quelli quello questa queste questi questo se sei si sia siamo
+siete solo sono sta stata stati stato su sua sue sugli sui sul sull sulla sulle sullo suo suoi ti
+tra tu tua tue tuo tuoi tutti tutto un una uno vi voi già così molto poco tanto ciò essa esso esse
+essi cosa fare fatto può possono deve devono stesso stessa stessi stesse altro altra altri altre
+mentre dopo prima sempre ora qui lì là però quindi dunque infatti oppure anzi invece neanche nemmeno
+neppure dell' all' dall' nell' sull' l' un' quest' quell'
+
+@stem
+rv
+mark á à *
+mark é è *
+mark í ì *
+mark ó ò *
+mark ú ù *
+mark u U after=q
+mark u U between-vowels
+mark i I between-vowels
+# 0: pronomi attaccati (parlarne -> parlare, mostrandolo -> mostrando -> mostr)
+step
+ci,gli,la,le,li,lo,mi,ne,si,ti,vi,sene,gliela,gliele,glieli,glielo,gliene,mela,mele,meli,melo,mene,tela,tele,teli,telo,tene,cela,cele,celi,celo,cene,vela,vele,veli,velo,vene - rv prestr=ando,endo
+ci,gli,la,le,li,lo,mi,ne,si,ti,vi,sene,gliela,gliele,glieli,glielo,gliene,mela,mele,meli,melo,mene,tela,tele,teli,telo,tene,cela,cele,celi,celo,cene,vela,vele,veli,velo,vene e rv prestr=ar,er,ir
+# 1: suffissi
+step
+anza,anze,ico,ici,ica,ice,iche,ichi,ismo,ismi,abile,abili,ibile,ibili,ista,iste,isti,istà,istè,istì,oso,osi,osa,ose,mente,atrice,atrici,ante,anti - r2
+azione,azioni,atore,atori - r2 then=ic@r2
+logia,logie log r2
+uzione,uzioni,usione,usioni u r2
+enza,enze ente r2
+amento,amenti,imento,imenti - rv
+amente - r1 then=iv>at,os,ic,abil@r2
+ità - r2 then=abil,ic,iv@r2
+ivo,ivi,iva,ive - r2 then=at>ic@r2
+# 2: desinenze verbali, solo se il passo 1 non ha tolto nulla
+step ifnone limit=rv
+ammo,ando,ano,are,arono,asse,assero,assi,assimo,ata,ate,ati,ato,ava,avamo,avano,avate,avi,avo,emmo,enda,ende,endi,endo,erà,erai,eranno,ere,erebbe,erebbero,erei,eremmo,eremo,ereste,eresti,erete,erò,erono,essero,ete,eva,evamo,evano,evate,evi,evo,Yamo,iamo,immo,irà,irai,iranno,ire,irebbe,irebbero,irei,iremmo,iremo,ireste,iresti,irete,irò,irono,isca,iscano,isce,isci,isco,iscono,issero,ita,ite,iti,ito,iva,ivamo,ivano,ivate,ivi,ivo,ono,uta,ute,uti,uto,ar,ir - rv
+# 3a: vocale finale (e la i che la precede)
+step
+a,e,i,o,à,è,ì,ò - rv then=i@rv
+# 3b
+step
+ch c rv
+gh g rv
+
+@paradigm
+slots inf ger pp*4 pres*6 impf*6 pr*6 fut*6 cond*6 cong*6 congi*6
+base inf
+
+class are
+ending are
+inf are
+ger ando
+pp ato ata ati ate
+pres o i a iamo ate ano
+impf avo avi ava avamo avate avano
+pr ai asti ò ammo aste arono
+fut erò erai erà eremo erete eranno
+cond erei eresti erebbe eremmo ereste erebbero
+cong i i i iamo iate ino
+congi assi assi asse assimo aste assero
+# cerc+i -> cerchi, pag+erò -> pagherò, mangi+erò -> mangerò, lasci+i -> lasci, studi+iamo -> studiamo
+join ci i,e c
+join gi i,e g
+join c i,e ch
+join g i,e gh
+join i i -
+strip fut er
+strip cond er
+strip pp at
+link cond fut
+link congi impf
+link ger impf
+link pr impf
+strong pr i - e - - ero
+
+class ere
+ending ere
+inf ere
+ger endo
+pp uto uta uti ute
+pres o i e iamo ete ono
+impf evo evi eva evamo evate evano
+pr ei esti é emmo este erono
+fut erò erai erà eremo erete eranno
+cond erei eresti erebbe eremmo ereste erebbero
+cong a a a iamo iate ano
+congi essi essi esse essimo este essero
+join i i -
+strip fut er
+strip cond er
+strip pp ut
+link cond fut
+link congi impf
+link ger impf
+link pr impf
+strong pr i - e - - ero
+
+class ire
+ending ire
+inf ire
+ger endo
+pp ito ita iti ite
+pres o i e iamo ite ono
+impf ivo ivi iva ivamo ivate ivano
+pr ii isti ì immo iste irono
+fut irò irai irà iremo irete iranno
+cond irei iresti irebbe iremmo ireste irebbero
+cong a a a iamo iate ano
+congi issi issi isse issimo iste issero
+join i i -
+strip fut ir
+strip cond ir
+strip pp it
+link cond fut
+link congi impf
+link ger impf
+link pr impf
+strong pr i - e - - ero
+
+# -ire con -isc- (capisco)
+class isc ire
+pres isco isci isce iamo ite iscono
+cong isca isca isca iamo iate iscano
+members capire finire preferire costruire gestire garantire definire chiarire suggerire fornire stabilire
+members sostituire contribuire distribuire colpire impedire favorire agire reagire subire unire riunire punire
+members pulire spedire tradire obbedire abolire custodire digerire esaurire inserire istruire percepire proibire
+members restituire sparire stupire svanire trasferire attribuire diminuire interferire concepire demolire
+members arricchire impoverire influire costituire istituire intuire guarire ferire aderire conferire riferire
+members approfondire ingrandire
+
+@irregular
+essere class=ere inf=essere ger=essendo pp=stato pres=sono,sei,è,siamo,siete,sono impf=ero,eri,era,eravamo,eravate,erano pr=fui,fosti,fu,fummo,foste,furono fut=sar cong=sia,sia,sia,siamo,siate,siano congi=fossi,fossi,fosse,fossimo,foste,fossero aux=essere
+avere pres=ho,hai,ha,abbiamo,avete,hanno fut=avr prs=ebb cong=abbia,abbia,abbia,abbiamo,abbiate,abbiano pp=avuto
+fare class=ere inf=fare stem=fac pres=faccio,fai,fa,facciamo,fate,fanno fut=far prs=fec cong=faccia,faccia,faccia,facciamo,facciate,facciano pp=fatto
+dare pres=do,dai,dà,diamo,date,danno fut=dar pr=diedi,desti,diede,demmo,deste,diedero cong=dia,dia,dia,diamo,diate,diano congi=dessi,dessi,desse,dessimo,deste,dessero pp=dato
+stare pres=sto,stai,sta,stiamo,state,stanno fut=star pr=stetti,stesti,stette,stemmo,steste,stettero cong=stia,stia,stia,stiamo,stiate,stiano congi=stessi,stessi,stesse,stessimo,steste,stessero aux=essere
+andare pres=vado,vai,va,andiamo,andate,vanno fut=andr cong=vada,vada,vada,andiamo,andiate,vadano aux=essere
+dire class=ere inf=dire stem=dic pres=dico,dici,dice,diciamo,dite,dicono fut=dir prs=diss cong=dica,dica,dica,diciamo,diciate,dicano pp=detto
+potere pres=posso,puoi,può,possiamo,potete,possono fut=potr cong=possa,possa,possa,possiamo,possiate,possano
+dovere pres=devo,devi,deve,dobbiamo,dovete,devono fut=dovr cong=debba,debba,debba,dobbiamo,dobbiate,debbano
+volere pres=voglio,vuoi,vuole,vogliamo,volete,vogliono fut=vorr prs=voll cong=voglia,voglia,voglia,vogliamo,vogliate,vogliano
+sapere pres=so,sai,sa,sappiamo,sapete,sanno fut=sapr prs=sepp cong=sappia,sappia,sappia,sappiamo,sappiate,sappiano
+venire pres=vengo,vieni,viene,veniamo,venite,vengono fut=verr prs=venn cong=venga,venga,venga,veniamo,veniate,vengano pp=venuto
+tenere pres=tengo,tieni,tiene,teniamo,tenete,tengono fut=terr prs=tenn cong=tenga,tenga,tenga,teniamo,teniate,tengano
+rimanere pres=rimango,rimani,rimane,rimaniamo,rimanete,rimangono fut=rimarr prs=rimas cong=rimanga,rimanga,rimanga,rimaniamo,rimaniate,rimangano pp=rimasto
+valere pres=valgo,vali,vale,valiamo,valete,valgono fut=varr prs=vals cong=valga,valga,valga,valiamo,valiate,valgano pp=valso
+parere pres=paio,pari,pare,paiamo,parete,paiono fut=parr prs=parv cong=paia,paia,paia,paiamo,paiate,paiano pp=parso
+uscire pres=esco,esci,esce,usciamo,uscite,escono cong=esca,esca,esca,usciamo,usciate,escano
+morire pres=muoio,muori,muore,moriamo,morite,muoiono fut=morr cong=muoia,muoia,muoia,moriamo,moriate,muoiano pp=morto
+salire pres=salgo,sali,sale,saliamo,salite,salgono cong=salga,salga,salga,saliamo,saliate,salgano
+piacere pres=piaccio,piaci,piace,piacciamo,piacete,piacciono prs=piacqu cong=piaccia,piaccia,piaccia,piacciamo,piacciate,piacciano pp=piaciuto
+bere class=ere inf=bere stem=bev fut=berr prs=bevv pp=bevuto
+porre class=ere inf=porre stem=pon pres=pongo,poni,pone,poniamo,ponete,pongono fut=porr prs=pos cong=ponga,ponga,ponga,poniamo,poniate,pongano pp=posto
+trarre class=ere inf=trarre stem=tra pres=traggo,trai,trae,traiamo,traete,traggono fut=trarr prs=trass cong=tragga,tragga,tragga,traiamo,traiate,traggano pp=tratto
+# radice comune di condurre, produrre, ridurre...
+durre class=ere inf=durre stem=duc pres=duco,duci,duce,duciamo,ducete,ducono fut=durr prs=duss cong=duca,duca,duca,duciamo,duciate,ducano pp=dotto
+# rendere fa anche prendere, comprendere, sorprendere... (p+resi, p+reso)
+rendere prs=res pp=reso
+mettere prs=mis pp=messo
+vedere fut=vedr prs=vid pp=visto
+chiedere prs=chies pp=chiesto
+spondere prs=spos pp=sposto
+scegliere pres=scelgo,scegli,sceglie,scegliamo,scegliete,scelgono prs=scels cong=scelga,scelga,scelga,scegliamo,scegliate,scelgano pp=scelto
+cogliere pres=colgo,cogli,coglie,cogliamo,cogliete,colgono prs=cols cong=colga,colga,colga,cogliamo,cogliate,colgano pp=colto
+togliere pres=tolgo,togli,toglie,togliamo,togliete,tolgono prs=tols cong=tolga,tolga,tolga,togliamo,togliate,tolgano pp=tolto
+sciogliere pres=sciolgo,sciogli,scioglie,sciogliamo,sciogliete,sciolgono prs=sciols cong=sciolga,sciolga,sciolga,sciogliamo,sciogliate,sciolgano pp=sciolto
+leggere prs=less pp=letto
+reggere prs=ress pp=retto
+proteggere prs=protess pp=protetto
+scrivere prs=scriss pp=scritto
+vivere fut=vivr prs=viss pp=vissuto
+correre prs=cors pp=corso
+giungere prs=giuns pp=giunto aux=essere
+volgere prs=vols pp=volto
+spingere prs=spins pp=spinto
+stringere prs=strins pp=stretto
+fingere prs=fins pp=finto
+distinguere prs=distins pp=distinto
+vincere prs=vins pp=vinto
+discutere prs=discuss pp=discusso
+cludere prs=clus pp=cluso
+chiudere prs=chius pp=chiuso
+cidere prs=cis pp=ciso
+dividere prs=divis pp=diviso
+ridere prs=ris pp=riso
+sumere prs=suns pp=sunto
+primere prs=press pp=presso
+muovere prs=moss pp=mosso
+nascere prs=nacqu pp=nato
+crescere prs=crebb pp=cresciuto
+conoscere prs=conobb pp=conosciuto
+perdere prs=pers pp=perso
+cendere prs=ces pp=ceso
+tendere prs=tes pp=teso
+pendere prs=pes pp=peso
+fendere prs=fes pp=feso
+emergere prs=emers pp=emerso
+sorgere prs=sors pp=sorto
+dirigere prs=dires pp=diretto
+sistere pp=sistito
+cedere prs=cess pp=cesso
+solvere prs=sols pp=solto
+accorgere prs=accors pp=accorto
+nascondere prs=nascos pp=nascosto
+rompere prs=rupp pp=rotto
+cadere fut=cadr prs=cadd
+parire pres=paio,pari,pare,pariamo,parite,paiono prs=parv cong=paia,paia,paia,pariamo,pariate,paiano pp=parso
+prire pp=perto
+ffrire pp=fferto
+succedere prs=success pp=successo
+
+@derive
+rendere prendere comprendere apprendere sorprendere riprendere intraprendere arrendere
+mettere ammettere commettere permettere promettere sottomettere trasmettere scommettere
+porre proporre esporre comporre disporre supporre imporre opporre deporre riporre sottoporre predisporre
+trarre attrarre distrarre estrarre sottrarre contrarre ritrarre
+durre condurre produrre ridurre introdurre tradurre dedurre indurre sedurre
+venire avvenire convenire divenire intervenire pervenire prevenire provenire svenire
+tenere ottenere mantenere sostenere contenere trattenere ritenere appartenere intrattenere detenere
+vedere prevedere rivedere intravedere
+fare rifare disfare
+dire contraddire predire disdire
+chiedere richiedere
+spondere rispondere corrispondere
+cogliere accogliere raccogliere
+leggere eleggere rileggere
+reggere correggere
+scrivere descrivere prescrivere iscrivere trascrivere sottoscrivere
+correre percorrere ricorrere soccorrere occorrere concorrere trascorrere
+giungere raggiungere aggiungere congiungere
+volgere svolgere rivolgere coinvolgere sconvolgere
+stringere costringere
+vincere convincere
+cludere concludere includere escludere precludere
+cidere decidere uccidere incidere coincidere
+dividere condividere
+sumere assumere presumere riassumere desumere
+primere esprimere imprimere comprimere reprimere opprimere sopprimere
+muovere promuovere commuovere rimuovere smuovere
+conoscere riconoscere
+cendere accendere scendere discendere
+tendere attendere estendere intendere pretendere contendere stendere
+pendere dipendere spendere sospendere appendere
+fendere difendere offendere
+sistere assistere esistere insistere consistere resistere persistere
+cedere concedere
+solvere risolvere assolvere
+parire apparire comparire scomparire
+prire aprire coprire scoprire ricoprire riaprire
+ffrire offrire soffrire
+uscire riuscire
+
+@aux
+avere *
+essere reflexive essere stare andare venire uscire riuscire diventare sembrare apparire comparire scomparire
+essere nascere morire rimanere restare arrivare partire cadere tornare entrare salire scendere succedere
+essere accadere bastare dipendere costare esistere consistere piacere parere crescere emergere sorgere
+essere avvenire divenire intervenire provenire svenire valere giungere sparire
+
+@clitic
+person mi ti si ci vi si
+beforene me te se ce ve se
+modals dovere potere volere sapere
+
+@prep
+di del:il dello:lo della:la dei:i degli:gli delle:le dell':l'
+a al:il allo:lo alla:la ai:i agli:gli alle:le all':l'
+da dal:il dallo:lo dalla:la dai:i dagli:gli dalle:le dall':l'
+in nel:il nello:lo nella:la nei:i negli:gli nelle:le nell':l'
+su sul:il sullo:lo sulla:la sui:i sugli:gli sulle:le sull':l'
+drop che
+
+# registro stimato delle parole che il dizionario non conosce (sinonimi del thesaurus)
+@register
+suffix +1 ismo istico
+suffix 0.5 zione sione ità evole ibile abile
+suffix 0.5 mento enza anza
+word -2 figo casino boh mitico sfiga
+word -1 roba cosa cose tizio mica okay ok beccare fregare prof bici
+word 1 pertanto tuttavia nondimeno qualora nonché ossia ovvero altresì giacché poiché sebbene benché
+particles -1 fuori su giù via dentro sopra sotto indietro avanti
+long 5 0.5
+short 1 -0.5
+
+# ---- tono: riempitivi e locuzioni colloquiali ----
+@sense cioè
+cioè                       -1
+vale a dire                 0
+ossia                      +1
+ovvero                     +1
+
+@sense un sacco di
+un sacco di                -2
+un mucchio di              -1
+una grande quantità di      0
+una notevole quantità di   +1
+
+@sense un sacco
+un sacco                   -2
+moltissimo                  0
+enormemente                +1
+
+@sense va bene
+ok                         -1
+va bene                     0
+d'accordo                   0
+
+@sense porre una domanda
+fare una domanda            0
+porre una domanda          +1
+chiedere                    0
+
+@sense sistemare
+mettere a posto            -1
+sistemare                   0
+riordinare                  0
+
+@sense estrarre
+tirare fuori               -1
+estrarre                   +1
+fare emergere               0
+
+# nomi: genere dalla desinenza (le -e ambigue si chiedono al thesaurus) e plurale
+@noun
+gender f zione sione tà tù trice ie i a
+gender m ma ista eta o ore ere one ile ame ume ale ante ente
+plural tà>* tù>* i>* ie>* ca>che:f ga>ghe:f ca>chi:m ga>ghi:m co>chi go>ghi cia>ce gia>ge io>i ma>mi:m ista>isti:m a>e:f a>i:m o>i e>i
+
+# contrari scritti a mano: il thesaurus italiano non ne ha ("bello brutto" vale nei due sensi;
+# "_" unisce le parole di una locuzione)
+@antonym
+bello brutto
+buono cattivo
+grande piccolo
+alto basso
+lungo corto breve
+largo stretto
+nuovo vecchio
+giovane vecchio anziano
+facile difficile
+semplice complesso complicato
+veloce lento
+rapido lento
+forte debole
+ricco povero
+caldo freddo
+pieno vuoto
+chiaro scuro oscuro
+leggero pesante
+vero falso
+giusto sbagliato ingiusto
+possibile impossibile
+probabile improbabile
+utile inutile
+importante irrilevante trascurabile
+necessario superfluo
+certo incerto
+sicuro insicuro pericoloso
+noto ignoto sconosciuto
+comune raro
+frequente raro
+positivo negativo
+attivo passivo
+pubblico privato
+interno esterno
+superiore inferiore
+maggiore minore
+primo ultimo
+iniziale finale
+antico moderno
+naturale artificiale
+reale immaginario
+concreto astratto
+generale particolare specifico
+semplice composto
+uguale diverso
+simile diverso
+stesso diverso
+presente assente
+vivo morto
+felice infelice triste
+allegro triste
+calmo agitato
+tranquillo inquieto
+gentile scortese
+onesto disonesto
+coraggioso codardo
+intelligente stupido
+saggio sciocco
+ordinato disordinato
+pulito sporco
+morbido duro
+liscio ruvido
+dolce amaro
+umido secco
+vicino lontano
+dentro fuori
+sopra sotto
+prima dopo
+spesso raramente
+sempre mai
+molto poco
+tanto poco
+tutto niente nulla
+qualcosa niente
+inizio fine
+entrata uscita
+domanda risposta
+vittoria sconfitta
+successo fallimento
+vantaggio svantaggio
+pregio difetto
+pace guerra
+amore odio
+amico nemico
+ordine disordine
+luce buio
+giorno notte
+guadagno perdita
+aumento diminuzione
+crescita calo
+salita discesa
+inizio conclusione
+causa effetto
+teoria pratica
+regola eccezione
+pro contro
+accettare rifiutare
+amare odiare
+aprire chiudere
+accendere spegnere
+entrare uscire
+salire scendere
+arrivare partire
+cominciare finire
+iniziare concludere terminare
+vincere perdere
+comprare vendere
+dare prendere ricevere
+aumentare diminuire ridurre
+crescere calare
+costruire distruggere
+creare distruggere
+ricordare dimenticare
+trovare perdere
+unire separare dividere
+accogliere respingere
+confermare smentire
+ammettere negare
+permettere vietare impedire
+approvare disapprovare
+lodare criticare
+rispettare disprezzare
+difendere attaccare
+nascondere mostrare rivelare
+aggiungere togliere
+riempire svuotare
+alzare abbassare
+avvicinare allontanare
+includere escludere
+importare esportare
+accelerare rallentare
+migliorare peggiorare
+semplificare complicare
+vivere morire
+ridere piangere
+parlare tacere
+sapere ignorare
+insegnare imparare
+domandare rispondere
+
+@article
+cls V a e i o u h à è é ì ò ù
+cls Z sb sc sd sf sg sl sm sn sp sq sr st sv z gn ps pn x y
+def ms il lo:Z l':V
+def fs la l':V
+def mp i gli:Z gli:V
+def fp le
+ind ms un uno:Z
+ind fs una un':V
+
+# ---- locuzioni nominali (l'articolo si accorda: "la chiave di volta" -> "il cardine") ----
+@sense elemento fondamentale
+chiave di volta             0  g:fs figurative
+cardine                    +1  g:ms
+perno                       0  g:ms
+fulcro                      0  g:ms
+pilastro                    0  g:ms figurative
+elemento portante           0  g:ms
+punto cruciale              0  g:ms
+
+@sense punto debole
+punto debole                0  g:ms
+tallone d'Achille           0  g:ms figurative
+lato debole                 0  g:ms
+punto critico               0  g:ms
+
+@sense punto di forza
+punto di forza              0  g:ms
+pregio                      0  g:ms
+vantaggio                   0  g:ms
+asso nella manica          -1  g:ms figurative
+
+@sense svolta
+pietra miliare              0  g:fs figurative
+punto di svolta             0  g:ms
+svolta                      0  g:fs
+tappa fondamentale          0  g:fs
+
+@sense banco di prova
+banco di prova              0  g:ms figurative
+prova del nove             -1  g:fs figurative
+verifica                    0  g:fs
+collaudo                    0  g:ms
+
+@sense punto di riferimento
+punto di riferimento        0  g:ms
+riferimento                 0  g:ms
+modello                     0  g:ms
+faro                       +1  g:ms figurative
+
+@sense punto di vista
+punto di vista              0  g:ms
+prospettiva                 0  g:fs
+ottica                     +1  g:fs
+angolazione                 0  g:fs
+
+@sense questione centrale
+nocciolo della questione    0  g:ms figurative
+nodo cruciale               0  g:ms figurative
+punto centrale              0  g:ms
+questione centrale          0  g:fs
+
+@sense specialità
+cavallo di battaglia       -1  g:ms figurative
+punto forte                 0  g:ms
+specialità                  0  g:fs
+
+@sense messa a punto
+messa a punto               0  g:fs
+perfezionamento            +1  g:ms
+affinamento                +1  g:ms
+ottimizzazione              0  g:fs technical
+
+@sense presa di coscienza
+presa di coscienza          0  g:fs
+consapevolezza              0  g:fs
+presa d'atto               +1  g:fs
+
+@sense linee guida
+linee guida                 0  g:fp
+indicazioni                 0  g:fp
+criteri                     0  g:mp
+direttive                  +1  g:fp
+
+@sense via d'uscita
+via d'uscita                0  g:fs
+soluzione                   0  g:fs
+scappatoia                 -1  g:fs  note:ha una sfumatura negativa
+
+# ---- connettivi ----
+@sense conseguenza
+quindi                0
+dunque                0
+perciò                0
+pertanto             +1
+di conseguenza        0
+per questo motivo     0
+
+@sense aggiunta
+inoltre               0
+in aggiunta           0
+per di più            0
+oltretutto           -1
+per giunta           -1
+altresì              +2
+
+@sense contrasto
+tuttavia              0
+però                 -1
+ciononostante        +1
+nondimeno            +2
+eppure                0
+
+@sense esempio
+per esempio           0
+ad esempio            0
+a titolo di esempio  +2
+
+@sense sintesi
+in breve              0
+in sintesi            0
+riassumendo           0
+in conclusione       +1
+insomma              -1
+in poche parole      -1
+
+@sense conferma
+infatti               0
+in effetti            0
+difatti              +1
+
+@sense causa
+a causa di            0
+per via di           -1
+a motivo di          +1
+in seguito a         +1
+grazie a              0  note:solo se la causa è positiva
+per colpa di         -1  note:solo se la causa è negativa
+
+@sense argomento
+riguardo a            0
+per quanto riguarda   0
+quanto a              0
+a proposito di        0
+in merito a          +1
+relativamente a      +1
+
+@sense oggi
+oggi                  0
+attualmente           0
+oggigiorno            0
+al giorno d'oggi     -1
+ai nostri giorni     +1
+
+@sense evidenza
+ovviamente            0
+chiaramente           0
+naturalmente          0
+evidentemente        +1
+
+@sense quasi
+quasi                 0
+pressoché            +1
+praticamente         -1
+
+@sense ipotesi
+forse                 0
+probabilmente         0
+magari               -1
+
+@sense intensità
+molto                 0
+estremamente         +1
+particolarmente       0
+assai                +1
+davvero              -1
+veramente            -1
+
+@sense inizio
+innanzitutto          0
+anzitutto            +1
+in primo luogo        0
+prima di tutto        0
+per prima cosa       -1
+
+@sense chiusura
+infine                0
+da ultimo            +1
+alla fine            -1
+
+# ---- verbi e locuzioni verbali ----
+@sense considerare
+prendere in considerazione  0
+considerare                 0
+tenere conto di             0
+tenere presente             0
+valutare                   +1
+
+@sense rendersi conto di
+rendersi conto di           0
+accorgersi di               0
+capire                      0
+realizzare                 -1  note:in questo senso è un calco dall'inglese, meglio "rendersi conto"
+
+# "mi rendo conto che...", "me ne rendo conto"
+@sense rendersi conto
+rendersi conto              0
+accorgersi                  0
+realizzare                 -1  note:in questo senso è un calco dall'inglese, meglio "rendersi conto"
+
+@sense svolgere
+svolgere                    0
+portare a termine           0
+effettuare                 +1
+eseguire                   +1
+compiere                   +1
+
+@sense affrontare
+affrontare                  0
+occuparsi di                0
+gestire                     0
+fare fronte a               0
+
+@sense mostrare
+mostrare                    0
+dimostrare                 +1
+evidenziare                +1
+mettere in luce             0  figurative
+
+@sense venire a sapere
+scoprire                    0
+venire a sapere            -1
+apprendere                 +1
+accertare                  +2
+
+@sense iniziare
+iniziare                    0
+cominciare                  0
+avviare                    +1
+dare il via a              -1  figurative
+
+@sense aumentare
+aumentare                   0
+crescere                    0
+salire                     -1
+incrementare               +1
+
+@sense diminuire
+diminuire                   0
+calare                     -1
+ridursi                     0
+decrescere                 +1
+
+@sense aiutare
+aiutare                     0
+sostenere                   0
+dare una mano a            -2  figurative
+supportare                 -1  note:calco dall'inglese, meglio "sostenere"
+
+@sense usare
+usare                       0
+utilizzare                 +1
+adoperare                   0
+impiegare                  +1
+fare uso di                +1
+
+@sense spiegare
+spiegare                    0
+chiarire                    0
+illustrare                 +1
+
+@sense sembrare
+sembrare                    0
+apparire                   +1
+parere                     +1
+
+@sense discutere
+discutere                   0
+trattare                   +1
+parlare di                 -1
+
+@sense ottenere
+ottenere                    0
+raggiungere                 0
+conseguire                 +2
+
+@sense permettere
+permettere                  0
+consentire                 +1
+
+@sense rinviare
+rinviare                    0
+rimandare                  -1
+posticipare                +1
+
+@sense eliminare
+eliminare                   0
+rimuovere                   0
+togliere                   -1
+
+@sense tentare
+provare                     0
+cercare di                  0
+tentare                    +1
+
+@sense mettere a fuoco
+mettere a fuoco             0  figurative
+chiarire                    0
+precisare                   0
+focalizzare                +1
+
+@sense fare il punto
+fare il punto               0
+fare un bilancio            0
+riassumere                  0
+
+@sense tirare le somme
+tirare le somme            -1  figurative
+trarre le conclusioni       0
+concludere                  0
+
+@sense venire meno
+venire meno                 0
+mancare                     0
+cessare                    +1
+
+@sense dare per scontato
+dare per scontato           0
+dare per certo              0
+presupporre                +1
+
+@sense prendere piede
+prendere piede              0  figurative
+diffondersi                 0
+affermarsi                 +1
+
+@sense andare a buon fine
+andare a buon fine          0
+riuscire                    0
+avere successo              0
+
+@sense mettere in dubbio
+mettere in discussione      0
+mettere in dubbio           0
+contestare                 +1
+
+@sense fare luce
+fare luce su                0  figurative
+gettare luce su            +1  figurative
+chiarire                    0
+
+@sense capire
+capire                      0
+comprendere                +1
+afferrare                  -1  figurative
+
+# ---- giri di parole, ridondanze, usi da evitare (in un senso solo) ----
+@replace
+al fine di -> per                                   reason:wordy
+allo scopo di -> per                                reason:wordy
+a causa del fatto che -> perché | poiché            reason:wordy
+dato il fatto che -> dato che | poiché              reason:wordy
+nonostante il fatto che -> benché | sebbene         reason:wordy  note:dopo "benché" serve il congiuntivo
+in questo momento -> ora | adesso                   reason:wordy
+al momento attuale -> ora | attualmente             reason:wordy
+nel caso in cui -> se                               reason:wordy  note:dopo "se" va l'indicativo, non il congiuntivo
+in un prossimo futuro -> presto                     reason:wordy
+un gran numero di -> molti                          reason:wordy  note:"molte" se il nome è femminile
+in prossimità di -> vicino a                        reason:wordy
+in data odierna -> oggi                             reason:bureaucratic
+per quanto concerne +1 -> per quanto riguarda | quanto a  reason:pompous
+porre in essere -> realizzare | attuare             reason:bureaucratic
+porre l'accento su -> sottolineare                  reason:wordy
+effettuare una verifica -> verificare               reason:wordy
+effettuare un controllo -> controllare              reason:wordy
+prendere una decisione -> decidere                  reason:wordy
+dare inizio a -> iniziare | avviare +1              reason:wordy
+fare riferimento a -> riferirsi a | citare          reason:wordy
+venire a conoscenza di -> scoprire | apprendere +1  reason:wordy
+essere in grado di -> potere | sapere               reason:wordy
+avere la possibilità di -> potere                   reason:wordy
+dare luogo a -> causare | provocare                 reason:wordy
+piuttosto che -> oppure | o                         reason:misuse  note:"piuttosto che" vuol dire "anziché", non "oppure"
+salire sopra -> salire                              reason:redundant
+scendere giù -> scendere                            reason:redundant
+uscire fuori -> uscire                              reason:redundant
+entrare dentro -> entrare                           reason:redundant
+ma però -> ma | però                                reason:redundant
+a me mi -> a me | mi                                reason:redundant
+assolutamente sì -> sì                              reason:redundant

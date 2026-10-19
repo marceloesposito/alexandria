@@ -7,6 +7,7 @@ mod clipboard;
 mod net;
 mod portable;
 mod snapshot;
+mod picus;
 mod thesaurus;
 mod typeset;
 
@@ -153,6 +154,9 @@ pub fn run() {
             snapshot::net_snapshot,
             snapshot::net_render,
             thesaurus::thesaurus_lookup,
+            thesaurus::thesaurus_lookup_many,
+            picus::picus_resources,
+            picus::picus_resource,
             portable::portable_root,
             clipboard::clipboard_read,
             selftest_spec,

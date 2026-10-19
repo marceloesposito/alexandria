@@ -60,7 +60,7 @@ import { t } from '../i18n';
 import { promptDialog } from '../components/confirm';
 import { getSourceView } from '../editor/SourceView';
 import { undo as cmUndo, redo as cmRedo } from '@codemirror/commands';
-import { lookupSelection } from '../thesaurus/ui';
+import { ask as askPicus } from '../picus';
 
 const E = () => getEditor();
 const inEditor = () => !!E() && !useDoc.getState().sourceMode && ws().app.view === 'editor';
@@ -244,7 +244,7 @@ export function registerEditorCommands() {
       run: () => chain().wrapIn('callout', { kind: 'note', title: '' }).run(),
     },
     // thesaurus offline (italiano e inglese, lingua di scrittura del Compendium)
-    { id: 'tools.thesaurus', label: 'cmd.tools.thesaurus', icon: BookA, shortcut: 'Shift+F7', category: 'format', views: ['editor'], run: () => void lookupSelection() },
+    { id: 'tools.thesaurus', label: 'cmd.tools.thesaurus', icon: BookA, shortcut: 'Shift+F7', category: 'format', views: ['editor'], run: () => void askPicus(false) },
     // colori: dalla tavolozza (la scelta si fa nel controllo del ribbon o nella barra flottante)
     { id: 'fmt.textColor', label: 'fmt.textColor', icon: Baseline, category: 'format', views: ['editor'], widget: 'textColor', isActive: active('textColor'), run: () => chain().unsetTextColor().run() },
     { id: 'fmt.highlightColor', label: 'fmt.highlightColor', icon: Highlighter, category: 'format', views: ['editor'], widget: 'highlightColor', isActive: active('highlight'), run: () => chain().toggleHighlight().run() },

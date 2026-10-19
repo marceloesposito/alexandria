@@ -1,0 +1,13 @@
+Pacchetti di lingua di Picus, il consigliere di scrittura di Alexandria
+=====================================================================
+
+Un file <lingua>.picus per lingua: solo dati (stopword, regole dello stemmer, paradigmi dei verbi,
+irregolari, locuzioni con registro e alternative), mai codice. Il formato e' descritto in
+src/picus/pack.ts. L'inglese e' incluso nell'app; le altre lingue si scelgono nell'installer o si
+aggiungono da Preferenze > Picus.
+
+it.picus - italiano
+  Locuzioni, registri, paradigmi e irregolari: scritti a mano per Alexandria (licenza MIT, come
+  l'app).
+  Regole dello stemmer: trascrizione dell'algoritmo Snowball per l'italiano
+  (https://snowballstem.org), licenza BSD 3-clause, (c) 2001 Martin Porter e Richard Boulton.

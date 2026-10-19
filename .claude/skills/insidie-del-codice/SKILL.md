@@ -11,6 +11,11 @@ description: Insidie gia' incontrate in parti specifiche di Alexandria - version
 - **Associazioni di file**: su Windows l'installer NSIS diventa il programma predefinito dei formati
   dichiarati. Le associazioni ai documenti (.docx...) stanno solo in `tauri.macos.conf.json` (rango
   Alternate); in `tauri.conf.json` resta solo `.recensio`.
+- **Modello NSIS personalizzato** (`src-tauri/windows/installer.nsi`, per la pagina Componenti con le
+  lingue di Picus): e' la copia di quello di tauri-cli 2.12.1 con le aggiunte marcate "Alexandria:".
+  Aggiornando tauri-cli va riallineato al modello nuovo. Le sezioni di Tauri sono nascoste (`-Install`),
+  altrimenti comparirebbero come caselle; una nuova lingua di Picus vuole una `Section` nel gruppo
+  "Picus", la preselezione in `.onInit` e la cancellazione in `-PicusCleanup`.
 - **macOS non distingue le maiuscole nei nomi di file**: `leftSections.ts` e `LeftSections.tsx` nella
   stessa cartella rompono tsc. Nomi diversi, non solo per maiuscole.
 - **mammoth**: la versione per node (test) vuole `buffer`, quella per il browser `arrayBuffer`; si
