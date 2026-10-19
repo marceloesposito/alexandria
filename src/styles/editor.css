@@ -361,6 +361,18 @@
   text-align: left;
 }
 
+/* bordo fra due colonne afferrabile (trascinare: larghezza; doppio clic: uguali) */
+.doc-body.is-col-border,
+.doc-body.is-col-border *,
+body.is-col-resizing,
+body.is-col-resizing * {
+  cursor: col-resize !important;
+}
+
+body.is-col-resizing {
+  user-select: none;
+}
+
 .doc-body .selectedCell {
   background: var(--select);
 }

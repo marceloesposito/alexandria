@@ -1,6 +1,7 @@
 // Insieme delle estensioni dell'editor. Ogni nodo ha un corrispettivo in src/doc (Markdown).
 import StarterKit from '@tiptap/starter-kit';
 import { Table, TableRow, TableHeader, TableCell } from '@tiptap/extension-table';
+import { mergeAttributes } from '@tiptap/core';
 import TextAlign from '@tiptap/extension-text-align';
 import { ColorHighlight, TextColorMark } from './colors';
 import Subscript from '@tiptap/extension-subscript';
@@ -36,6 +37,9 @@ import { BlockReorder } from './blockReorder';
 import { PicusMenu } from '../../picus/menu';
 import { PicusMarks } from '../../picus/plugin';
 import { PageView } from '../pagination';
+import { TableAlign } from './tableAlign';
+import { TableTools } from './tableTools';
+import { columnWidths } from 'logos/doc/tables';
 
 /** Tabella con l'allineamento delle colonne del Markdown (GFM). */
 const AlignedTable = Table.extend({
@@ -43,7 +47,15 @@ const AlignedTable = Table.extend({
     return {
       ...this.parent?.(),
       align: { default: [], rendered: false },
+      // larghezza delle colonne in percentuale (<!-- widths:... --> nel Markdown)
+      widths: { default: null, rendered: false },
     };
+  },
+  renderHTML({ node, HTMLAttributes }) {
+    const cols = node.firstChild?.childCount ?? 0;
+    const widths = columnWidths(node.attrs, cols);
+    const colgroup = ['colgroup', {}, ...Array.from({ length: cols }, (_, i) => ['col', widths ? { style: `width: ${widths[i]}%` } : {}])];
+    return ['table', mergeAttributes(this.options.HTMLAttributes, HTMLAttributes), colgroup, ['tbody', 0]];
   },
 });
 
@@ -59,6 +71,7 @@ export function buildExtensions() {
     TableRow,
     TableHeader,
     TableCell,
+    TableAlign,
     TextAlign.configure({ types: ['heading', 'paragraph'] }),
     ColorHighlight,
     TextColorMark,
@@ -73,6 +86,7 @@ export function buildExtensions() {
     FocusBlock,
     BlockReorder,
     PicusMenu,
+    TableTools,
     PicusMarks,
     Figure,
     Embed,

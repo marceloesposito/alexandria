@@ -8,6 +8,7 @@ import { rightPanel, centerOverlay, previewPanel } from './slots';
 import { OutlinePanel } from './OutlinePanel';
 import { CountsBadge } from '../shell/CountsBadge';
 import { FormatBar } from './FormatBar';
+import { TableBar } from './TableBar';
 import { PicusCompanion } from '../picus/ui';
 import { PicusPanel, RewritePanel } from '../picus/panels';
 import { useZen } from '../state/zen';
@@ -93,6 +94,7 @@ export function EditorView() {
           </div>
         )}
         {!zen && !sourceMode && !reading && <FormatBar />}
+        {!sourceMode && !reading && <TableBar />}
         <CountsBadge />
         <PicusPanel />
         <RewritePanel />
