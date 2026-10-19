@@ -531,3 +531,7 @@ cache della webview).
   svaniscono (opacita' 0,3, dissolvenza di 0,4 s) e tornano quando si muove il mouse o si clicca; in
   Typewriter restano sempre attenuati, come Silentium in Alexandria. Si spegne nelle Preferenze o con
   il comando "Paragrafo in primo piano" (`app.focus` in `stato.json`, `editor/focusBlock.ts`).
+- **Allineamento del testo** (19/10/2026): una sola icona nella barretta, accanto a B I U S, con il
+  menu a tendina (sinistra, centro, destra); l'icona mostra l'allineamento del paragrafo del cursore.
+  Non aggiunge un gruppo (la barretta resta a 10 controlli). Nel Markdown `<!-- align:center -->` come
+  in Alexandria; per nome anche "Allinea a sinistra", "Centra", "Allinea a destra" (`editor/align.ts`).

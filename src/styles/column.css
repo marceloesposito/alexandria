@@ -382,6 +382,16 @@ select.fx-input {
   gap: 1px;
 }
 
+/* allineamento: tre icone in fila, il popover stretto quanto loro */
+.popover.fx-popover--compact {
+  min-width: 0;
+}
+
+.fx-menu.fx-align {
+  flex-direction: row;
+  gap: 2px;
+}
+
 .fx-menu__item,
 .menu-item {
   display: flex;

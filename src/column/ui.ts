@@ -2,7 +2,7 @@
 // visibile e la versione selezionata nel Palimpsestus.
 import { create } from 'zustand';
 
-export type PopoverId = 'export' | 'style' | 'color' | 'insert' | 'timer' | 'counts' | 'tabulaAdd' | 'tabulaFind';
+export type PopoverId = 'export' | 'style' | 'align' | 'color' | 'insert' | 'timer' | 'counts' | 'tabulaAdd' | 'tabulaFind';
 export type DialogId = 'prefs' | 'help' | 'about';
 
 export interface TabulaApi {

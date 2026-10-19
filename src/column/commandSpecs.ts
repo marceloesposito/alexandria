@@ -52,6 +52,7 @@ export const COMMANDS: CommandSpec[] = [
   { id: 'text.italic', label: 'cmd.text.italic', home: 'bar', shortcut: 'Mod+I' },
   { id: 'text.underline', label: 'cmd.text.underline', home: 'bar', shortcut: 'Mod+U' },
   { id: 'text.strike', label: 'cmd.text.strike', home: 'bar', shortcut: 'Mod+Shift+X' },
+  { id: 'text.align', label: 'cmd.text.align', home: 'bar', palette: false },
   { id: 'text.color', label: 'cmd.text.color', home: 'bar', palette: false },
   { id: 'text.insert', label: 'cmd.text.insert', home: 'bar', palette: false },
   { id: 'timer.toggle', label: 'cmd.timer.toggle', home: 'bar', shortcut: 'Mod+Alt+T' },
@@ -96,6 +97,9 @@ export const COMMANDS: CommandSpec[] = [
 
   // solo per nome
   { id: 'silentium.toggle', label: 'cmd.silentium.toggle', home: 'none', shortcut: 'Mod+Shift+D' },
+  { id: 'text.align.left', label: 'cmd.text.align.left', home: 'none' },
+  { id: 'text.align.center', label: 'cmd.text.align.center', home: 'none' },
+  { id: 'text.align.right', label: 'cmd.text.align.right', home: 'none' },
   { id: 'focus.toggle', label: 'cmd.focus.toggle', home: 'none' },
   { id: 'timer.skip', label: 'cmd.timer.skip', home: 'none' },
   { id: 'timer.reset', label: 'cmd.timer.reset', home: 'none' },
@@ -108,7 +112,7 @@ export const COMMANDS: CommandSpec[] = [
 export const L0: Record<'header' | 'edgeTab' | 'bar' | 'tabulaBar' | 'versionsBar', string[][]> = {
   header: [['sheet.rename']],
   edgeTab: [['tabula.toggle'], ['versions.toggle']],
-  bar: [['text.style'], ['text.bold', 'text.italic', 'text.underline', 'text.strike'], ['text.color'], ['text.insert'], ['timer.toggle'], ['counts.open'], ['export.menu', 'sheet.exportDocx', 'sheet.exportPdf', 'sheet.saveAs', 'sheet.toCompendium']],
+  bar: [['text.style'], ['text.bold', 'text.italic', 'text.underline', 'text.strike', 'text.align'], ['text.color'], ['text.insert'], ['timer.toggle'], ['counts.open'], ['export.menu', 'sheet.exportDocx', 'sheet.exportPdf', 'sheet.saveAs', 'sheet.toCompendium']],
   tabulaBar: [['tabula.add'], ['tabula.find'], ['tabula.zoomOut', 'tabula.zoomIn', 'tabula.fit']],
   versionsBar: [['version.save'], ['version.resume']],
 };

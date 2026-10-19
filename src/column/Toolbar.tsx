@@ -1,4 +1,4 @@
-// Barretta di Column: Stile ▾ | B I U S | Colore ▾ | + ▾ | ⏱ | contatore | Esporta. Libera, si sposta
+// Barretta di Column: Stile ▾ | B I U S Allineamento ▾ | Colore ▾ | + ▾ | ⏱ | contatore | Esporta. Libera, si sposta
 // dalla maniglia dove si vuole; portata vicino alla barra in alto vi si aggancia da sola (magnetica)
 // e ne diventa parte; trascinata via si stacca. La posizione resta nelle preferenze (barPosition.ts).
 import { useEffect, useLayoutEffect, useRef, useState } from 'react';
@@ -14,6 +14,7 @@ import { useCounts } from './editor/counts';
 import { COUNT_KEYS, countValue, countsLabel, toggleShown, type CountKey } from './editor/countsModel';
 import { useColumn } from './store';
 import { insertItems } from './editor/insertItems';
+import { ALIGNS, applyAlign, currentAlign } from './editor/align';
 import { runCommand } from './commands';
 import { specOf } from './commandSpecs';
 import { shortcutLabel } from './keys';
@@ -64,6 +65,32 @@ function StylePopover({ editor }: { editor: Editor }) {
           </button>
         ))}
       </div>
+    </div>
+  );
+}
+
+/** Allineamento: tre icone in fila, quella attiva evidenziata. */
+function AlignPopover({ editor }: { editor: Editor }) {
+  const cur = currentAlign(editor);
+  return (
+    <div className="fx-menu fx-align" role="radiogroup" aria-label={t('cmd.text.align')}>
+      {ALIGNS.map(({ id, icon: Icon }) => (
+        <button
+          key={id}
+          role="radio"
+          aria-checked={cur === id}
+          className={`fx-btn ${cur === id ? 'is-active' : ''}`}
+          title={t(`cmd.text.align.${id}`)}
+          aria-label={t(`cmd.text.align.${id}`)}
+          onMouseDown={(e) => e.preventDefault()}
+          onClick={() => {
+            applyAlign(editor, id);
+            useUi.getState().close();
+          }}
+        >
+          <Icon size={16} />
+        </button>
+      ))}
     </div>
   );
 }
@@ -184,12 +211,14 @@ function ToolbarContent({ side, grip }: { side: Side; grip?: React.ReactNode }) 
   const shown = useColumn((s) => s.app.counts);
   const refs = {
     style: useRef<HTMLButtonElement>(null),
+    align: useRef<HTMLButtonElement>(null),
     color: useRef<HTMLButtonElement>(null),
     insert: useRef<HTMLButtonElement>(null),
     counts: useRef<HTMLButtonElement>(null),
     export: useRef<HTMLButtonElement>(null),
   };
   const close = () => useUi.getState().close();
+  const AlignIcon = ALIGNS.find((a) => a.id === currentAlign(editor))!.icon;
   const label = sel ? t('bar.wordsSelected', { n: sel.words }) : countsLabel(c, shown, pages, unit, getLang());
   return (
     <>
@@ -210,6 +239,10 @@ function ToolbarContent({ side, grip }: { side: Side; grip?: React.ReactNode }) 
       </CmdButton>
       <CmdButton id="text.strike">
         <Strikethrough size={16} />
+      </CmdButton>
+      <CmdButton id="text.align" ref={refs.align} className="fx-btn--narrow" pressed={popover === 'align'}>
+        <AlignIcon size={16} />
+        <ChevronDown size={11} />
       </CmdButton>
       <BarSep />
       <CmdButton id="text.color" ref={refs.color} pressed={popover === 'color'}>
@@ -235,6 +268,9 @@ function ToolbarContent({ side, grip }: { side: Side; grip?: React.ReactNode }) 
         <>
           <Popover anchor={refs.style.current} open={popover === 'style'} onClose={close} placement={side}>
             <StylePopover editor={editor} />
+          </Popover>
+          <Popover anchor={refs.align.current} open={popover === 'align'} onClose={close} placement={side} className="fx-popover--compact">
+            <AlignPopover editor={editor} />
           </Popover>
           <Popover anchor={refs.color.current} open={popover === 'color'} onClose={close} placement={side}>
             <ColorPopover editor={editor} />

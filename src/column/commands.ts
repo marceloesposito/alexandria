@@ -3,6 +3,7 @@
 import { COMMANDS, specOf } from './commandSpecs';
 import { useColumn } from './store';
 import { getEditor } from './editor/editorRef';
+import { applyAlign, currentAlign } from './editor/align';
 import { useUi } from './ui';
 import { startComment } from './comments/store';
 import { editLink } from './editor/insertItems';
@@ -57,6 +58,19 @@ const RUN: Record<string, Runner> = {
   'text.italic': { run: () => getEditor()?.chain().focus().toggleItalic().run(), active: () => !!getEditor()?.isActive('italic') },
   'text.underline': { run: () => getEditor()?.chain().focus().toggleUnderline().run(), active: () => !!getEditor()?.isActive('underline') },
   'text.strike': { run: () => getEditor()?.chain().focus().toggleStrike().run(), active: () => !!getEditor()?.isActive('strike') },
+  'text.align': { run: () => useUi.getState().toggle('align') },
+  ...Object.fromEntries(
+    (['left', 'center', 'right'] as const).map((a) => [
+      `text.align.${a}`,
+      {
+        run: () => {
+          const e = getEditor();
+          if (e) applyAlign(e, a);
+        },
+        active: () => currentAlign(getEditor()) === a,
+      },
+    ]),
+  ),
   'text.color': { run: () => useUi.getState().toggle('color') },
   'text.insert': { run: () => useUi.getState().toggle('insert') },
   'timer.toggle': { run: () => useTimer.getState().toggle(), active: () => useTimer.getState().state.since !== null },
