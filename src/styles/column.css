@@ -1449,6 +1449,52 @@ select.fx-input {
   stroke: var(--ok);
 }
 
+/* ---------------------------------------------------------------- maniglia dei blocchi */
+/* come in Alexandria: lo spazio fra l'icona e il testo e' padding della maniglia (trasparente), cosi'
+   il mouse lo attraversa senza che la maniglia sparisca */
+.fx-drag-handle {
+  display: flex;
+  align-items: center;
+  height: 22px;
+  padding-right: 12px;
+  color: var(--muted);
+  cursor: grab;
+}
+
+.fx-drag-handle__grip {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 18px;
+  height: 22px;
+  border-radius: 4px;
+  background: var(--paper);
+}
+
+.fx-drag-handle:hover .fx-drag-handle__grip {
+  background: var(--chrome-2);
+  color: var(--ink);
+}
+
+/* spostamento dei blocchi: gli altri scorrono per fare posto, come in Notion */
+.fx-prose.is-reordering > .is-reorder-moving {
+  transition: transform 0.16s ease;
+}
+
+.fx-prose.is-reordering > .is-reorder-source {
+  /* il blocco segue il puntatore (immagine del trascinamento): al suo posto resta solo il vuoto */
+  opacity: 0;
+}
+
+/* la linea di rilascio non serve: il posto si vede dal vuoto */
+.fx-scroll:has(.is-reordering) .prosemirror-dropcursor-block {
+  display: none;
+}
+
+.fx-app.is-silentium .fx-drag-handle {
+  opacity: 0.4;
+}
+
 /* ---------------------------------------------------------------- Silentium */
 .fx-app.is-silentium {
   grid-template-rows: 0 1fr;

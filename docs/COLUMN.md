@@ -535,3 +535,8 @@ cache della webview).
   menu a tendina (sinistra, centro, destra); l'icona mostra l'allineamento del paragrafo del cursore.
   Non aggiunge un gruppo (la barretta resta a 10 controlli). Nel Markdown `<!-- align:center -->` come
   in Alexandria; per nome anche "Allinea a sinistra", "Centra", "Allinea a destra" (`editor/align.ts`).
+- **Blocchi movibili** (19/10/2026): la maniglia ⠿ di Alexandria accanto a ogni blocco del Copy; trascinandola
+  gli altri blocchi scorrono per fare posto (come in Notion) e al rilascio il blocco va dove si vede il
+  vuoto (`editor/blockReorder.ts` e `dragHandlePosition.ts`, copiati da Alexandria). Dipendenze nuove:
+  `@tiptap/extension-drag-handle(-react)` con i suoi pari (node-range, collaboration, y-tiptap, yjs),
+  circa 0,1 MB in piu' nel pacchetto.

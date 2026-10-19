@@ -2,6 +2,8 @@
 // breve ritardo, conta le parole, accoglie immagini incollate o trascinate (in media/).
 import { useEffect, useRef, useState } from 'react';
 import { useEditor, EditorContent } from '@tiptap/react';
+import DragHandle from '@tiptap/extension-drag-handle-react';
+import { GripVertical } from 'lucide-react';
 import { EditorState } from '@tiptap/pm/state';
 import type { Editor } from '@tiptap/core';
 import type { PMNode } from 'logos/doc/types';
@@ -10,6 +12,8 @@ import { useColumn, mediaUrl } from '../store';
 import { markdownToDoc, docToMarkdown } from '../doc';
 import { editorExtensions } from './extensions';
 import { FocusBlock } from './focusBlock';
+import { BlockReorder } from './blockReorder';
+import { handlePositionConfig } from './dragHandlePosition';
 import { setMediaResolver, setFootnoteEditor } from './nodes';
 import { SlashMenu } from './slash';
 import { openTextMenu } from './textMenu';
@@ -52,7 +56,7 @@ export function Scriptorium() {
   const saveTimer = useRef<ReturnType<typeof setTimeout> | null>(null);
 
   const editor = useEditor({
-    extensions: editorExtensions([SlashMenu, PageHints, FocusBlock]),
+    extensions: editorExtensions([SlashMenu, PageHints, FocusBlock, BlockReorder]),
     content: markdownToDoc(useColumn.getState().sheet?.markdown ?? ''),
     autofocus: 'end',
     editorProps: {
@@ -175,6 +179,14 @@ export function Scriptorium() {
     <div className={`fx-scriptorium fx-font--${font} ${focus ? 'is-focus' : ''} ${writing ? 'is-writing' : ''}`} style={{ '--zoom': zoom } as React.CSSProperties}>
       <div className="fx-scroll">
         <div className="fx-page">
+          {editor && (
+            // maniglia dei blocchi, come in Alexandria: si trascina e gli altri blocchi fanno posto
+            <DragHandle editor={editor} className="fx-drag-handle" computePositionConfig={handlePositionConfig}>
+              <span className="fx-drag-handle__grip">
+                <GripVertical size={14} />
+              </span>
+            </DragHandle>
+          )}
           <EditorContent editor={editor} />
           {editor && <CommentLayer editor={editor} />}
         </div>
