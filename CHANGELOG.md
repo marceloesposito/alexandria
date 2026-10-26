@@ -17,7 +17,7 @@ barra in alto da 40 px, barretta flottante, Queries col clic destro, timer pomod
 gravitazionali accanto al testo, Editions ad albero, export .docx con commenti, Markdown e PDF, Porta in un
 Compendium. Eseguibile di 5,9 MB. Il 18/10/2026 Folium diventa Column, con il glossario di redazione
 (Piece, Copy, Clips, Editions, Queries, Rundown, Typewriter; il timer resta timer pomodoro) e il coltello nei Clips; i
-vecchi `.folium` si aprono ancora. Il 26/10 il confine di pagina diventa una linea continua centrata fra le righe, con il numero di pagina nel margine.
+vecchi `.folium` si aprono ancora. Il 26/10 il confine di pagina diventa una linea continua centrata fra le righe, con il numero di pagina nel margine. Sempre il 26/10: due salvataggi dello stesso Piece insieme non si accavallano piu' (davano "The Piece cannot be saved: No such file or directory").
 
 ## Non ancora rilasciato
 

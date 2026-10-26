@@ -44,12 +44,18 @@ export async function readSheetFile(path: string): Promise<Sheet> {
   return unpack(await platform.readBytes(path), newId('f'));
 }
 
-/** Scrive il .clmn passando da un file accanto: un'interruzione non lascia mai un file a meta'. */
-export async function writeSheetFile(path: string, s: Sheet): Promise<void> {
-  const tmp = `${path}-tmp`;
-  await platform.writeBytes(tmp, await pack(s));
-  if (await platform.exists(path)) await platform.remove(path);
-  await platform.rename(tmp, path);
+/** Coda delle scritture: due salvataggi dello stesso file non si accavallano mai. */
+let writing: Promise<unknown> = Promise.resolve();
+
+/**
+ * Scrive il .clmn. La scrittura e' gia' atomica nel Rust (file temporaneo + rename), e qui le
+ * scritture passano una alla volta: due salvataggi insieme (ritardo + uscita dal foglio) si
+ * rubavano a vicenda il file temporaneo ("No such file or directory").
+ */
+export function writeSheetFile(path: string, s: Sheet): Promise<void> {
+  const next = writing.then(async () => platform.writeBytes(path, await pack(s)));
+  writing = next.catch(() => undefined);
+  return next;
 }
 
 export async function readDraft(): Promise<Sheet | null> {
