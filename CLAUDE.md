@@ -1,5 +1,8 @@
 # Alexandria — contesto per Claude Code
 
+> **Ramo congelato (26/10/2026).** Column ora vive nella repo `marceloesposito/column`, con tutta
+> questa storia. Qui non si lavora piu'.
+
 > **Sei sul ramo `column`?** Qui il codice e' **Column** (prima Folium), l'app sorella portable: piano,
 > decisioni e avanzamento in `docs/COLUMN.md` (sezione "Avanzamento" e revisioni). Il frontend sta in `src/column/` (ingresso
 > `src/main.tsx`), il Rust in `src-tauri/src/` e' ridotto a `fsops.rs` e `portable.rs`. Prove:
