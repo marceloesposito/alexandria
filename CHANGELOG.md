@@ -40,7 +40,8 @@ serie completa (M10-M12 e richieste del committente); `0.2.x` = serie attuale.
   testo; si accende e si spegne da Visualizza > Confini di pagina (acceso di partenza).
 
 - Piano di **Folium**, l'app sorella portable, in `docs/FOLIUM.md` (#43). Il 18/10/2026 Folium
-  diventa **Column** (ramo `column`, #49).
+  diventa **Column** (ramo `column`, #49); dal 26/10/2026 Column vive nella repo
+  `marceloesposito/column`.
 - **Tabula: i post-it si eliminano** (#44). Un clic seleziona il post-it (e lo trascina), il doppio
   clic entra nella scrittura, Esc o un clic fuori ne escono. Backspace/Canc su un post-it selezionato
   lo elimina, come Backspace su un post-it vuoto in scrittura; il clic destro su post-it e cornici

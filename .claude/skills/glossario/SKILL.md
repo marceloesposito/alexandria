@@ -35,5 +35,5 @@ Unica eccezione voluta dal committente: in italiano lo Scroll si chiama **pergam
 - Ogni stringa visibile passa da `t()` (`src/i18n/`), con la chiave sia in `it.ts` sia in `en.ts`;
   le variabili `{nome}` devono coincidere fra le lingue.
 - Elenco e controlli: `src/i18n/glossary.ts` e `src/i18n/i18n.test.ts`.
-- Column, l'app sorella (ramo `column`), ha un glossario suo, da redazione (Piece, Copy, Clips,
+- Column, l'app sorella (repo `marceloesposito/column`), ha un glossario suo, da redazione (Piece, Copy, Clips,
   Editions...): e' descritto nella stessa skill su quel ramo.
