@@ -1,3 +1,6 @@
+> **Ramo congelato (26/10/2026).** Column ora vive nella repo `marceloesposito/column`, con tutta
+> questa storia. Qui non si lavora piu'.
+
 # Post-it della Tabula + Column, l'app sorella in mobilita'
 
 > Fino al 18/10/2026 l'app si chiamava **Folium** (ramo `folium`, file `.folium`): il piano qui sotto
