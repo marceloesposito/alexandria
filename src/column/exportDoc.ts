@@ -92,6 +92,20 @@ export async function exportDocx() {
   }
 }
 
+/** Markdown: il testo com'e' nell'editor (le Marginalia restano fuori, come nel .clmn). */
+export async function exportMd() {
+  const st = useColumn.getState();
+  if (!st.sheet) return;
+  const path = await platform.saveDialog(`${fileStem(sheetTitle(st.sheet))}.md`, ['md']);
+  if (!path) return;
+  try {
+    await platform.writeText(path, liveMarkdown(getEditor()));
+    st.toast(t('export.done', { name: path.slice(path.lastIndexOf('/') + 1) }), 'ok');
+  } catch (e) {
+    st.toast(t('export.error', { error: e instanceof Error ? e.message : String(e) }), 'error');
+  }
+}
+
 /** PDF: la finestra di stampa del sistema (Salva come PDF), con il solo testo impaginato. */
 export async function exportPdf() {
   const st = useColumn.getState();

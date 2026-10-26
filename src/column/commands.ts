@@ -47,6 +47,7 @@ const RUN: Record<string, Runner> = {
   'sheet.save': { run: lazy(() => import('./actions'), (m) => m.save()) },
   'sheet.saveAs': { run: lazy(() => import('./actions'), (m) => m.saveAs()) },
   'sheet.exportDocx': { run: lazy(() => import('./exportDoc'), (m) => m.exportDocx()) },
+  'sheet.exportMd': { run: lazy(() => import('./exportDoc'), (m) => m.exportMd()) },
   'sheet.exportPdf': { run: lazy(() => import('./exportDoc'), (m) => m.exportPdf()) },
   'sheet.toCompendium': { run: lazy(() => import('./actions'), (m) => m.toCompendium()) },
 
