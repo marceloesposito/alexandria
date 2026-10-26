@@ -167,8 +167,23 @@ function measureHints(view: EditorView, st: { sig: string }) {
   if (boxes.length !== view.state.doc.childCount) return;
   const p = paginate(boxes, g.textHeight);
   const sig = `hints|${p.breaks.map((b) => b.index).join(',')}`;
-  if (st.sig === sig) return;
-  view.dispatch(view.state.tr.setMeta(key, { deco: buildHints(view.state, p), sig }).setMeta('addToHistory', false));
+  if (st.sig !== sig) view.dispatch(view.state.tr.setMeta(key, { deco: buildHints(view.state, p), sig }).setMeta('addToHistory', false));
+  centerHints(dom, scale);
+}
+
+/**
+ * Mette la linea a meta' fra il blocco prima e quello dopo: il confine ha altezza zero e i margini
+ * dei due blocchi lo attraversano, quindi la sua posizione da sola non dice dove sta il centro.
+ */
+function centerHints(dom: HTMLElement, scale: number) {
+  for (const el of Array.from(dom.querySelectorAll<HTMLElement>(':scope > .page-hint'))) {
+    const prev = el.previousElementSibling;
+    const next = el.nextElementSibling;
+    if (!prev || !next) continue;
+    const mid = (prev.getBoundingClientRect().bottom + next.getBoundingClientRect().top) / 2;
+    const y = `${((mid - el.getBoundingClientRect().top) / scale).toFixed(1)}px`;
+    if (el.style.getPropertyValue('--hint-y') !== y) el.style.setProperty('--hint-y', y);
+  }
 }
 
 function build(state: EditorState, p: Pagination): DecorationSet {

@@ -32,6 +32,7 @@ export function ReviewDialog() {
       { label: 'PDF', onClick: () => void f(round, 'pdf') },
       { label: 'Word (.docx)', onClick: () => void f(round, 'docx') },
       { label: 'HTML', onClick: () => void f(round, 'html') },
+      { label: 'Markdown (.md)', onClick: () => void f(round, 'md') },
     ]);
 
   return (
