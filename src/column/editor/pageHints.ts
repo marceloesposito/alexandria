@@ -77,11 +77,28 @@ function measure(view: EditorView) {
   const p = paginate(boxes, pageHeightFor(dom.offsetWidth));
   onPages?.(p.pages);
   const sig = p.breaks.join(',');
-  if (key.getState(view.state)?.sig === sig) return;
-  const offsets: number[] = [];
-  view.state.doc.forEach((_n, offset) => offsets.push(offset));
-  const decos = p.breaks.map((i, k) => Decoration.widget(offsets[i], () => hint(k + 2), { side: -1, key: `ph${k}-${i}`, ignoreSelection: true }));
-  view.dispatch(view.state.tr.setMeta(key, { deco: DecorationSet.create(view.state.doc, decos), sig }).setMeta('addToHistory', false));
+  if (key.getState(view.state)?.sig !== sig) {
+    const offsets: number[] = [];
+    view.state.doc.forEach((_n, offset) => offsets.push(offset));
+    const decos = p.breaks.map((i, k) => Decoration.widget(offsets[i], () => hint(k + 2), { side: -1, key: `ph${k}-${i}`, ignoreSelection: true }));
+    view.dispatch(view.state.tr.setMeta(key, { deco: DecorationSet.create(view.state.doc, decos), sig }).setMeta('addToHistory', false));
+  }
+  centerHints(dom, scale);
+}
+
+/**
+ * Mette la linea a meta' fra il blocco prima e quello dopo: il confine ha altezza zero e i margini
+ * dei due blocchi lo attraversano, quindi la sua posizione da sola non dice dove sta il centro.
+ */
+function centerHints(dom: HTMLElement, scale: number) {
+  for (const el of Array.from(dom.querySelectorAll<HTMLElement>(':scope > .fx-page-hint'))) {
+    const prev = el.previousElementSibling;
+    const next = el.nextElementSibling;
+    if (!prev || !next) continue;
+    const mid = (prev.getBoundingClientRect().bottom + next.getBoundingClientRect().top) / 2;
+    const y = `${((mid - el.getBoundingClientRect().top) / scale).toFixed(1)}px`;
+    if (el.style.getPropertyValue('--hint-y') !== y) el.style.setProperty('--hint-y', y);
+  }
 }
 
 export const PageHints = Extension.create({

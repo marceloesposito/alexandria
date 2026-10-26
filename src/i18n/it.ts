@@ -24,6 +24,7 @@ export const it: Record<string, string> = {
   'leave.discard': "Non salvare",
   'cmd.sheet.saveAs': 'Salva come…',
   'cmd.sheet.exportDocx': 'Esporta in Word (.docx)',
+  'cmd.sheet.exportMd': 'Esporta in Markdown (.md)',
   'cmd.sheet.exportPdf': 'Esporta in PDF',
   'cmd.sheet.toCompendium': 'Porta in un Compendium…',
   'cmd.sheet.new': 'Nuovo',

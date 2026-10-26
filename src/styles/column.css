@@ -1124,7 +1124,8 @@ select.fx-input {
   pointer-events: none;
 }
 
-/* confine di pagina nel testo senza bordi: una linea tenue, che non sposta nulla */
+/* confine di pagina nel testo senza bordi: una linea tenue, che non sposta nulla; `--hint-y` (dal
+   plugin) la mette a meta' fra i due blocchi, il numero della pagina nuova sta a sinistra nel margine */
 .fx-prose > .fx-page-hint {
   position: relative;
   height: 0;
@@ -1137,9 +1138,23 @@ select.fx-input {
   position: absolute;
   left: -12%;
   right: -12%;
-  top: 0.3em;
-  border-top: 1px dashed var(--line-strong);
+  top: var(--hint-y, 0.3em);
+  border-top: 2px solid var(--line-strong);
+  transform: translateY(-50%);
   opacity: 0.6;
+}
+
+.fx-page-hint::before {
+  content: attr(data-page);
+  position: absolute;
+  right: calc(112% + 6px);
+  top: var(--hint-y, 0.3em);
+  transform: translateY(-50%);
+  font-family: var(--font-ui);
+  font-size: 9px;
+  line-height: 1;
+  color: var(--muted);
+  font-variant-numeric: tabular-nums;
 }
 
 .fx-figure {

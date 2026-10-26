@@ -197,7 +197,7 @@ function CountsPopover() {
   );
 }
 
-const EXPORTS = ['sheet.exportDocx', 'sheet.exportPdf', 'sheet.saveAs', 'sheet.toCompendium'];
+const EXPORTS = ['sheet.exportDocx', 'sheet.exportMd', 'sheet.exportPdf', 'sheet.saveAs', 'sheet.toCompendium'];
 
 /** Il contenuto della barretta, libera o agganciata. */
 function ToolbarContent({ side, grip }: { side: Side; grip?: React.ReactNode }) {
