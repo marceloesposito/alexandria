@@ -2053,7 +2053,8 @@ body.is-col-resizing {
   margin: 0;
 }
 
-/* vista senza bordi: confine di pagina, una linea tenue che non sposta il testo */
+/* vista senza bordi: confine di pagina, una linea tenue che non sposta il testo; `--hint-y` (dal
+   plugin) la mette a meta' fra i due blocchi, il numero della pagina nuova sta a sinistra nel margine */
 .doc-body > .page-hint {
   position: relative;
   height: 0;
@@ -2067,9 +2068,23 @@ body.is-col-resizing {
   position: absolute;
   left: -8%;
   right: -8%;
-  top: 0.3em;
-  border-top: 1px dashed var(--line-strong);
+  top: var(--hint-y, 0.3em);
+  border-top: 2px solid var(--line-strong);
+  transform: translateY(-50%);
   opacity: 0.6;
+}
+
+.page-hint::before {
+  content: attr(data-page);
+  position: absolute;
+  right: calc(108% + 6px);
+  top: var(--hint-y, 0.3em);
+  transform: translateY(-50%);
+  font-family: var(--font-ui);
+  font-size: 9px;
+  line-height: 1;
+  color: var(--muted);
+  font-variant-numeric: tabular-nums;
 }
 
 .page-gap {

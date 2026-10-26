@@ -12,6 +12,9 @@ serie completa (M10-M12 e richieste del committente); `0.2.x` = serie attuale.
 
 ## Non ancora rilasciato
 
+- **Confine di pagina nella vista senza bordi**: linea continua e un po' piu' spessa, a meta' fra le
+  due righe (stesso spazio sopra e sotto), con il numero della pagina nuova piccolo nel margine
+  sinistro. Nel menu di export della Recensio c'e' anche Markdown (.md).
 - **Tabelle piu' regolabili**: con il cursore in una tabella compare una barra con il numero di righe e
   di colonne (- / + o scritto), l'allineamento della colonna e le larghezze uguali; il tasto destro su
   una cella aggiunge o elimina righe e colonne; il bordo fra due colonne si trascina per cambiarne la
