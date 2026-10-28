@@ -11,6 +11,12 @@ serie completa (M10-M12 e richieste del committente); `0.2.x` = serie attuale.
 ---
 
 ## Non ancora rilasciato
+- **Fonte trascinata: citazione nel testo di default**: dall'Armarium nello Scriptorium la fonte diventa
+  la citazione inline nello stile del documento (APA di default); la nota a piè di pagina si ottiene con
+  Alt mentre si rilascia o dal clic destro sulla fonte ("Inserisci come nota a piè di pagina", che inserisce
+  nel punto del cursore). La preferenza si chiama ora `dropSourceForm`, quindi chi aveva la nota come
+  default riparte dalla citazione.
+
 
 - **Confine di pagina nella vista senza bordi**: linea continua e un po' piu' spessa, a meta' fra le
   due righe (stesso spazio sopra e sotto), con il numero della pagina nuova piccolo nel margine

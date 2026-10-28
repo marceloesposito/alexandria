@@ -41,6 +41,22 @@ export function setEditorFilesHandler(h: FilesHandler | null) {
   filesHandler = h;
 }
 
+/** Inserisce una fonte in `pos`: citazione nel testo o nota a piè di pagina con la fonte. */
+export function insertSource(view: EditorView, pos: number, items: { key: string; locator?: string }[], asNote: boolean) {
+  const node = asNote
+    ? view.state.schema.nodes.footnote.create({ text: formatCitation(items) })
+    : view.state.schema.nodes.citation.create({ items });
+  // uno spazio prima se la citazione si attacca a una parola
+  const $pos = view.state.doc.resolve(pos);
+  const before = $pos.parent.textBetween(Math.max(0, $pos.parentOffset - 1), $pos.parentOffset, '', '');
+  let tr = view.state.tr;
+  // lo spazio serve alla citazione nel testo, non all'apice della nota
+  if (!asNote && before && !/\s/.test(before)) tr = tr.insertText(' ', pos);
+  tr = tr.insert(tr.mapping.map(pos), node);
+  view.dispatch(tr.scrollIntoView());
+  view.focus();
+}
+
 function dropPos(view: EditorView, e: DragEvent): number | null {
   const p = view.posAtCoords({ left: e.clientX, top: e.clientY });
   return p ? p.pos : null;
@@ -121,20 +137,10 @@ export const DropHandler = Extension.create({
                 return true;
               }
               const items = [{ key: data.key, ...(data.locator ? { locator: data.locator } : {}) }];
-              // fonte trascinata: nota a piè di pagina con la fonte (o citazione nel testo, a scelta; Alt inverte)
-              const asNote = (useWorkspace.getState().app.prefs.dropSource !== 'citation') !== ev.altKey;
-              const node = asNote
-                ? view.state.schema.nodes.footnote.create({ text: formatCitation(items) })
-                : view.state.schema.nodes.citation.create({ items });
-              // uno spazio prima se la citazione si attacca a una parola
-              const $pos = view.state.doc.resolve(pos);
-              const before = $pos.parent.textBetween(Math.max(0, $pos.parentOffset - 1), $pos.parentOffset, '', '');
-              let tr = view.state.tr;
-              // lo spazio serve alla citazione nel testo, non all'apice della nota
-              if (!asNote && before && !/\s/.test(before)) tr = tr.insertText(' ', pos);
-              tr = tr.insert(tr.mapping.map(pos), node);
-              view.dispatch(tr.scrollIntoView());
-              view.focus();
+              // fonte trascinata: citazione nel testo (stile del documento, APA di default) o nota a piè di
+              // pagina, a scelta nelle preferenze; Alt inverte
+              const asNote = (useWorkspace.getState().app.prefs.dropSourceForm === 'footnote') !== ev.altKey;
+              insertSource(view, pos, items, asNote);
               return true;
             }
             const files = Array.from(dt.files ?? []);

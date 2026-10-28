@@ -5,7 +5,8 @@ import { ChevronDown, ChevronRight, Folder, Pin as PinIcon, Quote, Search } from
 import { useResources } from '../store';
 import { useWorkspace } from '../../state/workspace';
 import { KindIcon } from './common';
-import { CITE_MIME } from '../../editor/extensions/drop';
+import { CITE_MIME, insertSource } from '../../editor/extensions/drop';
+import { getEditor } from '../../state/editorRef';
 import { FIGURE_MIME, LINK_MIME, EMBED_MIME } from '../../editor/extensions/drop';
 import { embedAttrsFor } from '../insert';
 import { relativeFromDoc } from '../../vault/resolve';
@@ -30,6 +31,13 @@ function setDragData(e: React.DragEvent, r: Resource, locator?: string, pinId?: 
   e.dataTransfer.effectAllowed = 'copy';
 }
 
+/** Menu contestuale: la fonte entra dove sta il cursore, come citazione o come nota a piè di pagina. */
+function insertAtCursor(r: Resource, asNote: boolean) {
+  const editor = getEditor();
+  if (!editor) return;
+  insertSource(editor.view, editor.state.selection.to, [{ key: ensureCiteKey(r) }], asNote);
+}
+
 function ResItem({ r }: { r: Resource }) {
   return (
     <li
@@ -41,6 +49,8 @@ function ResItem({ r }: { r: Resource }) {
         openContextMenu(e, [
           { label: t('embed.open'), onClick: () => useResources.getState().openViewer(r.id) },
           { label: t('pane.openAside'), onClick: () => useSidePane.getState().open({ kind: 'resource', id: r.id }) },
+          { label: t('side.insertCitation'), onClick: () => insertAtCursor(r, false) },
+          { label: t('side.insertFootnote'), onClick: () => insertAtCursor(r, true) },
         ])
       }
       title={`${r.title}\n${displayAuthorYear(r)}${r.citeKey ? `\n@${r.citeKey}` : ''}`}

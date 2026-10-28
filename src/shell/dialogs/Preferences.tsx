@@ -164,7 +164,7 @@ export function PreferencesDialog() {
             <p className="hint">{t('prefs.libraryHint')}</p>
             <label className="form__row">
               <span>{t('prefs.dropSource')}</span>
-              <select className="select" value={prefs.dropSource} onChange={(e) => set({ dropSource: e.target.value as Prefs['dropSource'] })}>
+              <select className="select" value={prefs.dropSourceForm} onChange={(e) => set({ dropSourceForm: e.target.value as Prefs['dropSourceForm'] })}>
                 <option value="footnote">{t('prefs.dropSource.footnote')}</option>
                 <option value="citation">{t('prefs.dropSource.citation')}</option>
               </select>
