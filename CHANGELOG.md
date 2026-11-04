@@ -10,8 +10,10 @@ serie completa (M10-M12 e richieste del committente); `0.2.x` = serie attuale.
 
 ---
 
-## Non ancora rilasciato
-- **Schermata iniziale: numero di versione** accanto al nome; **Trova (Ctrl+F)** ora sta sopra i righelli della vista Pagina.
+## 0.2.1 — 4 novembre 2026
+- **Correzione, PDF: righe vuote mantenute** (#60): gli Invio ripetuti fra paragrafi (paragrafi vuoti) non spariscono piu' nell'export PDF, nell'anteprima e nella stampa; quelli in testa e in coda al testo restano esclusi.
+- **Correzione, Trova sopra i righelli** (#61): il pannello di Ctrl+F non finisce piu' sotto i righelli della vista Pagina.
+- **Schermata iniziale: numero di versione** accanto al nome (#61).
 - **Fonte trascinata: citazione nel testo di default**: dall'Armarium nello Scriptorium la fonte diventa
   la citazione inline nello stile del documento (APA di default); la nota a piè di pagina si ottiene con
   Alt mentre si rilascia o dal clic destro sulla fonte ("Inserisci come nota a piè di pagina", che inserisce
