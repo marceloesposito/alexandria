@@ -3,7 +3,7 @@
 import { platform, joinPath, stripExt, baseName, dirName } from '../platform';
 import { useWorkspace } from '../state/workspace';
 import { getEditor } from '../state/editorRef';
-import { flushSave, currentMarkdown } from '../editor/session';
+import { flushSave, currentMarkdown, useDoc } from '../editor/session';
 import { parseMarkdown } from 'logos/doc/parse';
 import { serializeMarkdown } from 'logos/doc/serialize';
 import { embedsToLinks, type PMNode, type CitationItem } from 'logos/doc/types';
@@ -60,20 +60,34 @@ export function exportHeader(settings: DocSettings): ExportContext['header'] {
 }
 
 /** Prepara la pergamena aperta nell'editor. */
-export async function prepare(opts: { wordComments?: boolean } = {}): Promise<Prepared | null> {
+export async function prepare(opts: { wordComments?: boolean; blankLines?: boolean } = {}): Promise<Prepared | null> {
   const ws = useWorkspace.getState();
   const editor = getEditor();
   if (!ws.vaultRoot || !ws.activeDoc || !editor) return null;
   await flushSave(editor);
   // i segni dei commenti vanno messi sul documento com'è nell'editor (prima di embed e revisioni)
   const comments = opts.wordComments ? marginaliaForWord() : [];
-  const parsed = parseMarkdown(currentMarkdown(editor));
+  // per il PDF si parte dal documento dell'editor: il Markdown butta via i paragrafi vuoti (Invio ripetuto)
+  const fromEditor = opts.blankLines && !useDoc.getState().sourceMode;
+  const parsed = fromEditor ? keepBlankLines(editor.getJSON() as PMNode) : parseMarkdown(currentMarkdown(editor));
   const doc = embedsToLinks(comments.length ? injectCommentMarks(parsed, comments) : parsed);
   const settings = useDocSettings.getState().settings;
   const title = settings.title || ws.docs.find((d) => d.rel === ws.activeDoc)?.title || t('doc.untitled');
   const p = await prepareDoc(doc, settings, title, ws.vaultRoot, ws.activeDoc, keysInDoc(editor));
   if (comments.length) p.ctx.comments = comments;
   return p;
+}
+
+/** Paragrafi vuoti in mezzo al testo (Invio ripetuto) diventano righe bianche vere: un paragrafo con uno spazio unificatore. Quelli in testa e in coda restano fuori. */
+export function keepBlankLines(doc: PMNode): PMNode {
+  const items = doc.content ?? [];
+  const isBlank = (n: PMNode) => n.type === 'paragraph' && !(n.content ?? []).some((c) => c.type !== 'text' || (c.text ?? '').trim() !== '');
+  let a = 0;
+  let b = items.length;
+  while (a < b && isBlank(items[a])) a++;
+  while (b > a && isBlank(items[b - 1])) b--;
+  const content = items.slice(a, b).map((n) => (isBlank(n) ? { type: 'paragraph', content: [{ type: 'text', text: ' ' }] } : n));
+  return { ...doc, content };
 }
 
 /** Commenti aperti e ancorati della pergamena aperta, con le risposte. */
@@ -203,7 +217,7 @@ export async function renderPdf(p: Prepared): Promise<Uint8Array> {
 }
 
 export async function renderPreview(): Promise<{ pages: string[]; errors: string[] }> {
-  const p = await prepare();
+  const p = await prepare({ blankLines: true });
   if (!p) return { pages: [], errors: [] };
   const out = await platform.typst(toTypst(p.doc, p.ctx), typstFiles(p), 'svg');
   return { pages: out.svgPages ?? [], errors: out.errors };
@@ -223,7 +237,7 @@ export const EXTENSIONS: Record<ExportFormat, string> = { pdf: 'pdf', docx: 'doc
 export async function exportTo(format: ExportFormat, target?: string, prepared?: Prepared): Promise<string | null> {
   const ws = useWorkspace.getState();
   // nel .docx i Marginalia della pergamena aperta diventano commenti di Word
-  const p = prepared ?? (await prepare({ wordComments: format === 'docx' }));
+  const p = prepared ?? (await prepare({ wordComments: format === 'docx', blankLines: format === 'pdf' }));
   if (!p) return null;
   const name = `${p.ctx.title}.${EXTENSIONS[format]}`;
   const path = target ?? (await platform.saveDialog(name, [EXTENSIONS[format]]));
@@ -274,7 +288,7 @@ export async function exportTo(format: ExportFormat, target?: string, prepared?:
 export async function printDocument() {
   const ws = useWorkspace.getState();
   if (!ws.vaultRoot) return;
-  const p = await prepare();
+  const p = await prepare({ blankLines: true });
   if (!p) return;
   try {
     const path = joinPath(ws.vaultRoot, '.alexandria-cache', 'print', `${p.ctx.title}.pdf`);
