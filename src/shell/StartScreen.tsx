@@ -6,6 +6,7 @@ import { useWorkspace, getPortableRoot } from '../state/workspace';
 import { runCommand } from '../commands/registry';
 import { platform, baseName } from '../platform';
 import { t, useLang } from '../i18n';
+import pkg from '../../package.json';
 
 function parentOf(path: string): string {
   const i = path.replace(/\\/g, '/').lastIndexOf('/');
@@ -48,7 +49,9 @@ export function StartScreen() {
         <div className="start__brand">
           <Landmark size={34} strokeWidth={1.4} />
           <div>
-            <div className="start__name">Alexandria</div>
+            <div className="start__name">
+              Alexandria <span className="start__version" title={t('start.version')}>v{pkg.version}</span>
+            </div>
             <div className="start__tagline">{t('start.tagline')}</div>
           </div>
         </div>

@@ -1024,6 +1024,7 @@ export const en: Record<string, string> = {
   'onboarding.start': "Start writing",
   'cmd.help.onboarding': "Introduction to Alexandria",
   'start.tagline': "Offline writing studio",
+  'start.version': "Alexandria version",
   'start.resume': "Pick up where you left off",
   'start.createFirst': "Create your first Compendium",
   'start.createFirstHint': "In Documents/Alexandria, ready to write",
