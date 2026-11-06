@@ -1203,7 +1203,7 @@ table.kv td:last-child {
   position: absolute;
   top: 8px;
   right: 22px;
-  z-index: 20;
+  z-index: 26; /* sopra i righelli della vista Pagina (25) */
   background: var(--paper);
   border: 1px solid var(--line);
   border-radius: var(--radius);
@@ -1774,6 +1774,14 @@ table.kv td:last-child {
 .start__action.is-primary {
   background: var(--paper);
   border-color: var(--line);
+}
+
+.start__version {
+  font-size: 0.55em;
+  font-weight: 500;
+  color: var(--muted);
+  letter-spacing: 0.02em;
+  vertical-align: middle;
 }
 
 .start__foot {
